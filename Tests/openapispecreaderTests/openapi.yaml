@@ -1,0 +1,271 @@
+openapi: '3.1.0'
+info:
+  title: GreetingService
+  version: 1.0.0
+  summary : "Prints a greeting on GET request"
+  termsOfService : "Displayss the terms of services"
+  contact:
+    name: API Support
+    url: https://www.example.com/support
+    email: support@example.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://example.com/api
+    description: Example service deployment.
+  - url: http://127.0.0.1:8080/api
+    description: Localhost deployment.
+  - url: https://{username}.gigantic-server.com:{port}/{basePath}
+    description: The production API server
+    variables:
+      username:
+        # note! no enum here means it is an open value
+        default: demo
+        description: this value is assigned by the service provider, in this example `gigantic-server.com`
+      port:
+        enum:
+          - '8443'
+          - '443'
+        default: '8443'
+      basePath:
+        # open meaning there is the opportunity to use special base paths as assigned by the provider, default is `v2`
+        default: v2
+paths:
+  /greet:
+    get:
+      operationId: getGreeting
+      parameters:
+        - name: name
+          required: false
+          in: query
+          description: The name used in the returned greeting.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A success response with a greeting.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Greeting'
+      security:
+        - petstore_auth:
+          - write:pets
+          - read:pets
+        - clip_auth:
+          - write:clips
+          - read:clips
+  /emoji:
+    get:
+      operationId: getEmoji
+      responses:
+        '200':
+          description: A success response with an emoji.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /clip:
+    get:
+      operationId: getClip
+      responses:
+        '200':
+          description: "Returns a cat video! 😽"
+          content:
+            video/mp4:
+              schema:
+                type: string
+                format: binary
+  /pets:
+    post:
+      summary: Add a new pet
+      requestBody:
+        description: Optional description in *Markdown*
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet'
+            examples:
+              user:
+                summary: User Example
+                externalValue: 'https://foo.bar/examples/user-example.json'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Pet'
+            user:
+              summary: User example in XML
+              externalValue: 'https://foo.bar/examples/user-example.xml'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PetForm'
+          text/plain:
+            schema:
+              type: string
+            examples:
+              user:
+                summary: User example in Plain text
+                externalValue: 'https://foo.bar/examples/user-example.txt'
+              foo:
+                summary: A foo example
+                value: {"foo": "bar"}
+              bar:
+                summary: A bar example
+                value: {"bar": "baz"}
+      responses:
+        '201':
+          description: Created
+    patch:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/Cat'
+                - $ref: '#/components/schemas/Dog'
+            examples:
+              confirmation-success:
+                $ref: '#/components/examples/confirmation-success'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json: {}
+            application/xml: {}
+          links:
+            address:
+              # the target link operationId
+              operationId: getUserAddress
+              parameters:
+                # get the `id` field from the request path parameter named `id`
+                userId: $request.path.id
+            UserRepositories:
+              # returns array of '#/components/schemas/repository'
+              operationRef: '#/paths/~12.0~1repositories~1{username}/get'
+              parameters:
+                username: $response.body#/username
+              requestBody:
+                $response.body#/username
+             
+        '405':
+          description: Method Not Allowed
+          content:
+            application/json: {}
+            application/xml: {}
+    put:
+      requestBody:
+        required: true
+        description: user to add to the system
+        content:
+          text/plain:
+            schema:
+              type: array
+              items:
+                type: string
+          
+components:
+  schemas:
+    Greeting:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+    GeneralError:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+    Tag:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+  parameters:
+    skipParam:
+      name: skip
+      in: query
+      description: number of items to skip
+      required: true
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+        default: 0
+    limitParam:       # Can be referenced as '#/components/parameters/limitParam'
+      name: limit
+      in: query
+      description: Maximum number of items to return.
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 100
+        default: 20
+  responses:
+    NotFound:
+      description: Entity not found.
+    ImageResponse:     # Can be referenced as '#/components/responses/ImageResponse'
+      description: An image.
+      content:
+        image/*:
+    IllegalInput:
+      description: Illegal input for operation.
+    GeneralError:
+      description: General Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GeneralError'
+  securitySchemes:
+    http_Key:
+      type: http
+      scheme: basic
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
+    bearer_key:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    petstore_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://example.org/api/oauth/dialog
+          scopes:
+            write:pets: modify pets in your account
+            read:pets: read your pets
+    clip_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://example.com/api/oauth/dialog
+          scopes:
+            write:pets: modify pets in your account
+            read:pets: read your pets
+        authorizationCode:
+          authorizationUrl: https://example.com/api/oauth/dialog
+          tokenUrl: https://example.com/api/oauth/token
+          scopes:
+            write:clips: modify pets in your account
+            read:clips: read your pets
+            
