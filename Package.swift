@@ -16,6 +16,7 @@ let package = Package(
             .package(url: "https://github.com/apple/swift-openapi-generator", from: "1.0.0"),
             .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.0.0"),
             .package(url: "https://github.com/jpsim/Yams", from: "5.1.0"),
+            .package(url: "https://gitlab.com/patricdubois/APIJockeyTestmodel", .upToNextMajor(from: "0.0.1"))
           
         ],
     targets: [
@@ -25,7 +26,8 @@ let package = Package(
             name: "openapispecreader",
             dependencies: [
                .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),  
-                .product(name: "Yams", package: "Yams"),]
+                .product(name: "Yams", package: "Yams"),
+               .product(name: "Testmodel", package: "APIJockeyTestmodel"),]
         ),
         .testTarget(
             name: "openapispecreaderTests",
