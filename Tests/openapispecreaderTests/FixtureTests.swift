@@ -7,7 +7,7 @@
 
 import Foundation
 import Testing
-@testable import openapispecreader
+@testable import SwiftOpenAPISpec
 
 struct FixtureTests {
     @Test("minimal-3_0/Parser-Happy-Path für 3.0.x.")

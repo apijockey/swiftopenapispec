@@ -4,38 +4,31 @@
 import PackageDescription
 
 let package = Package(
-    name: "openapispecreader",
-    platforms: [.macOS(.v10_15)],
+    name: "SwiftOpenAPISpec",
+    
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "openapispecreader",
-            targets: ["openapispecreader"]),
+            name: "SwiftOpenAPISpec",
+            targets: ["SwiftOpenAPISpec"]),
     ],
     dependencies: [
-            .package(url: "https://github.com/apple/swift-openapi-generator", from: "1.0.0"),
-            .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.0.0"),
-            .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", from: "3.0.0"),
-          
-            .package(url: "https://github.com/jpsim/Yams", from: "5.1.0"),
-            .package(url: "https://gitlab.com/patricdubois/APIJockeyTestmodel", .upToNextMajor(from: "0.0.1")) //wozu ist das?
+            .package(url: "https://github.com/jpsim/Yams", from: "5.1.0")
           
         ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "openapispecreader",
+            name: "SwiftOpenAPISpec",
             dependencies: [
-               .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),  
-                .product(name: "Yams", package: "Yams"),
-               "OpenAPIKit",
-               .product(name: "Testmodel", package: "APIJockeyTestmodel"),]
+               
+                .product(name: "Yams", package: "Yams")]
                 
         ),
         .testTarget(
             name: "openapispecreaderTests",
-            dependencies: ["openapispecreader"],
+            dependencies: ["SwiftOpenAPISpec"],
             resources: [
                 .process("Resources"),
                 ]),

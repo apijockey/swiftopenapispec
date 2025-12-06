@@ -6,24 +6,7 @@
 //
 
 import Foundation
-import SwiftUI
 
-
-/*
- Get a binding for SwiftUI
- Dynamic member lookup uses key paths
- and both subscripts and computed properties ca be part of key parths
- */
-extension Binding where Value == Bool {
-    func toggled() -> Self {
-        Self(get: {
-            !wrappedValue
-        },
-             set: { newValue in
-            wrappedValue = !newValue}
-        )
-    }
-}
 extension Bool {
     var flipped : Self {
         get { !self}
