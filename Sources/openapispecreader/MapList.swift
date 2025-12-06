@@ -8,30 +8,31 @@
 import Foundation
 struct MapList<T> where T : ThrowingHashMapInitiable {
     static func map(_ list:  [Any]) throws -> [T] {
-        var servers = [T]()
+        var types = [T]()
         for element in list {
             if let elementMap = element as? [String:Any] {
                 let element = try T(elementMap)
-                servers.append(element)
+                types.append(element)
             }
         }
-        return servers
+        return types
     }
 }
 
+
 struct MapListMap<T> where T :  KeyedElement {
     static func map(_ elements : [AnyHashable:Any]) throws -> [T] {
-        var openAPIOperations = [T]()
+        var types = [T]()
         for element in elements {
             let value = element.value
             if let key = element.key as? String,
                let valueMap = value as? [AnyHashable:Any]{
                 var type = try T(valueMap)
-                type.key = key
-                openAPIOperations.append(type)
+                type.key = element.key as? String
+                types.append(type)
             }
         }
-        return openAPIOperations
+        return types
     }
     
 }

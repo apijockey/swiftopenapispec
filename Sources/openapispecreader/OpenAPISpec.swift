@@ -15,8 +15,14 @@ struct S: Codable {
 
 
 
-
 struct OpenAPISpec  {
+    struct UserInfo : Codable {
+        let message : String
+        let infoType : UserInfoType
+    }
+    enum UserInfoType : String, Codable {
+        case error, warning, info
+    }
     enum Errors : LocalizedError {
         case invalidYaml(String), invalidSpecification(String, String)
         var errorDescription: String? {
@@ -28,14 +34,15 @@ struct OpenAPISpec  {
             }
         }
     }
+    var userInfos =  [UserInfo]()
     static let OPENAPI_KEY = "openapi"
     static let INFO_KEY = "info"
     static let SERVERS_KEY = "servers"
     static let PATHS_KEY = "paths"
     static let COMPONENTS_KEY = "components"
-    var openapi : String
+    var version : String
     var info : OpenAPIInfo
-    var servers : [OpenAPIServer] = [OpenAPIServer(url: "/")]
+    var servers : [OpenAPIServer] = []
     var paths : [OpenAPIPath] = []
     var components : OpenAPIComponent? = nil
     func resolveComponent(_ text : String) {
@@ -50,22 +57,44 @@ struct OpenAPISpec  {
         
         let version = try loadedDictionary.tryRead(OpenAPISpec.OPENAPI_KEY, String.self, root: "root")
         let info = try loadedDictionary.tryMap(OpenAPISpec.INFO_KEY, root: "root", OpenAPIInfo.self)
-        var spec = OpenAPISpec(openapi: version,info: info)
+        var spec = OpenAPISpec(version: version,info: info)
         let servers =  try loadedDictionary.tryOptionalList(OpenAPISpec.SERVERS_KEY, root: "root", OpenAPIServer.self)
         if servers.count > 0 {
             spec.servers = servers
         }
         // I want the list of Paths
-        if let map = loadedDictionary[OpenAPISpec.PATHS_KEY]  as? [AnyHashable:Any]{
-            let paths = try MapListMap<OpenAPIPath>.map(map)
-            if paths.count > 0 {
+         
+        if let map = loadedDictionary[OpenAPISpec.PATHS_KEY]  as? [AnyHashable:Any],
+           let paths = try? MapListMap<OpenAPIPath>.map(map),
+                paths.count > 0 {
                 spec.paths = paths
-            }
-        }       
-        spec.components =  try loadedDictionary.tryMap(OpenAPISpec.COMPONENTS_KEY, root: "root", OpenAPIComponent.self)
+        }
+        
+        spec.components =  try? loadedDictionary.tryMap(OpenAPISpec.COMPONENTS_KEY, root: "root", OpenAPIComponent.self)
+        //TODO: Webhooks
+        if spec.components == nil  && spec.paths.count == 0 {
+            spec.userInfos.append(UserInfo(message: "components and paths element missing", infoType: .warning))
+        }
        return spec
     }
+    subscript(operationId id: String) -> [OpenAPIOperation] {
+        let matches = paths[operationID: id]
+        return matches.isEmpty ? [] : matches
+    }
+    subscript(httpMethod method: String) -> [OpenAPIOperation] {
+        let matches = paths[httpMethod: method]
+        return matches.isEmpty ? [] : matches
+    }
+    subscript(path path: String) -> [OpenAPIPath] {
+        let matches = paths[path: path]
+        return matches.isEmpty ? [] : matches
+    }
+    
     
 }
 
+
+struct OpenAPISpecification : Codable {
+    
+}
 

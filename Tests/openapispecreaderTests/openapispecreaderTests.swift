@@ -15,7 +15,7 @@ final class openapispecreaderTests: XCTestCase {
             return
         }
         let apiSpec = try OpenAPISpec.read(text: string)
-        XCTAssertEqual(apiSpec.openapi, "3.1.0")
+        XCTAssertEqual(apiSpec.version, "3.1.0")
         XCTAssertEqual(apiSpec.info.title, "GreetingService")
         XCTAssertEqual(apiSpec.info.version, "1.0.0")
         XCTAssertEqual(apiSpec.info.summary, "Prints a greeting on GET request")
@@ -93,7 +93,7 @@ final class openapispecreaderTests: XCTestCase {
         XCTAssertEqual(getClipPath.operations.count, 1)
         let emojiPathOperation = try XCTUnwrap(getEmojiPath.operations.first)
         XCTAssertEqual(emojiPathOperation.responses?.count,1)
-        let response =
+    
         
         XCTAssertEqual(emojiPathOperation.key,"get")
         let clipPathOperation = try XCTUnwrap(getClipPath.operations.first)

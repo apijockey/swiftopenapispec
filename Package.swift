@@ -15,8 +15,10 @@ let package = Package(
     dependencies: [
             .package(url: "https://github.com/apple/swift-openapi-generator", from: "1.0.0"),
             .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.0.0"),
+            .package(url: "https://github.com/mattpolzin/OpenAPIKit.git", from: "3.0.0"),
+          
             .package(url: "https://github.com/jpsim/Yams", from: "5.1.0"),
-            .package(url: "https://gitlab.com/patricdubois/APIJockeyTestmodel", .upToNextMajor(from: "0.0.1"))
+            .package(url: "https://gitlab.com/patricdubois/APIJockeyTestmodel", .upToNextMajor(from: "0.0.1")) //wozu ist das?
           
         ],
     targets: [
@@ -27,13 +29,15 @@ let package = Package(
             dependencies: [
                .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),  
                 .product(name: "Yams", package: "Yams"),
+               "OpenAPIKit",
                .product(name: "Testmodel", package: "APIJockeyTestmodel"),]
+                
         ),
         .testTarget(
             name: "openapispecreaderTests",
             dependencies: ["openapispecreader"],
             resources: [
-                .copy("openapi.yaml"),
+                .process("Resources"),
                 ]),
     ]
 )
