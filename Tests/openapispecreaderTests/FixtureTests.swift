@@ -25,8 +25,12 @@ struct FixtureTests {
         #expect(apiSpec.version == "3.0.3")
         #expect(apiSpec.servers.count == 0)
         #expect(apiSpec.paths.count > 0)
-        let pingOperation = try #require(apiSpec[path: "/ping"].first)
-        #expect(pingOperation.key == "/ping")
+        let pingAPIPath = try #require(apiSpec[path: "/ping"].first)
+        #expect(pingAPIPath.key == "/ping")
+        #expect(pingAPIPath.operations.count == 1)
+        let getPingOperation = try #require(pingAPIPath[operationId: "ping"].first)
+        #expect(getPingOperation.responses?.count == 1)
+        
         
         
     }
