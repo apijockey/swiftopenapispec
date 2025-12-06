@@ -15,6 +15,10 @@ import Foundation
 //https://spec.openapis.org/oas/3.1/dialect/base
 //
 //https://swagger.io/docs/specification/data-models/oneof-anyof-allof-not/
+
+
+
+
 struct OpenAPISchema :  ThrowingHashMapInitiable {
     enum DataType : String, CaseIterable {
         case integer, int32, int64, number, string

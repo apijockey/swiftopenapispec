@@ -1,8 +1,7 @@
 import XCTest
 import Yams
 import SwiftUI
-@testable import openapispecreader
-
+@testable import SwiftOpenAPISpec
 final class openapispecreaderTests: XCTestCase {
     func testBasics() throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
