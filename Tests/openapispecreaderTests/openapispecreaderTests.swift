@@ -153,7 +153,7 @@ final class openapispecreaderTests: XCTestCase {
         XCTAssertEqual(greetPathParameter.required, false)
         XCTAssertEqual(greetPathParameter.location, "query")
         XCTAssertEqual(greetPathParameter.description, "The name used in the returned greeting.")
-        XCTAssertEqual(greetPathParameter.schema?.type, "string")
+        XCTAssertTrue(greetPathParameter.schema?.type is OpenAPIValidatableStringType)
         XCTAssertNil(greetPathParameter.allowEmptyValue)
         XCTAssertNil(greetPathParameter.allowEmptyValue)
     }
@@ -195,7 +195,7 @@ final class openapispecreaderTests: XCTestCase {
             path.key == "Greeting"
         })
         XCTAssertNotNil(greetingComponent)
-        XCTAssertEqual(greetingComponent.type?.type, "object")
+        XCTAssertTrue(greetingComponent.type?.type is OpenAPIValidatableObjectType)
         XCTAssertEqual(greetingComponent.type?.properties.count, 1)
         let messageProperty = try XCTUnwrap(greetingComponent.type?.properties.first)
         XCTAssertEqual(messageProperty.type, "string")
@@ -204,7 +204,7 @@ final class openapispecreaderTests: XCTestCase {
             path.key == "GeneralError"
         })
         XCTAssertNotNil(generalErrorComponent)
-        XCTAssertEqual(generalErrorComponent.type?.type, "object")
+        XCTAssertTrue(greetingComponent.type?.type is OpenAPIValidatableObjectType)
         XCTAssertEqual(generalErrorComponent.type?.properties.count, 2)
         let errorMessageCodeProperty =  generalErrorComponent.type?.properties.first(where: { prop in
             prop.key == "code"
@@ -237,7 +237,7 @@ final class openapispecreaderTests: XCTestCase {
         XCTAssertEqual(skipParamComponent.type?.location, "query")
         XCTAssertEqual(skipParamComponent.type?.description, "number of items to skip")
         XCTAssertEqual(skipParamComponent.type?.required, true)
-        XCTAssertEqual(skipParamComponent.type?.schema?.type, "integer")
+        XCTAssertTrue(skipParamComponent.type?.schema?.type is  OpenAPIValidatableIntegerType)
         XCTAssertEqual(skipParamComponent.type?.schema?.format, OpenAPISchema.DataType.int32)
     }
     func testResponsesComponents() throws {
