@@ -195,28 +195,28 @@ final class openapispecreaderTests: XCTestCase {
             path.key == "Greeting"
         })
         XCTAssertNotNil(greetingComponent)
-        XCTAssertTrue(greetingComponent.type?.type is OpenAPIValidatableObjectType)
-        XCTAssertEqual(greetingComponent.type?.properties.count, 1)
-        let messageProperty = try XCTUnwrap(greetingComponent.type?.properties.first)
-        XCTAssertEqual(messageProperty.type, "string")
-        XCTAssertEqual(greetingComponent.type?.required, ["message"])
+        let greetingObject = try XCTUnwrap(greetingComponent.type?.type as? OpenAPIValidatableObjectType)
+        XCTAssertEqual(greetingObject.properties.count, 1)
+        let messageProperty = try XCTUnwrap(greetingObject.properties.first)
+        XCTAssertTrue(messageProperty.type is OpenAPIValidatableStringType)
+        XCTAssertEqual(greetingObject.required, ["message"])
         let generalErrorComponent = try XCTUnwrap(apiSpec.components?.schemas.first { path in
             path.key == "GeneralError"
         })
         XCTAssertNotNil(generalErrorComponent)
-        XCTAssertTrue(greetingComponent.type?.type is OpenAPIValidatableObjectType)
-        XCTAssertEqual(generalErrorComponent.type?.properties.count, 2)
-        let errorMessageCodeProperty =  generalErrorComponent.type?.properties.first(where: { prop in
+        let errorObject = try XCTUnwrap(greetingComponent.type?.type as? OpenAPIValidatableObjectType)
+        XCTAssertEqual(errorObject.properties.count, 2)
+        let errorMessageCodeProperty =  errorObject.properties.first(where: { prop in
             prop.key == "code"
                         
         })
-        XCTAssertEqual(errorMessageCodeProperty?.type, "integer")
-        let errorMessageMessageProperty =  generalErrorComponent.type?.properties.first(where: { prop in
+        XCTAssertTrue(errorMessageCodeProperty?.type is OpenAPIValidatableIntegerType)
+        let errorMessageMessageProperty =  errorObject.properties.first(where: { prop in
             prop.key == "message"
                         
         })
-        XCTAssertEqual(errorMessageMessageProperty?.type, "string")
-        XCTAssertEqual(generalErrorComponent.type?.required.count, 0)
+        XCTAssertTrue(errorMessageMessageProperty?.type is OpenAPIValidatableStringType)
+        XCTAssertEqual(errorObject.required.count, 0)
     }
     func testParameterComponents() throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {

@@ -73,6 +73,7 @@ public struct OpenAPISpec  {
              - Parameter text: the Yaml/JSON representation
              - Returns: an OpenAPISpec instance  which holds the text contents as simple Swift structs
      */
+    
     public static func read(text : String) throws -> OpenAPISpec{
         guard let loadedDictionary = try Yams.load(yaml: text) as? [String:Any] else {
             throw OpenAPISpec.Errors.invalidYaml("text cannot be interpreted as a Key/Value List")

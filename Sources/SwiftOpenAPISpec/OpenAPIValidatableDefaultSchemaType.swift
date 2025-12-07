@@ -18,6 +18,7 @@ public struct OpenAPIDefaultSchemaType : OpenAPIValidatableSchemaType {
     public static func validatableType(_ string : String)  -> OpenAPIValidatableSchemaType.Type? {
         switch string {
             case "integer" : return OpenAPIValidatableIntegerType.self
+            case "number" : return OpenAPIValidatableDoubleType.self
             case "string" : return OpenAPIValidatableStringType.self
             case "object" : return OpenAPIValidatableObjectType.self
             default:
