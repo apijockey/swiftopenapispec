@@ -1,0 +1,19 @@
+openapi: 3.0.3
+info: { title: Media Types, version: "1.0" }
+paths:
+  /upload:
+    post:
+      operationId: upload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                productName:
+                  type: string
+                productPrice:
+                  type: number
+      responses:
+        "201": { description: created }

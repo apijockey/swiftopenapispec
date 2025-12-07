@@ -6,7 +6,7 @@
 //
 
 
-public struct OpenAPIValidatableIntegerType :  OpenAPIValidatableSchemaType, ThrowingHashMapInitiable  {
+public struct OpenAPIValidatableDoubleType :  OpenAPIValidatableSchemaType, ThrowingHashMapInitiable  {
     public func validate() throws {
         
     }
@@ -20,19 +20,19 @@ public struct OpenAPIValidatableIntegerType :  OpenAPIValidatableSchemaType, Thr
    
     public init(_ map: [AnyHashable : Any]) throws {
         self.type = map[Self.TYPE_KEY] as? String
-        self.defaultValue = map[Self.DEFAULT_KEY] as? Int
-        self.multipleOf =  map[Self.MULTIPLEOF_KEY] as? Int
-        self.maximum =  map[Self.MAXIMUM_KEY]  as? Int
-        self.exclusiveMaximum =  map[Self.EXCLUSIVEMAXIMUM_KEY]  as? Int
-        self.minimum =  map[Self.MINIMUM_KEY]  as? Int
-        self.exclusiveMinimum =  map[Self.EXCLUSIVEMINIMUM_KEY]  as? Int
+        self.defaultValue = map[Self.DEFAULT_KEY] as? Double
+        self.multipleOf =  map[Self.MULTIPLEOF_KEY] as? Double
+        self.maximum =  map[Self.MAXIMUM_KEY]  as? Double
+        self.exclusiveMaximum =  map[Self.EXCLUSIVEMAXIMUM_KEY]  as? Double
+        self.minimum =  map[Self.MINIMUM_KEY]  as? Double
+        self.exclusiveMinimum =  map[Self.EXCLUSIVEMINIMUM_KEY]  as? Double
     }
     public let type : String?
-    public let multipleOf : Int?
-    public let defaultValue : Int?
-    public let maximum : Int?
-    public let exclusiveMaximum : Int?
-    public let minimum : Int?
-    public let exclusiveMinimum : Int?
+    public let multipleOf : Double?
+    public let defaultValue : Double?
+    public let maximum : Double?
+    public let exclusiveMaximum :Double?
+    public let minimum : Double?
+    public let exclusiveMinimum : Double?
     
 }
