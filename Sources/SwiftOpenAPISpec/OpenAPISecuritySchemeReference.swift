@@ -7,9 +7,9 @@
 
 import Foundation
 
-struct OpenAPISecuritySchemeReference  {    
-    var key : String? = nil
-    var scopes : [String] = []
+public struct OpenAPISecuritySchemeReference  {
+    public var key : String? = nil
+    public var scopes : [String] = []
    
     
 }

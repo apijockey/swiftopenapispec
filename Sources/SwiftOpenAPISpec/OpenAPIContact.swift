@@ -6,14 +6,14 @@
 //
 
 import Foundation
-struct OpenAPIContact : Codable {
-    static let NAME_KEY = "name"
-    static let URL_KEY = "url"
-    static let EMAIL_KEY = "email"
-    var name : String? = nil
-    var url : String? = nil
-    var email : String? = nil
-    init?(_ map : [String:Any?]) {
+public struct OpenAPIContact : Codable {
+    public  static let NAME_KEY = "name"
+    public static let URL_KEY = "url"
+    public static let EMAIL_KEY = "email"
+    public  var name : String? = nil
+    public var url : String? = nil
+    public var email : String? = nil
+    public init?(_ map : [String:Any?]) {
         if let name = map[Self.NAME_KEY] as? String {
             self.name = name
         }

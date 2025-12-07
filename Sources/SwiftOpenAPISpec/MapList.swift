@@ -6,7 +6,7 @@
 //
 
 import Foundation
-struct MapList<T> where T : ThrowingHashMapInitiable {
+public struct MapList<T> where T : ThrowingHashMapInitiable {
     static func map(_ list:  [Any]) throws -> [T] {
         var types = [T]()
         for element in list {
@@ -20,7 +20,7 @@ struct MapList<T> where T : ThrowingHashMapInitiable {
 }
 
 
-struct MapListMap<T> where T :  KeyedElement {
+public struct MapListMap<T> where T :  KeyedElement {
     static func map(_ elements : [AnyHashable:Any]) throws -> [T] {
         var types = [T]()
         for element in elements {
@@ -38,12 +38,12 @@ struct MapListMap<T> where T :  KeyedElement {
 }
 
 
-protocol ThrowingHashMapInitiable {
+public protocol ThrowingHashMapInitiable {
 init(_ map : [AnyHashable:Any]) throws
    
 }
 /**A KeyedElement expects that the key Value is set from outside**/
-protocol KeyedElement : ThrowingHashMapInitiable {
+public protocol KeyedElement : ThrowingHashMapInitiable {
     var key : String? {get set}
 }
 //protocol KeyValueObjectInitializer {

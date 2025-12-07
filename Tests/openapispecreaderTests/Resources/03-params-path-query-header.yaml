@@ -1,0 +1,25 @@
+openapi: 3.0.3
+info: { title: Params, version: "1.0" }
+paths:
+  /pets/{id}:
+    get:
+      operationId: getPet
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: ok }
+  /pets:
+    get:
+      operationId: searchPets
+      parameters:
+        - in: query
+          name: limit
+          schema: { type: integer, default: 10, minimum: 1, maximum: 100 }
+        - in: header
+          name: X-Trace
+          schema: { type: string }
+      responses:
+        "200": { description: ok }

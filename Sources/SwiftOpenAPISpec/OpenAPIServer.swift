@@ -6,15 +6,15 @@
 //
 
 import Foundation
-struct OpenAPIServer : ThrowingHashMapInitiable {
-    static let URL_KEY = "url"
-    static let DESCRIPTION_KEY = "description"
-    static let VARIABLES_KEY = "variables"
+public struct OpenAPIServer : ThrowingHashMapInitiable {
+    public static let URL_KEY = "url"
+    public static let DESCRIPTION_KEY = "description"
+    public static let VARIABLES_KEY = "variables"
    
-    init(url:String){
+    public init(url:String){
         self.url = url
     }
-    init(_ map : [AnyHashable:Any]) throws {
+    public init(_ map : [AnyHashable:Any]) throws {
         if let text = map[Self.URL_KEY] as? String{
             self.url = text
         }
@@ -25,9 +25,9 @@ struct OpenAPIServer : ThrowingHashMapInitiable {
             self.variables = try MapListMap.map(variables)
         }
     }
-    var url : String = "/"
-    var description : String? = nil
-    var variables : [OpenAPIVariable] = []
+    public var url : String = "/"
+    public var description : String? = nil
+    public var variables : [OpenAPIVariable] = []
     
     
 }

@@ -8,17 +8,24 @@
 import Foundation
 
 
-/***
-  the pathKey includes a leading slash like /board
+/**
+  Struct containing an **OpenAPI Path** containing endpoints and their ``operations``
+   
+   The ``OpenAPIPath`` provides a set of convenient getter subscripts to filter for specific operations
+   
  */
-struct OpenAPIPath: KeyedElement {
-    var key: String? = nil
+public struct OpenAPIPath: KeyedElement {
+    /// holds the relative path to an individual endpoint, beginning with a leading slash
+    /// ```swift
+    /// //example
+    /// "/ping"
+    public var key: String? = nil
      
-    var operations: [OpenAPIOperation] = []
-
-    init(_ map: [AnyHashable : Any]) throws {
-        
-        
+    public var operations: [OpenAPIOperation] = []
+    
+    /// inits an instance of ``OpenAPIPath``
+    /// - Parameter map: Swift dictionary with a Path key and  value elements representing HTTP methods like **GET**, **POST** and **PUT**
+    public init(_ map: [AnyHashable : Any]) throws {
         // one resource may foresee several httpOperations
         for (key, httpOperation) in map {
             if let httpOperationMap = httpOperation as? [AnyHashable: Any] {
@@ -33,18 +40,20 @@ struct OpenAPIPath: KeyedElement {
     }
 
     // Zugriff per HTTP-Methode (get, post, put, ...) -> Liste oder nil
-    subscript(httpMethod method: String) -> [OpenAPIOperation] {
+    public subscript(httpMethod method: String) -> [OpenAPIOperation] {
         let matches = operations.filter { $0.key == method }
         return matches.isEmpty ? [] : matches
     }
 
     // Zugriff per operationId -> Liste oder nil
-    subscript(operationId id: String) -> [OpenAPIOperation] {
+    public subscript(operationId id: String) -> [OpenAPIOperation] {
         let matches = operations.filter { $0.operationId == id }
         return matches.isEmpty ? [] : matches
     }
 }
-extension Array where Element == OpenAPIPath  {
+
+
+public extension Array where Element == OpenAPIPath  {
     // Zugriff per HTTP-Methode (get, post, put, ...) -> Liste oder nil
     subscript(httpMethod method: String) -> [OpenAPIOperation] {
         var matches : [OpenAPIOperation] = []
@@ -55,8 +64,8 @@ extension Array where Element == OpenAPIPath  {
         
     }
 
-    // Zugriff per operationId -> Liste oder nil
-    subscript(operationID id : String) -> [OpenAPIOperation] {
+    /// Access an ``OpenAPIOperation`` based on its unique  ``OpenAPIOperation/operationId``.
+     subscript(operationID id : String) -> [OpenAPIOperation] {
         var matches : [OpenAPIOperation] = []
         for element in self {
             matches.append(contentsOf: element[operationId: id])
@@ -64,11 +73,20 @@ extension Array where Element == OpenAPIPath  {
         return matches.isEmpty ? [] : matches
         
     }
-    subscript(path path: String) -> [OpenAPIPath] {
-        return self.filter { element in
-            element.key == path
-        }
-        
-        
+    /// search for a **path** declaration
+     ///
+    /// An OpenAPI specification may hold a list of **Path** elements. The subscript provides an easy access to a list of matching ``OpenAPIPath`` elements for that **path** string.
+    ///
+    /// - Parameters: an OpenApi path string, starting with a slash.
+    /// - Returns: a list of  OpenAPIPath structs matching the search **path** string
+    ///
+    /// ```swift
+    /// // sample search for the Path declaration for /ping
+    ///  let openAPIPath = apiSpec[path: "/ping"]
+    /// ```
+    ///
+    subscript(path path: String) -> OpenAPIPath? {
+        return self.first(where: { $0.key == path })
     }
+   
 }

@@ -1,0 +1,20 @@
+openapi: 3.1.0
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+info: { title: Minimal 3.1, version: "1.0" }
+paths:
+  /ping:
+    get:
+      operationId: ping31
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                required: [ok]
+                unevaluatedProperties: false
+
+   
