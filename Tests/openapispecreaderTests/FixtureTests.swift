@@ -56,7 +56,7 @@ struct FixtureTests {
         #expect(getPingOperation.responses?.count == 1)
         let responses = try #require(getPingOperation.responses)
         let contentType = try #require(getPingOperation.response(httpstatus: "200")?.content[mediaType: "application/json"])
-        #expect(contentType.schema?.type == "object")
+        #expect(contentType.schema?.type is OpenAPIValidatableObjectType)
         let getPing200Response = try #require(getPingOperation.response(httpstatus:  "200"))
         #expect(getPing200Response.content.count == 1)
         let getPingResponseContent = try #require(getPing200Response.content.first?.schema)
@@ -82,15 +82,26 @@ struct FixtureTests {
         let parameters = try #require(path.operations[operationID : "getPet"]?.parameters)
         #expect(parameters.count == 1)
         let parameter = parameters.first!
-        #expect(parameter.name == "limit")
-        #expect(parameter.location == "query")
-        #expect(parameter.schema?.type == "integer")
+        #expect(parameter.name == "id")
+        #expect(parameter.location == "path")
+        #expect(parameter.schema?.type is OpenAPIValidatableStringType)
         //#expect(parameter.schema?.default == "10")
         //#expect(parameter.schema?.minimum == "1")
         //#expect(parameter.schema?.minimum == "100")
         
         #expect(parameter.explode == nil)
         #expect(parameter.deprecated == nil)
+        
+        let searchPath = try #require(apiSpec[path: "/pets"])
+        let searchParameters = try #require(searchPath.operations[operationID : "searchPets"]?.parameters)
+        #expect(parameters.count == 1)
+        let queryParameter = searchParameters.first!
+        #expect(queryParameter.name == "limit")
+        #expect(queryParameter.location == "query")
+        let parameterType = try #require(queryParameter.schema?.type as? OpenAPIValidatableIntegerType)
+        #expect(parameterType.defaultValue == 10)
+        #expect(parameterType.minimum == 1)
+        #expect(parameterType.maximum == 100)
         
     }
 }

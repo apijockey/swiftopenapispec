@@ -30,7 +30,10 @@ public struct OpenAPISchema :  ThrowingHashMapInitiable {
     public static let REQUIRED_KEY = "required"
    
     public init(_ map: [AnyHashable : Any]) throws {
-        self.type = map[Self.TYPE_KEY] as? String
+        if let type = map[Self.TYPE_KEY] as? String,
+            let validatableType = OpenAPIDefaultSchemaType.validatableType(type) {
+            self.type = try validatableType.init(map)
+        }
         self.format = DataType(rawValue:map[Self.FORMAT_KEY] as? String ?? DataType.string.rawValue)
         
         if let propertiesMap = map[Self.PROPERTIES_KEY] as? [AnyHashable:Any]{
@@ -39,7 +42,7 @@ public struct OpenAPISchema :  ThrowingHashMapInitiable {
         self.required = map[Self.REQUIRED_KEY] as? [String] ?? []
     }
     
-    public var type : String? = nil
+    public var type : OpenAPIValidatableSchemaType?
     //https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-01  ("null", "boolean", "object", "array", "number", or "string"), or "integer"
     public var format : DataType? = nil
     public var properties : [OpenAPISchemaProperty] = []
