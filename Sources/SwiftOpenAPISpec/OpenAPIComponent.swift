@@ -7,15 +7,15 @@
 
 import Foundation
 
-struct OpenAPIComponent : ThrowingHashMapInitiable {
-    static let ROUTE_INDEX = 0
-    static let COMPONENT_NAME_INDEX = 0
-    static let COMPONENTTYPE_INDEX = 2
-    static let COMPONENTELEMENT_INDEX = 3
-    enum Errors : LocalizedError {
+public struct OpenAPIComponent : ThrowingHashMapInitiable {
+    public static let ROUTE_INDEX = 0
+    public static let COMPONENT_NAME_INDEX = 0
+    public static let COMPONENTTYPE_INDEX = 2
+    public  static let COMPONENTELEMENT_INDEX = 3
+    public  enum Errors : LocalizedError {
         case unsupportedComponentlist, unrecognizedComponent
     }
-    init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [AnyHashable : Any]) throws {
         if let schemasMap = map[Self.SCHEMAS_KEY] as? [AnyHashable : Any]{
             schemas = try MapListMap<NamedComponent<OpenAPISchema>>.map(schemasMap)
         }
@@ -32,7 +32,7 @@ struct OpenAPIComponent : ThrowingHashMapInitiable {
             self.headers = try MapListMap<OpenAPIHeader>.map(headerMap)
         }
     }
-    func resolveSchemaComponent(components : [String]) throws ->  OpenAPISchema?{
+    public func resolveSchemaComponent(components : [String]) throws ->  OpenAPISchema?{
         if components.count < 4 {
             throw Self.Errors.unsupportedComponentlist
         }
@@ -48,18 +48,18 @@ struct OpenAPIComponent : ThrowingHashMapInitiable {
             throw Self.Errors.unrecognizedComponent
         }       
     }
-    static let SCHEMAS_KEY = "schemas"
-    static let PARAMETERS_KEY = "parameters"
-    static let SECURITY_SCHEMES_KEY = "securitySchemes"
-    static let REQUEST_BODIES_KEY = "requestBodies"
-    static let RESPONSES_KEY = "responses"
-    static let HEADERS_KEY = "headers"
-    static let EXAMPLES_KEY = "examples"
-    static let LINKS_KEY = "examples"
-    static let CALLBACKS_KEY = "examples"
-    var schemas : [NamedComponent<OpenAPISchema>] = []
-    var parameters : [NamedComponent<OpenAPIParameter>] = []
-    var responses : [OpenAPIResponse] = []
-    var securitySchemas : [OpenAPISecurityScheme] = []
-    var headers : [OpenAPIHeader] = []
+    public static let SCHEMAS_KEY = "schemas"
+    public static let PARAMETERS_KEY = "parameters"
+    public static let SECURITY_SCHEMES_KEY = "securitySchemes"
+    public static let REQUEST_BODIES_KEY = "requestBodies"
+    public static let RESPONSES_KEY = "responses"
+    public static let HEADERS_KEY = "headers"
+    public static let EXAMPLES_KEY = "examples"
+    public static let LINKS_KEY = "examples"
+    public  static let CALLBACKS_KEY = "examples"
+    public var schemas : [NamedComponent<OpenAPISchema>] = []
+    public var parameters : [NamedComponent<OpenAPIParameter>] = []
+    public var responses : [OpenAPIResponse] = []
+    public var securitySchemas : [OpenAPISecurityScheme] = []
+    public var headers : [OpenAPIHeader] = []
 }

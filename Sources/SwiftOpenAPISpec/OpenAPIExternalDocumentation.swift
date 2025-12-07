@@ -7,13 +7,13 @@
 
 import Foundation
 
-struct OpenAPIExternalDocumentation : 
+public struct OpenAPIExternalDocumentation :
     ThrowingHashMapInitiable {
-    init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [AnyHashable : Any]) throws {
         url = try map.tryRead("url", String.self, root: "externalDocumentation")
         self.description = map.readIfPresent("description", String.self)
     }
-    var description : String? = nil
-    var url : String
+    public var description : String? = nil
+    public var url : String
     
 }

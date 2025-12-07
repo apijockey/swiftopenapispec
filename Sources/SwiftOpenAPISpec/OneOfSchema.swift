@@ -8,8 +8,8 @@
 import Foundation
 
 
-struct OneOfSchemas : ThrowingHashMapInitiable {
-    init(_ map: [AnyHashable : Any]) throws {
+public struct OneOfSchemas : ThrowingHashMapInitiable {
+    public init(_ map: [AnyHashable : Any]) throws {
         let typelist  = map["oneOf"] as? [Any] ?? []
         for element in typelist {
             if let elementMap = element as? [AnyHashable:Any],
@@ -24,6 +24,6 @@ struct OneOfSchemas : ThrowingHashMapInitiable {
         }
     }
     
-    var schemas : [OpenAPISchema] = []
-    var schemaRefs : [OpenAPISchemaReference] = []
+    public var schemas : [OpenAPISchema] = []
+     public var schemaRefs : [OpenAPISchemaReference] = []
 }

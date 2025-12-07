@@ -7,12 +7,12 @@
 
 import Foundation
 
-struct OpenAPIMediaType :  KeyedElement {
-    static let SCHEMA_KEY = "schema"
-    static let EXAMPLE_KEY = "example"
-    static let EXAMPLES_KEY = "examples"
-    var key : String?
-    init(_ map: [AnyHashable : Any]) throws {
+public struct OpenAPIMediaType :  KeyedElement {
+    public static let SCHEMA_KEY = "schema"
+    public static let EXAMPLE_KEY = "example"
+    public static let EXAMPLES_KEY = "examples"
+    public var key : String?
+    public init(_ map: [AnyHashable : Any]) throws {
         if map[Self.SCHEMA_KEY] != nil {
             let schemaMap = try map.tryRead(Self.SCHEMA_KEY, [AnyHashable:Any].self, root: "content")
             self.schema =  try OpenAPISchema(schemaMap)
@@ -22,11 +22,21 @@ struct OpenAPIMediaType :  KeyedElement {
             
         }
     }
-    var schema : OpenAPISchema? = nil
-    var schemaRef  : OpenAPISchemaReference? = nil
-    var oneOfSchemas : OneOfSchemas? = nil
-    var examples : [OpenAPIKeyedExample] = []
+    public var schema : OpenAPISchema? = nil
+    public var schemaRef  : OpenAPISchemaReference? = nil
+    public var oneOfSchemas : OneOfSchemas? = nil
+    public var examples : [OpenAPIKeyedExample] = []
     //EXAMPLE
     
     //ENCODING
+}
+
+public extension Array where Element == OpenAPIMediaType  {
+    
+    subscript (mediaType type: String) -> OpenAPIMediaType? {
+        return first { response in
+            response.key == type
+        }
+    }
+    
 }

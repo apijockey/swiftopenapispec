@@ -7,33 +7,33 @@
 
 import Foundation
 
-struct OpenAPISecurityScheme : KeyedElement {
+public struct OpenAPISecurityScheme : KeyedElement {
    
     
-    static let TYPE_KEY = "type"
-    static let DESCRIPTION_KEY = "description"
-    static let NAME_KEY = "name"
-    static let LOCATION_KEY = "in"
-    static let SCHEME_KEY = "scheme"
-    static let BEARER_FORMAT_KEY = "bearerFormat"
-    static let FLOWS_KEY = "flows"
-    static let OPENID_CONNECT_URL_KEY = "openIdConnectUrl"
-    enum SecurityType : String {
+    public static let TYPE_KEY = "type"
+    public static let DESCRIPTION_KEY = "description"
+    public static let NAME_KEY = "name"
+    public static let LOCATION_KEY = "in"
+    public static let SCHEME_KEY = "scheme"
+    public static let BEARER_FORMAT_KEY = "bearerFormat"
+    public static let FLOWS_KEY = "flows"
+    public static let OPENID_CONNECT_URL_KEY = "openIdConnectUrl"
+    public enum SecurityType : String {
         case apiKey, http, mutualTLS, oauth2, openIdConnect
     }
-    enum APIKeyLocation : String {
+    public enum APIKeyLocation : String {
         case query,header,cookie
     }
-    enum Errors : LocalizedError {
+    public enum Errors : LocalizedError {
         case missingSecurityType
-        var errorDescription: String? {
+        public var errorDescription: String? {
             switch self {
             case .missingSecurityType:
                 "missing element 'type' on securitySchemes"
             }
         }
     }
-    init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [AnyHashable : Any]) throws {
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
         guard let securityRawType = map.readIfPresent(Self.TYPE_KEY, String.self),
         let securityType =  SecurityType(rawValue: securityRawType) else {
@@ -62,14 +62,14 @@ struct OpenAPISecurityScheme : KeyedElement {
             return
         }
     }
-    var key: String?
-    var securityType : SecurityType
-    var description : String? = nil
-    var apiKeyName : String? = nil
-    var ApiKeyIn : APIKeyLocation? = nil
-    var httpScheme : String? = nil
-    var httpBearerFormat : String? = nil
-    var flows : OpenAPIOAuthFlows? = nil
-    var openIdConnectURL : String? = nil
+    public var key: String?
+    public var securityType : SecurityType
+    public var description : String? = nil
+    public var apiKeyName : String? = nil
+    public var ApiKeyIn : APIKeyLocation? = nil
+    public var httpScheme : String? = nil
+    public var httpBearerFormat : String? = nil
+    public var flows : OpenAPIOAuthFlows? = nil
+    public var openIdConnectURL : String? = nil
     
 }

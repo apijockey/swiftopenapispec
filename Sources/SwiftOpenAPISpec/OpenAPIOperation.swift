@@ -7,9 +7,9 @@
 
 import Foundation
 
-struct OpenAPIOperation : KeyedElement{
-    var key: String?
-    init(_ map: [AnyHashable : Any]) throws {
+public struct OpenAPIOperation : KeyedElement{
+    public var key: String?
+    public init(_ map: [AnyHashable : Any]) throws {
         self.tags = map[Self.TAGS_KEY] as? [String] ?? []
         self.summary = map.readIfPresent(Self.SUMMARY_KEY, String.self)
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
@@ -44,30 +44,44 @@ struct OpenAPIOperation : KeyedElement{
         
     }
     
-    static let OP_ID_KEY = "operationId"
-    static let PARAMETERS_KEY = "parameters"
-    static let RESPONSES_KEY = "responses"
+    public static let OP_ID_KEY = "operationId"
+    public static let PARAMETERS_KEY = "parameters"
+    public static let RESPONSES_KEY = "responses"
     //https://swagger.io/docs/specification/paths-and-operations/
-    static let SUMMARY_KEY = "summary"
-    static let TAGS_KEY = "tags"
-    static let REQUEST_BODIES_KEY = "requestBody"
-    static let EXTERNAL_DOCS_KEY = "externalDocs"
-    static let DEPRECATED_KEY = "deprecated"
-    static let DESCRIPTION_KEY = "description"
-    static let SECURITY_KEY = "security"
-    var deprecated : Bool? = false
-    var operationId : String? = nil
-    var summary : String? = nil
-    var requestBody : OpenAPIRequestBody? = nil
-    var description : String? = nil
-    var tags : [String] = []
-    var responses : [OpenAPIResponse]? = []
-    var parameters : [OpenAPIParameter]? = []
-    var servers : [OpenAPIServer] = [OpenAPIServer(url: "/")]
+    public static let SUMMARY_KEY = "summary"
+    public static let TAGS_KEY = "tags"
+    public static let REQUEST_BODIES_KEY = "requestBody"
+    public static let EXTERNAL_DOCS_KEY = "externalDocs"
+    public static let DEPRECATED_KEY = "deprecated"
+    public static let DESCRIPTION_KEY = "description"
+    public static let SECURITY_KEY = "security"
+    public var deprecated : Bool? = false
+    public var operationId : String? = nil
+    public var summary : String? = nil
+    public var requestBody : OpenAPIRequestBody? = nil
+    public var description : String? = nil
+    public var tags : [String] = []
+    public var responses : [OpenAPIResponse]? = []
+    public var parameters : [OpenAPIParameter]? = []
+    public var servers : [OpenAPIServer] = [OpenAPIServer(url: "/")]
     //Lists the required security schemes to execute this operation. The name used for each property MUST correspond to a security scheme declared in the Security Schemes under the Components Object.
-    var securityObjects : [OpenAPISecuritySchemeReference] = []
-    var externalDocs : OpenAPIExternalDocumentation? = nil
+    public var securityObjects : [OpenAPISecuritySchemeReference] = []
+    public var externalDocs : OpenAPIExternalDocumentation? = nil
   
+    /// returns an OpenAPIResponse for the given HTTP Status  if declared on the operation or nil.
+    public func response(httpstatus  status : String) -> OpenAPIResponse? {
+        guard let responses else { return nil }
+        return responses[httpstatus: status]
+    }
     
     
+}
+
+
+extension Array where Element == OpenAPIOperation {
+    public subscript(operationID  id : String) -> OpenAPIOperation? {
+        return self.first { operation in
+            operation.operationId == id
+        }
+    }
 }

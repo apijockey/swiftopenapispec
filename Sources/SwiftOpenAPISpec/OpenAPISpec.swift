@@ -14,18 +14,35 @@ struct S: Codable {
 
 
 
-
-struct OpenAPISpec  {
+///
+/// OpenAPI is a specification format for REST/JSON based webservices.
+///
+///  The struct OpenAPISpec reads the textual representation written in the Yaml/JSON format and provides convenient access to all definitions in the specification.
+/// https://spec.openapis.org/oas/latest.html
+///
+/// To consume a Yaml/JSON representation of an OpenAPI specification, call the static `read` function:
+/// ```swift
+/// let text = """
+///openapi: 3.1.0
+///info:
+///  title: A minimal OpenAPI Description
+///  version: 0.0.1
+///paths: {}
+/// """
+/// let apiSpec = try OpenAPISpec.read(text: string)
+/// ```
+///
+public struct OpenAPISpec  {
     struct UserInfo : Codable {
         let message : String
         let infoType : UserInfoType
     }
-    enum UserInfoType : String, Codable {
+    public enum UserInfoType : String, Codable {
         case error, warning, info
     }
-    enum Errors : LocalizedError {
+    public enum Errors : LocalizedError {
         case invalidYaml(String), invalidSpecification(String, String)
-        var errorDescription: String? {
+        public var errorDescription: String? {
             switch self {
             case .invalidYaml(let string):
                 string
@@ -43,14 +60,20 @@ struct OpenAPISpec  {
     var version : String
     var info : OpenAPIInfo
     var servers : [OpenAPIServer] = []
-    var paths : [OpenAPIPath] = []
+    public private(set) var paths : [OpenAPIPath] = []
     var components : OpenAPIComponent? = nil
     func resolveComponent(_ text : String) {
         if text.starts(with: "#") {
             
         }
     }
-    static func read(text : String) throws -> OpenAPISpec{
+    /**
+            reads a textual representantation of an OpenAPI specification
+
+             - Parameter text: the Yaml/JSON representation
+             - Returns: an OpenAPISpec instance  which holds the text contents as simple Swift structs
+     */
+    public static func read(text : String) throws -> OpenAPISpec{
         guard let loadedDictionary = try Yams.load(yaml: text) as? [String:Any] else {
             throw OpenAPISpec.Errors.invalidYaml("text cannot be interpreted as a Key/Value List")
         }
@@ -77,18 +100,18 @@ struct OpenAPISpec  {
         }
        return spec
     }
-    subscript(operationId id: String) -> [OpenAPIOperation] {
+    public subscript(operationId id: String) -> [OpenAPIOperation] {
         let matches = paths[operationID: id]
         return matches.isEmpty ? [] : matches
     }
-    subscript(httpMethod method: String) -> [OpenAPIOperation] {
+    public subscript(httpMethod method: String) -> [OpenAPIOperation] {
         let matches = paths[httpMethod: method]
         return matches.isEmpty ? [] : matches
     }
-    subscript(path path: String) -> [OpenAPIPath] {
-        let matches = paths[path: path]
-        return matches.isEmpty ? [] : matches
+    subscript(path path: String) -> OpenAPIPath? {
+        return paths[path: path]
     }
+    
     
     
 }

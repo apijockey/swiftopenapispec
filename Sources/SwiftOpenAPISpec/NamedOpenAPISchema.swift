@@ -14,11 +14,11 @@ import Foundation
 // dialect:
 //https://spec.openapis.org/oas/3.1/dialect/base
 //
-struct NamedComponent<T> :  KeyedElement where T : ThrowingHashMapInitiable {
-    init(_ map: [AnyHashable : Any]) throws {
+public struct NamedComponent<T> :  KeyedElement where T : ThrowingHashMapInitiable {
+    public init(_ map: [AnyHashable : Any]) throws {
         type = try T(map)
     }
-    var key : String? = nil
-    var type : T? = nil
+    public var key : String? = nil
+    public var type : T? = nil
 }
 
