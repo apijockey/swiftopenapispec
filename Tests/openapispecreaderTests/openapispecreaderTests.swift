@@ -151,7 +151,7 @@ final class openapispecreaderTests: XCTestCase {
         let greetPathParameter = try XCTUnwrap(greetPathOperation.parameters?.first)
         XCTAssertEqual(greetPathParameter.name, "name")
         XCTAssertEqual(greetPathParameter.required, false)
-        XCTAssertEqual(greetPathParameter.location, "query")
+        XCTAssertEqual(greetPathParameter.location, OpenAPIParameter.ParameterLocation.query)
         XCTAssertEqual(greetPathParameter.description, "The name used in the returned greeting.")
         XCTAssertTrue(greetPathParameter.schema?.schemaType is OpenAPIValidatableStringType)
         XCTAssertNil(greetPathParameter.allowEmptyValue)
@@ -234,7 +234,7 @@ final class openapispecreaderTests: XCTestCase {
             path.key == "skipParam"
         })
         XCTAssertEqual(skipParamComponent.namedComponentType?.name, "skip")
-        XCTAssertEqual(skipParamComponent.namedComponentType?.location, "query")
+        XCTAssertEqual(skipParamComponent.namedComponentType?.location, OpenAPIParameter.ParameterLocation.query)
         XCTAssertEqual(skipParamComponent.namedComponentType?.description, "number of items to skip")
         XCTAssertEqual(skipParamComponent.namedComponentType?.required, true)
         XCTAssertTrue(skipParamComponent.namedComponentType?.schema?.schemaType is  OpenAPIValidatableIntegerType)

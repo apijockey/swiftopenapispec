@@ -12,6 +12,7 @@ import Foundation
   Struct containing an **OpenAPI Path** containing endpoints and their ``operations``
    
    The ``OpenAPIPath`` provides a set of convenient getter subscripts to filter for specific operations
+ 
    
  */
 public struct OpenAPIPath: KeyedElement {

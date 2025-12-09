@@ -8,6 +8,12 @@
 import Foundation
 
 public struct OpenAPIParameter :  ThrowingHashMapInitiable{
+    public enum ParameterLocation : String, Codable, CaseIterable {
+        case cookie, query, queryString, header ,path
+    }
+    public enum ParameterStyle : String, Codable, CaseIterable {
+        case simple,form, label, matrix
+    }
     public static let NAME_KEY = "name"
     public static let IN_KEY = "in"
     public static let REQUIRED_KEY = "required"
@@ -33,13 +39,15 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable{
         self.required = required ?? false
             
 
-        self.location = location
+        self.location = ParameterLocation(rawValue: location)
         self.name = name
         self.description =  map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
         self.deprecated =  map.readIfPresent(Self.DEPRECATED_KEY, Bool.self)
         self.allowEmptyValue = map.readIfPresent(Self.ALLOW_EMPTYVALUE_KEY, Bool.self)
         self.schema = try map.tryMapIfPresent(Self.SCHEMA_KEY, OpenAPISchema.self)
-        self.style = map.readIfPresent(Self.STYLE_KEY, String.self)
+        if let style = map.readIfPresent(Self.STYLE_KEY, String.self) {
+            self.style = ParameterStyle(rawValue: style)
+        }
         self.explode = map.readIfPresent(Self.EXPLODE_KEY, Bool.self)
         self.allowReserved = map.readIfPresent(Self.ALLOW_RESERVED_KEY, Bool.self)
         self.example = map.readIfPresent(Self.EXAMPLE_KEY, String.self)
@@ -48,13 +56,14 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable{
        
     }
     public var name : String? = nil
-    public let location : String
+    public let location : ParameterLocation?
     public let required : Bool
     public var description : String? = nil
     public var deprecated : Bool? = nil
     public var allowEmptyValue : Bool? = nil
     public var schema : OpenAPISchema? = nil
-    public var style : String? = nil
+    //https://learn.openapis.org/specification/parameters.html
+    public var style : ParameterStyle? = nil
     public var explode : Bool? = nil
     public var allowReserved : Bool? = nil
     public var example : Any? = nil

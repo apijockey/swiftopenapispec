@@ -93,7 +93,7 @@ struct FixtureTests {
         #expect(parameters.count == 1)
         let parameter = parameters.first!
         #expect(parameter.name == "id")
-        #expect(parameter.location == "path")
+        #expect(parameter.location == OpenAPIParameter.ParameterLocation.query)
         #expect(parameter.schema?.schemaType is OpenAPIValidatableStringType)
       
         
@@ -105,7 +105,7 @@ struct FixtureTests {
         #expect(parameters.count == 1)
         let queryParameter = searchParameters.first!
         #expect(queryParameter.name == "limit")
-        #expect(queryParameter.location == "query")
+        #expect(queryParameter.location == OpenAPIParameter.ParameterLocation.query)
         let parameterType = try #require(queryParameter.schema?.schemaType as? OpenAPIValidatableIntegerType)
         #expect(parameterType.defaultValue == 10)
         #expect(parameterType.minimum == 1)
