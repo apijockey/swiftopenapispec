@@ -5,6 +5,14 @@
 //  Created by Patric Dubois on 26.03.24.
 //
 
+
+//
+//  File.swift
+//
+//
+//  Created by Patric Dubois on 26.03.24.
+//
+
 import Foundation
 public struct OpenAPIServer : ThrowingHashMapInitiable {
     public static let URL_KEY = "url"

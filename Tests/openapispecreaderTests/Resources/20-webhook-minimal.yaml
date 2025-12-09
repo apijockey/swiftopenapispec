@@ -1,0 +1,33 @@
+#
+//  20-webhook-minimal.yaml
+//  SwiftOpenAPISpec
+//
+//  Created by Patric Dubois on 09.12.25.
+//
+
+
+openapi: "3.1.0"
+info:
+  title: Minimal Webhook API
+  version: "1.0.0"
+webhooks:
+  pingEvent:
+    post:
+      operationId: onPing
+      summary: Fired when a ping occurs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ok:
+                  type: boolean
+                ts:
+                  type: string
+                  format: date-time
+              required: [ok, ts]
+      responses:
+        "200":
+          description: Receiver accepted the webhook
