@@ -23,7 +23,10 @@ public struct OpenAPIValidatableObjectType : OpenAPIValidatableSchemaType {
         
     }
     public let type : String?
+    public var maxProperties : Int?
+    public var minProperties : Int?
     public var properties : [OpenAPISchemaProperty] = []
+    public var dependentRequired : String?
     public var unevaluatedProperties : Bool = false
     public var required : [String] = []
 }

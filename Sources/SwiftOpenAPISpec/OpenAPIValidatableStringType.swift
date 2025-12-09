@@ -6,20 +6,19 @@
 //
 
 
-public struct OpenAPIValidatableStringType :  OpenAPIValidatableSchemaType, ThrowingHashMapInitiable  {
+public struct OpenAPIValidatableComponentType :  OpenAPIValidatableSchemaType, ThrowingHashMapInitiable  {
     
     
-    public static let TYPE_KEY = "type"
-    public static let ALLOWED_ELEMENTS_KEY = "enum"
-    
+  
+    public static let REF_KEY = "$ref"
     public init(_ map: [AnyHashable : Any]) throws {
-        self.type = map[Self.TYPE_KEY] as? String
-        self.allowedElements = map[Self.ALLOWED_ELEMENTS_KEY] as? [String]
+        self.ref = map[Self.REF_KEY] as? String
+        
+        
     }
-   
     public func validate() throws {
         
     }
-    public let type : String?
-    public let allowedElements : [String]?
+    public let ref : String?
+     
 }

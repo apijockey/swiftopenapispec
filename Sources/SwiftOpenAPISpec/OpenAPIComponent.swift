@@ -43,7 +43,7 @@ public struct OpenAPIComponent : ThrowingHashMapInitiable {
         switch componenttype  {
         case Self.SCHEMAS_KEY : return schemas.first { schema in
             schema.key == componentname
-        }?.type
+        }?.namedComponentType
         default:
             throw Self.Errors.unrecognizedComponent
         }       
@@ -62,4 +62,5 @@ public struct OpenAPIComponent : ThrowingHashMapInitiable {
     public var responses : [OpenAPIResponse] = []
     public var securitySchemas : [OpenAPISecurityScheme] = []
     public var headers : [OpenAPIHeader] = []
+    //https://swagger.io/docs/specification/v3_0/components/
 }

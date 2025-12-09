@@ -31,3 +31,10 @@ public struct OpenAPIServer : ThrowingHashMapInitiable {
     
     
 }
+public extension Array where Element == OpenAPIServer {
+    subscript (url urlString : String) -> OpenAPIServer? {
+        return self.first { server in
+            server.url == urlString
+        }
+    }
+}

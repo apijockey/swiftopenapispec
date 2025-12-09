@@ -16,9 +16,9 @@ import Foundation
 //
 public struct NamedComponent<T> :  KeyedElement where T : ThrowingHashMapInitiable {
     public init(_ map: [AnyHashable : Any]) throws {
-        type = try T(map)
+        namedComponentType = try T(map)
     }
     public var key : String? = nil
-    public var type : T? = nil
+    public var namedComponentType : T? = nil
 }
 

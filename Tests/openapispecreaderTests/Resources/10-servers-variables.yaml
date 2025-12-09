@@ -1,0 +1,12 @@
+openapi: 3.0.3
+info: { title: Servers, version: "1.0" }
+servers:
+  - url: https://{region}.api.example.com/{basePath}
+    variables:
+      region: { default: eu, enum: [eu, us] }
+      basePath: { default: v1 }
+paths:
+  /ping:
+    get:
+      operationId: pingServer
+      responses: { "200": { description: ok } }
