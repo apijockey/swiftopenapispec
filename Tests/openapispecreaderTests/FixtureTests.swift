@@ -260,4 +260,44 @@ struct FixtureTests {
         let apiSpec = try OpenAPISpec.read(text: yaml)
         #expect(apiSpec[path: "/fail"]?.operations[operationID: "fail"]?.responses?[httpstatus: "400"]?.content[mediaType: "application/problem+json"]?.schema?.schemaType is OpenAPIValidatableObjectType)
     }
+    @Test("20-webhook-minimal")
+    func minimumwebhook() async throws {
+        let yaml = try fixtureString("20-webhook-minimal")
+        let apiSpec = try OpenAPISpec.read(text: yaml)
+        let pingWebhook = try #require(apiSpec[webhook: "pingEvent"])
+        let postMethod = try #require(pingWebhook[httpMethod: "post"].first)
+        
+        let postOperation = try #require(pingWebhook[operationId: "onPing"].first)
+    }
+    @Test("21-webhooks-multiple")
+    func multiplewebhooks() async throws {
+        let yaml = try fixtureString("21-webhooks-multiple")
+        let apiSpec = try OpenAPISpec.read(text: yaml)
+        let orderCreatedWebhook = try #require(apiSpec[webhook: "orderCreated"])
+        #expect(orderCreatedWebhook.operations.count == 1)
+        #expect(orderCreatedWebhook.operations.first?.summary == "Triggered when a new order is created")
+        let requiredBody = try #require(orderCreatedWebhook.operations.first?.requestBody)
+        #expect(requiredBody.required == true)
+        let orderCancelledWebhook = try #require(apiSpec[webhook: "orderCancelled"])
+        #expect(orderCancelledWebhook.operations.count == 1)
+    }
+    @Test("21-components")
+    func nestedcomponents() async throws {
+        let yaml = try fixtureString("21-webhooks-multiple")
+        let apiSpec = try OpenAPISpec.read(text: yaml)
+        let orderCreatedEventComponent = try #require(apiSpec[schema: "Money"])
+        let object = try #require(orderCreatedEventComponent.schemaType as? OpenAPIValidatableObjectType)
+        #expect(object.properties.contains("currency"))
+        let currencyInfo = try #require(object.properties["currency"])
+        let currencyTypeInfo = try #require(currencyInfo.type as? OpenAPIValidatableStringType)
+        #expect(currencyTypeInfo.minLength == 3)
+        #expect(currencyTypeInfo.maxLength == 3)
+    }
+    @Test("21-allofcomponents")
+    func nestedallofcomponent() async throws {
+        let yaml = try fixtureString("21-webhooks-multiple")
+        let apiSpec = try OpenAPISpec.read(text: yaml)
+        let orderCreatedEventComponent = try #require(apiSpec[schema: "OrderCreatedEvent"])
+        let object = try #require(orderCreatedEventComponent.schemaType as? OpenAPIValidatableAllOfType)
+    }
 }

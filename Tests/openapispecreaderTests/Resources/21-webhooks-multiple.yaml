@@ -1,0 +1,78 @@
+openapi: "3.1.0"
+info:
+  title: Shop Webhooks
+  version: "1.2.0"
+  description: Webhooks the shop system sends to partners
+webhooks:
+  orderCreated:
+    post:
+      operationId: onOrderCreated
+      summary: Triggered when a new order is created
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderCreatedEvent"
+      responses:
+        "202":
+          description: Accepted for processing
+  orderCancelled:
+    post:
+      operationId: onOrderCancelled
+      summary: Triggered when an order is cancelled
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderCancelledEvent"
+      responses:
+        "200":
+          description: OK
+components:
+  schemas:
+    Money:
+      type: object
+      properties:
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+        amount:
+          type: number
+      required: [currency, amount]
+
+    OrderBase:
+      type: object
+      properties:
+        id:
+          type: string
+        total:
+          $ref: "#/components/schemas/Money"
+        status:
+          type: string
+          enum: [created, cancelled]
+      required: [id, total, status]
+
+    OrderCreatedEvent:
+      allOf:
+        - $ref: "#/components/schemas/OrderBase"
+        - type: object
+          properties:
+            createdAt:
+              type: string
+              format: date-time
+          required: [createdAt]
+
+    OrderCancelledEvent:
+      allOf:
+        - $ref: "#/components/schemas/OrderBase"
+        - type: object
+          properties:
+            cancelledAt:
+              type: string
+              format: date-time
+            reason:
+              type: string
+          required: [cancelledAt]

@@ -63,15 +63,12 @@ public struct OpenAPISpec  {
     static let TAGS_KEY = "tags"
     static let SELF_URL_KEY = "$self"
     static let WEBHOOKS_KEY = "webhooks"
-    
-    
-    var webHooks : [OpenAPIWebhook] = []
     var version : String
     var info : OpenAPIInfo
     var servers : [OpenAPIServer] = []
     public private(set) var paths : [OpenAPIPath] = []
-    public private(set) var webhooks : [OpenAPIWebhook] = []
-    var components : OpenAPIComponent? = nil
+    public private(set) var webhooks : [OpenAPIPathItem] = []
+    var components : OpenAPIComponent?
     func resolveComponent(_ text : String) {
         if text.starts(with: "#") {
             
@@ -94,23 +91,31 @@ public struct OpenAPISpec  {
         let info = try loadedDictionary.tryMap(OpenAPISpec.INFO_KEY, root: "root", OpenAPIInfo.self)
         var spec = OpenAPISpec(version: version,info: info)
         spec.components =  try? loadedDictionary.tryMap(OpenAPISpec.COMPONENTS_KEY, root: "root", OpenAPIComponent.self)
-        //TODO: Webhooks
-        //https://swagger.io/docs/specification/v3_0/components/
-        if spec.components == nil  && spec.paths.count == 0 && spec.webhooks.count == 0 {
-            spec.userInfos.append(UserInfo(message: "components and paths element missing", infoType: .warning))
-        }
+        
+        
         let servers =  try loadedDictionary.tryOptionalList(OpenAPISpec.SERVERS_KEY, root: "root", OpenAPIServer.self)
         if servers.count > 0 {
             spec.servers = servers
         }
-        // I want the list of Paths
+        
+        //TODO: Webhooks
+        if let map = loadedDictionary[OpenAPISpec.WEBHOOKS_KEY]  as? [String:Any],
+           let webhooks = try? MapListMap<OpenAPIPathItem>.map(map),
+                webhooks.count > 0 {
+            spec.webhooks  = webhooks
+        }
+        
+       
          
         if let map = loadedDictionary[OpenAPISpec.PATHS_KEY]  as? [AnyHashable:Any],
            let paths = try? MapListMap<OpenAPIPath>.map(map),
                 paths.count > 0 {
                 spec.paths = paths
         }
-        
+        //https://swagger.io/docs/specification/v3_0/components/
+        if spec.components == nil  && spec.paths.count == 0 && spec.webhooks.count == 0 {
+            spec.userInfos.append(UserInfo(message: "components and paths element missing", infoType: .warning))
+        }
         
        return spec
     }
@@ -124,6 +129,29 @@ public struct OpenAPISpec  {
     }
     subscript(path path: String) -> OpenAPIPath? {
         return paths[path: path]
+    }
+    subscript(webhook path: String) -> OpenAPIPathItem? {
+        return webhooks[webhook: path]
+    }
+    subscript(schema component: String) -> OpenAPISchema? {
+        return components?.schemas.first(where: { c in
+            c.key == component
+        })?.namedComponentType
+    }
+    subscript(parameter component: String) -> OpenAPIParameter? {
+        return components?.parameters.first(where: { c in
+            c.key == component
+        })?.namedComponentType
+    }
+    subscript(response component: String) -> OpenAPIResponse? {
+        return components?.responses.first(where: { c in
+            c.key == component
+        })
+    }
+    subscript(securityschema component: String) -> OpenAPISecurityScheme? {
+        return components?.securitySchemas.first(where: { c in
+            c.key == component
+        })
     }
     
     

@@ -7,7 +7,9 @@
 
 import Foundation
 
-public struct OpenAPIComponent : ThrowingHashMapInitiable {
+public struct OpenAPIComponent : KeyedElement, ThrowingHashMapInitiable {
+  
+    
     public static let ROUTE_INDEX = 0
     public static let COMPONENT_NAME_INDEX = 0
     public static let COMPONENTTYPE_INDEX = 2
@@ -62,5 +64,16 @@ public struct OpenAPIComponent : ThrowingHashMapInitiable {
     public var responses : [OpenAPIResponse] = []
     public var securitySchemas : [OpenAPISecurityScheme] = []
     public var headers : [OpenAPIHeader] = []
+    public var key: String?
     //https://swagger.io/docs/specification/v3_0/components/
+}
+
+public extension Array where Element == OpenAPIComponent {
+    subscript(component: String) -> OpenAPIComponent? {
+        return self.first (where:{ c in
+            c.key == component
+        })
+    }
+
+    
 }
