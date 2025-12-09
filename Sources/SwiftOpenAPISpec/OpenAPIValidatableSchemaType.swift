@@ -10,7 +10,3 @@ public  protocol OpenAPIValidatableSchemaType : ThrowingHashMapInitiable {
     func validate() throws
     
 }
-extension OpenAPIValidatableSchemaType {
-   
-}
-

@@ -1,0 +1,15 @@
+openapi: 3.0.3
+info: { title: Vendor JSON, version: "1.0" }
+paths:
+  /fail:
+    get:
+      operationId: fail
+      responses:
+        "400":
+          description: bad
+          content:
+            application/problem+json:
+              schema:
+                type: object
+                properties: { title: { type: string } }
+                required: [title]

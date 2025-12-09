@@ -24,20 +24,37 @@ public struct OpenAPISchema :  ThrowingHashMapInitiable {
         case integer, int32, int64, number, string
     }
     public static let TYPE_KEY = "type"
+    public static let ALLOF_KEY = "allOf"
+    public static let ONEOF_KEY = "oneOf"
+    public static let ANYOF_KEY = "anyOf"
+    public static let JSONREF_KEY = "$ref"
     public static let FORMAT_KEY = "format"
     
    
     public init(_ map: [AnyHashable : Any]) throws {
         if let type = map[Self.TYPE_KEY] as? String,
             let validatableType = OpenAPIDefaultSchemaType.validatableType(type) {
-            self.type = try validatableType.init(map)
+            self.schemaType = try validatableType.init(map)
+        }
+        else if map[Self.JSONREF_KEY] is String {
+            self.schemaType = try OpenAPIValidatableComponentType(map)
+            
+        }
+        else if map[Self.ONEOF_KEY] is [Any] {
+            self.schemaType = try OpenAPIValidatableOneOfType(map)
+        }
+        else if map[Self.ANYOF_KEY] is [Any] {
+            self.schemaType = try OpenAPIValidatableAnyOfType(map)
+        }
+        else if map[Self.ALLOF_KEY] is [Any] {
+            self.schemaType = try OpenAPIValidatableAllOfType(map)
         }
         self.format = DataType(rawValue:map[Self.FORMAT_KEY] as? String ?? DataType.string.rawValue)
         
        
     }
     
-    public var type : OpenAPIValidatableSchemaType?
+    public var schemaType : OpenAPIValidatableSchemaType?
     //https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-01  ("null", "boolean", "object", "array", "number", or "string"), or "integer"
     public var format : DataType? = nil
    

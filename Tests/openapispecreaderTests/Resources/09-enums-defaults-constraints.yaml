@@ -1,0 +1,17 @@
+openapi: 3.0.3
+info: { title: Constraints, version: "1.0" }
+paths:
+  /order:
+    post:
+      operationId: createOrder
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status, count]
+              properties:
+                status: { type: string, enum: [NEW, PAID] }
+                count: { type: integer, minimum: 1, default: 1 }
+                note: { type: string, pattern: "^[A-Z]+$" }
+      responses: { "200": { description: ok } }

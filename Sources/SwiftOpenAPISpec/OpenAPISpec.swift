@@ -96,6 +96,7 @@ public struct OpenAPISpec  {
         
         spec.components =  try? loadedDictionary.tryMap(OpenAPISpec.COMPONENTS_KEY, root: "root", OpenAPIComponent.self)
         //TODO: Webhooks
+        //https://swagger.io/docs/specification/v3_0/components/
         if spec.components == nil  && spec.paths.count == 0 {
             spec.userInfos.append(UserInfo(message: "components and paths element missing", infoType: .warning))
         }
