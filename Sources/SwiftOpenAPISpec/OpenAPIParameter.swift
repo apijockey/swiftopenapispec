@@ -14,6 +14,7 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable{
     public enum ParameterStyle : String, Codable, CaseIterable {
         case simple,form, label, matrix
     }
+    public static let FORMAT_KEY = "format"
     public static let NAME_KEY = "name"
     public static let IN_KEY = "in"
     public static let REQUIRED_KEY = "required"
@@ -53,6 +54,7 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable{
         self.example = map.readIfPresent(Self.EXAMPLE_KEY, String.self)
         self.examples = try map.tryOptionalList(Self.EXAMPLES_KEY, root: "parameters", OpenAPIExample.self)
         self.content = map.readIfPresent(Self.CONTENT_KEY, OpenAPIMediaType.self)
+        self.format = map.readIfPresent(Self.FORMAT_KEY, String.self)
        
     }
     public var name : String? = nil
@@ -69,6 +71,8 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable{
     public var example : Any? = nil
     public var examples : [OpenAPIExample]? = []
     public var content : OpenAPIMediaType? = nil
+    public var format : String?
+   
    
     //TODO: Examples Object
    

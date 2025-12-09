@@ -1,0 +1,64 @@
+openapi: "3.1.0"
+info:
+  title: Secure Webhooks
+  version: "2.0.0"
+webhooks:
+  userUpdated:
+    post:
+      operationId: onUserUpdated
+      summary: Sent when user profile changes
+      security:
+        - webhookSignature: []
+      parameters:
+        - in: header
+          name: X-Signature
+          required: true
+          schema:
+            type: string
+          description: HMAC SHA-256 signature of the request body.
+        - in: header
+          name: X-Event-Id
+          required: true
+          schema:
+            type: string
+          description: Unique event identifier for idempotency.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdatedEvent"
+      responses:
+        "200":
+          description: OK
+components:
+  securitySchemes:
+    webhookSignature:
+      type: apiKey
+      in: header
+      name: X-Signature
+      description: Shared-secret HMAC signature.
+  schemas:
+    UserUpdatedEvent:
+      type: object
+      properties:
+        eventId:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+        changedFields:
+          type: array
+          items:
+            type: string
+      required: [eventId, user]
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        displayName:
+          type: string
+      required: [id, email]
