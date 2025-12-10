@@ -34,21 +34,21 @@ public struct OpenAPISchema :  ThrowingHashMapInitiable {
    
     public init(_ map: [String : Any]) throws {
         if let type = map[Self.TYPE_KEY] as? String,
-            let validatableType = OpenAPIDefaultSchemaType.validatableType(type) {
+            let validatableType = OpenAPISchemaType.validatableType(type) {
             self.schemaType = try validatableType.init(map)
         }
         else if map[Self.JSONREF_KEY] is String {
-            self.schemaType = try OpenAPIValidatableComponentType(map)
+            self.schemaType = try OpenAPIValidatableType(map)
             
         }
         else if map[Self.ONEOF_KEY] is [Any] {
-            self.schemaType = try OpenAPIValidatableOneOfType(map)
+            self.schemaType = try OpenAPIOneOfType(map)
         }
         else if map[Self.ANYOF_KEY] is [Any] {
-            self.schemaType = try OpenAPIValidatableAnyOfType(map)
+            self.schemaType = try OpenAPIAnyOfType(map)
         }
         else if map[Self.ALLOF_KEY] is [Any] {
-            self.schemaType = try OpenAPIValidatableAllOfType(map)
+            self.schemaType = try OpenAPIAllOfType(map)
         }
         self.format = DataType(rawValue:map[Self.FORMAT_KEY] as? String ?? DataType.string.rawValue)
         

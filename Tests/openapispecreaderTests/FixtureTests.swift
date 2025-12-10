@@ -73,10 +73,10 @@ struct FixtureTests {
         #expect(getPingOperation.responses?.count == 1)
         let responses = try #require(getPingOperation.responses)
         let contentType = try #require(getPingOperation.response(httpstatus: "200")?.content[key: "application/json"])
-        #expect(contentType.schema?.schemaType is OpenAPIValidatableObjectType)
+        #expect(contentType.schema?.schemaType is OpenAPIObjectType)
         let getPing200Response = try #require(getPingOperation.response(httpstatus:  "200"))
         #expect(getPing200Response.content.count == 1)
-        let getPingResponseContent = try #require(getPing200Response.content.first?.schema?.schemaType as? OpenAPIValidatableObjectType)
+        let getPingResponseContent = try #require(getPing200Response.content.first?.schema?.schemaType as? OpenAPIObjectType)
         #expect(getPingResponseContent.unevaluatedProperties == false)
         #expect(getPingResponseContent.properties.count == 1)
         #expect(getPingResponseContent.required.count == 1)
@@ -94,7 +94,7 @@ struct FixtureTests {
         let parameter = parameters.first!
         #expect(parameter.name == "id")
         #expect(parameter.location == SwiftOpenAPISpec.OpenAPIParameter.ParameterLocation.path)
-        #expect(parameter.schema?.schemaType is OpenAPIValidatableStringType)
+        #expect(parameter.schema?.schemaType is OpenAPIStringType)
       
         
         #expect(parameter.explode == nil)
@@ -106,7 +106,7 @@ struct FixtureTests {
         let queryParameter = searchParameters.first!
         #expect(queryParameter.name == "limit")
         #expect(queryParameter.location == OpenAPIParameter.ParameterLocation.query)
-        let parameterType = try #require(queryParameter.schema?.schemaType as? OpenAPIValidatableIntegerType)
+        let parameterType = try #require(queryParameter.schema?.schemaType as? OpenAPIIntegerType)
         #expect(parameterType.defaultValue == 10)
         #expect(parameterType.minimum == 1)
         #expect(parameterType.maximum == 100)
@@ -136,7 +136,7 @@ struct FixtureTests {
         
         let requestbodyContents = try #require(apiSpec[path: "/upload"]?.operations[operationID : "upload"]?.requestBody?.contents)
         #expect(requestbodyContents.count == 1)
-        let stringType = try #require(requestbodyContents[0].schema?.schemaType as? OpenAPIValidatableStringType)
+        let stringType = try #require(requestbodyContents[0].schema?.schemaType as? OpenAPIStringType)
         #expect(stringType.allowedElements == ["Alice","Bob","Carl"])
         
         
@@ -152,12 +152,12 @@ struct FixtureTests {
         
         let requestbodyContents = try #require(apiSpec[path: "/upload"]?.operations[operationID : "upload"]?.requestBody?.contents)
         #expect(requestbodyContents.count == 1)
-        let objectType = try #require(requestbodyContents[0].schema?.schemaType as? OpenAPIValidatableObjectType)
+        let objectType = try #require(requestbodyContents[0].schema?.schemaType as? OpenAPIObjectType)
         #expect(objectType.properties.count == 2)
         #expect(objectType.properties.contains(where:{$0.key == "productName"}))
         #expect(objectType.properties.contains(where:{$0.key == "productPrice"}))
-        #expect(objectType.properties[key: "productName"]?.type is OpenAPIValidatableStringType)
-        #expect(objectType.properties[key: "productPrice"]?.type is  OpenAPIValidatableDoubleType)
+        #expect(objectType.properties[key: "productName"]?.type is OpenAPIStringType)
+        #expect(objectType.properties[key: "productPrice"]?.type is  OpenAPIDoubleType)
         
         
     }
@@ -172,11 +172,11 @@ struct FixtureTests {
         
         let response201 = try #require(apiSpec[path: "/create"]?.operations[operationID : "create"]?.response(httpstatus: "201"))
         #expect(response201.description == "created")
-        #expect((response201.content.first?.schema?.schemaType as? OpenAPIValidatableObjectType)?.required.first  == "id")
-        #expect((response201.content.first?.schema?.schemaType as? OpenAPIValidatableObjectType)?.required.count  == 1)
+        #expect((response201.content.first?.schema?.schemaType as? OpenAPIObjectType)?.required.first  == "id")
+        #expect((response201.content.first?.schema?.schemaType as? OpenAPIObjectType)?.required.count  == 1)
         let defaultResponse = try #require(apiSpec[path: "/create"]?.operations[operationID : "create"]?.response(httpstatus: "default"))
         #expect(defaultResponse.description == "error")
-        let component = try #require(defaultResponse.content.first?.schema?.schemaType as? OpenAPIValidatableComponentType)
+        let component = try #require(defaultResponse.content.first?.schema?.schemaType as? OpenAPIValidatableType)
         #expect(component.ref == "#/components/schemas/Error")
     }
     
@@ -187,16 +187,16 @@ struct FixtureTests {
         let operations = try #require(apiSpec[path: "/board"]?.operations)
         #expect(operations.count == 1)
         #expect(operations.first?.response(httpstatus: "200")?.content.count == 1)
-        let objectType = try #require(operations.first?.response(httpstatus: "200")?.content.first?.schema?.schemaType as? OpenAPIValidatableObjectType)
+        let objectType = try #require(operations.first?.response(httpstatus: "200")?.content.first?.schema?.schemaType as? OpenAPIObjectType)
         #expect(objectType.properties.count == 2)
         let winnerProperty = try #require(objectType.properties[key: "winner"])
-        let stringPropertyInfo = try #require(winnerProperty.type as? OpenAPIValidatableStringType )
+        let stringPropertyInfo = try #require(winnerProperty.type as? OpenAPIStringType )
         #expect(stringPropertyInfo.allowedElements == ["X", "O", "."])
-        let boardProperty = try #require((objectType.properties[key: "board"]?.type as? OpenAPIValidatableArrayType))
+        let boardProperty = try #require((objectType.properties[key: "board"]?.type as? OpenAPIArrayType))
         #expect(boardProperty.maxItems == 3)
         #expect(boardProperty.minItems == 3)
-        let boardSubItems = try #require(boardProperty.items as? OpenAPIValidatableArrayType)
-        #expect(boardSubItems.items is OpenAPIValidatableStringType)
+        let boardSubItems = try #require(boardProperty.items as? OpenAPIArrayType)
+        #expect(boardSubItems.items is OpenAPIStringType)
         
     }
     
@@ -204,7 +204,7 @@ struct FixtureTests {
     func refscircular() async throws {
         let yaml = try fixtureString("07-refs-circular")
         let apiSpec = try OpenAPIObject.read(text: yaml)
-        let nodeObjectComponent = try #require(apiSpec.components?.schemas.first?.namedComponentType?.schemaType as? OpenAPIValidatableObjectType)
+        let nodeObjectComponent = try #require(apiSpec.components?.schemas.first?.namedComponentType?.schemaType as? OpenAPIObjectType)
         #expect(nodeObjectComponent.properties.count == 1)
         #expect(nodeObjectComponent.properties.first?.key == "next")
     }
@@ -213,7 +213,7 @@ struct FixtureTests {
     func oneofanyof() async throws {
         let yaml = try fixtureString("08-oneof")
         let apiSpec = try OpenAPIObject.read(text: yaml)
-        let oneOf = try #require(apiSpec[path: "/shape"]?.operations[operationID : "createShape"]?.requestBody?.contents[ key: "application/json"]?.schema?.schemaType as? OpenAPIValidatableOneOfType)
+        let oneOf = try #require(apiSpec[path: "/shape"]?.operations[operationID : "createShape"]?.requestBody?.contents[ key: "application/json"]?.schema?.schemaType as? OpenAPIOneOfType)
         #expect(oneOf.items?.count == 2)
         
     }
@@ -222,7 +222,7 @@ struct FixtureTests {
     func oneofallof() async throws {
         let yaml = try fixtureString("08a-allof")
         let apiSpec = try OpenAPIObject.read(text: yaml)
-        let allOf = try #require(apiSpec[path: "/shape"]?.operations[operationID : "createShape"]?.requestBody?.contents[ key: "application/json"]?.schema?.schemaType as? OpenAPIValidatableAllOfType)
+        let allOf = try #require(apiSpec[path: "/shape"]?.operations[operationID : "createShape"]?.requestBody?.contents[ key: "application/json"]?.schema?.schemaType as? OpenAPIAllOfType)
         #expect(allOf.items?.count == 2)
         
         
@@ -232,13 +232,13 @@ struct FixtureTests {
     func enumsdefaultsconstraints() async throws {
         let yaml = try fixtureString("09-enums-defaults-constraints")
         let apiSpec = try OpenAPIObject.read(text: yaml)
-        let object = try #require(apiSpec[path: "/order"]?.operations[operationID : "createOrder"]?.requestBody?.contents[ key: "application/json"]?.schema?.schemaType as? OpenAPIValidatableObjectType)
+        let object = try #require(apiSpec[path: "/order"]?.operations[operationID : "createOrder"]?.requestBody?.contents[ key: "application/json"]?.schema?.schemaType as? OpenAPIObjectType)
         #expect(object.required.contains( "status"))
         #expect(object.required.contains( "count"))
         #expect(object.properties.contains(name: "count"))
         #expect(object.properties.contains(name: "status"))
         #expect(object.properties.contains(name: "note"))
-        let noteProperty = try #require(object.properties[key: "note"]?.type as? OpenAPIValidatableStringType)
+        let noteProperty = try #require(object.properties[key: "note"]?.type as? OpenAPIStringType)
         #expect(noteProperty.pattern == "^[A-Z]+$")
     }
     @Test("10-servers-variables")
@@ -258,7 +258,7 @@ struct FixtureTests {
     func contenttypevendor() async throws {
         let yaml = try fixtureString("11-contenttype-vendor-json")
         let apiSpec = try OpenAPIObject.read(text: yaml)
-        #expect(apiSpec[path: "/fail"]?.operations[key: "get"]?.responses?[key: "400"]?.content[key: "application/problem+json"]?.schema?.schemaType is OpenAPIValidatableObjectType)
+        #expect(apiSpec[path: "/fail"]?.operations[key: "get"]?.responses?[key: "400"]?.content[key: "application/problem+json"]?.schema?.schemaType is OpenAPIObjectType)
     }
     @Test("20-webhook-minimal")
     func minimumwebhook() async throws {
@@ -287,10 +287,10 @@ struct FixtureTests {
         let yaml = try fixtureString("21-webhooks-multiple")
         let apiSpec = try OpenAPIObject.read(text: yaml)
         let orderCreatedEventComponent = try #require(apiSpec[schemacomponent: "Money"])
-        let object = try #require(orderCreatedEventComponent.schemaType as? OpenAPIValidatableObjectType)
+        let object = try #require(orderCreatedEventComponent.schemaType as? OpenAPIObjectType)
         #expect(object.properties.contains(name:"currency"))
         let currencyInfo = try #require(object.properties[key:"currency"])
-        let currencyTypeInfo = try #require(currencyInfo.type as? OpenAPIValidatableStringType)
+        let currencyTypeInfo = try #require(currencyInfo.type as? OpenAPIStringType)
         #expect(currencyTypeInfo.minLength == 3)
         #expect(currencyTypeInfo.maxLength == 3)
     }
@@ -299,7 +299,7 @@ struct FixtureTests {
         let yaml = try fixtureString("21-webhooks-multiple")
         let apiSpec = try OpenAPIObject.read(text: yaml)
         let orderCreatedEventComponent = try #require(apiSpec[schemacomponent: "OrderCreatedEvent"])
-        #expect(orderCreatedEventComponent.schemaType is OpenAPIValidatableAllOfType)
+        #expect(orderCreatedEventComponent.schemaType is OpenAPIAllOfType)
     }
     @Test("22-secured-webhooks")
     func securedwebhooks() async throws {
@@ -318,9 +318,9 @@ struct FixtureTests {
         let yaml = try fixtureString("23-oneOf-Webhooks")
         let apiSpec = try OpenAPIObject.read(text: yaml)
         let schemaComponent = try #require(apiSpec[schemacomponent: "EventEnvelope"])
-        let schemaComponentObject = try #require(schemaComponent.schemaType as? OpenAPIValidatableObjectType)
+        let schemaComponentObject = try #require(schemaComponent.schemaType as? OpenAPIObjectType)
         let payloadProperty = try #require(schemaComponentObject.properties[key: "payload"])
-        #expect(payloadProperty.type is OpenAPIValidatableOneOfType)
+        #expect(payloadProperty.type is OpenAPIOneOfType)
         let discriminator = try #require(payloadProperty.discriminator)
         #expect(discriminator.propertyName == "type")
         #expect(discriminator.mapping?.count == 2)

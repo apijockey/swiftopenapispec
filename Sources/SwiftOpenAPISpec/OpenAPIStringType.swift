@@ -1,12 +1,12 @@
 //
-//  OpenAPIIntegerType.swift
+//  OpenAPIStringType.swift
 //  SwiftOpenAPISpec
 //
-//  Created by Patric Dubois on 07.12.25.
+//  Created by Patric Dubois on 10.12.25.
 //
 
 
-public struct OpenAPIValidatableStringType :  OpenAPIValidatableSchemaType, ThrowingHashMapInitiable  {
+public struct OpenAPIStringType :  OpenAPIValidatableSchemaType, ThrowingHashMapInitiable  {
     
     
     public static let MAXLENGTH_KEY = "maxLength"

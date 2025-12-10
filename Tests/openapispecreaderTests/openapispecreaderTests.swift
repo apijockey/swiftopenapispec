@@ -153,7 +153,7 @@ final class openapispecreaderTests: XCTestCase {
         XCTAssertEqual(greetPathParameter.required, false)
         XCTAssertEqual(greetPathParameter.location, OpenAPIParameter.ParameterLocation.query)
         XCTAssertEqual(greetPathParameter.description, "The name used in the returned greeting.")
-        XCTAssertTrue(greetPathParameter.schema?.schemaType is OpenAPIValidatableStringType)
+        XCTAssertTrue(greetPathParameter.schema?.schemaType is OpenAPIStringType)
         XCTAssertNil(greetPathParameter.allowEmptyValue)
         XCTAssertNil(greetPathParameter.allowEmptyValue)
     }
@@ -195,20 +195,20 @@ final class openapispecreaderTests: XCTestCase {
             path.key == "Greeting"
         })
         XCTAssertNotNil(greetingComponent)
-        let greetingObject = try XCTUnwrap(greetingComponent.namedComponentType?.schemaType as? OpenAPIValidatableObjectType)
+        let greetingObject = try XCTUnwrap(greetingComponent.namedComponentType?.schemaType as? OpenAPIObjectType)
         XCTAssertEqual(greetingObject.properties.count, 1)
         let messageProperty = try XCTUnwrap(greetingObject.properties.first)
-        XCTAssertTrue(messageProperty.type is OpenAPIValidatableStringType)
+        XCTAssertTrue(messageProperty.type is OpenAPIStringType)
         XCTAssertEqual(greetingObject.required, ["message"])
         let generalErrorComponent = try XCTUnwrap(apiSpec[schemacomponent: "GeneralError"])
         XCTAssertNotNil(generalErrorComponent)
-        let errorObject = try XCTUnwrap(generalErrorComponent.schemaType as? OpenAPIValidatableObjectType)
+        let errorObject = try XCTUnwrap(generalErrorComponent.schemaType as? OpenAPIObjectType)
         XCTAssertEqual(errorObject.properties.count, 2)
         let errorMessageCodeProperty =  errorObject.properties[key: "code"]
         //falsch die Property ist schon nil
-        XCTAssertTrue(errorMessageCodeProperty?.type is OpenAPIValidatableIntegerType)
+        XCTAssertTrue(errorMessageCodeProperty?.type is OpenAPIIntegerType)
         let errorMessageMessageProperty =  errorObject.properties[key: "message"]
-        XCTAssertTrue(errorMessageMessageProperty?.type is OpenAPIValidatableStringType)
+        XCTAssertTrue(errorMessageMessageProperty?.type is OpenAPIStringType)
         XCTAssertEqual(errorObject.required.count, 0)
     }
     func testParameterComponents() throws {
@@ -230,7 +230,7 @@ final class openapispecreaderTests: XCTestCase {
         XCTAssertEqual(skipParamComponent.namedComponentType?.location, OpenAPIParameter.ParameterLocation.query)
         XCTAssertEqual(skipParamComponent.namedComponentType?.description, "number of items to skip")
         XCTAssertEqual(skipParamComponent.namedComponentType?.required, true)
-        XCTAssertTrue(skipParamComponent.namedComponentType?.schema?.schemaType is  OpenAPIValidatableIntegerType)
+        XCTAssertTrue(skipParamComponent.namedComponentType?.schema?.schemaType is  OpenAPIIntegerType)
         XCTAssertEqual(skipParamComponent.namedComponentType?.schema?.format, OpenAPISchema.DataType.int32)
     }
     func testResponsesComponents() throws {

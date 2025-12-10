@@ -6,7 +6,7 @@
 //
 
 
-public struct OpenAPIValidatableArrayType : OpenAPIValidatableSchemaType {
+public struct OpenAPIArrayType : OpenAPIValidatableSchemaType {
     public static let TYPE_KEY = "array"
     public static let ARRAY_TYPE_KEY = "type"
     public static let MAX_ITEMS_KEY = "maxItems"
@@ -25,7 +25,7 @@ public struct OpenAPIValidatableArrayType : OpenAPIValidatableSchemaType {
         self.uniqueItems = map[Self.UNIQE_ITEMS_KEY] as? Bool
         if let items = map[Self.ITEMS_KEY] as? [String : Any],
            let type = items[Self.ARRAY_TYPE_KEY] as? String,
-            let validatableType = OpenAPIDefaultSchemaType.validatableType(type) {
+            let validatableType = OpenAPISchemaType.validatableType(type) {
                 self.items = try validatableType.init(items)
            
         }

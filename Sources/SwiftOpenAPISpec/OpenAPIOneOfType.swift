@@ -6,7 +6,7 @@
 //
 
 
-public struct OpenAPIValidatableOneOfType : OpenAPIValidatableSchemaType {
+public struct OpenAPIOneOfType : OpenAPIValidatableSchemaType {
     public static let TYPE_KEY = "oneOf"
     public init(_ map: [String : Any]) throws {
         self.type = map[Self.TYPE_KEY] as? String

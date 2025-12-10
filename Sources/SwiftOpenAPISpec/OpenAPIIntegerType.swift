@@ -6,7 +6,7 @@
 //
 
 
-public struct OpenAPIValidatableIntegerType :  OpenAPIValidatableSchemaType, ThrowingHashMapInitiable  {
+public struct OpenAPIIntegerType :  OpenAPIValidatableSchemaType, ThrowingHashMapInitiable  {
     public func validate() throws {
         
     }
