@@ -17,21 +17,21 @@ public struct OpenAPIComponent : KeyedElement, ThrowingHashMapInitiable {
     public  enum Errors : LocalizedError {
         case unsupportedComponentlist, unrecognizedComponent
     }
-    public init(_ map: [AnyHashable : Any]) throws {
-        if let schemasMap = map[Self.SCHEMAS_KEY] as? [AnyHashable : Any]{
-            schemas = try MapListMap<NamedComponent<OpenAPISchema>>.map(schemasMap)
+    public init(_ map: [String : Any]) throws {
+        if let schemasMap = map[Self.SCHEMAS_KEY] as? [String : Any]{
+            schemas = try KeyedElementList<NamedComponent<OpenAPISchema>>.map(schemasMap)
         }
-        if let paramsMap = map[Self.PARAMETERS_KEY] as? [AnyHashable : Any]{
-            parameters = try MapListMap<NamedComponent<OpenAPIParameter>>.map(paramsMap)
+        if let paramsMap = map[Self.PARAMETERS_KEY] as? [String : Any]{
+            parameters = try KeyedElementList<NamedComponent<OpenAPIParameter>>.map(paramsMap)
         }
-        if let responsesMap = map[Self.RESPONSES_KEY] as? [AnyHashable : Any]{
-            responses = try MapListMap<OpenAPIResponse>.map(responsesMap)
+        if let responsesMap = map[Self.RESPONSES_KEY] as? [String : Any]{
+            responses = try KeyedElementList<OpenAPIResponse>.map(responsesMap)
         }
-        if let securitySchemaMap = map[Self.SECURITY_SCHEMES_KEY] as? [AnyHashable : Any]{
-            self.securitySchemas = try MapListMap<OpenAPISecurityScheme>.map(securitySchemaMap)
+        if let securitySchemaMap = map[Self.SECURITY_SCHEMES_KEY] as? [String : Any]{
+            self.securitySchemas = try KeyedElementList<OpenAPISecurityScheme>.map(securitySchemaMap)
         }
-        if let headerMap = map[Self.HEADERS_KEY] as? [AnyHashable : Any]{
-            self.headers = try MapListMap<OpenAPIHeader>.map(headerMap)
+        if let headerMap = map[Self.HEADERS_KEY] as? [String: Any]{
+            self.headers = try KeyedElementList<OpenAPIHeader>.map(headerMap)
         }
     }
     public func resolveSchemaComponent(components : [String]) throws ->  OpenAPISchema?{

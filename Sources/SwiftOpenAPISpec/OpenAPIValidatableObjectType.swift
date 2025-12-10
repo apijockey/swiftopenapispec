@@ -11,10 +11,10 @@ public struct OpenAPIValidatableObjectType : OpenAPIValidatableSchemaType {
     public static let PROPERTIES_KEY = "properties"
     public static let UNEVALUATEDPROPERTIES_KEY = "unevaluatedProperties"
     public static let REQUIRED_KEY = "required"
-    public init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [String : Any]) throws {
         self.type = map[Self.TYPE_KEY] as? String
-        if let propertiesMap = map[Self.PROPERTIES_KEY] as? [AnyHashable:Any]{
-            self.properties = try MapListMap.map(propertiesMap )
+        if let propertiesMap = map[Self.PROPERTIES_KEY] as? StringDictionary{
+            self.properties = try KeyedElementList.map(propertiesMap )
         }
         self.required = map[Self.REQUIRED_KEY] as? [String] ?? []
     }

@@ -11,7 +11,7 @@ public struct OpenAPIValidatableComponentType :  OpenAPIValidatableSchemaType, T
     
   
     public static let REF_KEY = "$ref"
-    public init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [String : Any]) throws {
         self.ref = map[Self.REF_KEY] as? String
         
         

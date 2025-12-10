@@ -65,7 +65,7 @@ public struct OpenAPIObject  {
      */
     
     public static func read(text : String) throws -> OpenAPIObject{
-        guard let loadedDictionary = try Yams.load(yaml: text) as? [AnyHashable:Any] else {
+        guard let loadedDictionary = try Yams.load(yaml: text) as? StringDictionary else {
             throw OpenAPIObject.Errors.invalidYaml("text cannot be interpreted as a Key/Value List")
         }
         //Mandatory
@@ -77,18 +77,18 @@ public struct OpenAPIObject  {
         spec.selfUrl = loadedDictionary.readIfPresent(OpenAPIObject.SELF_URL_KEY, String.self)
         spec.tags = try loadedDictionary.tryListIfPresent(OpenAPIObject.TAGS_KEY, root: "root", OpenAPITag.self)
         spec.externalDocumentation = try loadedDictionary.tryMapIfPresent(OpenAPIObject.EXTERNAL_DOCS_KEY,root: "root", OpenAPIExternalDocumentation.self)
-        spec.jsonSchemaDialect = try loadedDictionary.tryReadIfPresent(OpenAPIObject.JSON_SCHEMA_DIALECT_KEY, String.self, root: "root")
+        spec.jsonSchemaDialect = loadedDictionary.tryReadIfPresent(OpenAPIObject.JSON_SCHEMA_DIALECT_KEY, String.self, root: "root")
         let servers =  try loadedDictionary.tryListIfPresent(OpenAPIObject.SERVERS_KEY, root: "root", OpenAPIServer.self)
         if servers.count > 0 {
             spec.servers = servers
         }
-        if let map = loadedDictionary[OpenAPIObject.PATHS_KEY]  as? [AnyHashable:Any],
-           let paths = try? MapListMap<OpenAPIPath>.map(map),
+        if let map = loadedDictionary[OpenAPIObject.PATHS_KEY]  as? StringDictionary,
+           let paths = try? KeyedElementList<OpenAPIPath>.map(map),
                 paths.count > 0 {
                 spec.paths = paths
         }
-        if let map = loadedDictionary[OpenAPIObject.WEBHOOKS_KEY]  as? [AnyHashable:Any],
-           let webhooks = try? MapListMap<OpenAPIPathItem>.map(map),
+        if let map = loadedDictionary[OpenAPIObject.WEBHOOKS_KEY]  as? StringDictionary,
+           let webhooks = try? KeyedElementList<OpenAPIPathItem>.map(map),
                 webhooks.count > 0 {
             spec.webhooks  = webhooks
         }

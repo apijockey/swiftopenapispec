@@ -34,7 +34,7 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable{
     public static let EXAMPLE_KEY = "example"
     public static let EXAMPLES_KEY = "examples"
     public static let CONTENT_KEY = "content"
-    public init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [String: Any]) throws {
         
         guard let name = map[Self.NAME_KEY] as? String  else {
             throw OpenAPIObject.Errors.invalidSpecification(OpenAPIOperation.PARAMETERS_KEY, Self.NAME_KEY)
@@ -44,7 +44,7 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable{
         }
         //required
         self.content = map.readIfPresent(Self.CONTENT_KEY, OpenAPIMediaType.self)
-        self.schema = try map.tryMapIfPresent(Self.SCHEMA_KEY, OpenAPISchema.self)
+        self.schema = try map.MapIfPresent(Self.SCHEMA_KEY, OpenAPISchema.self)
         if self.content == nil && self.schema == nil {
             self
         }

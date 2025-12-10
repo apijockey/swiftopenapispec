@@ -16,14 +16,14 @@ public struct OpenAPIValidatableArrayType : OpenAPIValidatableSchemaType {
     public static let MAX_CONTAINS_KEY = "maxContains"
     public static let MIN_CONTAINS_KEY = "minContains"
     
-    public init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [String : Any]) throws {
         self.type = map[Self.TYPE_KEY] as? String
         self.minItems = map[Self.MIN_ITEMS_KEY] as? Int
         self.maxItems = map[Self.MAX_ITEMS_KEY] as? Int
         self.maxContains = map[Self.MAX_CONTAINS_KEY] as? Int
         self.minContains = map[Self.MIN_CONTAINS_KEY] as? Int
         self.uniqueItems = map[Self.UNIQE_ITEMS_KEY] as? Bool
-        if let items = map[Self.ITEMS_KEY] as? [AnyHashable : Any],
+        if let items = map[Self.ITEMS_KEY] as? [String : Any],
            let type = items[Self.ARRAY_TYPE_KEY] as? String,
             let validatableType = OpenAPIDefaultSchemaType.validatableType(type) {
                 self.items = try validatableType.init(items)

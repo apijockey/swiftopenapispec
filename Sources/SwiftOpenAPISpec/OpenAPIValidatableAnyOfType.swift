@@ -8,7 +8,7 @@
 
 public struct OpenAPIValidatableAnyOfType : OpenAPIValidatableSchemaType {
     public static let TYPE_KEY = "anyOf"
-    public init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [String : Any]) throws {
         self.type = map[Self.TYPE_KEY] as? String
         guard let list = (map["anyOf"] as? [Any]) else {
             return

@@ -27,12 +27,12 @@ public struct OpenAPIPathItem: KeyedElement {
     
     /// inits an instance of ``OpenAPIPathItem``
     /// - Parameter map: Swift dictionary with a Path key and  value elements representing HTTP methods like **GET**, **POST** and **PUT**
-    public init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [String: Any]) throws {
         // one resource may foresee several httpOperations
         self.summary = map[Self.SUMMARY_KEY] as? String
         self.description = map[Self.DESCRIPTION_KEY] as? String
         for (key, httpOperation) in map {
-            if let httpOperationMap = httpOperation as? [AnyHashable: Any] {
+            if let httpOperationMap = httpOperation as? [String: Any] {
                 var operation = try OpenAPIOperation(httpOperationMap)
                 if let operationId = key as? String {
                     // In diesem Kontext ist "key" die HTTP-Methode (get, post, ...)

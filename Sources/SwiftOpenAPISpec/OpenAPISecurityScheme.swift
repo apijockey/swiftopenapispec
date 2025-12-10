@@ -34,7 +34,7 @@ public struct OpenAPISecurityScheme : KeyedElement {
             }
         }
     }
-    public init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [String : Any]) throws {
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
         guard let securityRawType = map.readIfPresent(Self.TYPE_KEY, String.self),
         let securityType =  SecurityType(rawValue: securityRawType) else {
@@ -53,7 +53,7 @@ public struct OpenAPISecurityScheme : KeyedElement {
             self.httpScheme = map.readIfPresent(Self.SCHEME_KEY, String.self)
             self.httpBearerFormat = map.readIfPresent(Self.BEARER_FORMAT_KEY, String.self)
         case .oauth2:
-            if let flowsMap = map.readIfPresent(Self.FLOWS_KEY, [AnyHashable:Any].self) {
+            if let flowsMap = map.readIfPresent(Self.FLOWS_KEY, StringDictionary.self) {
                 self.flows = try OpenAPIOAuthFlows(flowsMap)
             }
         case .openIdConnect:

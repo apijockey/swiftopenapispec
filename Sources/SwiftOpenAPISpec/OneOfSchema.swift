@@ -9,15 +9,16 @@ import Foundation
 
 
 public struct OneOfSchemas : ThrowingHashMapInitiable {
-    public init(_ map: [AnyHashable : Any]) throws {
+    
+    public init(_ map: [String : Any]) throws {
         let typelist  = map["oneOf"] as? [Any] ?? []
         for element in typelist {
-            if let elementMap = element as? [AnyHashable:Any],
+            if let elementMap = element as? StringDictionary,
                elementMap["$ref"] as? String != nil,
                 let reference = try? OpenAPISchemaReference(elementMap) {
                 schemaRefs.append(reference)
             }
-            else if let elementMap = element as? [AnyHashable:Any],
+            else if let elementMap = element as? StringDictionary,
                     let schema = try? OpenAPISchema(elementMap){
                             schemas.append(schema)
             }

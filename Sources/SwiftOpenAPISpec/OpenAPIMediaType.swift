@@ -12,9 +12,9 @@ public struct OpenAPIMediaType :  KeyedElement {
     public static let EXAMPLE_KEY = "example"
     public static let EXAMPLES_KEY = "examples"
     public var key : String?
-    public init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [String : Any]) throws {
         if map[Self.SCHEMA_KEY] != nil {
-            let schemaMap = try map.tryRead(Self.SCHEMA_KEY, [AnyHashable:Any].self, root: "content")
+            let schemaMap = try map.tryRead(Self.SCHEMA_KEY, StringDictionary.self, root: "content")
             self.schema =  try OpenAPISchema(schemaMap)
         self.schemaRef =  try OpenAPISchemaReference(schemaMap)
         self.oneOfSchemas = try OneOfSchemas(schemaMap)

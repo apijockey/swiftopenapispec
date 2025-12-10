@@ -15,7 +15,7 @@ import Foundation
 //https://spec.openapis.org/oas/3.1/dialect/base
 //
 public struct NamedComponent<T> :  KeyedElement where T : ThrowingHashMapInitiable {
-    public init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [String : Any]) throws {
         namedComponentType = try T(map)
     }
     public var key : String? = nil

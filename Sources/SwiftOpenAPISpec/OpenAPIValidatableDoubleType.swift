@@ -19,7 +19,7 @@ public struct OpenAPIValidatableIntegerType :  OpenAPIValidatableSchemaType, Thr
     public static let EXCLUSIVEMINIMUM_KEY = "exclusiveMinimum"
     public static let EXCLUSIVEMAXIMUM_KEY = "exclusiveMaximum"
    
-    public init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [String : Any]) throws {
         self.type = map[Self.TYPE_KEY] as? String
         self.defaultValue = map[Self.DEFAULT_KEY] as? Int
         self.multipleOf =  map[Self.MULTIPLEOF_KEY] as? Int

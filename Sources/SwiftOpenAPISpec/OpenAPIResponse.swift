@@ -13,13 +13,13 @@ public struct OpenAPIResponse : KeyedElement{
     public static let DESCRIPTION_KEY = "description"
     public static let CONTENT_KEY = "content"
     public static let LINKS_KEY = "links"
-    public init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [String : Any]) throws {
         self.description = try map.tryRead(Self.DESCRIPTION_KEY, String.self, root:  "responses")
-        if let contentMap = map.readIfPresent(Self.CONTENT_KEY, [AnyHashable:Any] .self) {
-            self.content = try MapListMap<OpenAPIMediaType>.map(contentMap)
+        if let contentMap = map.readIfPresent(Self.CONTENT_KEY, StringDictionary .self) {
+            self.content = try KeyedElementList<OpenAPIMediaType>.map(contentMap)
         }
-        if let linkMap = map.readIfPresent(Self.LINKS_KEY, [AnyHashable:Any] .self) {
-            self.links = try MapListMap<OpenAPILink>.map(linkMap)
+        if let linkMap = map.readIfPresent(Self.LINKS_KEY, StringDictionary .self) {
+            self.links = try KeyedElementList<OpenAPILink>.map(linkMap)
         }
     }
     public var description : String

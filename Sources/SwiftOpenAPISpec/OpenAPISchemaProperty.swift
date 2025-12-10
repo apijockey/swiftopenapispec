@@ -13,7 +13,7 @@ public struct OpenAPISchemaProperty: KeyedElement {
     
     static let TYPE_KEY = "type"
     
-    public init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [String : Any]) throws {
         if let type = map[Self.TYPE_KEY] as? String,
             let validatableType = OpenAPIDefaultSchemaType.validatableType(type) {
             self.type = try validatableType.init(map)
@@ -31,10 +31,10 @@ public struct OpenAPISchemaProperty: KeyedElement {
         else if map[OpenAPISchema.ALLOF_KEY] is [Any] {
             self.type = try OpenAPIValidatableAllOfType(map)
         }
-        if let discriminatorMap = map[OpenAPISchema.DISCRIMINATOR_KEY] as? [AnyHashable : Any] {
+        if let discriminatorMap = map[OpenAPISchema.DISCRIMINATOR_KEY] as? [String : Any] {
             self.discriminator = try OpenAPIValidatableDiscriminator(discriminatorMap)
         }
-    print(self)
+   
     }
     public var userInfos =  [OpenAPIObject.UserInfo]()
     public  var key : String? = nil
