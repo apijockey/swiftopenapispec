@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct OpenAPIOperation : KeyedElement{
+public struct OpenAPIOperation : KeyedElement, ThrowingHashMapInitiable{
     public var key: String?
     public init(_ map: [String : Any]) throws {
         self.tags = map[Self.TAGS_KEY] as? [String] ?? []

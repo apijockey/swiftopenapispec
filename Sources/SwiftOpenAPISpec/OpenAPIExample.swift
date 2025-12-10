@@ -7,7 +7,7 @@
 
 import Foundation
 import Foundation
-public struct OpenAPIExample : ThrowingHashMapInitiable{
+public struct OpenAPIExample : KeyedElement,ThrowingHashMapInitiable{
     public static let SUMMARY_KEY = "summary"
     public static let DESCRIPTION_KEY = "description"
     public static let VALUE_KEY = "value"
@@ -20,6 +20,7 @@ public struct OpenAPIExample : ThrowingHashMapInitiable{
         self.externalValue = map.readIfPresent(Self.EXTERNAL_VALUE_KEY, String.self)
         self.ref = try map.mapIfPresent(Self.REF_KEY, OpenAPISchemaReference.self)
     }
+    public var key : String?
     public var summary : String? = nil
     public var description : String? = nil
     public var value : String? = nil
