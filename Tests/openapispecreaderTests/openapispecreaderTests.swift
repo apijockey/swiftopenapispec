@@ -462,9 +462,7 @@ final class openapispecreaderTests: XCTestCase {
             mediatype.key == "application/json"
         }))
         XCTAssertEqual(mediatype.examples.count,1)
-        let refExample = try XCTUnwrap(mediatype.examples.first { example in
-            example.key == "confirmation-success"
-        })
+        let refExample = try XCTUnwrap(mediatype.examples[key:"confirmation-success"])
         XCTAssertEqual(refExample.ref,"#/components/examples/confirmation-success")
     }
     func testLinks() throws {

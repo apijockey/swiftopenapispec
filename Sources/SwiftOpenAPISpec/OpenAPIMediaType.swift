@@ -19,7 +19,7 @@ public struct OpenAPIMediaType :  KeyedElement {
         self.schemaRef =  try OpenAPISchemaReference(schemaMap)
         self.oneOfSchemas = try OneOfSchemas(schemaMap)
         self.examples = try map.mapListIfPresent(Self.EXAMPLES_KEY)
-            
+        print(examples)
         }
     }
     public var schema : OpenAPISchema? = nil
