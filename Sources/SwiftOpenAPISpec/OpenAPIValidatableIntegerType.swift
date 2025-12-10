@@ -34,5 +34,6 @@ public struct OpenAPIValidatableDoubleType :  OpenAPIValidatableSchemaType, Thro
     public let exclusiveMaximum :Double?
     public let minimum : Double?
     public let exclusiveMinimum : Double?
+    public var userInfos =  [OpenAPISpec.UserInfo]()
     
 }

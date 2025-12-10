@@ -7,6 +7,12 @@
 
 import Foundation
 
+
+/**
+ /**
+  A unique parameter is defined by a combination of a name and location.
+  */
+ */
 public struct OpenAPIParameter :  ThrowingHashMapInitiable{
     public enum ParameterLocation : String, Codable, CaseIterable {
         case cookie, query, queryString, header ,path
@@ -36,16 +42,22 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable{
         guard let location = map[Self.IN_KEY] as? String  else {
             throw OpenAPISpec.Errors.invalidSpecification(OpenAPIOperation.PARAMETERS_KEY, Self.IN_KEY)
         }
+        //required
+        self.content = map.readIfPresent(Self.CONTENT_KEY, OpenAPIMediaType.self)
+        self.schema = try map.tryMapIfPresent(Self.SCHEMA_KEY, OpenAPISchema.self)
+        if self.content == nil && self.schema == nil {
+            self
+        }
         let required = map[Self.REQUIRED_KEY] as? Bool
         self.required = required ?? false
-            
-
+        
+        
         self.location = ParameterLocation(rawValue: location)
         self.name = name
         self.description =  map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
         self.deprecated =  map.readIfPresent(Self.DEPRECATED_KEY, Bool.self)
         self.allowEmptyValue = map.readIfPresent(Self.ALLOW_EMPTYVALUE_KEY, Bool.self)
-        self.schema = try map.tryMapIfPresent(Self.SCHEMA_KEY, OpenAPISchema.self)
+        
         if let style = map.readIfPresent(Self.STYLE_KEY, String.self) {
             self.style = ParameterStyle(rawValue: style)
         }
@@ -53,7 +65,7 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable{
         self.allowReserved = map.readIfPresent(Self.ALLOW_RESERVED_KEY, Bool.self)
         self.example = map.readIfPresent(Self.EXAMPLE_KEY, String.self)
         self.examples = try map.tryOptionalList(Self.EXAMPLES_KEY, root: "parameters", OpenAPIExample.self)
-        self.content = map.readIfPresent(Self.CONTENT_KEY, OpenAPIMediaType.self)
+        
         self.format = map.readIfPresent(Self.FORMAT_KEY, String.self)
        
     }
@@ -72,7 +84,7 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable{
     public var examples : [OpenAPIExample]? = []
     public var content : OpenAPIMediaType? = nil
     public var format : String?
-   
+    public var userInfos =  [OpenAPISpec.UserInfo]()
    
     //TODO: Examples Object
    

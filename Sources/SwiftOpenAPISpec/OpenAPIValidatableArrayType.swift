@@ -43,4 +43,5 @@ public struct OpenAPIValidatableArrayType : OpenAPIValidatableSchemaType {
     public var maxContains : Int?
     public var minContains : Int?
     public var items: OpenAPIValidatableSchemaType?
+    public var userInfos =  [OpenAPISpec.UserInfo]()
 }

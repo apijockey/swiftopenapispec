@@ -51,6 +51,7 @@ public struct OpenAPIHeader :  KeyedElement{
     public var example : Any? = nil
     public var examples : [OpenAPIExample]? = []
     public var content : OpenAPIMediaType? = nil
+    public var userInfos =  [OpenAPISpec.UserInfo]()
    
     //TODO: Examples Object
    

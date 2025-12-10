@@ -34,5 +34,6 @@ public struct OpenAPIValidatableStringType :  OpenAPIValidatableSchemaType, Thro
     public let allowedElements : Set<String>?
     public let maxLength: Int?
     public let minLength: Int?
-    public let pattern: String? 
+    public let pattern: String?
+    public var userInfos =  [OpenAPISpec.UserInfo]()
 }

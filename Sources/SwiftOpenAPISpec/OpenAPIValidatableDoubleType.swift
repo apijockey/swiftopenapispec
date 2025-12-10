@@ -34,5 +34,6 @@ public struct OpenAPIValidatableIntegerType :  OpenAPIValidatableSchemaType, Thr
     public let exclusiveMaximum : Int?
     public let minimum : Int?
     public let exclusiveMinimum : Int?
+    public var userInfos =  [OpenAPISpec.UserInfo]()
     
 }

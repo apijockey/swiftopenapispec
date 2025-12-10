@@ -29,4 +29,5 @@ public struct OpenAPIValidatableObjectType : OpenAPIValidatableSchemaType {
     public var dependentRequired : String?
     public var unevaluatedProperties : Bool = false
     public var required : [String] = []
+    public var userInfos =  [OpenAPISpec.UserInfo]()
 }

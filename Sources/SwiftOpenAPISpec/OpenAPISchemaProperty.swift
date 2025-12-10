@@ -7,7 +7,10 @@
 
 import Foundation
 
+
 public struct OpenAPISchemaProperty: KeyedElement {
+    
+    
     static let TYPE_KEY = "type"
     
     public init(_ map: [AnyHashable : Any]) throws {
@@ -28,11 +31,15 @@ public struct OpenAPISchemaProperty: KeyedElement {
         else if map[OpenAPISchema.ALLOF_KEY] is [Any] {
             self.type = try OpenAPIValidatableAllOfType(map)
         }
+        if let discriminatorMap = map[OpenAPISchema.DISCRIMINATOR_KEY] as? [AnyHashable : Any] {
+            self.discriminator = try OpenAPIValidatableDiscriminator(discriminatorMap)
+        }
     
     }
-    
+    public var userInfos =  [OpenAPISpec.UserInfo]()
     public  var key : String? = nil
     public var type : OpenAPIValidatableSchemaType?
+    public var discriminator : OpenAPIValidatableDiscriminator?
     
 }
 

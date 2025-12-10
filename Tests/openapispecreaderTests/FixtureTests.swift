@@ -285,7 +285,7 @@ struct FixtureTests {
     func nestedcomponents() async throws {
         let yaml = try fixtureString("21-webhooks-multiple")
         let apiSpec = try OpenAPISpec.read(text: yaml)
-        let orderCreatedEventComponent = try #require(apiSpec[schema: "Money"])
+        let orderCreatedEventComponent = try #require(apiSpec[schemacomponent: "Money"])
         let object = try #require(orderCreatedEventComponent.schemaType as? OpenAPIValidatableObjectType)
         #expect(object.properties.contains("currency"))
         let currencyInfo = try #require(object.properties["currency"])
@@ -297,7 +297,35 @@ struct FixtureTests {
     func nestedallofcomponent() async throws {
         let yaml = try fixtureString("21-webhooks-multiple")
         let apiSpec = try OpenAPISpec.read(text: yaml)
-        let orderCreatedEventComponent = try #require(apiSpec[schema: "OrderCreatedEvent"])
+        let orderCreatedEventComponent = try #require(apiSpec[schemacomponent: "OrderCreatedEvent"])
         let object = try #require(orderCreatedEventComponent.schemaType as? OpenAPIValidatableAllOfType)
+    }
+    @Test("22-secured-webhooks")
+    func securedwebhooks() async throws {
+        let yaml = try fixtureString("22-secured-webhooks")
+        let apiSpec = try OpenAPISpec.read(text: yaml)
+        let webhookSignatureComponent = try #require(apiSpec[securityschemacomponent:  "webhookSignature"])
+        #expect(webhookSignatureComponent.securityType == .apiKey)
+        #expect(webhookSignatureComponent.location == .header)
+        #expect(webhookSignatureComponent.location == .header)
+        #expect(webhookSignatureComponent.name == "X-Signature")
+        #expect(webhookSignatureComponent.description == "Shared-secret HMAC signature.")
+    }
+    
+    @Test("23-oneOf-WebhookComponent")
+    func oenOfsecurityWebhooks() async throws {
+        let yaml = try fixtureString("23-oneOf-Webhooks")
+        let apiSpec = try OpenAPISpec.read(text: yaml)
+        let schemaComponent = try #require(apiSpec[schemacomponent: "EventEnvelope"])
+        let schemaComponentObject = try #require(schemaComponent.schemaType as? OpenAPIValidatableObjectType)
+        let payloadProperty = try #require(schemaComponentObject.properties["payload"])
+        let oneOf = try #require(payloadProperty.type as? OpenAPIValidatableOneOfType)
+        let discriminator = try #require(payloadProperty.discriminator)
+        #expect(discriminator.propertyName == "type")
+        #expect(discriminator.mapping?.count == 2)
+        #expect(discriminator.mapping?["user.created"] == "#/components/schemas/UserCreated")
+        #expect(discriminator.mapping?["user.deleted"] == "#/components/schemas/UserDeleted")
+        
+        
     }
 }

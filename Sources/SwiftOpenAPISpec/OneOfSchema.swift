@@ -26,4 +26,5 @@ public struct OneOfSchemas : ThrowingHashMapInitiable {
     
     public var schemas : [OpenAPISchema] = []
      public var schemaRefs : [OpenAPISchemaReference] = []
+    public var userInfos =  [OpenAPISpec.UserInfo]()
 }

@@ -25,6 +25,7 @@ public struct OpenAPISchema :  ThrowingHashMapInitiable {
     }
     public static let TYPE_KEY = "type"
     public static let ALLOF_KEY = "allOf"
+    public static let DISCRIMINATOR_KEY = "discriminator"
     public static let ONEOF_KEY = "oneOf"
     public static let ANYOF_KEY = "anyOf"
     public static let JSONREF_KEY = "$ref"
@@ -57,6 +58,7 @@ public struct OpenAPISchema :  ThrowingHashMapInitiable {
     public var schemaType : OpenAPIValidatableSchemaType?
     //https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-01  ("null", "boolean", "object", "array", "number", or "string"), or "integer"
     public var format : DataType? = nil
+    public var userInfos =  [OpenAPISpec.UserInfo]()
    
     
 }

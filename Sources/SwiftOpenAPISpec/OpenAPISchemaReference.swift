@@ -13,4 +13,5 @@ public struct OpenAPISchemaReference  : ThrowingHashMapInitiable{
         self.ref = map[Self.REF_KEY] as? String
     }
     public var ref : String? = nil
+    public var userInfos =  [OpenAPISpec.UserInfo]()
 }
