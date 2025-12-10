@@ -37,10 +37,10 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable{
     public init(_ map: [AnyHashable : Any]) throws {
         
         guard let name = map[Self.NAME_KEY] as? String  else {
-            throw OpenAPISpec.Errors.invalidSpecification(OpenAPIOperation.PARAMETERS_KEY, Self.NAME_KEY)
+            throw OpenAPIObject.Errors.invalidSpecification(OpenAPIOperation.PARAMETERS_KEY, Self.NAME_KEY)
         }
         guard let location = map[Self.IN_KEY] as? String  else {
-            throw OpenAPISpec.Errors.invalidSpecification(OpenAPIOperation.PARAMETERS_KEY, Self.IN_KEY)
+            throw OpenAPIObject.Errors.invalidSpecification(OpenAPIOperation.PARAMETERS_KEY, Self.IN_KEY)
         }
         //required
         self.content = map.readIfPresent(Self.CONTENT_KEY, OpenAPIMediaType.self)
@@ -84,7 +84,7 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable{
     public var examples : [OpenAPIExample]? = []
     public var content : OpenAPIMediaType? = nil
     public var format : String?
-    public var userInfos =  [OpenAPISpec.UserInfo]()
+    public var userInfos =  [OpenAPIObject.UserInfo]()
    
     //TODO: Examples Object
    

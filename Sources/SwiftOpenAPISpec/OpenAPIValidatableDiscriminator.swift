@@ -6,7 +6,7 @@
 //
 
 public struct OpenAPIValidatableDiscriminator :  ThrowingHashMapInitiable {
-    public var userInfos = [OpenAPISpec.UserInfo]()
+    public var userInfos = [OpenAPIObject.UserInfo]()
     
     public enum DataType : String, CaseIterable {
         case integer, int32, int64, number, string
@@ -22,7 +22,7 @@ public struct OpenAPIValidatableDiscriminator :  ThrowingHashMapInitiable {
             self.propertyName = propertyName
         }
         else {
-            userInfos.append(OpenAPISpec.UserInfo(message: "propertyname in descriminator is missing, but required", infoType: .error))
+            userInfos.append(OpenAPIObject.UserInfo(message: "propertyname in descriminator is missing, but required", infoType: .error))
         }
         if let mapping = map[Self.MAPPING_KEY] as? [String: String] {
             self.mapping = mapping

@@ -36,7 +36,7 @@ public struct OpenAPIServer : ThrowingHashMapInitiable {
     public var url : String = "/"
     public var description : String? = nil
     public var variables : [OpenAPIVariable] = []
-    public var userInfos =  [OpenAPISpec.UserInfo]()
+    public var userInfos =  [OpenAPIObject.UserInfo]()
     
     
 }

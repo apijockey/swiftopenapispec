@@ -13,7 +13,7 @@ final class openapispecreaderTests: XCTestCase {
             XCTFail("no valid yaml")
             return
         }
-        let apiSpec = try OpenAPISpec.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string)
         XCTAssertEqual(apiSpec.version, "3.1.0")
         XCTAssertEqual(apiSpec.info.title, "GreetingService")
         XCTAssertEqual(apiSpec.info.version, "1.0.0")
@@ -36,7 +36,7 @@ final class openapispecreaderTests: XCTestCase {
             XCTFail("no valid yaml")
             return
         }
-        let apiSpec = try OpenAPISpec.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string)
         XCTAssertEqual(apiSpec.servers.count, 3)
         XCTAssertEqual(apiSpec.servers[0].url, "https://example.com/api")
         XCTAssertEqual(apiSpec.servers[0].description, "Example service deployment.")
@@ -75,7 +75,7 @@ final class openapispecreaderTests: XCTestCase {
             XCTFail("no valid yaml")
             return
         }
-        let apiSpec = try OpenAPISpec.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string)
         XCTAssertEqual(apiSpec.paths.count, 4)
         let getGreetPath = try XCTUnwrap(apiSpec.paths.first { path in
             path.key == "/greet"
@@ -110,7 +110,7 @@ final class openapispecreaderTests: XCTestCase {
             XCTFail("no valid yaml")
             return
         }
-        let apiSpec = try OpenAPISpec.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string)
         let getClipPath = try XCTUnwrap(apiSpec.paths.first { path in
             path.key == "/clip"
         })
@@ -132,7 +132,7 @@ final class openapispecreaderTests: XCTestCase {
             XCTFail("no valid yaml")
             return
         }
-        let apiSpec = try OpenAPISpec.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string)
         let getGreetPath = try XCTUnwrap(apiSpec.paths.first { path in
             path.key == "/greet"
         })
@@ -167,7 +167,7 @@ final class openapispecreaderTests: XCTestCase {
             XCTFail("no valid yaml")
             return
         }
-        let apiSpec = try OpenAPISpec.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string)
         let getGreetPath = try XCTUnwrap(apiSpec.paths.first { path in
             path.key == "/greet"
         })
@@ -189,7 +189,7 @@ final class openapispecreaderTests: XCTestCase {
             XCTFail("no valid yaml")
             return
         }
-        let apiSpec = try OpenAPISpec.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string)
         XCTAssertEqual(apiSpec.components?.schemas.count,4)
         let greetingComponent = try XCTUnwrap(apiSpec.components?.schemas.first { path in
             path.key == "Greeting"
@@ -200,21 +200,14 @@ final class openapispecreaderTests: XCTestCase {
         let messageProperty = try XCTUnwrap(greetingObject.properties.first)
         XCTAssertTrue(messageProperty.type is OpenAPIValidatableStringType)
         XCTAssertEqual(greetingObject.required, ["message"])
-        let generalErrorComponent = try XCTUnwrap(apiSpec.components?.schemas.first { path in
-            path.key == "GeneralError"
-        })
+        let generalErrorComponent = try XCTUnwrap(apiSpec[schemacomponent: "GeneralError"])
         XCTAssertNotNil(generalErrorComponent)
-        let errorObject = try XCTUnwrap(greetingComponent.namedComponentType?.schemaType as? OpenAPIValidatableObjectType)
+        let errorObject = try XCTUnwrap(generalErrorComponent.schemaType as? OpenAPIValidatableObjectType)
         XCTAssertEqual(errorObject.properties.count, 2)
-        let errorMessageCodeProperty =  errorObject.properties.first(where: { prop in
-            prop.key == "code"
-                        
-        })
+        let errorMessageCodeProperty =  errorObject.properties["code"]
+        //falsch die Property ist schon nil
         XCTAssertTrue(errorMessageCodeProperty?.type is OpenAPIValidatableIntegerType)
-        let errorMessageMessageProperty =  errorObject.properties.first(where: { prop in
-            prop.key == "message"
-                        
-        })
+        let errorMessageMessageProperty =  errorObject.properties["message"]
         XCTAssertTrue(errorMessageMessageProperty?.type is OpenAPIValidatableStringType)
         XCTAssertEqual(errorObject.required.count, 0)
     }
@@ -228,7 +221,7 @@ final class openapispecreaderTests: XCTestCase {
             XCTFail("no valid yaml")
             return
         }
-        let apiSpec = try OpenAPISpec.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string)
         XCTAssertEqual(apiSpec.components?.parameters.count,2)
         let skipParamComponent = try XCTUnwrap(apiSpec.components?.parameters.first { path in
             path.key == "skipParam"
@@ -250,7 +243,7 @@ final class openapispecreaderTests: XCTestCase {
             XCTFail("no valid yaml")
             return
         }
-        let apiSpec = try OpenAPISpec.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string)
         XCTAssertEqual(apiSpec.components?.responses.count,4)
         let notFoundResponseOptional = apiSpec.components?.responses.first(where: { response in
             response.key == "NotFound"
@@ -291,7 +284,7 @@ final class openapispecreaderTests: XCTestCase {
             XCTFail("no valid yaml")
             return
         }
-        let apiSpec = try OpenAPISpec.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string)
         XCTAssertEqual(apiSpec.paths.count, 4)
         let getPetsPath = try XCTUnwrap(apiSpec.paths.first { path in
             path.key == "/pets"
@@ -316,7 +309,7 @@ final class openapispecreaderTests: XCTestCase {
             XCTFail("no valid yaml")
             return
         }
-        let apiSpec = try OpenAPISpec.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string)
         XCTAssertEqual(apiSpec.paths.count, 4)
         let getPetsPath = try XCTUnwrap(apiSpec.paths.first { path in
             path.key == "/pets"
@@ -345,7 +338,7 @@ final class openapispecreaderTests: XCTestCase {
             XCTFail("no valid yaml")
             return
         }
-        let apiSpec = try OpenAPISpec.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string)
         XCTAssertEqual(apiSpec.paths.count, 4)
         let getGreetPath = try XCTUnwrap(apiSpec.paths.first { path in
             path.key == "/greet"
@@ -371,7 +364,7 @@ final class openapispecreaderTests: XCTestCase {
             XCTFail("no valid yaml")
             return
         }
-        let apiSpec = try OpenAPISpec.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string)
         XCTAssertEqual(apiSpec.components?.securitySchemas.count,5)
         let httpKeySecurityScheme = try XCTUnwrap(apiSpec.components?.securitySchemas.first{ $0.key == "http_Key"})
         XCTAssertEqual(httpKeySecurityScheme.securityType,.http)
@@ -422,7 +415,7 @@ final class openapispecreaderTests: XCTestCase {
             XCTFail("no valid yaml")
             return
         }
-        let apiSpec = try OpenAPISpec.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string)
         XCTAssertEqual(apiSpec.paths.count, 4)
         let getPetsPath = try XCTUnwrap(apiSpec.paths.first { path in
             path.key == "/pets"
@@ -456,7 +449,7 @@ final class openapispecreaderTests: XCTestCase {
             XCTFail("no valid yaml")
             return
         }
-        let apiSpec = try OpenAPISpec.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string)
         XCTAssertEqual(apiSpec.paths.count, 4)
         let getPetsPath = try XCTUnwrap(apiSpec.paths.first { path in
             path.key == "/pets"
@@ -484,7 +477,7 @@ final class openapispecreaderTests: XCTestCase {
             XCTFail("no valid yaml")
             return
         }
-        let apiSpec = try OpenAPISpec.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string)
         let getPetsPath = try XCTUnwrap(apiSpec.paths.first { path in
             path.key == "/pets"
         })

@@ -29,7 +29,7 @@ public struct OpenAPIDefaultSchemaType : OpenAPIValidatableSchemaType {
         }
     }
     public let type : String?
-    public var userInfos =  [OpenAPISpec.UserInfo]()
+    public var userInfos =  [OpenAPIObject.UserInfo]()
 }
 public extension Array where Element == OpenAPIDefaultSchemaType   {
     init(_ map: [AnyHashable : Any]) throws {

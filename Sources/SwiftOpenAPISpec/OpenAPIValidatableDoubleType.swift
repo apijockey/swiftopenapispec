@@ -10,6 +10,7 @@ public struct OpenAPIValidatableIntegerType :  OpenAPIValidatableSchemaType, Thr
     public func validate() throws {
         
     }
+    public static let FORMAT_KEY : String = "format"
     public static let TYPE_KEY = "type"
     public static let DEFAULT_KEY = "default"
     public static let MULTIPLEOF_KEY = "multipleOf"
@@ -26,6 +27,7 @@ public struct OpenAPIValidatableIntegerType :  OpenAPIValidatableSchemaType, Thr
         self.exclusiveMaximum =  map[Self.EXCLUSIVEMAXIMUM_KEY]  as? Int
         self.minimum =  map[Self.MINIMUM_KEY]  as? Int
         self.exclusiveMinimum =  map[Self.EXCLUSIVEMINIMUM_KEY]  as? Int
+        self.format = OpenAPISchema.DataType(rawValue:map[Self.FORMAT_KEY] as? String ?? OpenAPISchema.DataType.string.rawValue)
     }
     public let type : String?
     public let multipleOf : Int?
@@ -34,6 +36,7 @@ public struct OpenAPIValidatableIntegerType :  OpenAPIValidatableSchemaType, Thr
     public let exclusiveMaximum : Int?
     public let minimum : Int?
     public let exclusiveMinimum : Int?
-    public var userInfos =  [OpenAPISpec.UserInfo]()
+    public var format : OpenAPISchema.DataType?
+    public var userInfos =  [OpenAPIObject.UserInfo]()
     
 }

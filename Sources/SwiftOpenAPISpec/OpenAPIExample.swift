@@ -25,6 +25,6 @@ public struct OpenAPIExample : ThrowingHashMapInitiable{
     public var value : String? = nil
     public var externalValue : String? = nil
     public var ref : OpenAPISchemaReference? = nil
-    public var userInfos =  [OpenAPISpec.UserInfo]()
+    public var userInfos =  [OpenAPIObject.UserInfo]()
    
 }

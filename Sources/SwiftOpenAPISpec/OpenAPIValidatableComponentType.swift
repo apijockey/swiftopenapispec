@@ -35,5 +35,5 @@ public struct OpenAPIValidatableStringType :  OpenAPIValidatableSchemaType, Thro
     public let maxLength: Int?
     public let minLength: Int?
     public let pattern: String?
-    public var userInfos =  [OpenAPISpec.UserInfo]()
+    public var userInfos =  [OpenAPIObject.UserInfo]()
 }

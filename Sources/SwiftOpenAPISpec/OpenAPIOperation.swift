@@ -34,7 +34,7 @@ public struct OpenAPIOperation : KeyedElement{
                 }
             }
         }
-        let servers =  try map.tryOptionalList(OpenAPISpec.SERVERS_KEY, root: "operations", OpenAPIServer.self)
+        let servers =  try map.tryOptionalList(OpenAPIObject.SERVERS_KEY, root: "operations", OpenAPIServer.self)
         if servers.count > 0 {
             self.servers = servers
         }
@@ -67,7 +67,7 @@ public struct OpenAPIOperation : KeyedElement{
     //Lists the required security schemes to execute this operation. The name used for each property MUST correspond to a security scheme declared in the Security Schemes under the Components Object.
     public var securityObjects : [OpenAPISecuritySchemeReference] = []
     public var externalDocs : OpenAPIExternalDocumentation? = nil
-    public var userInfos =  [OpenAPISpec.UserInfo]()
+    public var userInfos =  [OpenAPIObject.UserInfo]()
   
     /// returns an OpenAPIResponse for the given HTTP Status  if declared on the operation or nil.
     public func response(httpstatus  status : String) -> OpenAPIResponse? {

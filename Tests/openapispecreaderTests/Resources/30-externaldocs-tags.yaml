@@ -1,0 +1,86 @@
+openapi: "3.1.0"
+info:
+  title: Payments API
+  version: "1.0.0"
+  description: API for initiating and tracking payments.
+
+externalDocs:
+  description: Full developer documentation
+  url: https://docs.example.com/payments
+
+tags:
+  - name: payments
+    description: Payment initiation and management
+    externalDocs:
+      description: Payments guide
+      url: https://docs.example.com/payments/guide
+  - name: refunds
+    description: Refund lifecycle
+    externalDocs:
+      description: Refunds guide
+      url: https://docs.example.com/refunds
+
+paths:
+  /payments:
+    post:
+      operationId: createPayment
+      summary: Create a new payment
+      description: Initiates a new payment and returns its id.
+      tags: [payments]
+      externalDocs:
+        description: More details about payment creation
+        url: https://docs.example.com/payments/create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePaymentRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+  /payments/{paymentId}:
+    get:
+      operationId: getPayment
+      summary: Get payment by id
+      tags: [payments]
+      externalDocs:
+        description: Payment status reference
+        url: https://docs.example.com/payments/status
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+
+components:
+  schemas:
+    CreatePaymentRequest:
+      type: object
+      properties:
+        amount: { type: number }
+        currency: { type: string, minLength: 3, maxLength: 3 }
+        recipientId: { type: string }
+      required: [amount, currency, recipientId]
+
+    Payment:
+      type: object
+      properties:
+        id: { type: string }
+        amount: { type: number }
+        currency: { type: string }
+        status:
+          type: string
+          enum: [created, processing, succeeded, failed]
+      required: [id, amount, currency, status]

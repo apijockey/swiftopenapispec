@@ -65,7 +65,7 @@ public struct OpenAPIComponent : KeyedElement, ThrowingHashMapInitiable {
     public var securitySchemas : [OpenAPISecurityScheme] = []
     public var headers : [OpenAPIHeader] = []
     public var key: String?
-    public var userInfos =  [OpenAPISpec.UserInfo]()
+    public var userInfos =  [OpenAPIObject.UserInfo]()
     //https://swagger.io/docs/specification/v3_0/components/
 }
 

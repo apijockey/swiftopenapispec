@@ -1,68 +1,10 @@
 //
-//  File.swift
-//  
+//  Dictionary+extension.swift
+//  SwiftOpenAPISpec
 //
-//  Created by Patric Dubois on 26.03.24.
+//  Created by Patric Dubois on 10.12.25.
 //
 
-import Foundation
-extension Dictionary where Key == String, Value == Any {
-    /** Reads a dictionary value and transforms it to the specified type. Throws, if it can't find the key or the type doesn't match.*/
-    func tryRead<T>(_ key : String, _ type : T.Type,root: String) throws -> T {
-        if let value = self[key] as? T {
-            return value
-        }
-        else {
-            throw OpenAPISpec.Errors.invalidSpecification(root, key.description)
-        }
-    }
-    /**
-        Reads the value list from a Mapping for a specified key and returns the provided type.
-        Throws if the key does not exist, does not point to an [String:Any]  or the Dictionary cannot be mapped to V
-     */
-    func tryMap<V>(_ key : String,root: String,_ result : V.Type) throws -> V  where V : ThrowingHashMapInitiable{
-        if let value = self[key] as? [String:Any] {
-            let v = try V.init(value)
-           return v
-            
-        }
-        else {
-            throw OpenAPISpec.Errors.invalidSpecification(root, key)
-        }
-    }
-    
-    
-    /**
-        Reads a list of dictionaries where key and values will be held in the provided result type that
-     implements the KeyedElement protocol
-        throws if the key does not exist, does not point to an [AnyHashable:Any]  or the list cannot be mapped to [V]
-     */
-    func tryList<V>(_ key : String,root: String,_ result : V.Type) throws -> [V]  where V : KeyedElement{
-        if let list = self[key] as? [AnyHashable:Any] {
-            return try MapListMap.map(list)
-        }
-        else {
-            throw OpenAPISpec.Errors.invalidSpecification(root, key)
-        }
-    }
-    /**
-        Reads an optional sequence for give key and maps the contents to the given type
-          Returns an empty list, if the key cannot be found or the key does not point to an [Any]
-        Throws if the list cannot be mapped to [V]
-     */
-    func tryOptionalList<V>(_ key : String,root: String,_ result : V.Type) throws -> [V]  where V : ThrowingHashMapInitiable{
-        guard let list = self[key] as? [Any] else {
-            return []            
-        } 
-        return try MapList.map(list)
-    }
-//    func tryOptionalAnyHashable <V>(_ key : String,root: String,_ result : V.Type) throws -> [V]  where V : KeyValueObjectInitializer{
-//        guard let list = self[key] as? [AnyHashable:Any] else {
-//            return []
-//        }
-//        return try MapListMap.map(list)
-//    }
-}
 
 extension Dictionary where Key == AnyHashable, Value == Any {
     /**
@@ -74,9 +16,10 @@ extension Dictionary where Key == AnyHashable, Value == Any {
             return value
         }
         else {
-            throw OpenAPISpec.Errors.invalidSpecification(root, key.description)
+            throw OpenAPIObject.Errors.invalidSpecification(root, key.description)
         }
     }
+    
     /**
         Reads a supported built-in Type if the key exists and the type corresponds to the value
      */
@@ -105,7 +48,7 @@ extension Dictionary where Key == AnyHashable, Value == Any {
             return try V.init(value)
         }
         else {
-            throw OpenAPISpec.Errors.invalidSpecification(root, key.description)
+            throw OpenAPIObject.Errors.invalidSpecification(root, key.description)
         }
     }
     /**
@@ -125,7 +68,7 @@ extension Dictionary where Key == AnyHashable, Value == Any {
             return try MapList.map(list)
         }
         else {
-            throw OpenAPISpec.Errors.invalidSpecification(root, key)
+            throw OpenAPIObject.Errors.invalidSpecification(root, key)
         }
     }
     func tryOptionalList<V>(_ key : String,root: String,_ result : V.Type) throws -> [V]  where V : ThrowingHashMapInitiable{
@@ -133,6 +76,20 @@ extension Dictionary where Key == AnyHashable, Value == Any {
             return []
         }
         return try MapList.map(list)
+    }
+    /// Reads a dictionary value and transforms it to the specified type.
+    /// - Parameters:
+    ///   - key: A String
+    ///   - type: The expected typ to create
+    ///   - root: Additional information about the context like parent element
+    /// - Returns:  An instance of type T or ni, the value does not exist or does not evaluate to type *T*
+    func tryReadIfPresent<T>(_ key : String, _ type : T.Type,root: String) -> T? {
+        if let value = self[key] as? T {
+            return value
+        }
+        else {
+            return nil
+        }
     }
     func mapListIfPresent<T>(_ key : String) throws -> [T]  where  T : KeyedElement{
         var openAPIOperations = [T]()
@@ -148,6 +105,34 @@ extension Dictionary where Key == AnyHashable, Value == Any {
             }
         }
         return openAPIOperations
+    }
+    /// Inits an instance of Type *V* by loading the value from the current Dictionary with the given *key*
+    /// - Parameters:
+    ///   - key: dictionary key
+    ///   - root: Used to improve error output in `OpenAPIObject/UserInfo`
+    ///   - result: expected type to init from the Dictionary
+    /// - Returns: an instance of type *V*, if the key exists and maps to  a Dictionary of [String:Any]
+    func tryMapIfPresent<V>(_ key : String,root: String,_ result : V.Type) throws -> V?  where V : ThrowingHashMapInitiable{
+        if let value = self[key] as? [String:Any] {
+            let v = try V.init(value)
+           return v
+            
+        }
+        else {
+            return nil
+        }
+    }
+    
+    /**
+        Reads an optional sequence for give key and maps the contents to the given type
+          Returns an empty list, if the key cannot be found or the key does not point to an [Any]
+        Throws if the list cannot be mapped to [V]
+     */
+    func tryListIfPresent<V>(_ key : String,root: String,_ result : V.Type) throws -> [V]  where V : ThrowingHashMapInitiable{
+        guard let list = self[key] as? [Any] else {
+            return []
+        }
+        return try MapList.map(list)
     }
 //    func tryMap<V>(_ key : AnyHashable ,root: String,_ result : V.Type) throws -> V  where V : KeyValueObjectInitializer{
 //        if let value = self[key] as? [String:Any] {
