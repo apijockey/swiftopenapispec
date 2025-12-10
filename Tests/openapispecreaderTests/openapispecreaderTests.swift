@@ -204,10 +204,10 @@ final class openapispecreaderTests: XCTestCase {
         XCTAssertNotNil(generalErrorComponent)
         let errorObject = try XCTUnwrap(generalErrorComponent.schemaType as? OpenAPIValidatableObjectType)
         XCTAssertEqual(errorObject.properties.count, 2)
-        let errorMessageCodeProperty =  errorObject.properties["code"]
+        let errorMessageCodeProperty =  errorObject.properties[key: "code"]
         //falsch die Property ist schon nil
         XCTAssertTrue(errorMessageCodeProperty?.type is OpenAPIValidatableIntegerType)
-        let errorMessageMessageProperty =  errorObject.properties["message"]
+        let errorMessageMessageProperty =  errorObject.properties[key: "message"]
         XCTAssertTrue(errorMessageMessageProperty?.type is OpenAPIValidatableStringType)
         XCTAssertEqual(errorObject.required.count, 0)
     }
@@ -428,7 +428,7 @@ final class openapispecreaderTests: XCTestCase {
             mediatype.key == "text/plain"
         }))
         XCTAssertEqual(mediatype.examples.count,3)
-        let userExample = mediatype.examples.first { $0.key == "user"}
+        let userExample = mediatype.examples[key: "user"]
         XCTAssertEqual(userExample?.summary,"User example in Plain text")
         XCTAssertEqual(userExample?.externalValue, "https://foo.bar/examples/user-example.txt")
         let fooExample = mediatype.examples.first { $0.key == "foo"}

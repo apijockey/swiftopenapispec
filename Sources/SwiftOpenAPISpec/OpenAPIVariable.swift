@@ -25,11 +25,3 @@ public struct OpenAPIVariable : KeyedElement {
     public var userInfos =  [OpenAPIObject.UserInfo]()
     
 }
-public extension Array where Element == OpenAPIVariable {
-    subscript (name key : String) -> OpenAPIVariable? {
-        return self.first(where: { $0.key == key })
-    }
-    func contains(name key: String) -> Bool {
-        return self.contains(where: { $0.key == key })
-    }
-}

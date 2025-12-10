@@ -72,7 +72,7 @@ public struct OpenAPIOperation : KeyedElement{
     /// returns an OpenAPIResponse for the given HTTP Status  if declared on the operation or nil.
     public func response(httpstatus  status : String) -> OpenAPIResponse? {
         guard let responses else { return nil }
-        return responses[httpstatus: status]
+        return responses[key: status]
     }
     
     

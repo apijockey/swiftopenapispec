@@ -44,11 +44,4 @@ public struct OpenAPISchemaProperty: KeyedElement {
 }
 
 
-public extension Array where Element == OpenAPISchemaProperty {
-    subscript (key: String) -> OpenAPISchemaProperty? {
-        first(where: { $0.key == key })
-    }
-    func contains(_ element : String) -> Bool {
-        return self[element] != nil
-    }
-}
+
