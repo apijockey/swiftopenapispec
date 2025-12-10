@@ -102,6 +102,9 @@ public struct OpenAPIObject  {
                 }
             }
         }
+        
+            spec.extensions = try OpenAPIExtension.extensionElements(loadedDictionary)
+
         //https://swagger.io/docs/specification/v3_0/components/
         if spec.components == nil  && spec.paths.count == 0 && spec.webhooks.count == 0 {
             spec.userInfos.append(UserInfo(message: "components and paths element missing", infoType: .warning))
@@ -166,6 +169,7 @@ public struct OpenAPIObject  {
     public var securityObjects : [OpenAPISecuritySchemeReference] = []
     public var externalDocumentation : OpenAPIExternalDocumentation?
     public var tags : [OpenAPITag] = []
+    public var extensions : [OpenAPIExtension]?
     
     
 }

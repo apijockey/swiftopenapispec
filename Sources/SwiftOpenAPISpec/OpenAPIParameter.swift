@@ -64,8 +64,9 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable{
         self.explode = map.readIfPresent(Self.EXPLODE_KEY, Bool.self)
         self.allowReserved = map.readIfPresent(Self.ALLOW_RESERVED_KEY, Bool.self)
         self.example = map.readIfPresent(Self.EXAMPLE_KEY, String.self)
-        self.examples = try map.tryOptionalList(Self.EXAMPLES_KEY, root: "parameters", OpenAPIExample.self)
-        
+        if let examplesMap  = map[Self.EXAMPLES_KEY]  as? StringDictionary{
+            self.examples = try KeyedElementList.map(examplesMap)
+        }
         self.format = map.readIfPresent(Self.FORMAT_KEY, String.self)
        
     }

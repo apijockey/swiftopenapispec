@@ -18,8 +18,11 @@ public struct OpenAPIMediaType :  KeyedElement {
             self.schema =  try OpenAPISchema(schemaMap)
         self.schemaRef =  try OpenAPISchemaReference(schemaMap)
         self.oneOfSchemas = try OneOfSchemas(schemaMap)
-        self.examples = try map.mapListIfPresent(Self.EXAMPLES_KEY)
-        print(examples)
+        if let examplesMap  = map[Self.EXAMPLES_KEY]  as? StringDictionary{
+            self.examples = try KeyedElementList.map(examplesMap)
+        }
+       
+      
         }
     }
     public var schema : OpenAPISchema? = nil

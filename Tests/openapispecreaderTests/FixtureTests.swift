@@ -347,4 +347,12 @@ struct FixtureTests {
         #expect(apiSpec.paths[key:"/payments"]?.operations[operationID: "createPayment"]?.externalDocs?.url == "https://docs.example.com/payments/create")
         #expect(apiSpec.paths[key:"/payments"]?.operations[operationID: "createPayment"]?.tags == ["payments"])
     }
+    
+    @Test("31-extensions-01")
+    func extensions() async throws {
+        let yaml = try fixtureString("31-extensions-01")
+        let apiSpec = try OpenAPIObject.read(text: yaml)
+        #expect( apiSpec.extensions?.count == 1)
+        #expect(apiSpec.extensions?[extensionName: "x-root-flags"]?.structuredExtension?.properties?.count == 2)
+    }
 }
