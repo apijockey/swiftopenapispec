@@ -15,6 +15,6 @@ public struct OpenAPIExternalDocumentation :
     }
     public var description : String? = nil
     public var url : String
-    public var userInfos =  [OpenAPISpec.UserInfo]()
+    public var userInfos =  [OpenAPIObject.UserInfo]()
     
 }

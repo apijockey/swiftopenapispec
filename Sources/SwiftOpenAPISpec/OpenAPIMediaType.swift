@@ -26,7 +26,7 @@ public struct OpenAPIMediaType :  KeyedElement {
     public var schemaRef  : OpenAPISchemaReference? = nil
     public var oneOfSchemas : OneOfSchemas? = nil
     public var examples : [OpenAPIKeyedExample] = []
-    public var userInfos =  [OpenAPISpec.UserInfo]()
+    public var userInfos =  [OpenAPIObject.UserInfo]()
     //EXAMPLE
     
     //ENCODING

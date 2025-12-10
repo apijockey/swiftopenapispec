@@ -57,7 +57,7 @@ public struct OpenAPIPathItem: KeyedElement {
     public var summary: String? = nil
     public var description: String? = nil
     public var operations: [OpenAPIOperation] = []
-    public var userInfos =  [OpenAPISpec.UserInfo]()
+    public var userInfos =  [OpenAPIObject.UserInfo]()
 }
 
 

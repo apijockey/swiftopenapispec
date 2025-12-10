@@ -20,6 +20,6 @@ public struct NamedComponent<T> :  KeyedElement where T : ThrowingHashMapInitiab
     }
     public var key : String? = nil
     public var namedComponentType : T? = nil
-    public var userInfos =  [OpenAPISpec.UserInfo]()
+    public var userInfos =  [OpenAPIObject.UserInfo]()
 }
 

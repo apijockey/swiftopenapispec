@@ -23,7 +23,7 @@ public struct OpenAPIHeader :  KeyedElement{
     public static let CONTENT_KEY = "content"
     public init(_ map: [AnyHashable : Any]) throws {
         guard let required = map[Self.REQUIRED_KEY] as? Bool else {
-            throw OpenAPISpec.Errors.invalidSpecification(OpenAPIOperation.PARAMETERS_KEY, Self.REQUIRED_KEY)
+            throw OpenAPIObject.Errors.invalidSpecification(OpenAPIOperation.PARAMETERS_KEY, Self.REQUIRED_KEY)
         }
       
         self.required = required
@@ -51,7 +51,7 @@ public struct OpenAPIHeader :  KeyedElement{
     public var example : Any? = nil
     public var examples : [OpenAPIExample]? = []
     public var content : OpenAPIMediaType? = nil
-    public var userInfos =  [OpenAPISpec.UserInfo]()
+    public var userInfos =  [OpenAPIObject.UserInfo]()
    
     //TODO: Examples Object
    

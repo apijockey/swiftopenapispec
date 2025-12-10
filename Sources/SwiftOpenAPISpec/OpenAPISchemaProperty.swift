@@ -34,9 +34,9 @@ public struct OpenAPISchemaProperty: KeyedElement {
         if let discriminatorMap = map[OpenAPISchema.DISCRIMINATOR_KEY] as? [AnyHashable : Any] {
             self.discriminator = try OpenAPIValidatableDiscriminator(discriminatorMap)
         }
-    
+    print(self)
     }
-    public var userInfos =  [OpenAPISpec.UserInfo]()
+    public var userInfos =  [OpenAPIObject.UserInfo]()
     public  var key : String? = nil
     public var type : OpenAPIValidatableSchemaType?
     public var discriminator : OpenAPIValidatableDiscriminator?

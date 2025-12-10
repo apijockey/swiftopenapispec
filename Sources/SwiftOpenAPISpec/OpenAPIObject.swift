@@ -32,7 +32,7 @@ struct S: Codable {
 /// let apiSpec = try OpenAPISpec.read(text: string)
 /// ```
 ///
-public struct OpenAPISpec  {
+public struct OpenAPIObject  {
     public struct UserInfo : Codable {
         public let message : String
         public let infoType : UserInfoType
@@ -51,24 +51,7 @@ public struct OpenAPISpec  {
             }
         }
     }
-    var userInfos =  [UserInfo]()
-    static let COMPONENTS_KEY = "components"
-    static let externalDocs_KEY = "components"
-    static let INFO_KEY = "info"
-    static let JSON_SCHEMA_DIALECT_KEY = "$schema"
-    static let OPENAPI_KEY = "openapi"
-    static let PATHS_KEY = "paths"
-    static let SECURITY_KEY = "security"
-    static let SERVERS_KEY = "servers"
-    static let TAGS_KEY = "tags"
-    static let SELF_URL_KEY = "$self"
-    static let WEBHOOKS_KEY = "webhooks"
-    var version : String
-    var info : OpenAPIInfo
-    var servers : [OpenAPIServer] = []
-    public private(set) var paths : [OpenAPIPath] = []
-    public private(set) var webhooks : [OpenAPIPathItem] = []
-    var components : OpenAPIComponent?
+   
     func resolveComponent(_ text : String) {
         if text.starts(with: "#") {
             
@@ -81,36 +64,43 @@ public struct OpenAPISpec  {
              - Returns: an OpenAPISpec instance  which holds the text contents as simple Swift structs
      */
     
-    public static func read(text : String) throws -> OpenAPISpec{
-        guard let loadedDictionary = try Yams.load(yaml: text) as? [String:Any] else {
-            throw OpenAPISpec.Errors.invalidYaml("text cannot be interpreted as a Key/Value List")
+    public static func read(text : String) throws -> OpenAPIObject{
+        guard let loadedDictionary = try Yams.load(yaml: text) as? [AnyHashable:Any] else {
+            throw OpenAPIObject.Errors.invalidYaml("text cannot be interpreted as a Key/Value List")
         }
         //Mandatory
-        let version = try loadedDictionary.tryRead(OpenAPISpec.OPENAPI_KEY, String.self, root: "root")
+        let version = try loadedDictionary.tryRead(OpenAPIObject.OPENAPI_KEY, String.self, root: "root")
         //Mandatory
-        let info = try loadedDictionary.tryMap(OpenAPISpec.INFO_KEY, root: "root", OpenAPIInfo.self)
-        var spec = OpenAPISpec(version: version,info: info)
-        spec.components =  try? loadedDictionary.tryMap(OpenAPISpec.COMPONENTS_KEY, root: "root", OpenAPIComponent.self)
-        
-        
-        let servers =  try loadedDictionary.tryOptionalList(OpenAPISpec.SERVERS_KEY, root: "root", OpenAPIServer.self)
+        let info = try loadedDictionary.tryMap(OpenAPIObject.INFO_KEY, root: "root", OpenAPIInfo.self)
+        var spec = OpenAPIObject(version: version,info: info)
+        spec.components =  try? loadedDictionary.tryMap(OpenAPIObject.COMPONENTS_KEY, root: "root", OpenAPIComponent.self)
+        spec.selfUrl = loadedDictionary.readIfPresent(OpenAPIObject.SELF_URL_KEY, String.self)
+        spec.tags = try loadedDictionary.tryListIfPresent(OpenAPIObject.TAGS_KEY, root: "root", OpenAPITag.self)
+        spec.externalDocumentation = try loadedDictionary.tryMapIfPresent(OpenAPIObject.EXTERNAL_DOCS_KEY,root: "root", OpenAPIExternalDocumentation.self)
+        spec.jsonSchemaDialect = try loadedDictionary.tryReadIfPresent(OpenAPIObject.JSON_SCHEMA_DIALECT_KEY, String.self, root: "root")
+        let servers =  try loadedDictionary.tryListIfPresent(OpenAPIObject.SERVERS_KEY, root: "root", OpenAPIServer.self)
         if servers.count > 0 {
             spec.servers = servers
         }
-        
-        //TODO: Webhooks
-        if let map = loadedDictionary[OpenAPISpec.WEBHOOKS_KEY]  as? [String:Any],
+        if let map = loadedDictionary[OpenAPIObject.PATHS_KEY]  as? [AnyHashable:Any],
+           let paths = try? MapListMap<OpenAPIPath>.map(map),
+                paths.count > 0 {
+                spec.paths = paths
+        }
+        if let map = loadedDictionary[OpenAPIObject.WEBHOOKS_KEY]  as? [AnyHashable:Any],
            let webhooks = try? MapListMap<OpenAPIPathItem>.map(map),
                 webhooks.count > 0 {
             spec.webhooks  = webhooks
         }
-        
-       
-         
-        if let map = loadedDictionary[OpenAPISpec.PATHS_KEY]  as? [AnyHashable:Any],
-           let paths = try? MapListMap<OpenAPIPath>.map(map),
-                paths.count > 0 {
-                spec.paths = paths
+      
+        if let securityObjectMap = loadedDictionary[Self.SECURITY_KEY] as?  [[String:[String]]] {
+            for element in securityObjectMap {
+                if let mapElement = element.first {
+                    let ref = OpenAPISecuritySchemeReference(key: mapElement.key, scopes:mapElement.value)
+                    spec.securityObjects.append(ref)
+                    
+                }
+            }
         }
         //https://swagger.io/docs/specification/v3_0/components/
         if spec.components == nil  && spec.paths.count == 0 && spec.webhooks.count == 0 {
@@ -153,7 +143,29 @@ public struct OpenAPISpec  {
             c.key == component
         })
     }
-    
+    var userInfos =  [UserInfo]()
+    static let COMPONENTS_KEY = "components"
+    static let EXTERNAL_DOCS_KEY = "externalDocs"
+    static let INFO_KEY = "info"
+    static let JSON_SCHEMA_DIALECT_KEY = "$schema"
+    static let OPENAPI_KEY = "openapi"
+    static let PATHS_KEY = "paths"
+    static let SECURITY_KEY = "security"
+    static let SERVERS_KEY = "servers"
+    static let TAGS_KEY = "tags"
+    static let SELF_URL_KEY = "$self"
+    static let WEBHOOKS_KEY = "webhooks"
+    public var version : String
+    public var selfUrl : String?
+    public var jsonSchemaDialect : String?
+    public var info : OpenAPIInfo
+    public var servers : [OpenAPIServer] = []
+    public private(set) var paths : [OpenAPIPath] = []
+    public private(set) var webhooks : [OpenAPIPathItem] = []
+    public var components : OpenAPIComponent?
+    public var securityObjects : [OpenAPISecuritySchemeReference] = []
+    public var externalDocumentation : OpenAPIExternalDocumentation?
+    public var tags : [OpenAPITag] = []
     
     
 }

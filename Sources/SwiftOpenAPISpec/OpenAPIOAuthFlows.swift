@@ -22,5 +22,5 @@ public struct OpenAPIOAuthFlows : ThrowingHashMapInitiable {
     public var password : OpenAPIOAuthFlow? = nil
     public var clienCredentials : OpenAPIOAuthFlow? = nil
     public var authorizationCode : OpenAPIOAuthFlow? = nil
-    public var userInfos =  [OpenAPISpec.UserInfo]()
+    public var userInfos =  [OpenAPIObject.UserInfo]()
 }

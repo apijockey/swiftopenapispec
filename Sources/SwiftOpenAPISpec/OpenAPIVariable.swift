@@ -22,7 +22,7 @@ public struct OpenAPIVariable : KeyedElement {
     public var enumList : [String]? = nil
     public var defaultValue : String
     public var description : String? = nil
-    public var userInfos =  [OpenAPISpec.UserInfo]()
+    public var userInfos =  [OpenAPIObject.UserInfo]()
     
 }
 public extension Array where Element == OpenAPIVariable {

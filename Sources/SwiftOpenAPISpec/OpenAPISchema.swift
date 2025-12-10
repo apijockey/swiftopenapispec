@@ -58,7 +58,7 @@ public struct OpenAPISchema :  ThrowingHashMapInitiable {
     public var schemaType : OpenAPIValidatableSchemaType?
     //https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-01  ("null", "boolean", "object", "array", "number", or "string"), or "integer"
     public var format : DataType? = nil
-    public var userInfos =  [OpenAPISpec.UserInfo]()
+    public var userInfos =  [OpenAPIObject.UserInfo]()
    
     
 }

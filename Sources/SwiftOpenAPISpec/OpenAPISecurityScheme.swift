@@ -73,7 +73,7 @@ public struct OpenAPISecurityScheme : KeyedElement {
     public var flows : OpenAPIOAuthFlows? = nil
     public var openIdConnectURL : String? = nil
     public var deprecated : Bool? = nil
-    public var userInfos =  [OpenAPISpec.UserInfo]()
+    public var userInfos =  [OpenAPIObject.UserInfo]()
     
     
 }

@@ -29,7 +29,7 @@ public struct OpenAPILink : KeyedElement {
     public var server : OpenAPIServer? = nil
     public var parameters : [String:String] = [:]
     public var requestBody : String? = nil
-    public var userInfos =  [OpenAPISpec.UserInfo]()
+    public var userInfos =  [OpenAPIObject.UserInfo]()
  
 }
 
