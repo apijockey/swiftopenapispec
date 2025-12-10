@@ -46,8 +46,3 @@ public protocol ThrowingHashMapInitiable {
    
 }
 /**A KeyedElement expects that the key Value is set from outside**/
-public protocol KeyedElement : ThrowingHashMapInitiable {
-    var key : String? {get set}
-}
-
-public typealias StringDictionary =  [String:Any]

@@ -33,3 +33,4 @@ public struct OpenAPIKeyedExample : KeyedElement{
     public var userInfos =  [OpenAPIObject.UserInfo]()
    
 }
+

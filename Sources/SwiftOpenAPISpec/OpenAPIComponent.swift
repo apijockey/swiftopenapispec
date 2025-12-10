@@ -69,12 +69,4 @@ public struct OpenAPIComponent : KeyedElement, ThrowingHashMapInitiable {
     //https://swagger.io/docs/specification/v3_0/components/
 }
 
-public extension Array where Element == OpenAPIComponent {
-    subscript(component: String) -> OpenAPIComponent? {
-        return self.first (where:{ c in
-            c.key == component
-        })
-    }
 
-    
-}

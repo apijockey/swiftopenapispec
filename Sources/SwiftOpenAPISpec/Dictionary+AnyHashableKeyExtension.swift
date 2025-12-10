@@ -123,6 +123,21 @@ extension Dictionary where Key == String, Value == Any {
         }
         return try HashmapInitializableList.map(list)
     }
+    
+    
+    
+    /**
+        Reads an optional sequence for give key and maps the contents to the given type
+          Returns an empty list, if the key cannot be found or the key does not point to an [Any]
+        Throws if the list cannot be mapped to [V]
+     */
+    func tryListIfPresent<V>(_ key : String,root: String,_ result : V.Type) throws -> [V]  where V : ThrowingHashMapInitiable{
+        guard let list = self[key] as? [Any] else {
+            return []
+        }
+        return try HashmapInitializableList.map(list)
+    }
+    
     /// Reads a dictionary value and transforms it to the specified type.
     /// - Parameters:
     ///   - key: A String
@@ -168,17 +183,7 @@ extension Dictionary where Key == String, Value == Any {
         }
     }
     
-    /**
-        Reads an optional sequence for give key and maps the contents to the given type
-          Returns an empty list, if the key cannot be found or the key does not point to an [Any]
-        Throws if the list cannot be mapped to [V]
-     */
-    func tryListIfPresent<V>(_ key : String,root: String,_ result : V.Type) throws -> [V]  where V : ThrowingHashMapInitiable{
-        guard let list = self[key] as? [Any] else {
-            return []
-        }
-        return try HashmapInitializableList.map(list)
-    }
+   
 //    func tryMap<V>(_ key : AnyHashable ,root: String,_ result : V.Type) throws -> V  where V : KeyValueObjectInitializer{
 //        if let value = self[key] as? StringDictionary {
 //            return try V.init(value)

@@ -27,17 +27,7 @@ public struct OpenAPIMediaType :  KeyedElement {
     public var oneOfSchemas : OneOfSchemas? = nil
     public var examples : [OpenAPIKeyedExample] = []
     public var userInfos =  [OpenAPIObject.UserInfo]()
-    //EXAMPLE
     
     //ENCODING
 }
 
-public extension Array where Element == OpenAPIMediaType  {
-    
-    subscript (mediaType type: String) -> OpenAPIMediaType? {
-        return first { response in
-            response.key == type
-        }
-    }
-    
-}

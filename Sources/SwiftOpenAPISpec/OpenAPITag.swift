@@ -8,7 +8,7 @@
 public struct OpenAPITag:  ThrowingHashMapInitiable {
     
     //REQUIRED
-    public static let NAME_KEY = "type"
+    public static let NAME_KEY = "name"
     public static let SUMMARY_KEY = "summary"
     public static let DESCRIPTION_KEY = "description"
     public static let EXTERNAL_DOCS_KEY = "externalDocs"
@@ -38,4 +38,9 @@ public struct OpenAPITag:  ThrowingHashMapInitiable {
     public var userInfos =  [OpenAPIObject.UserInfo]()
    
     
+}
+public extension Array where Element == OpenAPITag {
+    subscript (name name: String) -> OpenAPITag? {
+        return self.first(where: { $0.name == name })
+    }
 }

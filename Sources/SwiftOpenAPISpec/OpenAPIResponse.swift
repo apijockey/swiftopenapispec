@@ -29,12 +29,3 @@ public struct OpenAPIResponse : KeyedElement{
     public var userInfos =  [OpenAPIObject.UserInfo]()
 }
 
-public extension Array where Element == OpenAPIResponse  {
-    
-    subscript (httpstatus key: String) -> OpenAPIResponse? {
-        return first { response in
-            response.key == key
-        }
-    }
-    
-}
