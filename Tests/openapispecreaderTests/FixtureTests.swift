@@ -156,8 +156,8 @@ struct FixtureTests {
         #expect(objectType.properties.count == 2)
         #expect(objectType.properties.contains(where:{$0.key == "productName"}))
         #expect(objectType.properties.contains(where:{$0.key == "productPrice"}))
-        #expect(objectType.properties.first?.type is OpenAPIValidatableStringType)
-        #expect(objectType.properties.last?.type is  OpenAPIValidatableDoubleType)
+        #expect(objectType.properties["productName"]?.type is OpenAPIValidatableStringType)
+        #expect(objectType.properties["productPrice"]?.type is  OpenAPIValidatableDoubleType)
         
         
     }

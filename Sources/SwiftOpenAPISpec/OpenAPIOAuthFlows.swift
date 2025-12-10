@@ -12,7 +12,7 @@ public struct OpenAPIOAuthFlows : ThrowingHashMapInitiable {
     public static let PASSWORD_KEY  = "password"
     public static let CLIENT_CREDENTIALS_KEY  = "clientCredentials"
     public static let AUTHORIZATION_CODE_KEY  = "authorizationCode"
-    public init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [String : Any]) throws {
         self.implicit = try map.mapIfPresent(Self.IMPLICIT_KEY, OpenAPIOAuthFlow.self)
         self.password = try map.mapIfPresent(Self.PASSWORD_KEY, OpenAPIOAuthFlow.self)
         self.clienCredentials = try map.mapIfPresent(Self.CLIENT_CREDENTIALS_KEY, OpenAPIOAuthFlow.self)

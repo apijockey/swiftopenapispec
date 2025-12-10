@@ -22,15 +22,15 @@ public struct OpenAPIServer : ThrowingHashMapInitiable {
     public init(url:String){
         self.url = url
     }
-    public init(_ map : [AnyHashable:Any]) throws {
+    public init(_ map: [String : Any]) throws {
         if let text = map[Self.URL_KEY] as? String{
             self.url = text
         }
         if let text = map[Self.DESCRIPTION_KEY] as? String{
             self.description = text
         }
-        if let variables = map[Self.VARIABLES_KEY] as? [AnyHashable:Any] {
-            self.variables = try MapListMap.map(variables)
+        if let variables = map[Self.VARIABLES_KEY] as? StringDictionary {
+            self.variables = try KeyedElementList.map(variables)
         }
     }
     public var url : String = "/"

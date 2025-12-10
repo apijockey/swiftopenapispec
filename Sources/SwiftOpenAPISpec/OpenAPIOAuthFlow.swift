@@ -12,7 +12,7 @@ public struct OpenAPIOAuthFlow : ThrowingHashMapInitiable {
     public static let TOKENURL_KEY = "tokenUrl"
     public static let REFRESHURL_KEY = "refreshUrl"
     public static let SCOPES_KEY = "scopes"
-    public init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [String : Any]) throws {
         authorizationUrl = map.readIfPresent(Self.AUTHORIZATIONURL_KEY, String.self)
         tokenUrl = map.readIfPresent(Self.TOKENURL_KEY, String.self)
         refreshUrl = map.readIfPresent(Self.REFRESHURL_KEY, String.self)

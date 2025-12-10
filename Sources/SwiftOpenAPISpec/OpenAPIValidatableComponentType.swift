@@ -15,7 +15,7 @@ public struct OpenAPIValidatableStringType :  OpenAPIValidatableSchemaType, Thro
     public static let TYPE_KEY = "type"
     public static let ALLOWED_ELEMENTS_KEY = "enum"
     
-    public init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [String : Any]) throws {
         self.type = map[Self.TYPE_KEY] as? String
         if let allowedElements = map[Self.ALLOWED_ELEMENTS_KEY] as? [String] {
             self.allowedElements = Set(allowedElements)

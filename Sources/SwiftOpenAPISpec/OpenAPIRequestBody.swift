@@ -10,11 +10,11 @@ public struct OpenAPIRequestBody : ThrowingHashMapInitiable {
     public static let DESCRIPTION_KEY = "description"
     public static let REQUIRED_KEY = "required"
     public static let CONTENTS_KEY = "content"
-    public init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [String : Any]) throws {
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
         self.required = map.readIfPresent(Self.REQUIRED_KEY, Bool.self) ?? false
-        if let contentsMap = map[Self.CONTENTS_KEY] as? [AnyHashable : Any]{
-            self.contents = try MapListMap.map(contentsMap )
+        if let contentsMap = map[Self.CONTENTS_KEY] as? [String : Any]{
+            self.contents = try KeyedElementList.map(contentsMap )
         }
         
     }

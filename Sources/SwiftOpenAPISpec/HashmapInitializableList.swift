@@ -6,11 +6,11 @@
 //
 
 import Foundation
-public struct MapList<T> where T : ThrowingHashMapInitiable {
+public struct HashmapInitializableList<T> where T : ThrowingHashMapInitiable {
     static func map(_ list:  [Any]) throws -> [T] {
         var types = [T]()
         for element in list {
-            if let elementMap = element as? [String:Any] {
+            if let elementMap = element as? StringDictionary {
                 let element = try T(elementMap)
                 types.append(element)
             }
@@ -23,15 +23,14 @@ public struct MapList<T> where T : ThrowingHashMapInitiable {
 
 
 
-public struct MapListMap<T> where T :  KeyedElement {
-    static func map(_ elements : [AnyHashable:Any]) throws -> [T] {
+public struct KeyedElementList<T> where T :  KeyedElement {
+    static func map(_ elements : StringDictionary) throws -> [T] {
         var types = [T]()
         for element in elements {
             let value = element.value
-            if let key = element.key as? String,
-               let valueMap = value as? [AnyHashable:Any]{
+            if let valueMap = value as? StringDictionary{
                 var type = try T(valueMap)
-                type.key = element.key as? String
+                type.key = element.key
                 types.append(type)
             }
         }
@@ -42,7 +41,7 @@ public struct MapListMap<T> where T :  KeyedElement {
 
 
 public protocol ThrowingHashMapInitiable {
-    init(_ map : [AnyHashable:Any]) throws
+    init(_ map : StringDictionary) throws
     var userInfos :  [OpenAPIObject.UserInfo] {get}
    
 }
@@ -50,7 +49,5 @@ public protocol ThrowingHashMapInitiable {
 public protocol KeyedElement : ThrowingHashMapInitiable {
     var key : String? {get set}
 }
-//protocol KeyValueObjectInitializer {
-//    init(_ map : [AnyHashable:Any]) throws
-//}
-//
+
+public typealias StringDictionary =  [String:Any]

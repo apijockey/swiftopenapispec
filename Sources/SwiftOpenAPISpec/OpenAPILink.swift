@@ -14,7 +14,7 @@ public struct OpenAPILink : KeyedElement {
     public static let REQUEST_BODY_KEY = "requestBody"
     public static let DESCRIPTION_KEY = "description"
     public static let SERVER_KEY = "server"
-    public init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [String : Any]) throws {
         operationRef = map.readIfPresent(Self.OPERATIION_REF_KEY, String.self)
         operationId = map.readIfPresent(Self.OPERATIION_ID_KEY, String.self)
         description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)

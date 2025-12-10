@@ -17,7 +17,7 @@ public struct OpenAPIValidatableDiscriminator :  ThrowingHashMapInitiable {
     
     
     
-    public init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [String : Any]) throws {
         if let propertyName = map[Self.PROPERTY_NAME_KEY] as? String {
             self.propertyName = propertyName
         }

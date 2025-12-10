@@ -22,7 +22,7 @@ public struct OpenAPIInfo : ThrowingHashMapInitiable {
     var contact : OpenAPIContact? = nil
     var license : OpenAPILicense? = nil
     public var userInfos =  [OpenAPIObject.UserInfo]()
-    public init(_ map : [AnyHashable:Any]) throws {
+    public init(_ map: [String : Any]) throws {
         guard let titleString = map[Self.TITLE_KEY] as? String ,
         let versionString = map[Self.VERSION_KEY] as? String else {
             throw OpenAPIObject.Errors.invalidSpecification("info", Self.TITLE_KEY)

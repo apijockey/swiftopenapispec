@@ -9,7 +9,7 @@ import Foundation
 
 public struct OpenAPIExternalDocumentation :
     ThrowingHashMapInitiable {
-    public init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [String : Any]) throws {
         url = try map.tryRead("url", String.self, root: "externalDocumentation")
         self.description = map.readIfPresent("description", String.self)
     }

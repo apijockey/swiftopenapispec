@@ -17,7 +17,7 @@ public struct OpenAPITag:  ThrowingHashMapInitiable {
     
     
    
-    public init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map : StringDictionary) throws {
         self.name = map.readIfPresent(Self.NAME_KEY, String.self)
         self.summary = map.readIfPresent(Self.SUMMARY_KEY, String.self)
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)

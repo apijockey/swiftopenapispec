@@ -9,19 +9,19 @@ import Foundation
 
 public struct OpenAPIOperation : KeyedElement{
     public var key: String?
-    public init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [String : Any]) throws {
         self.tags = map[Self.TAGS_KEY] as? [String] ?? []
         self.summary = map.readIfPresent(Self.SUMMARY_KEY, String.self)
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
         self.externalDocs = try map.mapIfPresent(Self.EXTERNAL_DOCS_KEY, OpenAPIExternalDocumentation.self)
         self.operationId = map.readIfPresent(Self.OP_ID_KEY, String.self)
         if let parameterlist = map[Self.PARAMETERS_KEY] as? [Any] {
-            self.parameters = try MapList<OpenAPIParameter>.map(parameterlist)            
+            self.parameters = try HashmapInitializableList<OpenAPIParameter>.map(parameterlist)            
         }
-        self.requestBody = try map.tryMapIfPresent(Self.REQUEST_BODIES_KEY, OpenAPIRequestBody.self)
+        self.requestBody = try map.MapIfPresent(Self.REQUEST_BODIES_KEY, OpenAPIRequestBody.self)
         
-        if let responseMap = map[Self.RESPONSES_KEY] as? [AnyHashable:Any] {
-            self.responses = try MapListMap<OpenAPIResponse>.map(responseMap)
+        if let responseMap = map[Self.RESPONSES_KEY] as? StringDictionary {
+            self.responses = try KeyedElementList<OpenAPIResponse>.map(responseMap)
         }
          //CALLBACKS
         self.deprecated = map.readIfPresent(Self.DEPRECATED_KEY, Bool.self)

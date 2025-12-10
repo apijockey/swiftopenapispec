@@ -32,7 +32,7 @@ public struct OpenAPISchema :  ThrowingHashMapInitiable {
     public static let FORMAT_KEY = "format"
     
    
-    public init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [String : Any]) throws {
         if let type = map[Self.TYPE_KEY] as? String,
             let validatableType = OpenAPIDefaultSchemaType.validatableType(type) {
             self.schemaType = try validatableType.init(map)

@@ -21,7 +21,7 @@ public struct OpenAPIHeader :  KeyedElement{
     public static let EXAMPLE_KEY = "example"
     public static let EXAMPLES_KEY = "examples"
     public static let CONTENT_KEY = "content"
-    public init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [String : Any]) throws {
         guard let required = map[Self.REQUIRED_KEY] as? Bool else {
             throw OpenAPIObject.Errors.invalidSpecification(OpenAPIOperation.PARAMETERS_KEY, Self.REQUIRED_KEY)
         }
@@ -30,7 +30,7 @@ public struct OpenAPIHeader :  KeyedElement{
         self.description =  map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
         self.deprecated =  map.readIfPresent(Self.DEPRECATED_KEY, Bool.self)
         self.allowEmptyValue = map.readIfPresent(Self.ALLOW_EMPTYVALUE_KEY, Bool.self)
-        self.schema = try map.tryMapIfPresent(Self.SCHEMA_KEY, OpenAPISchema.self)
+        self.schema = try map.MapIfPresent(Self.SCHEMA_KEY, OpenAPISchema.self)
         self.style = map.readIfPresent(Self.STYLE_KEY, String.self)
         self.explode = map.readIfPresent(Self.EXPLODE_KEY, Bool.self)
         self.allowReserved = map.readIfPresent(Self.ALLOW_RESERVED_KEY, Bool.self)

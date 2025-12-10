@@ -13,7 +13,7 @@ public struct OpenAPIExample : ThrowingHashMapInitiable{
     public static let VALUE_KEY = "value"
     public static let REF_KEY = "value"
     public static let EXTERNAL_VALUE_KEY = "externalValue"
-    public init(_ map: [AnyHashable : Any]) throws {
+    public init(_ map: [String : Any]) throws {
         self.summary = map.readIfPresent(Self.SUMMARY_KEY, String.self)
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
         self.value = map.readIfPresent(Self.VALUE_KEY, String.self)
