@@ -26,6 +26,7 @@ public struct OpenAPIResponse : KeyedElement{
     public var content: [OpenAPIMediaType] = []
     public var links : [OpenAPILink] =   []
     public var key : String? = nil
+    public var userInfos =  [OpenAPISpec.UserInfo]()
 }
 
 public extension Array where Element == OpenAPIResponse  {

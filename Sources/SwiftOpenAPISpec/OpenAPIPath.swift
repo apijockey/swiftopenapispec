@@ -21,7 +21,7 @@ public struct OpenAPIPath: KeyedElement {
     /// //example
     /// "/ping"
     public var key: String? = nil
-     
+    public var userInfos =  [OpenAPISpec.UserInfo]()
     public var operations: [OpenAPIOperation] = []
     
     /// inits an instance of ``OpenAPIPath``

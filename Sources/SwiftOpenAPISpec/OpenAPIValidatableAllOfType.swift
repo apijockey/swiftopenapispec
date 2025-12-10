@@ -23,4 +23,5 @@ public struct OpenAPIValidatableAllOfType : OpenAPIValidatableSchemaType {
     }
     public let type : String?
     public var items: [OpenAPIValidatableSchemaType]?
+    public var userInfos =  [OpenAPISpec.UserInfo]()
 }

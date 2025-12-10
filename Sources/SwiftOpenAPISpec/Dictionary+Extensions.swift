@@ -22,12 +22,16 @@ extension Dictionary where Key == String, Value == Any {
      */
     func tryMap<V>(_ key : String,root: String,_ result : V.Type) throws -> V  where V : ThrowingHashMapInitiable{
         if let value = self[key] as? [String:Any] {
-            return try V.init(value)
+            let v = try V.init(value)
+           return v
+            
         }
         else {
             throw OpenAPISpec.Errors.invalidSpecification(root, key)
         }
     }
+    
+    
     /**
         Reads a list of dictionaries where key and values will be held in the provided result type that
      implements the KeyedElement protocol

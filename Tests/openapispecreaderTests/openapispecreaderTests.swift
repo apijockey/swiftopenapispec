@@ -379,8 +379,8 @@ final class openapispecreaderTests: XCTestCase {
         
         let apiKeySecurityScheme = try XCTUnwrap(apiSpec.components?.securitySchemas.first{ $0.key == "api_key"})
         XCTAssertEqual(apiKeySecurityScheme.securityType,.apiKey)
-        XCTAssertEqual(apiKeySecurityScheme.apiKeyName , "api_key")
-        XCTAssertEqual(apiKeySecurityScheme.ApiKeyIn , .header)
+        XCTAssertEqual(apiKeySecurityScheme.name , "api_key")
+        XCTAssertEqual(apiKeySecurityScheme.location , .header)
         
         let bearerKeySecurityScheme = try XCTUnwrap(apiSpec.components?.securitySchemas.first{ $0.key == "bearer_key"})
         XCTAssertEqual(bearerKeySecurityScheme.securityType,.http)

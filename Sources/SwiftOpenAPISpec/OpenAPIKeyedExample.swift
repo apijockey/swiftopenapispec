@@ -30,5 +30,6 @@ public struct OpenAPIKeyedExample : KeyedElement{
     public var value : Any? = nil
     public var externalValue : String? = nil
     public var ref : String? = nil
+    public var userInfos =  [OpenAPISpec.UserInfo]()
    
 }

@@ -1,0 +1,50 @@
+openapi: "3.1.0"
+info:
+  title: Polymorphic Webhook Events
+  version: "1.0.0"
+webhooks:
+  eventStream:
+    post:
+      operationId: onEvent
+      summary: Generic event stream
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventEnvelope"
+      responses:
+        "200":
+          description: OK
+components:
+  schemas:
+    EventEnvelope:
+      type: object
+      properties:
+        type:
+          type: string
+        payload:
+          oneOf:
+            - $ref: "#/components/schemas/UserCreated"
+            - $ref: "#/components/schemas/UserDeleted"
+          discriminator:
+            propertyName: type
+            mapping:
+              user.created: "#/components/schemas/UserCreated"
+              user.deleted: "#/components/schemas/UserDeleted"
+      required: [type, payload]
+
+    UserCreated:
+      type: object
+      properties:
+        id: { type: string }
+        email: { type: string, format: email }
+        createdAt: { type: string, format: date-time }
+      required: [id, email, createdAt]
+
+    UserDeleted:
+      type: object
+      properties:
+        id: { type: string }
+        deletedAt: { type: string, format: date-time }
+      required: [id, deletedAt]

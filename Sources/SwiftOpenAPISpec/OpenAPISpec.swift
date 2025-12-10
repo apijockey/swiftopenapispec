@@ -33,9 +33,9 @@ struct S: Codable {
 /// ```
 ///
 public struct OpenAPISpec  {
-    struct UserInfo : Codable {
-        let message : String
-        let infoType : UserInfoType
+    public struct UserInfo : Codable {
+        public let message : String
+        public let infoType : UserInfoType
     }
     public enum UserInfoType : String, Codable {
         case error, warning, info
@@ -133,22 +133,22 @@ public struct OpenAPISpec  {
     subscript(webhook path: String) -> OpenAPIPathItem? {
         return webhooks[webhook: path]
     }
-    subscript(schema component: String) -> OpenAPISchema? {
+    subscript(schemacomponent component: String) -> OpenAPISchema? {
         return components?.schemas.first(where: { c in
             c.key == component
         })?.namedComponentType
     }
-    subscript(parameter component: String) -> OpenAPIParameter? {
+    subscript(parametercomponent component: String) -> OpenAPIParameter? {
         return components?.parameters.first(where: { c in
             c.key == component
         })?.namedComponentType
     }
-    subscript(response component: String) -> OpenAPIResponse? {
+    subscript(responsecomponent component: String) -> OpenAPIResponse? {
         return components?.responses.first(where: { c in
             c.key == component
         })
     }
-    subscript(securityschema component: String) -> OpenAPISecurityScheme? {
+    subscript(securityschemacomponent component: String) -> OpenAPISecurityScheme? {
         return components?.securitySchemas.first(where: { c in
             c.key == component
         })

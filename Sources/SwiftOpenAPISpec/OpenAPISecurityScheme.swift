@@ -18,6 +18,7 @@ public struct OpenAPISecurityScheme : KeyedElement {
     public static let BEARER_FORMAT_KEY = "bearerFormat"
     public static let FLOWS_KEY = "flows"
     public static let OPENID_CONNECT_URL_KEY = "openIdConnectUrl"
+    public static let DEPRECATED_KEY = "deprecated"
     public enum SecurityType : String {
         case apiKey, http, mutualTLS, oauth2, openIdConnect
     }
@@ -43,10 +44,10 @@ public struct OpenAPISecurityScheme : KeyedElement {
          
         switch securityType  {
         case .apiKey:
-            self.apiKeyName = map.readIfPresent(Self.NAME_KEY, String.self)
+            self.name = map.readIfPresent(Self.NAME_KEY, String.self)
             if let locationRawValue = map.readIfPresent(Self.LOCATION_KEY, String.self),
                let location = APIKeyLocation(rawValue: locationRawValue) {
-                self.ApiKeyIn = location
+                self.location = location
             }
         case .http:
             self.httpScheme = map.readIfPresent(Self.SCHEME_KEY, String.self)
@@ -65,11 +66,14 @@ public struct OpenAPISecurityScheme : KeyedElement {
     public var key: String?
     public var securityType : SecurityType
     public var description : String? = nil
-    public var apiKeyName : String? = nil
-    public var ApiKeyIn : APIKeyLocation? = nil
+    public var name : String? = nil
+    public var location : APIKeyLocation? = nil
     public var httpScheme : String? = nil
     public var httpBearerFormat : String? = nil
     public var flows : OpenAPIOAuthFlows? = nil
     public var openIdConnectURL : String? = nil
+    public var deprecated : Bool? = nil
+    public var userInfos =  [OpenAPISpec.UserInfo]()
+    
     
 }

@@ -20,5 +20,6 @@ public struct OpenAPIValidatableComponentType :  OpenAPIValidatableSchemaType, T
         
     }
     public let ref : String?
+    public var userInfos =  [OpenAPISpec.UserInfo]()
      
 }

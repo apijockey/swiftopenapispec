@@ -21,6 +21,7 @@ public struct OpenAPIRequestBody : ThrowingHashMapInitiable {
     public var description : String? = nil
     public var required : Bool = false
     public var contents : [OpenAPIMediaType] = []
+    public var userInfos =  [OpenAPISpec.UserInfo]()
    
     
 }

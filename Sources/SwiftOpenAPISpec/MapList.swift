@@ -42,7 +42,8 @@ public struct MapListMap<T> where T :  KeyedElement {
 
 
 public protocol ThrowingHashMapInitiable {
-init(_ map : [AnyHashable:Any]) throws
+    init(_ map : [AnyHashable:Any]) throws
+    var userInfos :  [OpenAPISpec.UserInfo] {get}
    
 }
 /**A KeyedElement expects that the key Value is set from outside**/

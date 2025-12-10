@@ -21,6 +21,7 @@ struct OpenAPIInfo : ThrowingHashMapInitiable {
     var termsOfService : String? = nil
     var contact : OpenAPIContact? = nil
     var license : OpenAPILicense? = nil
+    public var userInfos =  [OpenAPISpec.UserInfo]()
     init(_ map : [AnyHashable:Any]) throws {
         guard let titleString = map[Self.TITLE_KEY] as? String ,
         let versionString = map[Self.VERSION_KEY] as? String else {
