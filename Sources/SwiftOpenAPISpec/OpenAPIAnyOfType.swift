@@ -6,11 +6,11 @@
 //
 
 
-public struct OpenAPIValidatableAllOfType : OpenAPIValidatableSchemaType {
-    public static let TYPE_KEY = "allOf"
+public struct OpenAPIAnyOfType : OpenAPIValidatableSchemaType {
+    public static let TYPE_KEY = "anyOf"
     public init(_ map: [String : Any]) throws {
         self.type = map[Self.TYPE_KEY] as? String
-        guard let list = (map["allOf"] as? [Any]) else {
+        guard let list = (map["anyOf"] as? [Any]) else {
             return
         }
         self.items = try list.asValidatableSchemaType()

@@ -1,0 +1,72 @@
+#
+//  31-extensions-01.yaml
+//  SwiftOpenAPISpec
+//
+//  Created by Patric Dubois on 10.12.25.
+//
+
+
+openapi: "3.1.0"
+info:
+  title: Ext Demo API
+  version: "1.0.0"
+  x-info-meta:
+    ownerTeam: platform
+    lifecycle: experimental
+    lastReviewed: "2025-10-01"
+
+x-root-flags:
+  featureToggle: true
+  rolloutPercentage: 15
+
+servers:
+  - url: https://api.example.com
+    description: Production
+    x-server-region: eu-central-1
+    x-server-weight: 100
+
+tags:
+  - name: demo
+    description: Demo endpoints
+    x-tag-color: "#FF9900"
+    x-tag-docs:
+      tocOrder: 1
+      showInSidebar: true
+
+paths:
+  /ping:
+    x-path-stability: stable
+    get:
+      operationId: ping
+      summary: Health check
+      x-operation-rate-limit:
+        burst: 20
+        sustainedPerMin: 120
+      parameters:
+        - name: verbose
+          in: query
+          required: false
+          schema:
+            type: boolean
+            x-schema-ui:
+              widget: toggle
+              defaultLabel: "Detailed response"
+          x-parameter-source: internal
+      responses:
+        "200":
+          description: ok
+          x-response-cache:
+            ttlSeconds: 30
+            varyBy: [Authorization]
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  build:
+                    type: string
+                    x-field-sensitive: false
+                required: [ok]
+                x-schema-version: 3

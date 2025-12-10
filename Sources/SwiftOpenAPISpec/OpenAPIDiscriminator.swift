@@ -5,7 +5,7 @@
 //  Created by Patric Dubois on 10.12.25.
 //
 
-public struct OpenAPIValidatableDiscriminator :  ThrowingHashMapInitiable {
+public struct OpenAPIDiscriminator :  ThrowingHashMapInitiable {
     public var userInfos = [OpenAPIObject.UserInfo]()
     
     public enum DataType : String, CaseIterable {

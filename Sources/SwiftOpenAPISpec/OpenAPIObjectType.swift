@@ -6,7 +6,7 @@
 //
 
 
-public struct OpenAPIValidatableObjectType : OpenAPIValidatableSchemaType {
+public struct OpenAPIObjectType : OpenAPIValidatableSchemaType {
     public static let TYPE_KEY = "type"
     public static let PROPERTIES_KEY = "properties"
     public static let UNEVALUATEDPROPERTIES_KEY = "unevaluatedProperties"
