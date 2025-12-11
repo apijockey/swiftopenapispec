@@ -32,6 +32,27 @@ public struct OpenAPIExtension  {
                     extensionElement.simpleExtensionValue = stringValue
                     extensionList.append(extensionElement)
                 }
+                else if let stringValue = value as? Int {
+                    var extensionElement = OpenAPIExtension(key: key)
+                    extensionElement.simpleExtensionValue = String(stringValue)
+                    extensionList.append(extensionElement)
+                }
+                else if let stringValue = value as? Double {
+                    var extensionElement = OpenAPIExtension(key: key)
+                    extensionElement.simpleExtensionValue = String(stringValue)
+                    extensionList.append(extensionElement)
+                }
+                else if let stringValue = value as? Float {
+                    var extensionElement = OpenAPIExtension(key: key)
+                    extensionElement.simpleExtensionValue = String(stringValue)
+                    extensionList.append(extensionElement)
+                }
+                else if let stringValue = value as? Bool {
+                    var extensionElement = OpenAPIExtension(key: key)
+                    extensionElement.simpleExtensionValue = String(stringValue)
+                    extensionList.append(extensionElement)
+                }
+               
                 
             }
         }
@@ -60,11 +81,17 @@ public struct OpenAPIStructuredExtensionValues : ThrowingHashMapInitiable{
         
     public init(_ map: StringDictionary) throws {
         self.properties = map.mapValues({ value in
-            value as? String ?? ""
+            if let stringValue = value as? String {
+                return stringValue
+            }
+                // Replace invalid Any extension usage with free function
+                return stringValue(from: value as Any)
+           
         })
         
     }
     public var properties : [String:String]?
+    
    
    
 }

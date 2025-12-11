@@ -14,14 +14,7 @@ public struct OpenAPIInfo : ThrowingHashMapInitiable {
     static let TERMS_KEY = "termsOfService"
     static let CONTACT_KEY = "contact"
     static let LICENSE_KEY = "license"
-    let title : String
-    let version : String
-    var  summary : String?
-    var description : String? = nil
-    var termsOfService : String? = nil
-    var contact : OpenAPIContact? = nil
-    var license : OpenAPILicense? = nil
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    
     public init(_ map: [String : Any]) throws {
         guard let titleString = map[Self.TITLE_KEY] as? String ,
         let versionString = map[Self.VERSION_KEY] as? String else {
@@ -38,15 +31,24 @@ public struct OpenAPIInfo : ThrowingHashMapInitiable {
         if let text = map[Self.TERMS_KEY] as? String {
             self.termsOfService = text
         }
-        if let contactMap  =  map[Self.CONTACT_KEY] as? [String : Any?],
-           let contact = OpenAPIContact(contactMap) {
+        if let contactMap  =  map[Self.CONTACT_KEY] as? StringDictionary{
+           let contact = try OpenAPIContact(contactMap)
             self.contact = contact
         }
-        if let licenseMap  =  map[Self.LICENSE_KEY] as? [String : Any?],
+        if let licenseMap  =  map[Self.LICENSE_KEY] as? StringDictionary,
            let license = OpenAPILicense(licenseMap) {
             self.license = license
         }
-        
+        extensions = try OpenAPIExtension.extensionElements(map)
         
     }
+    public var title : String
+    public var version : String
+    public var  summary : String?
+    public var description : String? = nil
+    public var termsOfService : String? = nil
+    public var contact : OpenAPIContact? = nil
+    public var license : OpenAPILicense? = nil
+    public var extensions : [OpenAPIExtension]?
+    public var userInfos =  [OpenAPIObject.UserInfo]()
 }

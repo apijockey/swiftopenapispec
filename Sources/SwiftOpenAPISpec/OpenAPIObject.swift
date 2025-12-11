@@ -134,7 +134,7 @@ public struct OpenAPIObject  {
     subscript(parametercomponent component: String) -> OpenAPIParameter? {
         return components?.parameters.first(where: { c in
             c.key == component
-        })?.namedComponentType
+        })
     }
     subscript(responsecomponent component: String) -> OpenAPIResponse? {
         return components?.responses.first(where: { c in

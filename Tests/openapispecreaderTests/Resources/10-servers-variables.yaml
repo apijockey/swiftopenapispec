@@ -1,10 +1,37 @@
 openapi: 3.0.3
+$self: https://apidescriptions.example.com/foo
 info: { title: Servers, version: "1.0" }
 servers:
   - url: https://{region}.api.example.com/{basePath}
     variables:
       region: { default: eu, enum: [eu, us] }
       basePath: { default: v1 }
+  - url: .
+    description: The production API on this device
+  - url: ./test
+    description: The test API on this device
+  - url: https://development.gigantic-server.com/v1
+    description: Development server
+    name: dev
+  - url: https://staging.gigantic-server.com/v1
+    description: Staging server
+    name: staging
+  - url: https://{username}.gigantic-server.com:{port}/{basePath}
+    description: The production API server
+    name: prod
+    variables:
+      username:
+        # note! no enum here means it is an open value
+        default: demo
+        description: A user-specific subdomain. Use `demo` for a free sandbox environment.
+      port:
+        enum:
+          - '8443'
+          - '443'
+        default: '8443'
+      basePath:
+        # open meaning there is the opportunity to use special base paths as assigned by the provider, default is "v2"
+        default: v2
 paths:
   /ping:
     get:

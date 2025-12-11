@@ -6,14 +6,13 @@
 //
 
 import Foundation
-public struct OpenAPIContact : Codable {
+public struct OpenAPIContact : ThrowingHashMapInitiable {
+    
+    
     public  static let NAME_KEY = "name"
     public static let URL_KEY = "url"
     public static let EMAIL_KEY = "email"
-    public  var name : String? = nil
-    public var url : String? = nil
-    public var email : String? = nil
-    public init?(_ map : [String:Any?]) {
+    public init(_ map : StringDictionary) throws {
         if let name = map[Self.NAME_KEY] as? String {
             self.name = name
         }
@@ -23,5 +22,11 @@ public struct OpenAPIContact : Codable {
         if let email = map[Self.EMAIL_KEY] as? String {
             self.email = email
         }
+        extensions = try OpenAPIExtension.extensionElements(map)
     }
+    public  var name : String? = nil
+    public var url : String? = nil
+    public var email : String? = nil
+    public var extensions : [OpenAPIExtension]?
+    public var userInfos = [OpenAPIObject.UserInfo]()
 }

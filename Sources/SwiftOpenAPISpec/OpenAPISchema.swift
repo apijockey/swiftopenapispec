@@ -50,8 +50,8 @@ public struct OpenAPISchema :  ThrowingHashMapInitiable {
         else if map[Self.ALLOF_KEY] is [Any] {
             self.schemaType = try OpenAPIAllOfType(map)
         }
-        self.format = DataType(rawValue:map[Self.FORMAT_KEY] as? String ?? DataType.string.rawValue)
-        
+    
+        extensions = try OpenAPIExtension.extensionElements(map)
        
     }
     
@@ -59,6 +59,7 @@ public struct OpenAPISchema :  ThrowingHashMapInitiable {
     //https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-01  ("null", "boolean", "object", "array", "number", or "string"), or "integer"
     public var format : DataType? = nil
     public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var extensions : [OpenAPIExtension]?
    
     
 }

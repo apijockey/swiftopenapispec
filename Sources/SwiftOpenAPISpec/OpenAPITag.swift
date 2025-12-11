@@ -24,7 +24,7 @@ public struct OpenAPITag:  ThrowingHashMapInitiable {
         self.parent = map.readIfPresent(Self.PARENT_KEY, String.self)
         self.kind = map.readIfPresent(Self.KIND_KEY, String.self)
         self.externalDocs = try map.mapIfPresent(Self.EXTERNAL_DOCS_KEY, OpenAPIExternalDocumentation.self)
-       
+        self.extensions = try OpenAPIExtension.extensionElements(map)
     }
     
     public var schemaType : OpenAPIValidatableSchemaType?
@@ -36,7 +36,7 @@ public struct OpenAPITag:  ThrowingHashMapInitiable {
     public var parent : String?
     public var kind : String?
     public var userInfos =  [OpenAPIObject.UserInfo]()
-   
+    public var extensions : [OpenAPIExtension]?
     
 }
 public extension Array where Element == OpenAPITag {

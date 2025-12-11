@@ -72,6 +72,7 @@ struct FixtureTests {
         let getPingOperation = try #require(pingAPIPath[operationId: "ping31"].first)
         #expect(getPingOperation.responses?.count == 1)
         let responses = try #require(getPingOperation.responses)
+        #expect(responses.count == 1)
         let contentType = try #require(getPingOperation.response(httpstatus: "200")?.content[key: "application/json"])
         #expect(contentType.schema?.schemaType is OpenAPIObjectType)
         let getPing200Response = try #require(getPingOperation.response(httpstatus:  "200"))
@@ -92,7 +93,7 @@ struct FixtureTests {
         let parameters = try #require(path.operations[operationID : "getPet"]?.parameters)
         #expect(parameters.count == 1)
         let parameter = parameters.first!
-        #expect(parameter.name == "id")
+        #expect(parameter.key == "id")
         #expect(parameter.location == SwiftOpenAPISpec.OpenAPIParameter.ParameterLocation.path)
         #expect(parameter.schema?.schemaType is OpenAPIStringType)
       
@@ -104,7 +105,7 @@ struct FixtureTests {
         let searchParameters = try #require(searchPath.operations[operationID : "searchPets"]?.parameters)
         #expect(parameters.count == 1)
         let queryParameter = searchParameters.first!
-        #expect(queryParameter.name == "limit")
+        #expect(queryParameter.key == "limit")
         #expect(queryParameter.location == OpenAPIParameter.ParameterLocation.query)
         let parameterType = try #require(queryParameter.schema?.schemaType as? OpenAPIIntegerType)
         #expect(parameterType.defaultValue == 10)
@@ -245,13 +246,25 @@ struct FixtureTests {
     func serversvariables() async throws {
         let yaml = try fixtureString("10-servers-variables")
         let apiSpec = try OpenAPIObject.read(text: yaml)
-        #expect(apiSpec.servers.count == 1)
-        #expect(apiSpec.servers.first?.variables.count == 2)
-        let regionVariable = try #require(apiSpec.servers.first?.variables[key: "region"])
+        #expect(apiSpec.servers.count == 6)
+        //Änderungen an der Yaml-Datei
+        let regionServer = try #require(apiSpec.servers[url: "https://{region}.api.example.com/{basePath}"])
+        let regionVariable = try #require(regionServer.variables[key: "region"])
         #expect(regionVariable.defaultValue == "eu")
         #expect(regionVariable.enumList == ["eu", "us"])
         let baseVariable = try #require(apiSpec.servers.first?.variables[key: "basePath"])
         #expect(baseVariable.defaultValue == "v1")
+        let selfurlServer =  try #require(apiSpec.servers[url: "."])
+        #expect(selfurlServer.description == "The production API on this device")
+        
+        let stagingServer =  try #require(apiSpec.servers[url: "https://staging.gigantic-server.com/v1"])
+        #expect(stagingServer.name == "staging")
+        
+        let prodServer =  try #require(apiSpec.servers[url: "https://{username}.gigantic-server.com:{port}/{basePath}"])
+        #expect(prodServer.name == "prod")
+        let prodServerPortVariable = try #require(prodServer.variables[key: "port"])
+        #expect(prodServerPortVariable.defaultValue == "8443")
+        #expect(prodServerPortVariable.enumList == ["8443","443"])
         
     }
     @Test("11-contenttype-vendor-json")
@@ -354,5 +367,43 @@ struct FixtureTests {
         let apiSpec = try OpenAPIObject.read(text: yaml)
         #expect( apiSpec.extensions?.count == 1)
         #expect(apiSpec.extensions?[extensionName: "x-root-flags"]?.structuredExtension?.properties?.count == 2)
+        #expect(apiSpec.info.extensions?.count == 1)
+        let properties = try #require(apiSpec.info.extensions?[extensionName:"x-info-meta"]?.structuredExtension?.properties)
+        #expect(properties.containsKey("ownerTeam"))
+        #expect(properties.containsKey("lifecycle"))
+        #expect(properties.containsKey("lastReviewed"))
+        #expect(apiSpec.servers.count == 1)
+        let serverextensions = try #require(apiSpec.servers.first?.extensions)
+        #expect(serverextensions.count == 2)
+        #expect(serverextensions[extensionName: "x-server-region"]?.simpleExtensionValue == "eu-central-1")
+        #expect(serverextensions[extensionName: "x-server-weight"]?.simpleExtensionValue == "100")
+        let tagextensions = try #require(apiSpec.tags.first?.extensions)
+        #expect(tagextensions.count == 2)
+        #expect(tagextensions[extensionName: "x-tag-color"]?.simpleExtensionValue == "#FF9900")
+        let tagDocsExtensionProperties = try #require(tagextensions[extensionName: "x-tag-docs"]?.structuredExtension?.properties)
+        #expect(tagDocsExtensionProperties.count == 2)
+        #expect(tagDocsExtensionProperties["tocOrder"] == "1")
+        #expect(tagDocsExtensionProperties["showInSidebar"] == "true")
+        
+        let pingOpExtensions = try #require(apiSpec.paths[key: "/ping"]?.operations[operationID: "ping"]?.extensions)
+        #expect(pingOpExtensions.count == 1)
+        #expect(pingOpExtensions[extensionName: "x-operation-rate-limit"]?.structuredExtension?.properties?.count == 2)
+        let pingOpExtensionsProperties = try #require(pingOpExtensions[extensionName: "x-operation-rate-limit"]?.structuredExtension?.properties)
+        #expect(pingOpExtensionsProperties["burst"] == "20")
+        #expect(pingOpExtensionsProperties["sustainedPerMin"] == "120")
+        let extendedParameter = try #require(apiSpec.paths[key: "/ping"]?.operations[operationID: "ping"]?.parameters?[key: "verbose"])
+        #expect(extendedParameter.extensions?.count == 1)
+        #expect(extendedParameter.extensions?[extensionName:"x-parameter-source"]?.simpleExtensionValue == "internal")
+        let parameterSchema = try #require(extendedParameter.schema)
+        #expect(parameterSchema.extensions?.count == 1)
+        let parameterStructuredExtensionProperties = try #require(parameterSchema.extensions?[extensionName: "x-schema-ui"]?.structuredExtension?.properties)
+        #expect(parameterStructuredExtensionProperties["widget"] == "toggle")
+        #expect(parameterStructuredExtensionProperties["defaultLabel"] == "Detailed response")
     }
+    @Test("32-localurls")
+    func localurls() async throws {
+        
+    }
+    
+    
 }
