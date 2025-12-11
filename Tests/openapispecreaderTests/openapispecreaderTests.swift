@@ -190,8 +190,8 @@ final class openapispecreaderTests: XCTestCase {
             return
         }
         let apiSpec = try OpenAPIObject.read(text: string)
-        XCTAssertEqual(apiSpec.components?.schemas.count,4)
-        let greetingComponent = try XCTUnwrap(apiSpec.components?.schemas.first { path in
+        XCTAssertEqual(apiSpec.components?.schemas?.count,4)
+        let greetingComponent = try XCTUnwrap(apiSpec.components?.schemas?.first { path in
             path.key == "Greeting"
         })
         XCTAssertNotNil(greetingComponent)
@@ -222,8 +222,8 @@ final class openapispecreaderTests: XCTestCase {
             return
         }
         let apiSpec = try OpenAPIObject.read(text: string)
-        XCTAssertEqual(apiSpec.components?.parameters.count,2)
-        let skipParamComponent = try XCTUnwrap(apiSpec.components?.parameters.first { path in
+        XCTAssertEqual(apiSpec.components?.parameters?.count,2)
+        let skipParamComponent = try XCTUnwrap(apiSpec.components?.parameters?.first { path in
             path.key == "skipParam"
         })
         XCTAssertEqual(skipParamComponent.key, "skip")
@@ -244,23 +244,23 @@ final class openapispecreaderTests: XCTestCase {
             return
         }
         let apiSpec = try OpenAPIObject.read(text: string)
-        XCTAssertEqual(apiSpec.components?.responses.count,4)
-        let notFoundResponseOptional = apiSpec.components?.responses.first(where: { response in
+        XCTAssertEqual(apiSpec.components?.responses?.count,4)
+        let notFoundResponseOptional = apiSpec.components?.responses?.first(where: { response in
             response.key == "NotFound"
         })
         let notFoundResponse = try XCTUnwrap(notFoundResponseOptional)
         XCTAssertEqual( notFoundResponse.description,"Entity not found.")
-        let ImageResponseOptional = apiSpec.components?.responses.first(where: { response in
+        let ImageResponseOptional = apiSpec.components?.responses?.first(where: { response in
             response.key == "ImageResponse"
         })
         let ImageResponse = try XCTUnwrap(ImageResponseOptional)
         XCTAssertEqual( ImageResponse.description,"An image.")
-        let IllegalInputOptional = apiSpec.components?.responses.first(where: { response in
+        let IllegalInputOptional = apiSpec.components?.responses?.first(where: { response in
             response.key == "IllegalInput"
         })
         let IllegalInput = try XCTUnwrap(IllegalInputOptional)
         XCTAssertEqual( IllegalInput.description,"Illegal input for operation.")
-        let GeneralErrorOptional = apiSpec.components?.responses.first(where: { response in
+        let GeneralErrorOptional = apiSpec.components?.responses?.first(where: { response in
             response.key == "GeneralError"
         })
         let GeneralError = try XCTUnwrap(GeneralErrorOptional)
@@ -365,22 +365,22 @@ final class openapispecreaderTests: XCTestCase {
             return
         }
         let apiSpec = try OpenAPIObject.read(text: string)
-        XCTAssertEqual(apiSpec.components?.securitySchemas.count,5)
-        let httpKeySecurityScheme = try XCTUnwrap(apiSpec.components?.securitySchemas.first{ $0.key == "http_Key"})
+        XCTAssertEqual(apiSpec.components?.securitySchemas?.count,5)
+        let httpKeySecurityScheme = try XCTUnwrap(apiSpec.components?.securitySchemas?.first{ $0.key == "http_Key"})
         XCTAssertEqual(httpKeySecurityScheme.securityType,.http)
         XCTAssertEqual(httpKeySecurityScheme.httpScheme , "basic")
         
-        let apiKeySecurityScheme = try XCTUnwrap(apiSpec.components?.securitySchemas.first{ $0.key == "api_key"})
+        let apiKeySecurityScheme = try XCTUnwrap(apiSpec.components?.securitySchemas?.first{ $0.key == "api_key"})
         XCTAssertEqual(apiKeySecurityScheme.securityType,.apiKey)
         XCTAssertEqual(apiKeySecurityScheme.name , "api_key")
         XCTAssertEqual(apiKeySecurityScheme.location , .header)
         
-        let bearerKeySecurityScheme = try XCTUnwrap(apiSpec.components?.securitySchemas.first{ $0.key == "bearer_key"})
+        let bearerKeySecurityScheme = try XCTUnwrap(apiSpec.components?.securitySchemas?.first{ $0.key == "bearer_key"})
         XCTAssertEqual(bearerKeySecurityScheme.securityType,.http)
         XCTAssertEqual(bearerKeySecurityScheme.httpScheme, "bearer")
         XCTAssertEqual(bearerKeySecurityScheme.httpBearerFormat, "JWT")
         
-        let petStoreOAuth2KeySecurityScheme = try XCTUnwrap(apiSpec.components?.securitySchemas.first{ $0.key == "petstore_auth"})
+        let petStoreOAuth2KeySecurityScheme = try XCTUnwrap(apiSpec.components?.securitySchemas?.first{ $0.key == "petstore_auth"})
         XCTAssertEqual(petStoreOAuth2KeySecurityScheme.securityType,.oauth2)
         XCTAssertNotNil(petStoreOAuth2KeySecurityScheme.flows?.implicit)
         let flowImplicit = try XCTUnwrap(petStoreOAuth2KeySecurityScheme.flows?.implicit)
@@ -390,7 +390,7 @@ final class openapispecreaderTests: XCTestCase {
         XCTAssertTrue(flowImplicit.scopes?.contains(where: {key,value in
                 key == "read:pets"}) ?? false)
         
-        let clipStoreOAuth2KeySecurityScheme = try XCTUnwrap(apiSpec.components?.securitySchemas.first{ $0.key == "clip_auth"})
+        let clipStoreOAuth2KeySecurityScheme = try XCTUnwrap(apiSpec.components?.securitySchemas?.first{ $0.key == "clip_auth"})
         XCTAssertEqual(clipStoreOAuth2KeySecurityScheme.securityType,.oauth2)
         XCTAssertNotNil(clipStoreOAuth2KeySecurityScheme.flows?.implicit)
         let clipflowImplicit = try XCTUnwrap(clipStoreOAuth2KeySecurityScheme.flows?.implicit)

@@ -1,0 +1,135 @@
+openapi: "3.1.0"
+info:
+  title: Component Ref Demo (single file)
+  version: "1.0.0"
+
+paths:
+  /users:
+    post:
+      operationId: createUser
+      summary: Create a user
+      tags: [users]
+      # requestBody über Component-Referenz
+      requestBody:
+        $ref: "#/components/requestBodies/CreateUserRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+              # Example über Component-Referenz
+              examples:
+                userExample:
+                  $ref: "#/components/examples/UserExample"
+          # Link-Component
+          links:
+            GetUserById:
+              $ref: "#/components/links/GetUserById"
+        "202":
+          description: Accepted, will send callback when ready
+          # Callback-Component
+          callbacks:
+            userCreated:
+              $ref: "#/components/callbacks/UserCreatedCallback"
+
+  # pathItem über Component-Referenz
+  /users/{userId}:
+    $ref: "#/components/pathItems/UserByIdPathItem"
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+      required: [id, email]
+
+    Error:
+      type: object
+      properties:
+        code: { type: string }
+        message: { type: string }
+      required: [code, message]
+
+  # -------- requestBodies --------
+  requestBodies:
+    CreateUserRequest:
+      description: JSON-Payload für das Anlegen eines Users
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/User"
+          # MediaType + Example-Ref
+          examples:
+            userExample:
+              $ref: "#/components/examples/UserExample"
+
+  # -------- examples --------
+  examples:
+    UserExample:
+      summary: Beispiel-User
+      value:
+        id: "u-123"
+        email: "alice@example.com"
+
+  # -------- links --------
+  links:
+    GetUserById:
+      description: Hole den gerade angelegten User
+      operationId: getUser
+      parameters:
+        userId: "$response.body#/id"
+
+  # -------- callbacks --------
+  callbacks:
+    UserCreatedCallback:
+      "{$request.body#/callbackUrl}":
+        post:
+          operationId: userCreatedCallbackReceiver
+          summary: Wird aufgerufen, wenn ein User vollständig angelegt ist
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    eventType: { type: string }
+                    user:
+                      $ref: "#/components/schemas/User"
+                  required: [eventType, user]
+          responses:
+            "200":
+              description: Callback empfangen
+
+  # -------- pathItems (nur OAS 3.1) --------
+  pathItems:
+    UserByIdPathItem:
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string }
+      get:
+        operationId: getUser
+        summary: Get user by id
+        responses:
+          "200":
+            description: OK
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/User"
+          "404":
+            description: Not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Error"
