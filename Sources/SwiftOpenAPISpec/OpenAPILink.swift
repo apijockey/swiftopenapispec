@@ -21,6 +21,7 @@ public struct OpenAPILink : KeyedElement {
         server = try map.mapIfPresent(Self.SERVER_KEY, OpenAPIServer.self)
         requestBody = map.readIfPresent(Self.REQUEST_BODY_KEY, String.self)
         parameters = map.readIfPresent(Self.PARAMETERS_KEY, [String:String].self) ?? [:]
+        extensions = try OpenAPIExtension.extensionElements(map)
     }
     public var key : String? = nil
     public var operationRef : String? = nil
@@ -30,6 +31,7 @@ public struct OpenAPILink : KeyedElement {
     public var parameters : [String:String] = [:]
     public var requestBody : String? = nil
     public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var extensions : [OpenAPIExtension]?
  
 }
 

@@ -13,7 +13,9 @@ import Foundation
   A unique parameter is defined by a combination of a name and location.
   */
  */
-public struct OpenAPIParameter :  ThrowingHashMapInitiable{
+public struct OpenAPIParameter :  KeyedElement{
+    
+    
     public enum ParameterLocation : String, Codable, CaseIterable {
         case cookie, query, queryString, header ,path
     }
@@ -36,9 +38,7 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable{
     public static let CONTENT_KEY = "content"
     public init(_ map: [String: Any]) throws {
         
-        guard let name = map[Self.NAME_KEY] as? String  else {
-            throw OpenAPIObject.Errors.invalidSpecification(OpenAPIOperation.PARAMETERS_KEY, Self.NAME_KEY)
-        }
+      
         guard let location = map[Self.IN_KEY] as? String  else {
             throw OpenAPIObject.Errors.invalidSpecification(OpenAPIOperation.PARAMETERS_KEY, Self.IN_KEY)
         }
@@ -46,14 +46,14 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable{
         self.content = map.readIfPresent(Self.CONTENT_KEY, OpenAPIMediaType.self)
         self.schema = try map.MapIfPresent(Self.SCHEMA_KEY, OpenAPISchema.self)
         if self.content == nil && self.schema == nil {
-            self
+            //TODO what is missing here
         }
         let required = map[Self.REQUIRED_KEY] as? Bool
         self.required = required ?? false
         
         
         self.location = ParameterLocation(rawValue: location)
-        self.name = name
+       
         self.description =  map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
         self.deprecated =  map.readIfPresent(Self.DEPRECATED_KEY, Bool.self)
         self.allowEmptyValue = map.readIfPresent(Self.ALLOW_EMPTYVALUE_KEY, Bool.self)
@@ -68,9 +68,10 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable{
             self.examples = try KeyedElementList.map(examplesMap)
         }
         self.format = map.readIfPresent(Self.FORMAT_KEY, String.self)
+        extensions = try OpenAPIExtension.extensionElements(map)
        
     }
-    public var name : String? = nil
+    public var key: String?
     public let location : ParameterLocation?
     public let required : Bool
     public var description : String? = nil
@@ -86,6 +87,7 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable{
     public var content : OpenAPIMediaType? = nil
     public var format : String?
     public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var extensions : [OpenAPIExtension]?
    
     //TODO: Examples Object
    

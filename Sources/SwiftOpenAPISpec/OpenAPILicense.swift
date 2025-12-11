@@ -6,11 +6,11 @@
 //
 
 import Foundation
-struct OpenAPILicense : Codable {
-    static let NAME_KEY = "name"
-    static let IDENTIFIER_KEY = "identifier"
-    static let URL_KEY = "url"
-    init?(_ map : [String:Any?]) {
+public struct OpenAPILicense : Codable {
+    public static let NAME_KEY = "name"
+    public static let IDENTIFIER_KEY = "identifier"
+    public static let URL_KEY = "url"
+    public init?(_ map : [String:Any?]) {
         guard let name = map[Self.NAME_KEY] as? String else {
             return nil
         }
@@ -25,7 +25,7 @@ struct OpenAPILicense : Codable {
             self.identifier = identifier
         }
     }
-    let name : String
-    var identifier : String? = nil
-    var url : String? = nil
+    public var name : String
+    public var identifier : String? = nil
+    public var url : String? = nil
 }

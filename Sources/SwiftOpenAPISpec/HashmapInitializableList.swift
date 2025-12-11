@@ -47,6 +47,23 @@ public struct KeyedElementList<T> where T :  KeyedElement {
         }
         return types
     }
+    static func map(list : [StringDictionary], yamlKeyName : String) throws -> [T] {
+        var types = [T]()
+        for listElement in list {
+                var element = try T(listElement)
+                if let key = listElement[yamlKeyName] as? String{
+                    element.key = key
+                    types.append(element)
+            }
+            else {
+                throw OpenAPIObject.Errors.invalidYaml("Could not find a entry in \(list.debugDescription) for \(yamlKeyName)")
+            }
+            
+            
+        }
+        return types
+        
+    }
     
 }
 

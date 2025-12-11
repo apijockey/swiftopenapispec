@@ -15,8 +15,8 @@ public struct OpenAPIOperation : KeyedElement, ThrowingHashMapInitiable{
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
         self.externalDocs = try map.mapIfPresent(Self.EXTERNAL_DOCS_KEY, OpenAPIExternalDocumentation.self)
         self.operationId = map.readIfPresent(Self.OP_ID_KEY, String.self)
-        if let parameterlist = map[Self.PARAMETERS_KEY] as? [Any] {
-            self.parameters = try HashmapInitializableList<OpenAPIParameter>.map(parameterlist)            
+        if let parameterlist = map[Self.PARAMETERS_KEY] as? [StringDictionary] {
+            parameters =   try KeyedElementList<OpenAPIParameter>.map(list:parameterlist,yamlKeyName: "name")
         }
         self.requestBody = try map.MapIfPresent(Self.REQUEST_BODIES_KEY, OpenAPIRequestBody.self)
         
@@ -38,7 +38,7 @@ public struct OpenAPIOperation : KeyedElement, ThrowingHashMapInitiable{
         if servers.count > 0 {
             self.servers = servers
         }
-       
+        extensions = try OpenAPIExtension.extensionElements(map)
        
        
         
@@ -66,6 +66,7 @@ public struct OpenAPIOperation : KeyedElement, ThrowingHashMapInitiable{
     public var servers : [OpenAPIServer] = [OpenAPIServer(url: "/")]
     //Lists the required security schemes to execute this operation. The name used for each property MUST correspond to a security scheme declared in the Security Schemes under the Components Object.
     public var securityObjects : [OpenAPISecuritySchemeReference] = []
+    public var extensions : [OpenAPIExtension]?
     public var externalDocs : OpenAPIExternalDocumentation? = nil
     public var userInfos =  [OpenAPIObject.UserInfo]()
   

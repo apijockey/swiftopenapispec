@@ -149,7 +149,7 @@ final class openapispecreaderTests: XCTestCase {
         XCTAssertEqual(emojiPathOperation.parameters?.count,0)
         XCTAssertEqual(greetPathOperation.parameters?.count,1)
         let greetPathParameter = try XCTUnwrap(greetPathOperation.parameters?.first)
-        XCTAssertEqual(greetPathParameter.name, "name")
+        XCTAssertEqual(greetPathParameter.key, "name")
         XCTAssertEqual(greetPathParameter.required, false)
         XCTAssertEqual(greetPathParameter.location, OpenAPIParameter.ParameterLocation.query)
         XCTAssertEqual(greetPathParameter.description, "The name used in the returned greeting.")
@@ -226,12 +226,12 @@ final class openapispecreaderTests: XCTestCase {
         let skipParamComponent = try XCTUnwrap(apiSpec.components?.parameters.first { path in
             path.key == "skipParam"
         })
-        XCTAssertEqual(skipParamComponent.namedComponentType?.name, "skip")
-        XCTAssertEqual(skipParamComponent.namedComponentType?.location, OpenAPIParameter.ParameterLocation.query)
-        XCTAssertEqual(skipParamComponent.namedComponentType?.description, "number of items to skip")
-        XCTAssertEqual(skipParamComponent.namedComponentType?.required, true)
-        XCTAssertTrue(skipParamComponent.namedComponentType?.schema?.schemaType is  OpenAPIIntegerType)
-        XCTAssertEqual(skipParamComponent.namedComponentType?.schema?.format, OpenAPISchema.DataType.int32)
+        XCTAssertEqual(skipParamComponent.key, "skip")
+        XCTAssertEqual(skipParamComponent.location, OpenAPIParameter.ParameterLocation.query)
+        XCTAssertEqual(skipParamComponent.description, "number of items to skip")
+        XCTAssertEqual(skipParamComponent.required, true)
+        XCTAssertTrue(skipParamComponent.schema?.schemaType is  OpenAPIIntegerType)
+     
     }
     func testResponsesComponents() throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {

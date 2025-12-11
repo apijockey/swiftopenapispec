@@ -31,10 +31,9 @@ public struct OpenAPIPath: KeyedElement {
         for (key, httpOperation) in map {
             if let httpOperationMap = httpOperation as? [String: Any] {
                 var operation = try OpenAPIOperation(httpOperationMap)
-                if let operationId = key as? String {
+                
                     // In diesem Kontext ist "key" die HTTP-Methode (get, post, ...)
-                    operation.key = operationId
-                }
+                    operation.key = key
                 self.operations.append(operation)
             }
         }
