@@ -65,9 +65,10 @@ public struct OpenAPIObject  {
      */
     
     public static func read(text : String) throws -> OpenAPIObject{
-        guard let loadedDictionary = try Yams.load(yaml: text) as? StringDictionary else {
+        guard let unflattened = try Yams.load(yaml: text) as? StringDictionary else {
             throw OpenAPIObject.Errors.invalidYaml("text cannot be interpreted as a Key/Value List")
         }
+        let loadedDictionary = resolveMergeKeys(in: unflattened)
         //Mandatory
         let version = try loadedDictionary.tryRead(OpenAPIObject.OPENAPI_KEY, String.self, root: "root")
         //Mandatory
@@ -146,6 +147,94 @@ public struct OpenAPIObject  {
             c.key == component
         })
     }
+    
+    
+
+    /// Resolves YAML merge keys ("<<") in a structure produced by Yams.load.
+    /// - Parameter any: The parsed YAML object (Dictionary/Array/Scalar).
+    /// - Returns: A new object where merge keys are applied and removed.
+    private static func resolveMergeKeys(_ any: Any) -> Any {
+        switch any {
+        case let dict as [String: Any]:
+            return resolveMergeKeys(in: dict)
+        case let array as [Any]:
+            return array.map { resolveMergeKeys($0) }
+        default:
+            return any
+        }
+    }
+
+    private static func resolveMergeKeys(in dict: [String: Any]) -> [String: Any] {
+        // 1) First resolve merge keys in all non-merge children
+        var resolved: [String: Any] = [:]
+        resolved.reserveCapacity(dict.count)
+
+        for (k, v) in dict where k != "<<" {
+            resolved[k] = resolveMergeKeys(v)
+        }
+
+        // 2) Apply merges if present
+        if let mergeValue = dict["<<"] {
+            let mergedFrom = extractMergeMappings(mergeValue)
+                .map { resolveMergeKeys(in: $0) } // resolve nested merges inside bases
+
+            // YAML rule: merges are applied in order, later merges override earlier ones,
+            // but explicit/local keys override everything.
+            var base: [String: Any] = [:]
+            for m in mergedFrom {
+                base = deepMerge(base, m, preferSecond: true)
+            }
+
+            // 3) Finally merge local keys on top (locals win)
+            resolved = deepMerge(base, resolved, preferSecond: true)
+        }
+
+        return resolved
+    }
+
+    /// Turns a merge-key value into an array of mappings.
+    /// Valid YAML forms:
+    ///   <<: *base
+    ///   <<: [*base1, *base2]
+    private static func extractMergeMappings(_ mergeValue: Any) -> [[String: Any]] {
+        if let single = mergeValue as? [String: Any] {
+            return [single]
+        } else if let many = mergeValue as? [Any] {
+            return many.compactMap { $0 as? [String: Any] }
+        } else {
+            // Non-mapping merge values are invalid per YAML spec;
+            // we ignore them for robustness.
+            return []
+        }
+    }
+
+    /// Deep merges two dictionaries.
+    /// - preferSecond: if true, values from `b` override those from `a`
+    private static func deepMerge(_ a: [String: Any], _ b: [String: Any], preferSecond: Bool) -> [String: Any] {
+        var result = a
+
+        for (key, bVal) in b {
+            if let aVal = result[key] {
+                switch (aVal, bVal) {
+                case (let aDict as [String: Any], let bDict as [String: Any]):
+                    result[key] = deepMerge(aDict, bDict, preferSecond: preferSecond)
+
+                case (let aArr as [Any], let bArr as [Any]):
+                    // YAML doesn't define array-merge for <<; last wins is typical.
+                    result[key] = preferSecond ? bArr : aArr
+
+                default:
+                    result[key] = preferSecond ? bVal : aVal
+                }
+            } else {
+                result[key] = bVal
+            }
+        }
+
+        return result
+    }
+
+    
     var userInfos =  [UserInfo]()
     static let COMPONENTS_KEY = "components"
     static let EXTERNAL_DOCS_KEY = "externalDocs"
