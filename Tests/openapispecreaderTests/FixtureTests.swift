@@ -422,8 +422,26 @@ struct FixtureTests {
         let apiSpec = try OpenAPIObject.read(text: yaml)
         #expect(apiSpec.components?.schemas?.count == 2)
         #expect(apiSpec.components?.requestBodies?.count == 1)
+        let requestBody = try #require(apiSpec.components?.requestBodies?[key: "CreateUserRequest"]?.namedComponentType)
+        #expect(requestBody.description == "JSON-Payload für das Anlegen eines Users")
+        #expect(requestBody.required == true)
         #expect(apiSpec.components?.examples?.count == 1)
+        let example = try #require(apiSpec.components?.examples?[key: "UserExample"])
+        #expect(example.summary == "Beispiel-User")
         #expect(apiSpec.components?.links?.count == 1)
+        let link = try #require(apiSpec.components?.links?[key: "GetUserById"])
+        #expect(link.description == "Hole den gerade angelegten User")
+        #expect(link.operationId == "getUser")
+        #expect(link.parameters["userId"] == "$response.body#/id")
+        
+        #expect(apiSpec.components?.callbacks?.count == 1)
+        let callback = try #require(apiSpec.components?.callbacks?[key:"UserCreatedCallback"]?.pathItems?[key: "{$request.body#/callbackUrl}"])
+        #expect((callback.operations[operationID: "userCreatedCallbackReceiver"] != nil))
+        #expect(callback.key == "{$request.body#/callbackUrl}")
+        #expect(apiSpec.components?.pathItems?.count == 1)
+        let pathItem = try #require(apiSpec.components?.pathItems?[key:"UserByIdPathItem"])
+        #expect(pathItem.key == "UserByIdPathItem")
+        #expect(pathItem.operations[operationID: "getUser"]?.summary == "Get user by id")
     }
     
 }
