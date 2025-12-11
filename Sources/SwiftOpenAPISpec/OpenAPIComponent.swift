@@ -19,7 +19,9 @@ public struct OpenAPIComponent : KeyedElement, ThrowingHashMapInitiable {
     }
     public init(_ map: StringDictionary) throws {
         
-        //callbacks
+        if let map = map[Self.CALLBACKS_KEY] as? StringDictionary{
+            self.callbacks = try KeyedElementList<OpenAPICallBack>.map(map)
+        }
         if let map = map[Self.EXAMPLES_KEY] as? StringDictionary{
             self.examples = try KeyedElementList<OpenAPIExample>.map(map)
         }
@@ -91,6 +93,7 @@ public struct OpenAPIComponent : KeyedElement, ThrowingHashMapInitiable {
     //TODO: Callback
     public var extensions : [OpenAPIExtension]?
     public var examples : [OpenAPIExample]?
+    public var callbacks : [OpenAPICallBack]?
     public var headers : [OpenAPIHeader]?
     public var key: String?
     public var parameters : [OpenAPIParameter]?
