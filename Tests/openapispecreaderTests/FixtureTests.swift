@@ -400,10 +400,21 @@ struct FixtureTests {
         #expect(parameterStructuredExtensionProperties["widget"] == "toggle")
         #expect(parameterStructuredExtensionProperties["defaultLabel"] == "Detailed response")
     }
-    @Test("32-localurls")
-    func localurls() async throws {
-        
-    }
+   
     
+    @Test("32-mergekeys")
+    func mergekeys() async throws {
+        let yaml = try fixtureString("32-mergekeys")
+        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let baseAnchorServer = try #require(apiSpec.servers[url: "."])
+        #expect(baseAnchorServer.description == "The production API on this device")
+        #expect(baseAnchorServer.extensions?[extensionName: "x-timeout"]?.simpleExtensionValue == "30")
+        #expect(baseAnchorServer.extensions?[extensionName: "x-custom-header"]?.simpleExtensionValue == "value")
+        
+        let deviceServer = try #require(apiSpec.servers[url: "./test"])
+        #expect(deviceServer.description == "The test API on this device")
+        #expect(deviceServer.extensions?[extensionName: "x-timeout"]?.simpleExtensionValue == "60")
+        #expect(deviceServer.extensions?[extensionName: "x-custom-header"]?.simpleExtensionValue == "value")
+    }
     
 }

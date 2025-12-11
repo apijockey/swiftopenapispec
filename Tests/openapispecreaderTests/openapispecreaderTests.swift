@@ -514,7 +514,7 @@ final class openapispecreaderTests: XCTestCase {
         XCTAssertEqual(aset[contains: .top],true)
         
         let json = JSON.intValue(5)
-        print(json.stringValue)
+        
         let jsonArray = JSON.arrayValue([JSON.intValue(2),JSON.intValue(5),JSON.intValue(8),JSON.intValue(1)])
         XCTAssertNil(jsonArray[5])
         XCTAssertEqual(jsonArray[2]?.stringValue,"8")
