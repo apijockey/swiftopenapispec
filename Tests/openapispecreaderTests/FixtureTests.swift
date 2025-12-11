@@ -205,7 +205,7 @@ struct FixtureTests {
     func refscircular() async throws {
         let yaml = try fixtureString("07-refs-circular")
         let apiSpec = try OpenAPIObject.read(text: yaml)
-        let nodeObjectComponent = try #require(apiSpec.components?.schemas.first?.namedComponentType?.schemaType as? OpenAPIObjectType)
+        let nodeObjectComponent = try #require(apiSpec.components?.schemas?.first?.namedComponentType?.schemaType as? OpenAPIObjectType)
         #expect(nodeObjectComponent.properties.count == 1)
         #expect(nodeObjectComponent.properties.first?.key == "next")
     }
@@ -415,6 +415,15 @@ struct FixtureTests {
         #expect(deviceServer.description == "The test API on this device")
         #expect(deviceServer.extensions?[extensionName: "x-timeout"]?.simpleExtensionValue == "60")
         #expect(deviceServer.extensions?[extensionName: "x-custom-header"]?.simpleExtensionValue == "value")
+    }
+    @Test("33-components-singlefile")
+    func componentssinglefile() async throws {
+        let yaml = try fixtureString("33-components-singlefile")
+        let apiSpec = try OpenAPIObject.read(text: yaml)
+        #expect(apiSpec.components?.schemas?.count == 2)
+        #expect(apiSpec.components?.requestBodies?.count == 1)
+        #expect(apiSpec.components?.examples?.count == 1)
+        #expect(apiSpec.components?.links?.count == 1)
     }
     
 }

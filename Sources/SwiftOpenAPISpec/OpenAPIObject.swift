@@ -128,22 +128,22 @@ public struct OpenAPIObject  {
         return webhooks[webhook: path]
     }
     subscript(schemacomponent component: String) -> OpenAPISchema? {
-        return components?.schemas.first(where: { c in
+        return components?.schemas?.first(where: { c in
             c.key == component
         })?.namedComponentType
     }
     subscript(parametercomponent component: String) -> OpenAPIParameter? {
-        return components?.parameters.first(where: { c in
+        return components?.parameters?.first(where: { c in
             c.key == component
         })
     }
     subscript(responsecomponent component: String) -> OpenAPIResponse? {
-        return components?.responses.first(where: { c in
+        return components?.responses?.first(where: { c in
             c.key == component
         })
     }
     subscript(securityschemacomponent component: String) -> OpenAPISecurityScheme? {
-        return components?.securitySchemas.first(where: { c in
+        return components?.securitySchemas?.first(where: { c in
             c.key == component
         })
     }

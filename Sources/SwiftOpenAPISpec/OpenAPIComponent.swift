@@ -17,23 +17,48 @@ public struct OpenAPIComponent : KeyedElement, ThrowingHashMapInitiable {
     public  enum Errors : LocalizedError {
         case unsupportedComponentlist, unrecognizedComponent
     }
-    public init(_ map: [String : Any]) throws {
-        if let schemasMap = map[Self.SCHEMAS_KEY] as? [String : Any]{
-            schemas = try KeyedElementList<NamedComponent<OpenAPISchema>>.map(schemasMap)
+    public init(_ map: StringDictionary) throws {
+        
+        //callbacks
+        if let map = map[Self.EXAMPLES_KEY] as? StringDictionary{
+            self.examples = try KeyedElementList<OpenAPIExample>.map(map)
         }
+        extensions = try OpenAPIExtension.extensionElements(map)
+        
+        if let map = map[Self.HEADERS_KEY] as? StringDictionary{
+            self.examples = try KeyedElementList<OpenAPIExample>.map(map)
+        }
+        
+        if let headerMap = map[Self.HEADERS_KEY] as? StringDictionary{
+            self.headers = try KeyedElementList<OpenAPIHeader>.map(headerMap)
+        }
+        if let map = map[Self.LINKS_KEY] as? StringDictionary{
+            self.links = try KeyedElementList<OpenAPILink>.map(map)
+        }
+        if let map = map[Self.MEDIATYPES_KEY] as? StringDictionary{
+            self.mediaTypes = try KeyedElementList<OpenAPIMediaType>.map(map)
+        }
+        if let map = map[Self.PATHSITEMS_KEY] as? StringDictionary{
+            self.pathItems = try KeyedElementList<OpenAPIPath>.map(map)
+        }
+        
+      
         if let paramsMap = map[Self.PARAMETERS_KEY] as? [StringDictionary]{
             parameters = try KeyedElementList<OpenAPIParameter>.map(list:paramsMap,yamlKeyName: "name")
         }
-        if let responsesMap = map[Self.RESPONSES_KEY] as? [String : Any]{
+        if let map = map[Self.REQUEST_BODIES_KEY] as? StringDictionary{
+            self.requestBodies = try KeyedElementList<NamedComponent<OpenAPIRequestBody>>.map(map)
+        }
+        if let responsesMap = map[Self.RESPONSES_KEY] as? StringDictionary{
             responses = try KeyedElementList<OpenAPIResponse>.map(responsesMap)
         }
-        if let securitySchemaMap = map[Self.SECURITY_SCHEMES_KEY] as? [String : Any]{
+        if let schemasMap = map[Self.SCHEMAS_KEY] as? StringDictionary{
+            schemas = try KeyedElementList<NamedComponent<OpenAPISchema>>.map(schemasMap)
+        }
+        if let securitySchemaMap = map[Self.SECURITY_SCHEMES_KEY] as? StringDictionary{
             self.securitySchemas = try KeyedElementList<OpenAPISecurityScheme>.map(securitySchemaMap)
         }
-        if let headerMap = map[Self.HEADERS_KEY] as? [String: Any]{
-            self.headers = try KeyedElementList<OpenAPIHeader>.map(headerMap)
-        }
-        extensions = try OpenAPIExtension.extensionElements(map)
+        
     }
     public func resolveSchemaComponent(components : [String]) throws ->  OpenAPISchema?{
         if components.count < 4 {
@@ -44,33 +69,40 @@ public struct OpenAPIComponent : KeyedElement, ThrowingHashMapInitiable {
         let componenttype = components[Self.COMPONENTTYPE_INDEX ]
         let componentname = components[Self.COMPONENTELEMENT_INDEX ]
         switch componenttype  {
-        case Self.SCHEMAS_KEY : return schemas.first { schema in
+        case Self.SCHEMAS_KEY : return schemas?.first { schema in
             schema.key == componentname
         }?.namedComponentType
         default:
             throw Self.Errors.unrecognizedComponent
         }       
     }
-    public  static let CALLBACKS_KEY = "examples"
+    public  static let CALLBACKS_KEY = "callbacks"
     public static let EXAMPLES_KEY = "examples"
     public static let HEADERS_KEY = "headers"
-    public static let LINKS_KEY = "examples"
+    public static let LINKS_KEY = "links"
     public  static let MEDIATYPES_KEY = "mediaTypes"
-    public  static let PATHS_ITEMS_KEY = "pathItems"
+    public  static let PATHSITEMS_KEY = "pathItems"
     public static let PARAMETERS_KEY = "parameters"
     public static let REQUEST_BODIES_KEY = "requestBodies"
     public static let RESPONSES_KEY = "responses"
     public static let SCHEMAS_KEY = "schemas"
     public static let SECURITY_SCHEMES_KEY = "securitySchemes"
     
-    public var schemas : [NamedComponent<OpenAPISchema>] = []
-    public var headers : [OpenAPIHeader] = []
-    public var key: String?
-    public var parameters : [OpenAPIParameter] = []
-    public var responses : [OpenAPIResponse] = []
-    public var securitySchemas : [OpenAPISecurityScheme] = []
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    //TODO: Callback
     public var extensions : [OpenAPIExtension]?
+    public var examples : [OpenAPIExample]?
+    public var headers : [OpenAPIHeader]?
+    public var key: String?
+    public var parameters : [OpenAPIParameter]?
+    public var pathItems : [OpenAPIPath]?
+    public var mediaTypes : [OpenAPIMediaType]?
+    public var links: [OpenAPILink]?
+    public var requestBodies : [NamedComponent<OpenAPIRequestBody>]?
+    public var responses : [OpenAPIResponse]?
+    public var securitySchemas : [OpenAPISecurityScheme]?
+    public var schemas : [NamedComponent<OpenAPISchema>]?
+    public var userInfos =  [OpenAPIObject.UserInfo]()
+    
     
     
     //https://swagger.io/docs/specification/v3_0/components/
