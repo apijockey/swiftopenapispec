@@ -32,7 +32,54 @@ struct S: Codable {
 /// let apiSpec = try OpenAPISpec.read(text: string)
 /// ```
 ///
-public struct OpenAPIObject  {
+public struct OpenAPIObject : KeyedElement {
+    public var key: String?
+    
+    public init(_ map: StringDictionary) throws {
+        //Mandatory
+        self.version = try map.tryRead(OpenAPIObject.OPENAPI_KEY, String.self, root: "root")
+        //Mandatory
+        self.info = try map.tryMap(OpenAPIObject.INFO_KEY, root: "root", OpenAPIInfo.self)
+        if map[OpenAPIObject.COMPONENTS_KEY]  as? StringDictionary != nil {
+            components =  try map.tryMap(OpenAPIObject.COMPONENTS_KEY, root: "root", OpenAPIComponent.self)
+        }
+        selfUrl = map.readIfPresent(OpenAPIObject.SELF_URL_KEY, String.self)
+        self.key = selfUrl
+        tags = try map.tryListIfPresent(OpenAPIObject.TAGS_KEY, root: "root", OpenAPITag.self)
+        self.externalDocumentation = try map.tryMapIfPresent(OpenAPIObject.EXTERNAL_DOCS_KEY,root: "root", OpenAPIExternalDocumentation.self)
+        self.jsonSchemaDialect = map.tryReadIfPresent(OpenAPIObject.JSON_SCHEMA_DIALECT_KEY, String.self, root: "root")
+        let servers =  try map.tryListIfPresent(OpenAPIObject.SERVERS_KEY, root: "root", OpenAPIServer.self)
+        if servers.count > 0 {
+            self.servers = servers
+        }
+        if let pathsMap = map[OpenAPIObject.PATHS_KEY]  as? StringDictionary{
+           let paths = try KeyedElementList<OpenAPIPathItem>.map(pathsMap)
+            self.paths = paths
+        }
+        if let webhooksMap = map[OpenAPIObject.WEBHOOKS_KEY]  as? StringDictionary{
+           let webhooks = try KeyedElementList<OpenAPIPathItem>.map(webhooksMap)
+            self.webhooks  = webhooks
+        }
+        if let securityObjectMap = map[Self.SECURITY_KEY] as?  [[String:[String]]] {
+            for element in securityObjectMap {
+                if let mapElement = element.first {
+                    let ref = OpenAPISecuritySchemeReference(key: mapElement.key, scopes:mapElement.value)
+                    self.securityObjects.append(ref)
+                    
+                }
+            }
+        }
+        
+        self.extensions = try OpenAPIExtension.extensionElements(map)
+
+        //https://swagger.io/docs/specification/v3_0/components/
+        if self.components == nil  && self.paths.count == 0 && self.webhooks.count == 0 {
+            self.userInfos.append(UserInfo(message: "components and paths element missing", infoType: .warning))
+        }
+        
+       
+    }
+    
     public struct UserInfo : Codable {
         public let message : String
         public let infoType : UserInfoType
@@ -62,51 +109,16 @@ public struct OpenAPIObject  {
              - Returns: an OpenAPISpec instance  which holds the text contents as simple Swift structs
      */
     
-    public static func read(text : String) throws -> OpenAPIObject{
+    public static func read(text : String, url : String ) throws -> OpenAPIObject{
         guard let unflattened = try Yams.load(yaml: text) as? StringDictionary else {
             throw OpenAPIObject.Errors.invalidYaml("text cannot be interpreted as a Key/Value List")
         }
         let loadedDictionary = resolveMergeKeys(in: unflattened)
-        //Mandatory
-        let version = try loadedDictionary.tryRead(OpenAPIObject.OPENAPI_KEY, String.self, root: "root")
-        //Mandatory
-        let info = try loadedDictionary.tryMap(OpenAPIObject.INFO_KEY, root: "root", OpenAPIInfo.self)
-        var spec = OpenAPIObject(version: version,info: info)
-        spec.components =  try? loadedDictionary.tryMap(OpenAPIObject.COMPONENTS_KEY, root: "root", OpenAPIComponent.self)
-        spec.selfUrl = loadedDictionary.readIfPresent(OpenAPIObject.SELF_URL_KEY, String.self)
-        spec.tags = try loadedDictionary.tryListIfPresent(OpenAPIObject.TAGS_KEY, root: "root", OpenAPITag.self)
-        spec.externalDocumentation = try loadedDictionary.tryMapIfPresent(OpenAPIObject.EXTERNAL_DOCS_KEY,root: "root", OpenAPIExternalDocumentation.self)
-        spec.jsonSchemaDialect = loadedDictionary.tryReadIfPresent(OpenAPIObject.JSON_SCHEMA_DIALECT_KEY, String.self, root: "root")
-        let servers =  try loadedDictionary.tryListIfPresent(OpenAPIObject.SERVERS_KEY, root: "root", OpenAPIServer.self)
-        if servers.count > 0 {
-            spec.servers = servers
+        var openapispec = try OpenAPIObject(loadedDictionary)
+        if openapispec.key == nil {
+            openapispec.key = url
         }
-        if let map = loadedDictionary[OpenAPIObject.PATHS_KEY]  as? StringDictionary{
-           let paths = try KeyedElementList<OpenAPIPathItem>.map(map)
-            spec.paths = paths
-        }
-        if let map = loadedDictionary[OpenAPIObject.WEBHOOKS_KEY]  as? StringDictionary{
-           let webhooks = try KeyedElementList<OpenAPIPathItem>.map(map)
-            spec.webhooks  = webhooks
-        }
-        if let securityObjectMap = loadedDictionary[Self.SECURITY_KEY] as?  [[String:[String]]] {
-            for element in securityObjectMap {
-                if let mapElement = element.first {
-                    let ref = OpenAPISecuritySchemeReference(key: mapElement.key, scopes:mapElement.value)
-                    spec.securityObjects.append(ref)
-                    
-                }
-            }
-        }
-        
-            spec.extensions = try OpenAPIExtension.extensionElements(loadedDictionary)
-
-        //https://swagger.io/docs/specification/v3_0/components/
-        if spec.components == nil  && spec.paths.count == 0 && spec.webhooks.count == 0 {
-            spec.userInfos.append(UserInfo(message: "components and paths element missing", infoType: .warning))
-        }
-        
-       return spec
+        return openapispec
     }
     public subscript(operationId id: String) -> [OpenAPIOperation] {
         let matches = paths[operationID: id]
@@ -240,18 +252,18 @@ public struct OpenAPIObject  {
         }
     }
     
-    var userInfos =  [UserInfo]()
-    static let COMPONENTS_KEY = "components"
-    static let EXTERNAL_DOCS_KEY = "externalDocs"
-    static let INFO_KEY = "info"
-    static let JSON_SCHEMA_DIALECT_KEY = "$schema"
-    static let OPENAPI_KEY = "openapi"
-    static let PATHS_KEY = "paths"
-    static let SECURITY_KEY = "security"
-    static let SERVERS_KEY = "servers"
-    static let TAGS_KEY = "tags"
-    static let SELF_URL_KEY = "$self"
-    static let WEBHOOKS_KEY = "webhooks"
+    public var userInfos =  [UserInfo]()
+    public static let COMPONENTS_KEY = "components"
+    public static let EXTERNAL_DOCS_KEY = "externalDocs"
+    public static let INFO_KEY = "info"
+    public static let JSON_SCHEMA_DIALECT_KEY = "$schema"
+    public static let OPENAPI_KEY = "openapi"
+    public static let PATHS_KEY = "paths"
+    public static let SECURITY_KEY = "security"
+    public static let SERVERS_KEY = "servers"
+    public static let TAGS_KEY = "tags"
+    public static let SELF_URL_KEY = "$self"
+    public static let WEBHOOKS_KEY = "webhooks"
     public var version : String
     public var selfUrl : String?
     public var jsonSchemaDialect : String?

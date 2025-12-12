@@ -45,7 +45,7 @@ struct FixtureTests {
         
         let yaml = try fixtureString("minimal-3_0")
         
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml, url:"minimal-3_0" )
         #expect(apiSpec.version == "3.0.3")
         #expect(apiSpec.servers.count == 0)
         #expect(apiSpec.paths.count > 0)
@@ -62,7 +62,7 @@ struct FixtureTests {
     func modernKeywords() async throws {
         
         let yaml = try fixtureString("02-minimal-31")
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml, url:"02-minimal-31" )
         #expect(apiSpec.version == "3.1.0")
         #expect(apiSpec.servers.count == 0)
         #expect(apiSpec.paths.count > 0)
@@ -88,7 +88,7 @@ struct FixtureTests {
     func pathitems() async throws {
         
         let yaml = try fixtureString("03-pathitems")
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml, url:"03-pathitems")
         let path = try #require(apiSpec[path: "/pets/{id}"])
         #expect(path.description == "Returns pets information")
         #expect(path.summary == "get Pets")
@@ -121,7 +121,7 @@ struct FixtureTests {
     func mediatypes() async throws {
         
         let yaml = try fixtureString("04-requestbody-media-types")
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml, url:"04-requestbody-media-types")
         let operations = try #require(apiSpec[path: "/upload"]?.operations)
         #expect(operations.count == 1)
         
@@ -134,7 +134,7 @@ struct FixtureTests {
     func enumtypes() async throws {
         
         let yaml = try fixtureString("04a-requestbody-media-types-enum")
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml, url:"04a-requestbody-media-types-enum")
         let operations = try #require(apiSpec[path: "/upload"]?.operations)
         #expect(operations.count == 1)
         
@@ -150,7 +150,7 @@ struct FixtureTests {
     func arraytypes() async throws {
         
         let yaml = try fixtureString("04b-requestbody-media-types-object")
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml, url:"04b-requestbody-media-types-object")
         let operations = try #require(apiSpec[path: "/upload"]?.operations)
         #expect(operations.count == 1)
         
@@ -170,7 +170,7 @@ struct FixtureTests {
     func components() async throws {
         
         let yaml = try fixtureString("05-responses-status-default")
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml, url:"05-responses-status-default")
         let operations = try #require(apiSpec[path: "/create"]?.operations)
         #expect(operations.count == 1)
         
@@ -187,7 +187,7 @@ struct FixtureTests {
     @Test("tictactor-nested-array-elements")
     func nestedArrayElements() async throws {
         let yaml = try fixtureString("tictactoe")
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml, url:"tictactoe")
         let operations = try #require(apiSpec[path: "/board"]?.operations)
         #expect(operations.count == 1)
         #expect(operations.first?.response(httpstatus: "200")?.content.count == 1)
@@ -207,7 +207,7 @@ struct FixtureTests {
     @Test("07-refs-circular")
     func refscircular() async throws {
         let yaml = try fixtureString("07-refs-circular")
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml, url:"07-refs-circular")
         let nodeObjectComponent = try #require(apiSpec.components?.schemas?.first?.schemaType as? OpenAPIObjectType)
         #expect(nodeObjectComponent.properties.count == 1)
         #expect(nodeObjectComponent.properties.first?.key == "next")
@@ -216,7 +216,7 @@ struct FixtureTests {
     @Test("08-oneof")
     func oneofanyof() async throws {
         let yaml = try fixtureString("08-oneof")
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml, url:"08-oneof")
         let oneOf = try #require(apiSpec[path: "/shape"]?.operations[operationID : "createShape"]?.requestBody?.contents[ key: "application/json"]?.schema?.schemaType as? OpenAPIOneOfType)
         #expect(oneOf.items?.count == 2)
         
@@ -225,7 +225,7 @@ struct FixtureTests {
     @Test("08a-allof")
     func oneofallof() async throws {
         let yaml = try fixtureString("08a-allof")
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml, url:"08a-allof")
         let allOf = try #require(apiSpec[path: "/shape"]?.operations[operationID : "createShape"]?.requestBody?.contents[ key: "application/json"]?.schema?.schemaType as? OpenAPIAllOfType)
         #expect(allOf.items?.count == 2)
         
@@ -235,7 +235,7 @@ struct FixtureTests {
     @Test("09-enums-defaults-constraints")
     func enumsdefaultsconstraints() async throws {
         let yaml = try fixtureString("09-enums-defaults-constraints")
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml, url:"09-enums-defaults-constraints")
         let object = try #require(apiSpec[path: "/order"]?.operations[operationID : "createOrder"]?.requestBody?.contents[ key: "application/json"]?.schema?.schemaType as? OpenAPIObjectType)
         #expect(object.required.contains( "status"))
         #expect(object.required.contains( "count"))
@@ -248,7 +248,7 @@ struct FixtureTests {
     @Test("10-servers-variables")
     func serversvariables() async throws {
         let yaml = try fixtureString("10-servers-variables")
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml, url:"10-servers-variables")
         #expect(apiSpec.servers.count == 6)
         //Änderungen an der Yaml-Datei
         let regionServer = try #require(apiSpec.servers[url: "https://{region}.api.example.com/{basePath}"])
@@ -273,13 +273,13 @@ struct FixtureTests {
     @Test("11-contenttype-vendor-json")
     func contenttypevendor() async throws {
         let yaml = try fixtureString("11-contenttype-vendor-json")
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml, url:"11-contenttype-vendor-json")
         #expect(apiSpec[path: "/fail"]?.operations[key: "get"]?.responses?[key: "400"]?.content[key: "application/problem+json"]?.schema?.schemaType is OpenAPIObjectType)
     }
     @Test("20-webhook-minimal")
     func minimumwebhook() async throws {
         let yaml = try fixtureString("20-webhook-minimal")
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml, url:"20-webhook-minimal")
         let pingWebhook = try #require(apiSpec[webhook: "pingEvent"])
         let postMethod = try #require(pingWebhook[httpMethod: "post"].first)
         #expect(postMethod.key == "post")
@@ -289,7 +289,7 @@ struct FixtureTests {
     @Test("21-webhooks-multiple")
     func multiplewebhooks() async throws {
         let yaml = try fixtureString("21-webhooks-multiple")
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml,url:"21-webhooks-multiple")
         let orderCreatedWebhook = try #require(apiSpec[webhook: "orderCreated"])
         #expect(orderCreatedWebhook.operations.count == 1)
         #expect(orderCreatedWebhook.operations.first?.summary == "Triggered when a new order is created")
@@ -301,7 +301,7 @@ struct FixtureTests {
     @Test("21-components")
     func nestedcomponents() async throws {
         let yaml = try fixtureString("21-webhooks-multiple")
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml, url:"21-webhooks-multiple")
         let orderCreatedEventComponent = try #require(apiSpec[schemacomponent: "Money"])
         let object = try #require(orderCreatedEventComponent.schemaType as? OpenAPIObjectType)
         #expect(object.properties.contains(name:"currency"))
@@ -313,14 +313,14 @@ struct FixtureTests {
     @Test("21-allofcomponents")
     func nestedallofcomponent() async throws {
         let yaml = try fixtureString("21-webhooks-multiple")
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml, url:"21-webhooks-multiple")
         let orderCreatedEventComponent = try #require(apiSpec[schemacomponent: "OrderCreatedEvent"])
         #expect(orderCreatedEventComponent.schemaType is OpenAPIAllOfType)
     }
     @Test("22-secured-webhooks")
     func securedwebhooks() async throws {
         let yaml = try fixtureString("22-secured-webhooks")
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml, url:"22-secured-webhooks")
         let webhookSignatureComponent = try #require(apiSpec[securityschemacomponent:  "webhookSignature"])
         #expect(webhookSignatureComponent.securityType == .apiKey)
         #expect(webhookSignatureComponent.location == .header)
@@ -332,7 +332,7 @@ struct FixtureTests {
     @Test("23-oneOf-WebhookComponent")
     func oenOfsecurityWebhooks() async throws {
         let yaml = try fixtureString("23-oneOf-Webhooks")
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml, url:"23-oneOf-Webhooks")
         let schemaComponent = try #require(apiSpec[schemacomponent: "EventEnvelope"])
         let schemaComponentObject = try #require(schemaComponent.schemaType as? OpenAPIObjectType)
         let payloadProperty = try #require(schemaComponentObject.properties[key: "payload"])
@@ -348,7 +348,7 @@ struct FixtureTests {
     @Test("30-externaldocs-tags")
     func externaldocstags() async throws {
         let yaml = try fixtureString("30-externaldocs-tags")
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml, url:"30-externaldocs-tags")
         #expect(apiSpec.externalDocumentation?.description == "Full developer documentation")
         #expect(apiSpec.externalDocumentation?.url == "https://docs.example.com/payments")
         let paymentsTag = try #require(apiSpec.tags[name: "payments"])
@@ -367,7 +367,7 @@ struct FixtureTests {
     @Test("31-extensions-01")
     func extensions() async throws {
         let yaml = try fixtureString("31-extensions-01")
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml, url:"31-extensions-01")
         #expect( apiSpec.extensions?.count == 1)
         #expect(apiSpec.extensions?[extensionName: "x-root-flags"]?.structuredExtension?.properties?.count == 2)
         #expect(apiSpec.info.extensions?.count == 1)
@@ -408,7 +408,7 @@ struct FixtureTests {
     @Test("32-mergekeys")
     func mergekeys() async throws {
         let yaml = try fixtureString("32-mergekeys")
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml, url:"32-mergekeys")
         let baseAnchorServer = try #require(apiSpec.servers[url: "."])
         #expect(baseAnchorServer.description == "The production API on this device")
         #expect(baseAnchorServer.extensions?[extensionName: "x-timeout"]?.simpleExtensionValue == "30")
@@ -422,7 +422,7 @@ struct FixtureTests {
     @Test("33-components-singlefile")
     func componentssinglefile() async throws {
         let yaml = try fixtureString("33-components-singlefile")
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml, url:"33-components-singlefile")
         #expect(apiSpec.components?.schemas?.count == 2)
         
         #expect(apiSpec.components?.requestBodies?.count == 1)
@@ -453,14 +453,14 @@ struct FixtureTests {
     @Test("34-openapi-main")
     func componentsmultiplefile() async throws {
         let yaml = try fixtureString("34-openapi-main")
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml, url:"34-openapi-main")
         let createUserRequest = try #require(apiSpec[requestbodycomponent: "CreateUserRequest"])
         
     }
     @Test("34-openapi-main resolvecomponents")
         func resolveComponents() async throws {
         let yaml = try fixtureString("34-openapi-main")
-        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let apiSpec = try OpenAPIObject.read(text: yaml, url:"34-openapi-main")
         let component = try #require(apiSpec.element(for: "components") as? OpenAPIComponent)
         let requestBodyComponent = try #require(component.element(for: "requestBodies") as? [OpenAPIRequestBody])
             let createUserRequest = try #require(requestBodyComponent.element(for: "CreateUserRequest"))
