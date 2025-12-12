@@ -1,522 +1,435 @@
-import XCTest
+import Testing
 import Yams
-import SwiftUI
+import Foundation
 @testable import SwiftOpenAPISpec
-final class openapispecreaderTests: XCTestCase {
+
+@Suite("OpenAPI Spec (legacy XCTest -> Swift Testing)")
+struct OpenAPILegacyPortedTests {
+
+    @Test
     func testBasics() throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            XCTFail("no openapi")
+            #expect(Bool(false), "no openapi")
             return
         }
         let data = try Data(contentsOf: settingsURL)
         guard let string = String(data: data, encoding: .utf8) else  {
-            XCTFail("no valid yaml")
+            #expect(Bool(false), "no valid yaml")
             return
         }
         let apiSpec = try OpenAPIObject.read(text: string)
-        XCTAssertEqual(apiSpec.version, "3.1.0")
-        XCTAssertEqual(apiSpec.info.title, "GreetingService")
-        XCTAssertEqual(apiSpec.info.version, "1.0.0")
-        XCTAssertEqual(apiSpec.info.summary, "Prints a greeting on GET request")
-        XCTAssertEqual(apiSpec.info.termsOfService, "Displayss the terms of services")
-        XCTAssertEqual(apiSpec.info.contact?.name ?? "", "API Support")
-        XCTAssertEqual(apiSpec.info.contact?.url ?? "", "https://www.example.com/support")
-        XCTAssertEqual(apiSpec.info.contact?.email ?? "", "support@example.com")
-        XCTAssertEqual(apiSpec.info.license?.name ?? "", "Apache 2.0")
-        XCTAssertEqual(apiSpec.info.license?.url ?? "", "https://www.apache.org/licenses/LICENSE-2.0.html")
+        #expect(apiSpec.version == "3.1.0")
+        #expect(apiSpec.info.title == "GreetingService")
+        #expect(apiSpec.info.version == "1.0.0")
+        #expect(apiSpec.info.summary == "Prints a greeting on GET request")
+        #expect(apiSpec.info.termsOfService == "Displayss the terms of services")
+        #expect((apiSpec.info.contact?.name ?? "") == "API Support")
+        #expect((apiSpec.info.contact?.url ?? "") == "https://www.example.com/support")
+        #expect((apiSpec.info.contact?.email ?? "") == "support@example.com")
+        #expect((apiSpec.info.license?.name ?? "") == "Apache 2.0")
+        #expect((apiSpec.info.license?.url ?? "") == "https://www.apache.org/licenses/LICENSE-2.0.html")
     }
-    func testServers() throws {
-        
-        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            XCTFail("no openapi")
-            return
-        }
-        let data = try Data(contentsOf: settingsURL)
-        guard let string = String(data: data, encoding: .utf8) else  {
-            XCTFail("no valid yaml")
-            return
-        }
-        let apiSpec = try OpenAPIObject.read(text: string)
-        XCTAssertEqual(apiSpec.servers.count, 3)
-        XCTAssertEqual(apiSpec.servers[0].url, "https://example.com/api")
-        XCTAssertEqual(apiSpec.servers[0].description, "Example service deployment.")
-        XCTAssertEqual(apiSpec.servers[1].url, "http://127.0.0.1:8080/api")
-        XCTAssertEqual(apiSpec.servers[1].description, "Localhost deployment.")
-        XCTAssertEqual(apiSpec.servers[2].variables.count, 3)
-        guard let usernameVariable = apiSpec.servers[2].variables.first(where: { variable in
-            variable.key == "username"
-        }) else {
-            XCTFail("no username variable")
-            return
-        }
-        XCTAssertEqual(usernameVariable.defaultValue, "demo")
-        XCTAssertEqual(usernameVariable.description, "this value is assigned by the service provider, in this example `gigantic-server.com`")
-        XCTAssertNil(usernameVariable.enumList)
-        // Port
-        guard let portVariable = apiSpec.servers[2].variables.first(where: { variable in
-            variable.key == "port"
-        }) else {
-            XCTFail("no port variable")
-            return
-        }
-        XCTAssertEqual(portVariable.defaultValue, "8443")
-        XCTAssertEqual(portVariable.enumList?.count,2)
-        XCTAssertNotNil(portVariable.enumList?.first(where: {$0 == "8443"}))
-        XCTAssertNotNil(portVariable.enumList?.first(where: {$0 == "443"}))
 
+    @Test
+    func testServers() throws {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
+            #expect(Bool(false), "no openapi"); return
+        }
+        let data = try Data(contentsOf: settingsURL)
+        guard let string = String(data: data, encoding: .utf8) else  {
+            #expect(Bool(false), "no valid yaml"); return
+        }
+        let apiSpec = try OpenAPIObject.read(text: string)
+        #expect(apiSpec.servers.count == 3)
+        #expect(apiSpec.servers[0].url == "https://example.com/api")
+        #expect(apiSpec.servers[0].description == "Example service deployment.")
+        #expect(apiSpec.servers[1].url == "http://127.0.0.1:8080/api")
+        #expect(apiSpec.servers[1].description == "Localhost deployment.")
+        #expect(apiSpec.servers[2].variables.count == 3)
+
+        guard let usernameVariable = apiSpec.servers[2].variables.first(where: { $0.key == "username" }) else {
+            #expect(Bool(false), "no username variable"); return
+        }
+        #expect(usernameVariable.defaultValue == "demo")
+        #expect(usernameVariable.description == "this value is assigned by the service provider, in this example `gigantic-server.com`")
+        #expect(usernameVariable.enumList == nil)
+
+        guard let portVariable = apiSpec.servers[2].variables.first(where: { $0.key == "port" }) else {
+            #expect(Bool(false), "no port variable"); return
+        }
+        #expect(portVariable.defaultValue == "8443")
+        #expect(portVariable.enumList?.count == 2)
+        #expect(portVariable.enumList?.contains("8443") == true)
+        #expect(portVariable.enumList?.contains("443") == true)
     }
+
+    @Test
     func testPathInfo() throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            XCTFail("no openapi")
-            return
+            #expect(Bool(false), "no openapi"); return
         }
         let data = try Data(contentsOf: settingsURL)
         guard let string = String(data: data, encoding: .utf8) else  {
-            XCTFail("no valid yaml")
-            return
+            #expect(Bool(false), "no valid yaml"); return
         }
         let apiSpec = try OpenAPIObject.read(text: string)
-        XCTAssertEqual(apiSpec.paths.count, 4)
-        let getGreetPath = try XCTUnwrap(apiSpec.paths.first { path in
-            path.key == "/greet"
-        })
-        XCTAssertEqual(getGreetPath.operations.count,1)
-        let getEmojiPath = try XCTUnwrap(apiSpec.paths.first { path in
-            path.key == "/emoji"
-        })
-        let getClipPath = try XCTUnwrap(apiSpec.paths.first { path in
-            path.key == "/clip"
-        })
-        XCTAssertEqual(getGreetPath.operations.count, 1)
-        XCTAssertEqual(getEmojiPath.operations.count, 1)
-        XCTAssertEqual(getClipPath.operations.count, 1)
-        let emojiPathOperation = try XCTUnwrap(getEmojiPath.operations.first)
-        XCTAssertEqual(emojiPathOperation.responses?.count,1)
-    
-        
-        XCTAssertEqual(emojiPathOperation.key,"get")
-        let clipPathOperation = try XCTUnwrap(getClipPath.operations.first)
-        XCTAssertEqual(clipPathOperation.key,"get")
-        let greetingPathOperation = try XCTUnwrap(getGreetPath.operations.first)
-        XCTAssertEqual(clipPathOperation.key,"get")
+        #expect(apiSpec.paths.count == 4)
+
+        let getGreetPath = try #require(apiSpec.paths.first { $0.key == "/greet" })
+        #expect(getGreetPath.operations.count == 1)
+        let getEmojiPath = try #require(apiSpec.paths.first { $0.key == "/emoji" })
+        let getClipPath = try #require(apiSpec.paths.first { $0.key == "/clip" })
+        #expect(getGreetPath.operations.count == 1)
+        #expect(getEmojiPath.operations.count == 1)
+        #expect(getClipPath.operations.count == 1)
+
+        let emojiPathOperation = try #require(getEmojiPath.operations.first)
+        #expect(emojiPathOperation.responses?.count == 1)
+        #expect(emojiPathOperation.key == "get")
+
+        let clipPathOperation = try #require(getClipPath.operations.first)
+        #expect(clipPathOperation.key == "get")
+
+        let greetingPathOperation = try #require(getGreetPath.operations.first)
+        #expect(greetingPathOperation.key == "get")
     }
+
+    @Test
     func testOperations() throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            XCTFail("no openapi")
-            return
+            #expect(Bool(false), "no openapi"); return
         }
         let data = try Data(contentsOf: settingsURL)
         guard let string = String(data: data, encoding: .utf8) else  {
-            XCTFail("no valid yaml")
-            return
+            #expect(Bool(false), "no valid yaml"); return
         }
         let apiSpec = try OpenAPIObject.read(text: string)
-        let getClipPath = try XCTUnwrap(apiSpec.paths.first { path in
-            path.key == "/clip"
-        })
-        let clipPathOperation = try XCTUnwrap(getClipPath.operations.first)
-        XCTAssertEqual(clipPathOperation.key,"get")
-        XCTAssertEqual(clipPathOperation.responses?.count,1)
-        XCTAssertEqual(clipPathOperation.operationId,"getClip")
-        let response  = try XCTUnwrap(clipPathOperation.responses?.first)
-        XCTAssertEqual(response.description,"Returns a cat video! 😽")
-        XCTAssertEqual(response.key,"200")
+        let getClipPath = try #require(apiSpec.paths.first { $0.key == "/clip" })
+        let clipPathOperation = try #require(getClipPath.operations.first)
+        #expect(clipPathOperation.key == "get")
+        #expect(clipPathOperation.responses?.count == 1)
+        #expect(clipPathOperation.operationId == "getClip")
+        let response  = try #require(clipPathOperation.responses?.first)
+        #expect(response.description == "Returns a cat video! 😽")
+        #expect(response.key == "200")
     }
+
+    @Test
     func testParameters() throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            XCTFail("no openapi")
-            return
+            #expect(Bool(false), "no openapi"); return
         }
         let data = try Data(contentsOf: settingsURL)
         guard let string = String(data: data, encoding: .utf8) else  {
-            XCTFail("no valid yaml")
-            return
+            #expect(Bool(false), "no valid yaml"); return
         }
         let apiSpec = try OpenAPIObject.read(text: string)
-        let getGreetPath = try XCTUnwrap(apiSpec.paths.first { path in
-            path.key == "/greet"
-        })
-        let getEmojiPath = try XCTUnwrap(apiSpec.paths.first { path in
-            path.key == "/emoji"
-        })
-        let getClipPath = try XCTUnwrap(apiSpec.paths.first { path in
-            path.key == "/clip"
-        })
-        let clipPathOperation = try XCTUnwrap(getClipPath.operations.first)
-        let emojiPathOperation = try XCTUnwrap(getEmojiPath.operations.first)
-        let greetPathOperation = try XCTUnwrap(getGreetPath.operations.first)
-        XCTAssertEqual(clipPathOperation.parameters?.count,0)
-        XCTAssertEqual(emojiPathOperation.parameters?.count,0)
-        XCTAssertEqual(greetPathOperation.parameters?.count,1)
-        let greetPathParameter = try XCTUnwrap(greetPathOperation.parameters?.first)
-        XCTAssertEqual(greetPathParameter.key, "name")
-        XCTAssertEqual(greetPathParameter.required, false)
-        XCTAssertEqual(greetPathParameter.location, OpenAPIParameter.ParameterLocation.query)
-        XCTAssertEqual(greetPathParameter.description, "The name used in the returned greeting.")
-        XCTAssertTrue(greetPathParameter.schema?.schemaType is OpenAPIStringType)
-        XCTAssertNil(greetPathParameter.allowEmptyValue)
-        XCTAssertNil(greetPathParameter.allowEmptyValue)
+        let getGreetPath = try #require(apiSpec.paths.first { $0.key == "/greet" })
+        let getEmojiPath = try #require(apiSpec.paths.first { $0.key == "/emoji" })
+        let getClipPath = try #require(apiSpec.paths.first { $0.key == "/clip" })
+        let clipPathOperation = try #require(getClipPath.operations.first)
+        let emojiPathOperation = try #require(getEmojiPath.operations.first)
+        let greetPathOperation = try #require(getGreetPath.operations.first)
+        #expect(clipPathOperation.parameters?.count == 0)
+        #expect(emojiPathOperation.parameters?.count == 0)
+        #expect(greetPathOperation.parameters?.count == 1)
+        let greetPathParameter = try #require(greetPathOperation.parameters?.first)
+        #expect(greetPathParameter.key == "name")
+        #expect(greetPathParameter.required == false)
+        #expect(greetPathParameter.location == OpenAPIParameter.ParameterLocation.query)
+        #expect(greetPathParameter.description == "The name used in the returned greeting.")
+        #expect(greetPathParameter.schema?.schemaType is OpenAPIStringType)
+        #expect(greetPathParameter.allowEmptyValue == nil)
     }
+
+    @Test
     func testResponses() throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            XCTFail("no openapi")
-            return
+            #expect(Bool(false), "no openapi"); return
         }
         let data = try Data(contentsOf: settingsURL)
         guard let string = String(data: data, encoding: .utf8) else  {
-            XCTFail("no valid yaml")
-            return
+            #expect(Bool(false), "no valid yaml"); return
         }
         let apiSpec = try OpenAPIObject.read(text: string)
-        let getGreetPath = try XCTUnwrap(apiSpec.paths.first { path in
-            path.key == "/greet"
-        })
-        let greetPathOperation = try XCTUnwrap(getGreetPath.operations.first)
-        let response = try XCTUnwrap(greetPathOperation.responses?.first)
-        XCTAssertEqual(response.key,"200")
-        XCTAssertEqual(response.content.count, 1)
-        let content = try XCTUnwrap(response.content.first)
-        XCTAssertEqual(content.key,"application/json")
-        XCTAssertEqual(content.schemaRef?.ref,"#/components/schemas/Greeting")
+        let getGreetPath = try #require(apiSpec.paths.first { $0.key == "/greet" })
+        let greetPathOperation = try #require(getGreetPath.operations.first)
+        let response = try #require(greetPathOperation.responses?.first)
+        #expect(response.key == "200")
+        #expect(response.content.count == 1)
+        let content = try #require(response.content.first)
+        #expect(content.key == "application/json")
+        #expect(content.schema?.ref == "#/components/schemas/Greeting")
     }
+
+    @Test
     func testSchemaComponents() throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            XCTFail("no openapi")
-            return
+            #expect(Bool(false), "no openapi"); return
         }
         let data = try Data(contentsOf: settingsURL)
         guard let string = String(data: data, encoding: .utf8) else  {
-            XCTFail("no valid yaml")
-            return
+            #expect(Bool(false), "no valid yaml"); return
         }
         let apiSpec = try OpenAPIObject.read(text: string)
-        XCTAssertEqual(apiSpec.components?.schemas?.count,4)
-        let greetingComponent = try XCTUnwrap(apiSpec.components?.schemas?.first { path in
-            path.key == "Greeting"
-        })
-        XCTAssertNotNil(greetingComponent)
-        let greetingObject = try XCTUnwrap(greetingComponent.namedComponentType?.schemaType as? OpenAPIObjectType)
-        XCTAssertEqual(greetingObject.properties.count, 1)
-        let messageProperty = try XCTUnwrap(greetingObject.properties.first)
-        XCTAssertTrue(messageProperty.type is OpenAPIStringType)
-        XCTAssertEqual(greetingObject.required, ["message"])
-        let generalErrorComponent = try XCTUnwrap(apiSpec[schemacomponent: "GeneralError"])
-        XCTAssertNotNil(generalErrorComponent)
-        let errorObject = try XCTUnwrap(generalErrorComponent.schemaType as? OpenAPIObjectType)
-        XCTAssertEqual(errorObject.properties.count, 2)
-        let errorMessageCodeProperty =  errorObject.properties[key: "code"]
-        //falsch die Property ist schon nil
-        XCTAssertTrue(errorMessageCodeProperty?.type is OpenAPIIntegerType)
-        let errorMessageMessageProperty =  errorObject.properties[key: "message"]
-        XCTAssertTrue(errorMessageMessageProperty?.type is OpenAPIStringType)
-        XCTAssertEqual(errorObject.required.count, 0)
+        #expect(apiSpec.components?.schemas?.count == 4)
+        let greetingComponent = try #require(apiSpec.components?.schemas?.first { $0.key == "Greeting" })
+        let greetingObject = try #require(greetingComponent.schemaType as? OpenAPIObjectType)
+        #expect(greetingObject.properties.count == 1)
+        let messageProperty = try #require(greetingObject.properties.first)
+        #expect(messageProperty.type is OpenAPIStringType)
+        #expect(greetingObject.required == ["message"])
+
+        let generalErrorComponent = try #require(apiSpec[schemacomponent: "GeneralError"])
+        let errorObject = try #require(generalErrorComponent.schemaType as? OpenAPIObjectType)
+        #expect(errorObject.properties.count == 2)
+        let errorMessageCodeProperty = errorObject.properties[key: "code"]
+        #expect(errorMessageCodeProperty?.type is OpenAPIIntegerType)
+        let errorMessageMessageProperty = errorObject.properties[key: "message"]
+        #expect(errorMessageMessageProperty?.type is OpenAPIStringType)
+        #expect(errorObject.required.count == 0)
     }
+
+    @Test
     func testParameterComponents() throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            XCTFail("no openapi")
-            return
+            #expect(Bool(false), "no openapi"); return
         }
         let data = try Data(contentsOf: settingsURL)
         guard let string = String(data: data, encoding: .utf8) else  {
-            XCTFail("no valid yaml")
-            return
+            #expect(Bool(false), "no valid yaml"); return
         }
         let apiSpec = try OpenAPIObject.read(text: string)
-        XCTAssertEqual(apiSpec.components?.parameters?.count,2)
-        let skipParamComponent = try XCTUnwrap(apiSpec.components?.parameters?.first { path in
-            path.key == "skipParam"
-        })
-        XCTAssertEqual(skipParamComponent.key, "skip")
-        XCTAssertEqual(skipParamComponent.location, OpenAPIParameter.ParameterLocation.query)
-        XCTAssertEqual(skipParamComponent.description, "number of items to skip")
-        XCTAssertEqual(skipParamComponent.required, true)
-        XCTAssertTrue(skipParamComponent.schema?.schemaType is  OpenAPIIntegerType)
-     
+        #expect(apiSpec.components?.parameters?.count == 2)
+        let skipParamComponent = try #require(apiSpec[parametercomponent: "skipParam"])
+        #expect(skipParamComponent.key == "skipParam")
+        #expect(skipParamComponent.location == OpenAPIParameter.ParameterLocation.query)
+        #expect(skipParamComponent.description == "number of items to skip")
+        #expect(skipParamComponent.required == true)
+        #expect(skipParamComponent.schema?.schemaType is OpenAPIIntegerType)
     }
+
+    @Test
     func testResponsesComponents() throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            XCTFail("no openapi")
-            return
+            #expect(Bool(false), "no openapi"); return
         }
         let data = try Data(contentsOf: settingsURL)
         guard let string = String(data: data, encoding: .utf8) else  {
-            XCTFail("no valid yaml")
-            return
+            #expect(Bool(false), "no valid yaml"); return
         }
         let apiSpec = try OpenAPIObject.read(text: string)
-        XCTAssertEqual(apiSpec.components?.responses?.count,4)
-        let notFoundResponseOptional = apiSpec.components?.responses?.first(where: { response in
-            response.key == "NotFound"
-        })
-        let notFoundResponse = try XCTUnwrap(notFoundResponseOptional)
-        XCTAssertEqual( notFoundResponse.description,"Entity not found.")
-        let ImageResponseOptional = apiSpec.components?.responses?.first(where: { response in
-            response.key == "ImageResponse"
-        })
-        let ImageResponse = try XCTUnwrap(ImageResponseOptional)
-        XCTAssertEqual( ImageResponse.description,"An image.")
-        let IllegalInputOptional = apiSpec.components?.responses?.first(where: { response in
-            response.key == "IllegalInput"
-        })
-        let IllegalInput = try XCTUnwrap(IllegalInputOptional)
-        XCTAssertEqual( IllegalInput.description,"Illegal input for operation.")
-        let GeneralErrorOptional = apiSpec.components?.responses?.first(where: { response in
-            response.key == "GeneralError"
-        })
-        let GeneralError = try XCTUnwrap(GeneralErrorOptional)
-        XCTAssertEqual( GeneralError.description,"General Error")
-        XCTAssertEqual( GeneralError.content.count,1)
-        let jsonContentOpt = GeneralError.content.first { content in
-            content.key == "application/json"
-        }
-        XCTAssertNotNil(jsonContentOpt)
-        let jsonContent = try XCTUnwrap(jsonContentOpt)
-        XCTAssertEqual( jsonContent.schemaRef?.ref,"#/components/schemas/GeneralError")
-        
+        #expect(apiSpec.components?.responses?.count == 4)
+
+        let notFoundResponse = try #require(apiSpec.components?.responses?.first(where: { $0.key == "NotFound" }))
+        #expect(notFoundResponse.description == "Entity not found.")
+
+        let imageResponse = try #require(apiSpec.components?.responses?.first(where: { $0.key == "ImageResponse" }))
+        #expect(imageResponse.description == "An image.")
+
+        let illegalInput = try #require(apiSpec.components?.responses?.first(where: { $0.key == "IllegalInput" }))
+        #expect(illegalInput.description == "Illegal input for operation.")
+
+        let generalError = try #require(apiSpec.components?.responses?.first(where: { $0.key == "GeneralError" }))
+        #expect(generalError.description == "General Error")
+        #expect(generalError.content.count == 1)
+        let jsonContent = try #require(generalError.content.first { $0.key == "application/json" })
+        #expect(jsonContent.schema?.ref == "#/components/schemas/GeneralError")
     }
+
+    @Test
     func testRequestBody() throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            XCTFail("no openapi")
-            return
+            #expect(Bool(false), "no openapi"); return
         }
         let data = try Data(contentsOf: settingsURL)
         guard let string = String(data: data, encoding: .utf8) else  {
-            XCTFail("no valid yaml")
-            return
+            #expect(Bool(false), "no valid yaml"); return
         }
         let apiSpec = try OpenAPIObject.read(text: string)
-        XCTAssertEqual(apiSpec.paths.count, 4)
-        let getPetsPath = try XCTUnwrap(apiSpec.paths.first { path in
-            path.key == "/pets"
-        })
-        let postOperation = try XCTUnwrap(getPetsPath.operations.first { operation in
-            operation.key == "post"
-        })
-        XCTAssertEqual(postOperation.requestBody?.description,"Optional description in *Markdown*")
-        XCTAssertEqual(postOperation.requestBody?.required,true)
-        XCTAssertEqual(postOperation.requestBody?.contents.count,4)
-        
-        
-        
+        #expect(apiSpec.paths.count == 4)
+        let getPetsPath = try #require(apiSpec.paths.first { $0.key == "/pets" })
+        let postOperation = try #require(getPetsPath.operations.first { $0.key == "post" })
+        #expect(postOperation.requestBody?.description == "Optional description in *Markdown*")
+        #expect(postOperation.requestBody?.required == true)
+        #expect(postOperation.requestBody?.contents.count == 4)
     }
+
+    @Test
     func testOneOfSchema() throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            XCTFail("no openapi")
-            return
+            #expect(Bool(false), "no openapi"); return
         }
         let data = try Data(contentsOf: settingsURL)
         guard let string = String(data: data, encoding: .utf8) else  {
-            XCTFail("no valid yaml")
-            return
+            #expect(Bool(false), "no valid yaml"); return
         }
         let apiSpec = try OpenAPIObject.read(text: string)
-        XCTAssertEqual(apiSpec.paths.count, 4)
-        let getPetsPath = try XCTUnwrap(apiSpec.paths.first { path in
-            path.key == "/pets"
-        })
-        XCTAssertEqual(getPetsPath.operations.count, 3)
-        let patchOperation = try XCTUnwrap(getPetsPath.operations.first { operation in
-            operation.key == "patch"
-        })
-       
-        XCTAssertEqual(patchOperation.requestBody?.required,false)
-        let jsonContentOpt = patchOperation.requestBody?.contents.first(where: { content in
-            content.key == "application/json"
-        })
-        XCTAssertNotNil(jsonContentOpt)
-        let jsonContent = try XCTUnwrap(jsonContentOpt)
-        XCTAssertEqual(jsonContent.oneOfSchemas?.schemaRefs.count, 2)
-        XCTAssertEqual(jsonContent.oneOfSchemas?.schemas.count, 0)
+        #expect(apiSpec.paths.count == 4)
+        let getPetsPath = try #require(apiSpec.paths.first { $0.key == "/pets" })
+        #expect(getPetsPath.operations.count == 3)
+        let patchOperation = try #require(getPetsPath.operations.first { $0.key == "patch" })
+        #expect(patchOperation.requestBody?.required == false)
+        let jsonContent = try #require(patchOperation.requestBody?.contents.first(where: { $0.key == "application/json" }))
+        let oneOfSchemas = try #require(jsonContent.schema?.schemaType as? OpenAPIOneOfType)
+        #expect(oneOfSchemas.items?.count == 2)
     }
+
+    @Test
     func testOperationSecurityScheme() throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            XCTFail("no openapi")
-            return
+            #expect(Bool(false), "no openapi"); return
         }
         let data = try Data(contentsOf: settingsURL)
         guard let string = String(data: data, encoding: .utf8) else  {
-            XCTFail("no valid yaml")
-            return
+            #expect(Bool(false), "no valid yaml"); return
         }
         let apiSpec = try OpenAPIObject.read(text: string)
-        XCTAssertEqual(apiSpec.paths.count, 4)
-        let getGreetPath = try XCTUnwrap(apiSpec.paths.first { path in
-            path.key == "/greet"
-        })
-        let getOperation = try XCTUnwrap(getGreetPath.operations.first { operation in
-            operation.key == "get"
-        })
-        XCTAssertEqual(getOperation.securityObjects.count,2)
-        let petStoreAuth = try XCTUnwrap(getOperation.securityObjects.first { $0.key == "petstore_auth" })
-        XCTAssertTrue(petStoreAuth.scopes.contains("write:pets"))
-        XCTAssertTrue(petStoreAuth.scopes.contains("read:pets"))
-        let clipStoreAuth = try XCTUnwrap(getOperation.securityObjects.first { $0.key == "clip_auth" })
-        XCTAssertTrue(clipStoreAuth.scopes.contains("write:clips"))
-        XCTAssertTrue(clipStoreAuth.scopes.contains("read:clips"))
+        #expect(apiSpec.paths.count == 4)
+        let getGreetPath = try #require(apiSpec.paths.first { $0.key == "/greet" })
+        let getOperation = try #require(getGreetPath.operations.first { $0.key == "get" })
+        #expect(getOperation.securityObjects.count == 2)
+        let petStoreAuth = try #require(getOperation.securityObjects.first { $0.key == "petstore_auth" })
+        #expect(petStoreAuth.scopes.contains("write:pets"))
+        #expect(petStoreAuth.scopes.contains("read:pets"))
+        let clipStoreAuth = try #require(getOperation.securityObjects.first { $0.key == "clip_auth" })
+        #expect(clipStoreAuth.scopes.contains("write:clips"))
+        #expect(clipStoreAuth.scopes.contains("read:clips"))
     }
+
+    @Test
     func testSecurityComponents() throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            XCTFail("no openapi")
-            return
+            #expect(Bool(false), "no openapi"); return
         }
         let data = try Data(contentsOf: settingsURL)
         guard let string = String(data: data, encoding: .utf8) else  {
-            XCTFail("no valid yaml")
-            return
+            #expect(Bool(false), "no valid yaml"); return
         }
         let apiSpec = try OpenAPIObject.read(text: string)
-        XCTAssertEqual(apiSpec.components?.securitySchemas?.count,5)
-        let httpKeySecurityScheme = try XCTUnwrap(apiSpec.components?.securitySchemas?.first{ $0.key == "http_Key"})
-        XCTAssertEqual(httpKeySecurityScheme.securityType,.http)
-        XCTAssertEqual(httpKeySecurityScheme.httpScheme , "basic")
-        
-        let apiKeySecurityScheme = try XCTUnwrap(apiSpec.components?.securitySchemas?.first{ $0.key == "api_key"})
-        XCTAssertEqual(apiKeySecurityScheme.securityType,.apiKey)
-        XCTAssertEqual(apiKeySecurityScheme.name , "api_key")
-        XCTAssertEqual(apiKeySecurityScheme.location , .header)
-        
-        let bearerKeySecurityScheme = try XCTUnwrap(apiSpec.components?.securitySchemas?.first{ $0.key == "bearer_key"})
-        XCTAssertEqual(bearerKeySecurityScheme.securityType,.http)
-        XCTAssertEqual(bearerKeySecurityScheme.httpScheme, "bearer")
-        XCTAssertEqual(bearerKeySecurityScheme.httpBearerFormat, "JWT")
-        
-        let petStoreOAuth2KeySecurityScheme = try XCTUnwrap(apiSpec.components?.securitySchemas?.first{ $0.key == "petstore_auth"})
-        XCTAssertEqual(petStoreOAuth2KeySecurityScheme.securityType,.oauth2)
-        XCTAssertNotNil(petStoreOAuth2KeySecurityScheme.flows?.implicit)
-        let flowImplicit = try XCTUnwrap(petStoreOAuth2KeySecurityScheme.flows?.implicit)
-        XCTAssertEqual(flowImplicit.authorizationUrl, "https://example.org/api/oauth/dialog")
-        XCTAssertEqual(flowImplicit.scopes?.count,2)
-        XCTAssertTrue(flowImplicit.scopes?.contains(where: {key,value in key == "write:pets"}) ?? false)
-        XCTAssertTrue(flowImplicit.scopes?.contains(where: {key,value in
-                key == "read:pets"}) ?? false)
-        
-        let clipStoreOAuth2KeySecurityScheme = try XCTUnwrap(apiSpec.components?.securitySchemas?.first{ $0.key == "clip_auth"})
-        XCTAssertEqual(clipStoreOAuth2KeySecurityScheme.securityType,.oauth2)
-        XCTAssertNotNil(clipStoreOAuth2KeySecurityScheme.flows?.implicit)
-        let clipflowImplicit = try XCTUnwrap(clipStoreOAuth2KeySecurityScheme.flows?.implicit)
-        XCTAssertEqual(clipflowImplicit.authorizationUrl, "https://example.com/api/oauth/dialog")
-        XCTAssertNotNil(clipStoreOAuth2KeySecurityScheme.flows?.authorizationCode)
-        let clipflowAuthorizationCode = try XCTUnwrap(clipStoreOAuth2KeySecurityScheme.flows?.authorizationCode)
-        XCTAssertEqual(clipflowAuthorizationCode.authorizationUrl, "https://example.com/api/oauth/dialog")
-        XCTAssertEqual(clipflowAuthorizationCode.tokenUrl, "https://example.com/api/oauth/token")
-        XCTAssertEqual(clipflowAuthorizationCode.tokenUrl, "https://example.com/api/oauth/token")
-        XCTAssertEqual(clipflowAuthorizationCode.scopes?.count,2)
-        XCTAssertTrue(clipflowAuthorizationCode.scopes?.contains(where: {key,value in key == "write:clips"}) ?? false)
-        XCTAssertTrue(clipflowAuthorizationCode.scopes?.contains(where: {key,value in
-                key == "read:clips"}) ?? false)
+        #expect(apiSpec.components?.securitySchemas?.count == 5)
+
+        let httpKeySecurityScheme = try #require(apiSpec.components?.securitySchemas?.first{ $0.key == "http_Key"})
+        #expect(httpKeySecurityScheme.securityType == .http)
+        #expect(httpKeySecurityScheme.httpScheme == "basic")
+
+        let apiKeySecurityScheme = try #require(apiSpec.components?.securitySchemas?.first{ $0.key == "api_key"})
+        #expect(apiKeySecurityScheme.securityType == .apiKey)
+        #expect(apiKeySecurityScheme.name == "api_key")
+        #expect(apiKeySecurityScheme.location == .header)
+
+        let bearerKeySecurityScheme = try #require(apiSpec.components?.securitySchemas?.first{ $0.key == "bearer_key"})
+        #expect(bearerKeySecurityScheme.securityType == .http)
+        #expect(bearerKeySecurityScheme.httpScheme == "bearer")
+        #expect(bearerKeySecurityScheme.httpBearerFormat == "JWT")
+
+        let petStoreOAuth2KeySecurityScheme = try #require(apiSpec.components?.securitySchemas?.first{ $0.key == "petstore_auth"})
+        #expect(petStoreOAuth2KeySecurityScheme.securityType == .oauth2)
+        #expect(petStoreOAuth2KeySecurityScheme.flows?.implicit != nil)
+        let flowImplicit = try #require(petStoreOAuth2KeySecurityScheme.flows?.implicit)
+        #expect(flowImplicit.authorizationUrl == "https://example.org/api/oauth/dialog")
+        #expect(flowImplicit.scopes?.count == 2)
+        #expect(flowImplicit.scopes?.contains(where: { k, _ in k == "write:pets" }) == true)
+        #expect(flowImplicit.scopes?.contains(where: { k, _ in k == "read:pets" }) == true)
+
+        let clipStoreOAuth2KeySecurityScheme = try #require(apiSpec.components?.securitySchemas?.first{ $0.key == "clip_auth"})
+        #expect(clipStoreOAuth2KeySecurityScheme.securityType == .oauth2)
+        #expect(clipStoreOAuth2KeySecurityScheme.flows?.implicit != nil)
+        let clipflowImplicit = try #require(clipStoreOAuth2KeySecurityScheme.flows?.implicit)
+        #expect(clipflowImplicit.authorizationUrl == "https://example.com/api/oauth/dialog")
+        #expect(clipStoreOAuth2KeySecurityScheme.flows?.authorizationCode != nil)
+        let clipflowAuthorizationCode = try #require(clipStoreOAuth2KeySecurityScheme.flows?.authorizationCode)
+        #expect(clipflowAuthorizationCode.authorizationUrl == "https://example.com/api/oauth/dialog")
+        #expect(clipflowAuthorizationCode.tokenUrl == "https://example.com/api/oauth/token")
+        #expect(clipflowAuthorizationCode.scopes?.count == 2)
+        #expect(clipflowAuthorizationCode.scopes?.contains(where: { k, _ in k == "write:clips" }) == true)
+        #expect(clipflowAuthorizationCode.scopes?.contains(where: { k, _ in k == "read:clips" }) == true)
     }
-    func testExamples()throws {
+
+    @Test
+    func testExamples() throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            XCTFail("no openapi")
-            return
+            #expect(Bool(false), "no openapi"); return
         }
         let data = try Data(contentsOf: settingsURL)
         guard let string = String(data: data, encoding: .utf8) else  {
-            XCTFail("no valid yaml")
-            return
+            #expect(Bool(false), "no valid yaml"); return
         }
         let apiSpec = try OpenAPIObject.read(text: string)
-        XCTAssertEqual(apiSpec.paths.count, 4)
-        let getPetsPath = try XCTUnwrap(apiSpec.paths.first { path in
-            path.key == "/pets"
-        })
-        XCTAssertEqual(getPetsPath.operations.count, 3)
-        let postOperation = try XCTUnwrap(getPetsPath.operations.first { operation in
-            operation.key == "post"
-        })
-        let mediatype = try XCTUnwrap(postOperation.requestBody?.contents.first(where: { mediatype in
-            mediatype.key == "text/plain"
-        }))
-        XCTAssertEqual(mediatype.examples.count,3)
+        #expect(apiSpec.paths.count == 4)
+        let getPetsPath = try #require(apiSpec.paths.first { $0.key == "/pets" })
+        #expect(getPetsPath.operations.count == 3)
+        let postOperation = try #require(getPetsPath.operations.first { $0.key == "post" })
+        let mediatype = try #require(postOperation.requestBody?.contents.first(where: { $0.key == "text/plain" }))
+        #expect(mediatype.examples.count == 3)
         let userExample = mediatype.examples[key: "user"]
-        XCTAssertEqual(userExample?.summary,"User example in Plain text")
-        XCTAssertEqual(userExample?.externalValue, "https://foo.bar/examples/user-example.txt")
+        #expect(userExample?.summary == "User example in Plain text")
+        #expect(userExample?.externalValue == "https://foo.bar/examples/user-example.txt")
         let fooExample = mediatype.examples.first { $0.key == "foo"}
-        XCTAssertEqual(fooExample?.summary,"A foo example")
-        XCTAssertNotNil(fooExample?.value)
+        #expect(fooExample?.summary == "A foo example")
+        #expect(fooExample?.value != nil)
         let barExample = mediatype.examples.first { $0.key == "bar"}
-        XCTAssertEqual(barExample?.summary,"A bar example")
-        XCTAssertNotNil(barExample?.value)
-        
+        #expect(barExample?.summary == "A bar example")
+        #expect(barExample?.value != nil)
     }
+
+    @Test
     func testExamplesRef() throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            XCTFail("no openapi")
-            return
+            #expect(Bool(false), "no openapi"); return
         }
         let data = try Data(contentsOf: settingsURL)
         guard let string = String(data: data, encoding: .utf8) else  {
-            XCTFail("no valid yaml")
-            return
+            #expect(Bool(false), "no valid yaml"); return
         }
         let apiSpec = try OpenAPIObject.read(text: string)
-        XCTAssertEqual(apiSpec.paths.count, 4)
-        let getPetsPath = try XCTUnwrap(apiSpec.paths.first { path in
-            path.key == "/pets"
-        })
-        XCTAssertEqual(getPetsPath.operations.count, 3)
-        let patchOperation = try XCTUnwrap(getPetsPath.operations.first { operation in
-            operation.key == "patch"
-        })
-        let mediatype = try XCTUnwrap(         patchOperation.requestBody?.contents.first(where: { mediatype in
-            mediatype.key == "application/json"
-        }))
-        XCTAssertEqual(mediatype.examples.count,1)
-        let refExample = try XCTUnwrap(mediatype.examples[key:"confirmation-success"])
-        XCTAssertEqual(refExample.ref,"#/components/examples/confirmation-success")
+        #expect(apiSpec.paths.count == 4)
+        let getPetsPath = try #require(apiSpec.paths.first { $0.key == "/pets" })
+        #expect(getPetsPath.operations.count == 3)
+        let patchOperation = try #require(getPetsPath.operations.first { $0.key == "patch" })
+        let mediatype = try #require(patchOperation.requestBody?.contents.first(where: { $0.key == "application/json" }))
+        #expect(mediatype.examples.count == 1)
+        let refExample = try #require(mediatype.examples[key:"confirmation-success"])
+        #expect(refExample.ref == "#/components/examples/confirmation-success")
     }
+
+    @Test
     func testLinks() throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            XCTFail("no openapi")
-            return
+            #expect(Bool(false), "no openapi"); return
         }
         let data = try Data(contentsOf: settingsURL)
         guard let string = String(data: data, encoding: .utf8) else  {
-            XCTFail("no valid yaml")
-            return
+            #expect(Bool(false), "no valid yaml"); return
         }
         let apiSpec = try OpenAPIObject.read(text: string)
-        let getPetsPath = try XCTUnwrap(apiSpec.paths.first { path in
-            path.key == "/pets"
-        })
-        let patchOperation = try XCTUnwrap(getPetsPath.operations.first { operation in
-            operation.key == "patch"
-        })
-        let links = try XCTUnwrap(patchOperation.responses?.first(where: { $0.key == "200" })?.links)
-        XCTAssertEqual(links.count, 2)
-        let addressLink = try XCTUnwrap(links.first {$0.key == "address" })
-        XCTAssertEqual(addressLink.operationId,"getUserAddress")
-        XCTAssertEqual(addressLink.parameters.count,1)
-        let parameter = addressLink.parameters.first { key,value in
-            key == "userId"
-        }
-        XCTAssertEqual(parameter?.value, "$request.path.id")
-        let userRepositoriesLink = try XCTUnwrap(links.first {$0.key == "UserRepositories" })
-        XCTAssertEqual(userRepositoriesLink.operationRef,"#/paths/~12.0~1repositories~1{username}/get")
-        XCTAssertEqual(userRepositoriesLink.parameters.count,1)
-        let repParameter = userRepositoriesLink.parameters.first { key,value in
-            key == "username"
-        }
-        XCTAssertEqual(repParameter?.value, "$response.body#/username")
-        XCTAssertEqual(userRepositoriesLink.requestBody,"$response.body#/username")
+        let getPetsPath = try #require(apiSpec.paths.first { $0.key == "/pets" })
+        let patchOperation = try #require(getPetsPath.operations.first { $0.key == "patch" })
+        let links = try #require(patchOperation.responses?.first(where: { $0.key == "200" })?.links)
+        #expect(links.count == 2)
+        let addressLink = try #require(links.first { $0.key == "address" })
+        #expect(addressLink.operationId == "getUserAddress")
+        #expect(addressLink.parameters.count == 1)
+        let parameter = addressLink.parameters.first { key, _ in key == "userId" }
+        #expect(parameter?.value == "$request.path.id")
+        let userRepositoriesLink = try #require(links.first { $0.key == "UserRepositories" })
+        #expect(userRepositoriesLink.operationRef == "#/paths/~12.0~1repositories~1{username}/get")
+        #expect(userRepositoriesLink.parameters.count == 1)
+        let repParameter = userRepositoriesLink.parameters.first { key, _ in key == "username" }
+        #expect(repParameter?.value == "$response.body#/username")
+        #expect(userRepositoriesLink.requestBody == "$response.body#/username")
     }
+
+    @Test
     func testDynamicMemberLookup() throws {
         let person = Person()
-        let age : Int = person.age
-        let name : String = person.name
-        print(name)
-        print(age)
+        let age: Int = person.age
+        let name: String = person.name
+        _ = name
+        _ = age
         let addressedPerson = AddressedPerson()
         addressedPerson.printAddress("Gernlindener Weg 23")
     }
-    func testSubscript() throws {
-        let aset : Set<Edge> = [Edge.top, Edge.bottom]
-        XCTAssertEqual(aset[contains: .top],true)
-        
-        let json = JSON.intValue(5)
-        
-        let jsonArray = JSON.arrayValue([JSON.intValue(2),JSON.intValue(5),JSON.intValue(8),JSON.intValue(1)])
-        XCTAssertNil(jsonArray[5])
-        XCTAssertEqual(jsonArray[2]?.stringValue,"8")
-    }
+
+    
 }

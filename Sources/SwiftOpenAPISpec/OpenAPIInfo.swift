@@ -7,14 +7,13 @@
 
 import Foundation
 public struct OpenAPIInfo : ThrowingHashMapInitiable {
+    static let CONTACT_KEY = "contact"
+    static let DESCRIPTION_KEY = "description"
+    static let LICENSE_KEY = "license"
+    static let SUMMARY_KEY = "summary"
+    static let TERMS_KEY = "termsOfService"
     static let TITLE_KEY = "title"
     static let VERSION_KEY = "version"
-    static let SUMMARY_KEY = "summary"
-    static let DESCRIPTION_KEY = "description"
-    static let TERMS_KEY = "termsOfService"
-    static let CONTACT_KEY = "contact"
-    static let LICENSE_KEY = "license"
-    
     public init(_ map: [String : Any]) throws {
         guard let titleString = map[Self.TITLE_KEY] as? String ,
         let versionString = map[Self.VERSION_KEY] as? String else {
@@ -42,13 +41,14 @@ public struct OpenAPIInfo : ThrowingHashMapInitiable {
         extensions = try OpenAPIExtension.extensionElements(map)
         
     }
-    public var title : String
-    public var version : String
-    public var  summary : String?
-    public var description : String? = nil
-    public var termsOfService : String? = nil
     public var contact : OpenAPIContact? = nil
-    public var license : OpenAPILicense? = nil
+    public var description : String? = nil
     public var extensions : [OpenAPIExtension]?
+    public var license : OpenAPILicense? = nil
+    public var termsOfService : String? = nil
+    public var title : String
+    public var  summary : String?
     public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var version : String
+    
 }

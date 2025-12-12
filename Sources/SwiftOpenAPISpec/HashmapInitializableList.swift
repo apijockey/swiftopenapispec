@@ -67,6 +67,9 @@ public struct KeyedElementList<T> where T :  KeyedElement {
     
 }
 
+public protocol JSONPointerResolver {
+    func resolveSubscript(key : String) -> String?
+}
 
 public protocol ThrowingHashMapInitiable {
     init(_ map : StringDictionary) throws
@@ -74,3 +77,58 @@ public protocol ThrowingHashMapInitiable {
    
 }
 /**A KeyedElement expects that the key Value is set from outside**/
+
+public struct RelativeReferenceResolver {
+    
+    var specMap : [URL:OpenAPIObject] = [URL:OpenAPIObject]()
+    enum Errors : LocalizedError {
+        case invalidURL(String)
+    }
+    private let baseURL : String
+    private let baseSpec : OpenAPIObject
+    public static func resolve(_ url: String, baseUrl: String) throws -> URL {
+        guard let baseURL = URL(string: baseUrl),
+        let resolvedURL = URL(string: url, relativeTo: baseURL)else {
+            throw Self.Errors.invalidURL("\(url) \(baseUrl)")
+        }
+        return resolvedURL
+        
+    }
+    
+    public init(baseURL: String, baseSpec: OpenAPIObject) {
+        self.baseURL = baseURL
+        self.baseSpec = baseSpec
+    }
+    public func resolve<T>(component type  : T.Type, from reference : String) throws -> T? {
+        if reference.hasPrefix("#"){
+            // load from localFile
+            return nil
+        }
+        else if reference.hasPrefix("./") {
+            // load from relative file
+            return nil
+        }
+        return nil
+        
+    }
+    /// sehr einfache Fragment-Auflösung für "#/components/schemas/User"
+        func resolveFragment(root: [String: Any], fragment: String) throws -> Any {
+            let trimmed = fragment.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+            let keys = trimmed.split(separator: "/").map(String.init)
+
+            var current: Any = root
+            for key in keys {
+                guard let dict = current as? [String: Any] else {
+                    throw NSError(domain: "RefResolver", code: 1,
+                                  userInfo: [NSLocalizedDescriptionKey: "Expected dict at \(key)"])
+                }
+                guard let next = dict[key] else {
+                    throw NSError(domain: "RefResolver", code: 2,
+                                  userInfo: [NSLocalizedDescriptionKey: "Key \(key) not found"])
+                }
+                current = next
+            }
+            return current
+        }
+   
+}

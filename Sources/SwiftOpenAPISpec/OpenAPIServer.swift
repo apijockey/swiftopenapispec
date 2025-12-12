@@ -10,11 +10,12 @@ import Foundation
 
 
 public struct OpenAPIServer : ThrowingHashMapInitiable {
+    public static let DESCRIPTION_KEY = "description"
     public static let URL_KEY = "url"
     public static let NAME_KEY = "name"
-    public static let DESCRIPTION_KEY = "description"
     public static let VARIABLES_KEY = "variables"
    
+    
     public init(url:String){
         self.url = url
     }
@@ -27,13 +28,15 @@ public struct OpenAPIServer : ThrowingHashMapInitiable {
         }
         extensions = try OpenAPIExtension.extensionElements(map)
     }
-    public var url : String = "/"
-    public var name : String? = nil
     public var description : String? = nil
+    public var extensions : [OpenAPIExtension]?
+    public var name : String? = nil
+    public var url : String = "/"
+    public var userInfos =  [OpenAPIObject.UserInfo]()
     //https://spec.openapis.org/oas/latest.html#server-variable-object
     public var variables : [OpenAPIVariable] = []
-    public var userInfos =  [OpenAPIObject.UserInfo]()
-    public var extensions : [OpenAPIExtension]?
+    
+    
      
     
 }

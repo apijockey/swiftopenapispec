@@ -1,0 +1,68 @@
+#
+//  34-components-links-callbacks-pathItems.yaml
+//  SwiftOpenAPISpec
+//
+//  Created by Patric Dubois on 12.12.25.
+//
+
+
+openapi: "3.1.0"
+info:
+  title: Components – Links, Callbacks, PathItems
+  version: "1.0.0"
+
+components:
+  links:
+    GetUserById:
+      description: Hole den User über seine ID
+      operationId: getUser
+      parameters:
+        userId: "$response.body#/id"
+
+  callbacks:
+    UserCreatedCallback:
+      "{$request.body#/callbackUrl}":
+        post:
+          operationId: userCreatedCallbackReceiver
+          summary: Callback wenn User fertig erstellt ist
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    eventType: { type: string }
+                    user:
+                      $ref: "#/components/schemas/User"
+                  required: [eventType, user]
+          responses:
+            "200":
+              description: Callback empfangen
+            "400":
+              description: Invalid callback payload
+
+  pathItems:
+    UserByIdPathItem:
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string }
+      get:
+        operationId: getUser
+        summary: Get user by id (from external pathItem)
+        responses:
+          "200":
+            description: OK
+            content:
+              application/json:
+                schema:
+                  # Achtung: Referenz zurück auf Schemas in anderer Datei
+                  $ref: "../components-req-examples.yaml#/components/schemas/User"
+          "404":
+            description: Not found
+            content:
+              application/json:
+                schema:
+                  $ref: "../components-req-examples.yaml#/components/schemas/Error"

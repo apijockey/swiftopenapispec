@@ -18,5 +18,9 @@ public extension Array where Element : KeyedElement {
     func contains(name key: String) -> Bool {
         return self.contains(where: { $0.key == key })
     }
-   
+   func element(for segmentName: String) -> Element? {
+        self.first { namedComponent in
+            namedComponent.key == segmentName
+        }
+    }
 }

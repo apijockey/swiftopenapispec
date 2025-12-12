@@ -8,10 +8,10 @@
 import Foundation
 public struct OpenAPIContact : ThrowingHashMapInitiable {
     
-    
+    public static let EMAIL_KEY = "email"
     public  static let NAME_KEY = "name"
     public static let URL_KEY = "url"
-    public static let EMAIL_KEY = "email"
+   
     public init(_ map : StringDictionary) throws {
         if let name = map[Self.NAME_KEY] as? String {
             self.name = name
@@ -24,9 +24,9 @@ public struct OpenAPIContact : ThrowingHashMapInitiable {
         }
         extensions = try OpenAPIExtension.extensionElements(map)
     }
-    public  var name : String? = nil
-    public var url : String? = nil
     public var email : String? = nil
     public var extensions : [OpenAPIExtension]?
+    public  var name : String? = nil
+    public var url : String? = nil
     public var userInfos = [OpenAPIObject.UserInfo]()
 }

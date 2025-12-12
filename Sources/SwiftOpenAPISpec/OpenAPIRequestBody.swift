@@ -6,7 +6,7 @@
 //
 
 import Foundation
-public struct OpenAPIRequestBody : ThrowingHashMapInitiable {
+public struct OpenAPIRequestBody : KeyedElement {
     public static let DESCRIPTION_KEY = "description"
     public static let REQUIRED_KEY = "required"
     public static let CONTENTS_KEY = "content"
@@ -18,10 +18,19 @@ public struct OpenAPIRequestBody : ThrowingHashMapInitiable {
         }
         
     }
+    public var key : String?
     public var description : String? = nil
     public var required : Bool = false
     public var contents : [OpenAPIMediaType] = []
     public var userInfos =  [OpenAPIObject.UserInfo]()
    
+    public func element(for segmentName : String) throws -> Any? {
+        switch segmentName {
+            case "contents" : return self.contents
+        case "userInfos" : return self.userInfos
+            default : throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIObject", segmentName)
+        }
+    }
     
 }
+

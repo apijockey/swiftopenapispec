@@ -9,37 +9,57 @@ import Foundation
 
 
 /**
-  Struct containing an **OpenAPI Path Item** containing endpoints and their ``operations``
+  Struct containing an **OpenAPI Path** containing endpoints and their ``operations``
    
- Describes the operations available on a single path. A Path Item MAY be empty, due to ACL constraints. The path itself is still exposed to the documentation viewer but they will not know which operations and parameters are available.
+   The ``OpenAPIPath`` provides a set of convenient getter subscripts to filter for specific operations
  
    
  */
 public struct OpenAPIPathItem: KeyedElement {
-    public var key: String?
+   
+    
+    public enum Operations: String, Codable {
+        case get, post, put, delete, options, head, patch, trace, query
+    }
+    
+    public static let REF_KEY = "$ref"
+    public static let SUMMARY_KEY = "summary"
+    public static let DESCRIPTION_KEY = "description"
+    public static let SERVERS_KEY = "servers"
+    public static let PARAMETERS_KEY = "parameters"
+    public static let ADDITIONAL_OPERATIONS_KEY = "additionalOperations"
     
     /// holds the relative path to an individual endpoint, beginning with a leading slash
     /// ```swift
     /// //example
     /// "/ping"
-    public static let SUMMARY_KEY = "summary"
-    public static let DESCRIPTION_KEY = "description"
-    
-    /// inits an instance of ``OpenAPIPathItem``
+    /// inits an instance of ``OpenAPIPath``
     /// - Parameter map: Swift dictionary with a Path key and  value elements representing HTTP methods like **GET**, **POST** and **PUT**
     public init(_ map: [String: Any]) throws {
         // one resource may foresee several httpOperations
-        self.summary = map[Self.SUMMARY_KEY] as? String
-        self.description = map[Self.DESCRIPTION_KEY] as? String
         for (key, httpOperation) in map {
-            if let httpOperationMap = httpOperation as? [String: Any] {
+            if Self.Operations(rawValue: key) != nil,
+               let httpOperationMap = httpOperation as? [String: Any] {
                 var operation = try OpenAPIOperation(httpOperationMap)
-                
-                    // In diesem Kontext ist "key" die HTTP-Methode (get, post, ...)
-                    operation.key = key
+                operation.key = key
                 self.operations.append(operation)
             }
         }
+        self.ref  = map.readIfPresent(Self.REF_KEY, String.self)
+        self.summary  = map.readIfPresent(Self.SUMMARY_KEY, String.self)
+        self.description  = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
+        let servers = try map.tryListIfPresent(OpenAPIObject.SERVERS_KEY, root: "OpenAPIPath", OpenAPIServer.self)
+        if servers.count > 0 {
+            self.servers = servers
+        }
+        let parameters = try map.tryListIfPresent(Self.PARAMETERS_KEY, root: "OpenAPIPath", OpenAPIParameter.self)
+        if parameters.count > 0 {
+            self.parameters = parameters
+        }
+        if let additionalOperationsMap = map[Self.ADDITIONAL_OPERATIONS_KEY] as? StringDictionary {
+            self.additionalOperations = try KeyedElementList<OpenAPIOperation>.map(additionalOperationsMap)
+        }
+        self.extensions = try OpenAPIExtension.extensionElements(map)
     }
 
     // Zugriff per HTTP-Methode (get, post, put, ...) -> Liste oder nil
@@ -53,9 +73,15 @@ public struct OpenAPIPathItem: KeyedElement {
         let matches = operations.filter { $0.operationId == id }
         return matches.isEmpty ? [] : matches
     }
-    public var summary: String? = nil
-    public var description: String? = nil
+    public var additionalOperations: [OpenAPIOperation] = []
+    public var description :String? = nil
+    public var key: String? = nil
+    public var extensions : [OpenAPIExtension] = []
     public var operations: [OpenAPIOperation] = []
+    public var parameters: [OpenAPIParameter] = []
+    public var ref : String? = nil
+    public var servers: [OpenAPIServer] = []
+    public var summary: String? = nil
     public var userInfos =  [OpenAPIObject.UserInfo]()
 }
 
@@ -92,9 +118,10 @@ public extension Array where Element == OpenAPIPathItem  {
     ///  let openAPIPath = apiSpec[path: "/ping"]
     /// ```
     ///
-    subscript(webhook path: String) -> OpenAPIPathItem? {
+    subscript(path path: String) -> OpenAPIPathItem? {
         return self.first(where: { $0.key == path })
     }
+   
     
-    
+   
 }

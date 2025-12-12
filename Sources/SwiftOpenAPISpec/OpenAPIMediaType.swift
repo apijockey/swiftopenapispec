@@ -14,10 +14,10 @@ public struct OpenAPIMediaType :  KeyedElement {
     public var key : String?
     public init(_ map: [String : Any]) throws {
         if map[Self.SCHEMA_KEY] != nil {
-            let schemaMap = try map.tryRead(Self.SCHEMA_KEY, StringDictionary.self, root: "content")
+            let schemaMap = try map.tryRead(Self.SCHEMA_KEY, StringDictionary.self, root: "OpenAPIMediaType")
             self.schema =  try OpenAPISchema(schemaMap)
-        self.schemaRef =  try OpenAPISchemaReference(schemaMap)
-        self.oneOfSchemas = try OneOfSchemas(schemaMap)
+   
+        
         if let examplesMap  = map[Self.EXAMPLES_KEY]  as? StringDictionary{
             self.examples = try KeyedElementList.map(examplesMap)
         }
@@ -26,9 +26,7 @@ public struct OpenAPIMediaType :  KeyedElement {
         }
     }
     public var schema : OpenAPISchema? = nil
-    public var schemaRef  : OpenAPISchemaReference? = nil
-    public var oneOfSchemas : OneOfSchemas? = nil
-    public var examples : [OpenAPIExample] = []
+   public var examples : [OpenAPIExample] = []
     public var userInfos =  [OpenAPIObject.UserInfo]()
     
     //ENCODING

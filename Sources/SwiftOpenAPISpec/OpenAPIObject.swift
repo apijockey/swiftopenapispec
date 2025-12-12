@@ -41,22 +41,20 @@ public struct OpenAPIObject  {
         case error, warning, info
     }
     public enum Errors : LocalizedError {
-        case invalidYaml(String), invalidSpecification(String, String)
+        case invalidYaml(String), invalidSpecification(String, String), unsupportedSegment(String, String)
         public var errorDescription: String? {
             switch self {
             case .invalidYaml(let string):
                 string
             case .invalidSpecification(let hierarchy, let key):
                 "\(key) not found  in \(hierarchy) or does not contain expected elements"
+            case .unsupportedSegment(let type, let segment):
+                "\(type) does not contain expected element for \(segment)"
             }
         }
     }
    
-    func resolveComponent(_ text : String) {
-        if text.starts(with: "#") {
-            
-        }
-    }
+    
     /**
             reads a textual representantation of an OpenAPI specification
 
@@ -83,17 +81,14 @@ public struct OpenAPIObject  {
         if servers.count > 0 {
             spec.servers = servers
         }
-        if let map = loadedDictionary[OpenAPIObject.PATHS_KEY]  as? StringDictionary,
-           let paths = try? KeyedElementList<OpenAPIPath>.map(map),
-                paths.count > 0 {
-                spec.paths = paths
+        if let map = loadedDictionary[OpenAPIObject.PATHS_KEY]  as? StringDictionary{
+           let paths = try KeyedElementList<OpenAPIPathItem>.map(map)
+            spec.paths = paths
         }
-        if let map = loadedDictionary[OpenAPIObject.WEBHOOKS_KEY]  as? StringDictionary,
-           let webhooks = try? KeyedElementList<OpenAPIPathItem>.map(map),
-                webhooks.count > 0 {
+        if let map = loadedDictionary[OpenAPIObject.WEBHOOKS_KEY]  as? StringDictionary{
+           let webhooks = try KeyedElementList<OpenAPIPathItem>.map(map)
             spec.webhooks  = webhooks
         }
-      
         if let securityObjectMap = loadedDictionary[Self.SECURITY_KEY] as?  [[String:[String]]] {
             for element in securityObjectMap {
                 if let mapElement = element.first {
@@ -121,16 +116,16 @@ public struct OpenAPIObject  {
         let matches = paths[httpMethod: method]
         return matches.isEmpty ? [] : matches
     }
-    subscript(path path: String) -> OpenAPIPath? {
+    subscript(path path: String) -> OpenAPIPathItem? {
         return paths[path: path]
     }
     subscript(webhook path: String) -> OpenAPIPathItem? {
-        return webhooks[webhook: path]
+        return webhooks[path: path]
     }
     subscript(schemacomponent component: String) -> OpenAPISchema? {
         return components?.schemas?.first(where: { c in
             c.key == component
-        })?.namedComponentType
+        })
     }
     subscript(parametercomponent component: String) -> OpenAPIParameter? {
         return components?.parameters?.first(where: { c in
@@ -146,6 +141,11 @@ public struct OpenAPIObject  {
         return components?.securitySchemas?.first(where: { c in
             c.key == component
         })
+    }
+    subscript(requestbodycomponent component: String) -> OpenAPIRequestBody? {
+        return components?.requestBodies?.first(where:{ namedComponent in
+            namedComponent.key == component
+        }) as? OpenAPIRequestBody
     }
     
     
@@ -233,7 +233,12 @@ public struct OpenAPIObject  {
 
         return result
     }
-
+    public func element(for segmentName : String) throws -> Any? {
+        switch segmentName {
+            case "components" : return self.components
+            default : throw Self.Errors.unsupportedSegment("OpenAPIObject", segmentName)
+        }
+    }
     
     var userInfos =  [UserInfo]()
     static let COMPONENTS_KEY = "components"
@@ -252,7 +257,7 @@ public struct OpenAPIObject  {
     public var jsonSchemaDialect : String?
     public var info : OpenAPIInfo
     public var servers : [OpenAPIServer] = []
-    public private(set) var paths : [OpenAPIPath] = []
+    public private(set) var paths : [OpenAPIPathItem] = []
     public private(set) var webhooks : [OpenAPIPathItem] = []
     public var components : OpenAPIComponent?
     public var securityObjects : [OpenAPISecuritySchemeReference] = []
