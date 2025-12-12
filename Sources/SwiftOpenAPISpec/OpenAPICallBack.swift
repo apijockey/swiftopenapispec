@@ -13,13 +13,13 @@ public struct OpenAPICallBack : KeyedElement{
         extensions = try OpenAPIExtension.extensionElements(map)
         if map.count > 0 {
             pathItems = []
-            self.pathItems = try KeyedElementList<OpenAPIPath>.map(map)
+            self.pathItems = try KeyedElementList<OpenAPIPathItem>.map(map)
         }
      
     }
     
     public var userInfos = [OpenAPIObject.UserInfo]()
     public var extensions : [OpenAPIExtension]?
-    public var pathItems : [OpenAPIPath]?
+    public var pathItems : [OpenAPIPathItem]?
     public var key: String?
 }

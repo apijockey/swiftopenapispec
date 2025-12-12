@@ -84,25 +84,28 @@ struct FixtureTests {
         #expect(getPingResponseContent.required.first! == "ok")
         
     }
-    @Test("03-params-path-query-header, parameter matrix")
-    func parametermatrix() async throws {
+    @Test("03-pathitems, parameter matrix, operations, additional operations")
+    func pathitems() async throws {
         
-        let yaml = try fixtureString("03-params-path-query-header")
+        let yaml = try fixtureString("03-pathitems")
         let apiSpec = try OpenAPIObject.read(text: yaml)
         let path = try #require(apiSpec[path: "/pets/{id}"])
+        #expect(path.description == "Returns pets information")
+        #expect(path.summary == "get Pets")
         let parameters = try #require(path.operations[operationID : "getPet"]?.parameters)
         #expect(parameters.count == 1)
         let parameter = parameters.first!
         #expect(parameter.key == "id")
         #expect(parameter.location == SwiftOpenAPISpec.OpenAPIParameter.ParameterLocation.path)
         #expect(parameter.schema?.schemaType is OpenAPIStringType)
-      
-        
         #expect(parameter.explode == nil)
         #expect(parameter.deprecated == nil)
-        
+
         let searchPath = try #require(apiSpec[path: "/pets"])
         let searchParameters = try #require(searchPath.operations[operationID : "searchPets"]?.parameters)
+        let copyOperation = try #require(searchPath.additionalOperations[operationID : "copyPetsById"])
+        
+        
         #expect(parameters.count == 1)
         let queryParameter = searchParameters.first!
         #expect(queryParameter.key == "limit")
@@ -205,7 +208,7 @@ struct FixtureTests {
     func refscircular() async throws {
         let yaml = try fixtureString("07-refs-circular")
         let apiSpec = try OpenAPIObject.read(text: yaml)
-        let nodeObjectComponent = try #require(apiSpec.components?.schemas?.first?.namedComponentType?.schemaType as? OpenAPIObjectType)
+        let nodeObjectComponent = try #require(apiSpec.components?.schemas?.first?.schemaType as? OpenAPIObjectType)
         #expect(nodeObjectComponent.properties.count == 1)
         #expect(nodeObjectComponent.properties.first?.key == "next")
     }
@@ -292,7 +295,7 @@ struct FixtureTests {
         #expect(orderCreatedWebhook.operations.first?.summary == "Triggered when a new order is created")
         let requiredBody = try #require(orderCreatedWebhook.operations.first?.requestBody)
         #expect(requiredBody.required == true)
-        let orderCancelledWebhook = try #require(apiSpec[webhook: "orderCancelled"])
+        let orderCancelledWebhook = try #require(apiSpec[webhook:  "orderCancelled"])
         #expect(orderCancelledWebhook.operations.count == 1)
     }
     @Test("21-components")
@@ -421,13 +424,16 @@ struct FixtureTests {
         let yaml = try fixtureString("33-components-singlefile")
         let apiSpec = try OpenAPIObject.read(text: yaml)
         #expect(apiSpec.components?.schemas?.count == 2)
+        
         #expect(apiSpec.components?.requestBodies?.count == 1)
-        let requestBody = try #require(apiSpec.components?.requestBodies?[key: "CreateUserRequest"]?.namedComponentType)
+        let requestBody = try #require(apiSpec.components?.requestBodies?[key: "CreateUserRequest"])
         #expect(requestBody.description == "JSON-Payload für das Anlegen eines Users")
         #expect(requestBody.required == true)
+        
         #expect(apiSpec.components?.examples?.count == 1)
         let example = try #require(apiSpec.components?.examples?[key: "UserExample"])
         #expect(example.summary == "Beispiel-User")
+        
         #expect(apiSpec.components?.links?.count == 1)
         let link = try #require(apiSpec.components?.links?[key: "GetUserById"])
         #expect(link.description == "Hole den gerade angelegten User")
@@ -438,10 +444,26 @@ struct FixtureTests {
         let callback = try #require(apiSpec.components?.callbacks?[key:"UserCreatedCallback"]?.pathItems?[key: "{$request.body#/callbackUrl}"])
         #expect((callback.operations[operationID: "userCreatedCallbackReceiver"] != nil))
         #expect(callback.key == "{$request.body#/callbackUrl}")
+        
         #expect(apiSpec.components?.pathItems?.count == 1)
         let pathItem = try #require(apiSpec.components?.pathItems?[key:"UserByIdPathItem"])
         #expect(pathItem.key == "UserByIdPathItem")
         #expect(pathItem.operations[operationID: "getUser"]?.summary == "Get user by id")
+    }
+    @Test("34-openapi-main")
+    func componentsmultiplefile() async throws {
+        let yaml = try fixtureString("34-openapi-main")
+        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let createUserRequest = try #require(apiSpec[requestbodycomponent: "CreateUserRequest"])
+        
+    }
+    @Test("34-openapi-main resolvecomponents")
+        func resolveComponents() async throws {
+        let yaml = try fixtureString("34-openapi-main")
+        let apiSpec = try OpenAPIObject.read(text: yaml)
+        let component = try #require(apiSpec.element(for: "components") as? OpenAPIComponent)
+        let requestBodyComponent = try #require(component.element(for: "requestBodies") as? [OpenAPIRequestBody])
+            let createUserRequest = try #require(requestBodyComponent.element(for: "CreateUserRequest"))
     }
     
 }

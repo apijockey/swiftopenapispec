@@ -1,0 +1,64 @@
+openapi: "3.1.0"
+info:
+  title: Component Ref Demo (multi file)
+  version: "1.0.0"
+
+paths:
+  /users:
+    post:
+      operationId: createUser
+      summary: Create a user
+      tags: [users]
+      requestBody:
+        # Verweis auf Component (die wiederum in externer Datei definiert ist)
+        $ref: "#/components/requestBodies/CreateUserRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+              examples:
+                userExample:
+                  $ref: "#/components/examples/UserExample"
+          links:
+            GetUserById:
+              $ref: "#/components/links/GetUserById"
+        "202":
+          description: Accepted
+          callbacks:
+            userCreated:
+              $ref: "#/components/callbacks/UserCreatedCallback"
+
+  /users/{userId}:
+    # pathItem aus externer Datei
+    $ref: "#/components/pathItems/UserByIdPathItem"
+
+components:
+  # Jede dieser Component-Definitionen ist selbst ein $ref in eine andere Datei
+  requestBodies:
+    CreateUserRequest:
+      $ref: "./34-components-req-examples.yaml#/components/requestBodies/CreateUserRequest"
+
+  examples:
+    UserExample:
+      $ref: "./34-components-req-examples.yaml#/components/examples/UserExample"
+
+  schemas:
+    User:
+      $ref: "./34-components-req-examples.yaml#/components/schemas/User"
+    Error:
+      $ref: "./34-components-req-examples.yaml#/components/schemas/Error"
+
+  links:
+    GetUserById:
+      $ref: "./34-components-links-callbacks-pathItems.yaml#/components/links/GetUserById"
+
+  callbacks:
+    UserCreatedCallback:
+      $ref: "./34-components-links-callbacks-pathItems.yaml#/components/callbacks/UserCreatedCallback"
+
+  pathItems:
+    UserByIdPathItem:
+      $ref: "./34-components-links-callbacks-pathItems.yaml#/components/pathItems/UserByIdPathItem"

@@ -41,6 +41,18 @@ public struct OpenAPISchemaProperty: KeyedElement {
     public var type : OpenAPIValidatableSchemaType?
     public var discriminator : OpenAPIDiscriminator?
     
+    public func element(for segmentName : String) throws -> Any? {
+        switch segmentName {
+            case OpenAPISchema.JSONREF_KEY : return self.type
+            case Self.TYPE_KEY : return self.type
+            case OpenAPISchema.ONEOF_KEY: return type
+            case OpenAPISchema.ALLOF_KEY : return type
+            case OpenAPISchema.DISCRIMINATOR_KEY : return self.discriminator
+            
+            default : throw OpenAPIObject.Errors.unsupportedSegment("OpenAPISchema", segmentName)
+        }
+    }
+    
 }
 
 

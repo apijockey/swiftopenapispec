@@ -19,10 +19,13 @@ import Foundation
 
 
 
-public struct OpenAPISchema :  ThrowingHashMapInitiable {
+public struct OpenAPISchema :  KeyedElement{
+    public var key: String?
+    
     public enum DataType : String, CaseIterable {
         case integer, int32, int64, number, string
     }
+    public static let REF_KEY = "$ref"
     public static let TYPE_KEY = "type"
     public static let ALLOF_KEY = "allOf"
     public static let DISCRIMINATOR_KEY = "discriminator"
@@ -50,6 +53,7 @@ public struct OpenAPISchema :  ThrowingHashMapInitiable {
         else if map[Self.ALLOF_KEY] is [Any] {
             self.schemaType = try OpenAPIAllOfType(map)
         }
+        self.ref = map.readIfPresent(Self.REF_KEY, String.self)
     
         extensions = try OpenAPIExtension.extensionElements(map)
        
@@ -60,6 +64,17 @@ public struct OpenAPISchema :  ThrowingHashMapInitiable {
     public var format : DataType? = nil
     public var userInfos =  [OpenAPIObject.UserInfo]()
     public var extensions : [OpenAPIExtension]?
+    public var ref: String? = nil
    
-    
+    public func element(for segmentName : String) throws -> Any? {
+        switch segmentName {
+            case Self.JSONREF_KEY : return self.schemaType
+            case Self.TYPE_KEY : return self.schemaType
+            case Self.ONEOF_KEY: return schemaType
+            case Self.ALLOF_KEY : return schemaType
+            case Self.REF_KEY : return self.ref
+            
+            default : throw OpenAPIObject.Errors.unsupportedSegment("OpenAPISchema", segmentName)
+        }
+    }
 }
