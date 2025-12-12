@@ -63,6 +63,9 @@ public struct OpenAPISecurityScheme : KeyedElement {
             return
         }
     }
+    public func element(for segmentName: String) throws -> Any? {
+        try Self.element(for: segmentName)
+    }
     public var key: String?
     public var securityType : SecurityType
     public var description : String? = nil

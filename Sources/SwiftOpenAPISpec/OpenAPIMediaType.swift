@@ -25,6 +25,10 @@ public struct OpenAPIMediaType :  KeyedElement {
       
         }
     }
+    
+    public func element(for segmentName: String) throws -> Any? {
+        try Self.element(for: segmentName)
+    }
     public var schema : OpenAPISchema? = nil
    public var examples : [OpenAPIExample] = []
     public var userInfos =  [OpenAPIObject.UserInfo]()

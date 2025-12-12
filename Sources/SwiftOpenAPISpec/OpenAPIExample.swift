@@ -20,6 +20,9 @@ public struct OpenAPIExample : KeyedElement,ThrowingHashMapInitiable{
         self.externalValue = map.readIfPresent(Self.EXTERNAL_VALUE_KEY, String.self)
         self.ref = map.readIfPresent(Self.REF_KEY, String.self)
     }
+    public func element(for segmentName: String) throws -> Any? {
+        try Self.element(for: segmentName)
+    }
     public var key : String?
     public var summary : String? = nil
     public var description : String? = nil

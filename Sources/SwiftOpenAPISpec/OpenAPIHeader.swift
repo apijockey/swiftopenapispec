@@ -42,6 +42,9 @@ public struct OpenAPIHeader :  KeyedElement{
         self.content = map.readIfPresent(Self.CONTENT_KEY, OpenAPIMediaType.self)
        
     }
+    public func element(for segmentName: String) throws -> Any? {
+        try Self.element(for: segmentName)
+    }
     public var key: String?
     public let required : Bool
     public var description : String? = nil

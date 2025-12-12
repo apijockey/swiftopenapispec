@@ -43,7 +43,9 @@ public struct OpenAPIOperation : KeyedElement, ThrowingHashMapInitiable{
        
         
     }
-    
+    public func element(for segmentName: String) throws -> Any? {
+        try Self.element(for: segmentName)
+    }
     public static let OP_ID_KEY = "operationId"
     public static let PARAMETERS_KEY = "parameters"
     public static let RESPONSES_KEY = "responses"

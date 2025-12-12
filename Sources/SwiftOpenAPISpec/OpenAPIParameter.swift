@@ -71,6 +71,9 @@ public struct OpenAPIParameter :  KeyedElement{
         extensions = try OpenAPIExtension.extensionElements(map)
        
     }
+    public func element(for segmentName: String) throws -> Any? {
+        try Self.element(for: segmentName)
+    }
     public var key: String?
     public let location : ParameterLocation?
     public let required : Bool

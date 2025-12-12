@@ -6,8 +6,10 @@
 //
 
 
+
 public protocol KeyedElement : ThrowingHashMapInitiable {
     var key : String? {get set}
+   func element(for segmentName : String) throws -> Any?
 }
 
 public typealias StringDictionary =  [String:Any]
@@ -22,5 +24,10 @@ public extension Array where Element : KeyedElement {
         self.first { namedComponent in
             namedComponent.key == segmentName
         }
+    }
+}
+extension KeyedElement {
+    public static func element(for segmentName : String) throws -> Any? {
+       nil
     }
 }
