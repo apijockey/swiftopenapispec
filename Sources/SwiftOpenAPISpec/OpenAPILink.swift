@@ -23,6 +23,10 @@ public struct OpenAPILink : KeyedElement {
         parameters = map.readIfPresent(Self.PARAMETERS_KEY, [String:String].self) ?? [:]
         extensions = try OpenAPIExtension.extensionElements(map)
     }
+    
+    public func element(for segmentName: String) throws -> Any? {
+        try Self.element(for: segmentName)
+    }
     public var key : String? = nil
     public var operationRef : String? = nil
     public var operationId : String? = nil

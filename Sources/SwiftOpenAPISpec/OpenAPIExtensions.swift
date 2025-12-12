@@ -64,7 +64,9 @@ public struct OpenAPISimpleExtensionValues : KeyedElement{
         self.key = map.keys.first
         self.value = map.values.first as? String ?? ""
     }
-    
+    public func element(for segmentName: String) throws -> Any? {
+        try Self.element(for: segmentName)
+    }
     
     public var userInfos: [OpenAPIObject.UserInfo] = []
     

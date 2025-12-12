@@ -61,7 +61,9 @@ public struct OpenAPIPathItem: KeyedElement {
         }
         self.extensions = try OpenAPIExtension.extensionElements(map)
     }
-
+    public func element(for segmentName: String) throws -> Any? {
+        try Self.element(for: segmentName)
+    }
     // Zugriff per HTTP-Methode (get, post, put, ...) -> Liste oder nil
     public subscript(httpMethod method: String) -> [OpenAPIOperation] {
         let matches = operations.filter { $0.key == method }

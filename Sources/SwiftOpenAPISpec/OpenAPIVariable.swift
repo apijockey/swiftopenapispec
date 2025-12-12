@@ -19,6 +19,9 @@ public struct OpenAPIVariable : KeyedElement {
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
             
     }
+    public func element(for segmentName: String) throws -> Any? {
+        try Self.element(for: segmentName)
+    }
     public var enumList : [String]? = nil
     public var defaultValue : String
     public var description : String? = nil
