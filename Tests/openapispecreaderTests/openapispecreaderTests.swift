@@ -17,7 +17,7 @@ struct OpenAPILegacyPortedTests {
             #expect(Bool(false), "no valid yaml")
             return
         }
-        let apiSpec = try OpenAPIObject.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
         #expect(apiSpec.version == "3.1.0")
         #expect(apiSpec.info.title == "GreetingService")
         #expect(apiSpec.info.version == "1.0.0")
@@ -39,7 +39,7 @@ struct OpenAPILegacyPortedTests {
         guard let string = String(data: data, encoding: .utf8) else  {
             #expect(Bool(false), "no valid yaml"); return
         }
-        let apiSpec = try OpenAPIObject.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
         #expect(apiSpec.servers.count == 3)
         #expect(apiSpec.servers[0].url == "https://example.com/api")
         #expect(apiSpec.servers[0].description == "Example service deployment.")
@@ -72,7 +72,7 @@ struct OpenAPILegacyPortedTests {
         guard let string = String(data: data, encoding: .utf8) else  {
             #expect(Bool(false), "no valid yaml"); return
         }
-        let apiSpec = try OpenAPIObject.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
         #expect(apiSpec.paths.count == 4)
 
         let getGreetPath = try #require(apiSpec.paths.first { $0.key == "/greet" })
@@ -103,7 +103,7 @@ struct OpenAPILegacyPortedTests {
         guard let string = String(data: data, encoding: .utf8) else  {
             #expect(Bool(false), "no valid yaml"); return
         }
-        let apiSpec = try OpenAPIObject.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
         let getClipPath = try #require(apiSpec.paths.first { $0.key == "/clip" })
         let clipPathOperation = try #require(getClipPath.operations.first)
         #expect(clipPathOperation.key == "get")
@@ -123,7 +123,7 @@ struct OpenAPILegacyPortedTests {
         guard let string = String(data: data, encoding: .utf8) else  {
             #expect(Bool(false), "no valid yaml"); return
         }
-        let apiSpec = try OpenAPIObject.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
         let getGreetPath = try #require(apiSpec.paths.first { $0.key == "/greet" })
         let getEmojiPath = try #require(apiSpec.paths.first { $0.key == "/emoji" })
         let getClipPath = try #require(apiSpec.paths.first { $0.key == "/clip" })
@@ -151,7 +151,7 @@ struct OpenAPILegacyPortedTests {
         guard let string = String(data: data, encoding: .utf8) else  {
             #expect(Bool(false), "no valid yaml"); return
         }
-        let apiSpec = try OpenAPIObject.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
         let getGreetPath = try #require(apiSpec.paths.first { $0.key == "/greet" })
         let greetPathOperation = try #require(getGreetPath.operations.first)
         let response = try #require(greetPathOperation.responses?.first)
@@ -171,7 +171,7 @@ struct OpenAPILegacyPortedTests {
         guard let string = String(data: data, encoding: .utf8) else  {
             #expect(Bool(false), "no valid yaml"); return
         }
-        let apiSpec = try OpenAPIObject.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
         #expect(apiSpec.components?.schemas?.count == 4)
         let greetingComponent = try #require(apiSpec.components?.schemas?.first { $0.key == "Greeting" })
         let greetingObject = try #require(greetingComponent.schemaType as? OpenAPIObjectType)
@@ -199,7 +199,7 @@ struct OpenAPILegacyPortedTests {
         guard let string = String(data: data, encoding: .utf8) else  {
             #expect(Bool(false), "no valid yaml"); return
         }
-        let apiSpec = try OpenAPIObject.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
         #expect(apiSpec.components?.parameters?.count == 2)
         let skipParamComponent = try #require(apiSpec[parametercomponent: "skipParam"])
         #expect(skipParamComponent.key == "skipParam")
@@ -218,7 +218,7 @@ struct OpenAPILegacyPortedTests {
         guard let string = String(data: data, encoding: .utf8) else  {
             #expect(Bool(false), "no valid yaml"); return
         }
-        let apiSpec = try OpenAPIObject.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
         #expect(apiSpec.components?.responses?.count == 4)
 
         let notFoundResponse = try #require(apiSpec.components?.responses?.first(where: { $0.key == "NotFound" }))
@@ -246,7 +246,7 @@ struct OpenAPILegacyPortedTests {
         guard let string = String(data: data, encoding: .utf8) else  {
             #expect(Bool(false), "no valid yaml"); return
         }
-        let apiSpec = try OpenAPIObject.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
         #expect(apiSpec.paths.count == 4)
         let getPetsPath = try #require(apiSpec.paths.first { $0.key == "/pets" })
         let postOperation = try #require(getPetsPath.operations.first { $0.key == "post" })
@@ -264,7 +264,7 @@ struct OpenAPILegacyPortedTests {
         guard let string = String(data: data, encoding: .utf8) else  {
             #expect(Bool(false), "no valid yaml"); return
         }
-        let apiSpec = try OpenAPIObject.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
         #expect(apiSpec.paths.count == 4)
         let getPetsPath = try #require(apiSpec.paths.first { $0.key == "/pets" })
         #expect(getPetsPath.operations.count == 3)
@@ -284,7 +284,7 @@ struct OpenAPILegacyPortedTests {
         guard let string = String(data: data, encoding: .utf8) else  {
             #expect(Bool(false), "no valid yaml"); return
         }
-        let apiSpec = try OpenAPIObject.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
         #expect(apiSpec.paths.count == 4)
         let getGreetPath = try #require(apiSpec.paths.first { $0.key == "/greet" })
         let getOperation = try #require(getGreetPath.operations.first { $0.key == "get" })
@@ -306,7 +306,7 @@ struct OpenAPILegacyPortedTests {
         guard let string = String(data: data, encoding: .utf8) else  {
             #expect(Bool(false), "no valid yaml"); return
         }
-        let apiSpec = try OpenAPIObject.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
         #expect(apiSpec.components?.securitySchemas?.count == 5)
 
         let httpKeySecurityScheme = try #require(apiSpec.components?.securitySchemas?.first{ $0.key == "http_Key"})
@@ -355,7 +355,7 @@ struct OpenAPILegacyPortedTests {
         guard let string = String(data: data, encoding: .utf8) else  {
             #expect(Bool(false), "no valid yaml"); return
         }
-        let apiSpec = try OpenAPIObject.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
         #expect(apiSpec.paths.count == 4)
         let getPetsPath = try #require(apiSpec.paths.first { $0.key == "/pets" })
         #expect(getPetsPath.operations.count == 3)
@@ -382,7 +382,7 @@ struct OpenAPILegacyPortedTests {
         guard let string = String(data: data, encoding: .utf8) else  {
             #expect(Bool(false), "no valid yaml"); return
         }
-        let apiSpec = try OpenAPIObject.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
         #expect(apiSpec.paths.count == 4)
         let getPetsPath = try #require(apiSpec.paths.first { $0.key == "/pets" })
         #expect(getPetsPath.operations.count == 3)
@@ -402,7 +402,7 @@ struct OpenAPILegacyPortedTests {
         guard let string = String(data: data, encoding: .utf8) else  {
             #expect(Bool(false), "no valid yaml"); return
         }
-        let apiSpec = try OpenAPIObject.read(text: string)
+        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
         let getPetsPath = try #require(apiSpec.paths.first { $0.key == "/pets" })
         let patchOperation = try #require(getPetsPath.operations.first { $0.key == "patch" })
         let links = try #require(patchOperation.responses?.first(where: { $0.key == "200" })?.links)
