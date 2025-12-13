@@ -15,7 +15,7 @@ import Foundation
  
    
  */
-public struct OpenAPIPathItem: KeyedElement {
+public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
    
     
     public enum Operations: String, Codable {

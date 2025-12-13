@@ -6,7 +6,7 @@
 //
 
 import Foundation
-public struct OpenAPIRequestBody : KeyedElement {
+public struct OpenAPIRequestBody : KeyedElement , PointerNavigable {
     public static let DESCRIPTION_KEY = "description"
     public static let REQUIRED_KEY = "required"
     public static let CONTENTS_KEY = "content"

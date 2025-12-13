@@ -6,7 +6,7 @@
 //
 
 import Foundation
-public struct OpenAPICallBack : KeyedElement{
+public struct OpenAPICallBack : KeyedElement,PointerNavigable{
     public func element(for segmentName: String) throws -> Any? {
         try Self.element(for: segmentName)
     }

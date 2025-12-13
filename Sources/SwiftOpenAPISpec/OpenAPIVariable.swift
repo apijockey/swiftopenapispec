@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct OpenAPIVariable : KeyedElement {
+public struct OpenAPIVariable : KeyedElement , PointerNavigable {
     public static let ENUM_KEY = "enum"
     public static let DEFAULT_KEY = "default"
     public static let DESCRIPTION_KEY = "description"

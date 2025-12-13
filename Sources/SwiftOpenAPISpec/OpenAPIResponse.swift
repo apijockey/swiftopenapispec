@@ -9,7 +9,7 @@ import Foundation
 
 
 /// An OpenAPIResponse is a child of ``OpenAPIOperation`` and can be identified by its unique ``key``, being an HTTP status, like '200'
-public struct OpenAPIResponse : KeyedElement{
+public struct OpenAPIResponse : KeyedElement, PointerNavigable {
     public static let DESCRIPTION_KEY = "description"
     public static let SUMMARY_KEY = "summary"
     public static let CONTENT_KEY = "content"

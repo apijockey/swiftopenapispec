@@ -67,7 +67,7 @@ public struct KeyedElementList<T> where T :  KeyedElement {
     
 }
 
-public protocol JSONPointerResolver {
+public protocol JSONPointerResolvable {
     func resolveSubscript(key : String) -> String?
 }
 

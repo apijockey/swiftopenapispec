@@ -5,11 +5,13 @@
 //  Created by Patric Dubois on 10.12.25.
 //
 
-
+protocol PointerNavigable {
+    func element(for segmentName: String) throws -> Any?
+}
 
 public protocol KeyedElement : ThrowingHashMapInitiable {
     var key : String? {get set}
-   func element(for segmentName : String) throws -> Any?
+   
 }
 
 public typealias StringDictionary =  [String:Any]

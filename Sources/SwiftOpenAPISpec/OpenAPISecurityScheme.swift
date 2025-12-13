@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct OpenAPISecurityScheme : KeyedElement {
+public struct OpenAPISecurityScheme : KeyedElement , PointerNavigable {
    
     
     public static let TYPE_KEY = "type"

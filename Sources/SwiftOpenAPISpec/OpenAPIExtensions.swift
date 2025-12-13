@@ -59,7 +59,7 @@ public struct OpenAPIExtension  {
         return extensionList
     }
 }
-public struct OpenAPISimpleExtensionValues : KeyedElement{
+public struct OpenAPISimpleExtensionValues : KeyedElement, PointerNavigable {
     public init(_ map: StringDictionary) throws {
         self.key = map.keys.first
         self.value = map.values.first as? String ?? ""

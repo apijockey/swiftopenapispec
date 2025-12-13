@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct OpenAPILink : KeyedElement {
+public struct OpenAPILink : KeyedElement , PointerNavigable {
     public static let OPERATIION_REF_KEY = "operationRef"
     public static let OPERATIION_ID_KEY = "operationId"
     public static let PARAMETERS_KEY = "parameters"

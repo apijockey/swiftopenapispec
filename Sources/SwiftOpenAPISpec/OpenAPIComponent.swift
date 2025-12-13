@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct OpenAPIComponent : KeyedElement, ThrowingHashMapInitiable  {
+public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
     
     
   
