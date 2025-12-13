@@ -13,7 +13,7 @@ import Foundation
   A unique parameter is defined by a combination of a name and location.
   */
  */
-public struct OpenAPIParameter :  KeyedElement{
+public struct OpenAPIParameter :  KeyedElement, PointerNavigable {
     
     
     public enum ParameterLocation : String, Codable, CaseIterable {

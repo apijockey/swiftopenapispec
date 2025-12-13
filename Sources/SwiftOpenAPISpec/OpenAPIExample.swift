@@ -7,7 +7,7 @@
 
 import Foundation
 import Foundation
-public struct OpenAPIExample : KeyedElement,ThrowingHashMapInitiable{
+public struct OpenAPIExample : KeyedElement, PointerNavigable {
     public static let SUMMARY_KEY = "summary"
     public static let DESCRIPTION_KEY = "description"
     public static let VALUE_KEY = "value"

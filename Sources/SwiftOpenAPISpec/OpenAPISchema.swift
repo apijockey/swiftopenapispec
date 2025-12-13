@@ -19,7 +19,7 @@ import Foundation
 
 
 
-public struct OpenAPISchema :  KeyedElement{
+public struct OpenAPISchema :  KeyedElement, PointerNavigable {
     public var key: String?
     
     public enum DataType : String, CaseIterable {

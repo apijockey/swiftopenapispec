@@ -1,0 +1,129 @@
+openapi: "3.1.0"
+info:
+  title: JSON Pointer Torture External Components
+  version: "1.0.0"
+
+components:
+  schemas:
+    # Name enthält "/" und "~" -> JSON Pointer muss ~1 und ~0 nutzen
+    "user/admin~meta":
+      type: object
+      properties:
+        note: { type: string }
+      required: [note]
+
+    # oneOf Array + $ref Kette + Array-Index Pointer Tests
+    EventEnvelope:
+      type: object
+      properties:
+        type: { type: string }
+        payload:
+          oneOf:
+            - $ref: "#/components/schemas/UserCreated"
+            - $ref: "#/components/schemas/UserDeleted"
+          discriminator:
+            propertyName: type
+            mapping:
+              user.created: "#/components/schemas/UserCreated"
+              user.deleted: "#/components/schemas/UserDeleted"
+      required: [type, payload]
+
+    UserCreated:
+      type: object
+      properties:
+        type: { const: "user.created" }
+        userId: { type: string }
+        # Rück-Ref in die Hauptdatei (relativer Pfad)
+        errorShape:
+          $ref: "./main.yaml#/components/schemas/CommonError"
+      required: [type, userId]
+
+    UserDeleted:
+      type: object
+      properties:
+        type: { const: "user.deleted" }
+        userId: { type: string }
+      required: [type, userId]
+
+  examples:
+    CreateEventExample:
+      summary: Request example
+      value:
+        callbackUrl: "https://receiver.example.com/hooks/events"
+        event:
+          type: "user.created"
+          payload:
+            type: "user.created"
+            userId: "u-1"
+
+  requestBodies:
+    CreateEvent:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              callbackUrl: { type: string, format: uri }
+              event:
+                $ref: "#/components/schemas/EventEnvelope"
+            required: [callbackUrl, event]
+          examples:
+            create:
+              $ref: "#/components/examples/CreateEventExample"
+          encoding:
+            # Segment "application/json" muss als application~1json escaped werden,
+            # und "event/payload" enthält "/" -> event~1payload
+            event/payload:
+              contentType: application/json
+              headers:
+                X-Encoded:
+                  schema:
+                    type: string
+                  example: "1"
+
+    # Webhook RequestBody, der auf schema in ext und example in ext referenziert
+    EventWebhook:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/EventEnvelope"
+          examples:
+            webhook:
+              $ref: "#/components/examples/CreateEventExample"
+
+  links:
+    ExternalLinkExample:
+      description: Example link in external file
+      operationId: getEvent
+      parameters:
+        eventId: "$response.body#/id"
+
+  callbacks:
+    DeliveredCallback:
+      "{$request.body#/callbackUrl}":
+        post:
+          operationId: delivered
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    delivered: { type: boolean }
+                    eventId: { type: string }
+                  required: [delivered, eventId]
+          responses:
+            "200":
+              description: OK
+
+  pathItems:
+    # Name enthält "~" -> ~0
+    "weird~pathItem":
+      get:
+        operationId: weirdPathItemGet
+        responses:
+          "200":
+            description: OK

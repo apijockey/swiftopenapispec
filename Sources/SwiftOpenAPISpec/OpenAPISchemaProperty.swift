@@ -8,7 +8,7 @@
 import Foundation
 
 
-public struct OpenAPISchemaProperty: KeyedElement {
+public struct OpenAPISchemaProperty: KeyedElement , PointerNavigable {
     
     
     static let TYPE_KEY = "type"

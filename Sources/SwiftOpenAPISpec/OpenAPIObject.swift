@@ -32,7 +32,7 @@ struct S: Codable {
 /// let apiSpec = try OpenAPISpec.read(text: string)
 /// ```
 ///
-public struct OpenAPIObject : KeyedElement {
+public struct OpenAPIObject : KeyedElement , PointerNavigable {
     public var key: String?
     
     public init(_ map: StringDictionary) throws {
@@ -87,17 +87,27 @@ public struct OpenAPIObject : KeyedElement {
     public enum UserInfoType : String, Codable {
         case error, warning, info
     }
-    public enum Errors : LocalizedError {
-        case invalidYaml(String), invalidSpecification(String, String), unsupportedSegment(String, String)
-        public var errorDescription: String? {
+    public enum Errors : CustomStringConvertible, LocalizedError {
+        public var description: String{
             switch self {
             case .invalidYaml(let string):
-                string
+                return string
             case .invalidSpecification(let hierarchy, let key):
-                "\(key) not found  in \(hierarchy) or does not contain expected elements"
+                return "\(key) not found  in \(hierarchy) or does not contain expected elements"
             case .unsupportedSegment(let type, let segment):
-                "\(type) does not contain expected element for \(segment)"
+                return "\(type) does not contain expected element for \(segment)"
+            case .notFound(let name): return "Fixture not found: \(name)"
+            case .unreadable(let name, let err): return "Fixture unreadable: \(name) (\(err))"
+            case .notUTF8(let name): return "Fixture not UTF-8 encoded: \(name)"
             }
+        }
+        
+        case invalidYaml(String), invalidSpecification(String, String), unsupportedSegment(String, String)
+        case notFound(String)
+        case unreadable(String, Error)
+        case notUTF8(String)
+        public var errorDescription: String? {
+            return description
         }
     }
    
@@ -108,7 +118,18 @@ public struct OpenAPIObject : KeyedElement {
              - Parameter text: the Yaml/JSON representation
              - Returns: an OpenAPISpec instance  which holds the text contents as simple Swift structs
      */
-    
+    public static func load(from url: URL) throws -> OpenAPIObject{
+        do {
+            let data = try Data(contentsOf: url)
+            guard let string = String(data: data, encoding: .utf8) else {
+                throw Self.Errors.notUTF8(url.absoluteString)
+            }
+            let apiSpec = try OpenAPIObject.read(text: string, url:url.absoluteString )
+            return apiSpec
+        } catch {
+            throw Self.Errors.unreadable(url.absoluteString, error)
+        }
+    }
     public static func read(text : String, url : String ) throws -> OpenAPIObject{
         guard let unflattened = try Yams.load(yaml: text) as? StringDictionary else {
             throw OpenAPIObject.Errors.invalidYaml("text cannot be interpreted as a Key/Value List")

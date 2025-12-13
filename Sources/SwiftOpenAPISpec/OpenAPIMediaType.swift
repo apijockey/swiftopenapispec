@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct OpenAPIMediaType :  KeyedElement {
+public struct OpenAPIMediaType :  KeyedElement , PointerNavigable {
     public static let SCHEMA_KEY = "schema"
     public static let EXAMPLE_KEY = "example"
     public static let EXAMPLES_KEY = "examples"

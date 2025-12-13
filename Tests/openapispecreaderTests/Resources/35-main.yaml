@@ -1,0 +1,120 @@
+openapi: "3.1.0"
+info:
+  title: JSON Pointer Torture Main
+  version: "1.0.0"
+
+paths:
+  /events:
+    post:
+      operationId: createEvent
+      requestBody:
+        $ref: "#/components/requestBodies/CreateEvent"
+      responses:
+        "201":
+          description: Created
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventCreated"
+              examples:
+                created:
+                  $ref: "#/components/examples/CreatedExample"
+          links:
+            GetEventById:
+              $ref: "#/components/links/GetEventById"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommonError"
+  /events/{eventId}:
+    $ref: "#/components/pathItems/EventById"
+
+webhooks:
+  eventStream:
+    post:
+      operationId: onEvent
+      requestBody:
+        $ref: "#/components/requestBodies/EventWebhook"
+      responses:
+        "200":
+          description: OK
+
+components:
+  schemas:
+    CommonError:
+      type: object
+      properties:
+        code: { type: string }
+        message: { type: string }
+        meta:
+          type: object
+          additionalProperties: true
+      required: [code, message]
+
+    # Dieses Schema wird absichtlich extern referenziert
+    EventEnvelope:
+      $ref: "./ext-components.yaml#/components/schemas/EventEnvelope"
+
+    EventCreated:
+      type: object
+      properties:
+        id: { type: string }
+        accepted: { type: boolean }
+        # Ref in externe Datei, aber auf eine Schema-NAMEN mit "/" und "~"
+        weirdRef:
+          $ref: "./ext-components.yaml#/components/schemas/user~1admin~0meta"
+      required: [id, accepted]
+
+  requestBodies:
+    CreateEvent:
+      $ref: "./ext-components.yaml#/components/requestBodies/CreateEvent"
+
+    EventWebhook:
+      $ref: "./ext-components.yaml#/components/requestBodies/EventWebhook"
+
+  examples:
+    CreatedExample:
+      summary: Created response example
+      value:
+        id: "e-123"
+        accepted: true
+
+  links:
+    GetEventById:
+      operationId: getEvent
+      parameters:
+        eventId: "$response.body#/id"
+
+  headers:
+    XRequestId:
+      description: Request correlation id
+      schema:
+        type: string
+
+  pathItems:
+    EventById:
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema: { type: string }
+      get:
+        operationId: getEvent
+        responses:
+          "200":
+            description: OK
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/EventEnvelope"
+          "404":
+            description: Not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/CommonError"

@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct OpenAPIHeader :  KeyedElement{
+public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
 
 
     public static let REQUIRED_KEY = "required"
