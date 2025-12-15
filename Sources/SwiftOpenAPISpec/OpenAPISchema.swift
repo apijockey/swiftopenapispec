@@ -72,7 +72,7 @@ public struct OpenAPISchema :  KeyedElement, PointerNavigable {
         switch segmentName {
             
             case Self.JSONREF_KEY : return self.ref
-            case Self.TYPE_KEY : return self.schemaType
+        case Self.TYPE_KEY : return self.schemaType
             case Self.ONEOF_KEY: return schemaType
             case Self.ALLOF_KEY : return schemaType
             default :

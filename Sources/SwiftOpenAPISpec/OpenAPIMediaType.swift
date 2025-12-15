@@ -9,7 +9,13 @@ import Foundation
 
 public struct OpenAPIMediaType :  KeyedElement , PointerNavigable {
     public static let SCHEMA_KEY = "schema"
+    public static let ITEM_SCHEMA_KEY = "itemSchema"
     public static let EXAMPLES_KEY = "examples"
+    public static let EXAMPLE_KEY = "example"
+    public static let ENCODING_KEY = "encoding"
+    public static let PREFIX_ENCODING_KEY = "prefixEncoding"
+    public static let ITEM_ENCODING_KEY = "itemEncoding"
+    public static let EXTENSIONS_KEY = "extensions"
     public var key : String?
     public init(_ map: [String : Any]) throws {
         if map[Self.SCHEMA_KEY] != nil {
