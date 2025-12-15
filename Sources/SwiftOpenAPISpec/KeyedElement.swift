@@ -9,8 +9,17 @@ import Foundation
 
 // MARK: - Navigation
 
-protocol PointerNavigable {
+public protocol PointerNavigable {
     func element(for segmentName: String) throws -> Any?
+    var ref : String? {get}
+    var hasFilledRef : Bool { get }
+     
+}
+
+public extension PointerNavigable {
+    var hasFilledRef: Bool {
+        return self.ref != nil && self.ref?.isEmpty == false
+    }
 }
 
 // MARK: - Core Protocols

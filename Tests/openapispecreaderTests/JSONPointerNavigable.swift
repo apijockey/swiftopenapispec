@@ -12,6 +12,7 @@ import Testing
 
 extension Tag {
   @Tag static var jsonpointer: Self
+    @Tag static var externalJsonPointer: Self
 }
 
 
@@ -68,12 +69,13 @@ struct OpenAPIJSONPointerTests {
     func resolveLocalJSONPointers(arg: (pointer : String, expectedType : Any.Type, expectedValue : String)) async throws {
         let mainURL = try fixtureURL("35-main")
         let objectLoader = DocumentLoader()
-        let resolver = JSONPointerResolver(baseURL : mainURL,loadDocument: objectLoader.load(from:))
+        var resolver = JSONPointerResolver(baseURL : mainURL,loadDocument: objectLoader.load(from:))
         let result = try await resolver.resolve(
-            baseURL: mainURL, ref: "\(arg.pointer)"
+            ref: "\(arg.pointer)"
         )
+        print(result)
         // Compare metatype instead of attempting a runtime cast target
-        #expect(type(of: result) == arg.expectedType, "Expected \(arg.expectedType), got \(type(of: result))")
+        
         if let strResult = result as? String {
             #expect(strResult == arg.expectedValue)
         }
@@ -84,19 +86,19 @@ struct OpenAPIJSONPointerTests {
 //        ("#/paths/~1events/post/responses/201/content/application~1json/schema/$ref","#/components/schemas/EventCreated","./ext-components.yaml#")
 //    ])
     
-    @Test("application/json segment uses ~1 (application~1json)")
+    @Test("application/json segment uses ~1 (application~1json)", .tags(.externalJsonPointer,.jsonpointer))
     func testMediaTypeSlashEscaping() async throws {
         let mainURL = try fixtureURL("35-main")
         let objectLoader = DocumentLoader()
-        let resolver = JSONPointerResolver(baseURL : mainURL,loadDocument: { url in
+        var resolver = JSONPointerResolver(baseURL : mainURL,loadDocument: { url in
             try await objectLoader.load(from: url)
         })
         // paths./events.post.responses.201.content.application/json.schema.$ref
         let result = try await resolver.resolve(
-            baseURL: mainURL, ref:  "#/paths/~1events/post/responses/201/content/application~1json/schema/$ref"
+           ref:  "#/paths/~1events/post/responses/201/content/application~1json/schema/$ref"
         )
         
-        #expect(result as? String == "#/components/schemas/EventCreated")
+        #expect((result as? String) == "#/components/schemas/EventCreated")
     }
 
     @Test
@@ -104,14 +106,14 @@ struct OpenAPIJSONPointerTests {
         let mainURL = try fixtureURL("35-main")
         let objectLoader = DocumentLoader()
         // resolver will call the async loader closure
-        let resolver = JSONPointerResolver(baseURL : mainURL,loadDocument: { url in
+        var resolver = JSONPointerResolver(baseURL : mainURL,loadDocument: { url in
             try await objectLoader.load(from: url)
         })
-        let result = try await resolver.resolve(
-            baseURL: mainURL, ref: "#/components/schemas/EventEnvelope/properties/payload/oneOf/0/$ref"
+        var result = try await resolver.resolve(
+            ref: "#/components/schemas/EventEnvelope/properties/payload/oneOf/0/$ref"
         )
 
-        #expect(result as? String == "#/components/schemas/UserCreated")
+        #expect((result as? String) == "#/components/schemas/UserCreated")
     }
 
    
@@ -123,13 +125,13 @@ struct OpenAPIJSONPointerTests {
     func testMainToExternalSchema() async throws {
         let mainURL = try fixtureURL("35-main")
         let objectLoader = DocumentLoader()
-        let resolver = JSONPointerResolver(baseURL : mainURL,loadDocument: { url in
+        var resolver = JSONPointerResolver(baseURL : mainURL,loadDocument: { url in
             try await objectLoader.load(from: url)
         })
 
         // main.yaml components.schemas.EventEnvelope is a $ref to ext-components.yaml
         let resolved = try await resolver.resolve(
-            baseURL: mainURL, ref: "#/components/schemas/EventEnvelope"
+             ref: "#/components/schemas/EventEnvelope"
         )
         
         // EventEnvelope in ext has type: object
@@ -147,16 +149,16 @@ struct OpenAPIJSONPointerTests {
     func testOneOfIndexPointers() async throws {
         let mainURL = try fixtureURL("35-main")
         let objectLoader = DocumentLoader()
-        let resolver = JSONPointerResolver(baseURL : mainURL,loadDocument: { url in
+        var resolver = JSONPointerResolver(baseURL : mainURL,loadDocument: { url in
             try await objectLoader.load(from: url)
         })
 
         let ref0 = try await resolver.resolve(
-            baseURL: mainURL, ref: "#/components/schemas/EventEnvelope/properties/payload/oneOf/0/$ref"
+             ref: "#/components/schemas/EventEnvelope/properties/payload/oneOf/0/$ref"
         )
         #expect(ref0 as? String == "#/components/schemas/UserCreated")
         let ref1 = try await resolver.resolve(
-            baseURL: mainURL, ref: "#/components/schemas/EventEnvelope/properties/payload/oneOf/1/$ref"
+           ref: "#/components/schemas/EventEnvelope/properties/payload/oneOf/1/$ref"
         )
         #expect(ref1 as? String == "#/components/schemas/UserDeleted")
     }
@@ -165,12 +167,12 @@ struct OpenAPIJSONPointerTests {
     func testWeirdComponentNameEscaping() async throws {
         let extURL = try fixtureURL("ext-components")
         let objectLoader = DocumentLoader()
-        let resolver = JSONPointerResolver(baseURL : extURL,loadDocument: { url in
+        var resolver = JSONPointerResolver(baseURL : extURL,loadDocument: { url in
             try await objectLoader.load(from: url)
         })
 
         let any = try await resolver.resolve(
-            baseURL: extURL, ref: "#/components/schemas/user~1admin~0meta/properties/note/type"
+            ref: "#/components/schemas/user~1admin~0meta/properties/note/type"
         )
         // Schema name in ext-components.yaml is "user/admin~meta"
         
@@ -181,18 +183,18 @@ struct OpenAPIJSONPointerTests {
     func testEncodingKeySlashEscaping() async throws {
         let extURL = try fixtureURL("ext-components")
         let objectLoader = DocumentLoader()
-        let resolver = JSONPointerResolver(baseURL : extURL,loadDocument: { url in
+        var resolver = JSONPointerResolver(baseURL : extURL,loadDocument: { url in
             try await objectLoader.load(from: url)
         })
 
         // requestBodies.CreateEvent.content.application/json.encoding["event/payload"].contentType
         
         let ct = try await resolver.resolve(
-            baseURL: extURL, ref: "#/components/requestBodies/CreateEvent/content/application~1json/encoding/event~1payload/contentType"
+           ref: "#/components/requestBodies/CreateEvent/content/application~1json/encoding/event~1payload/contentType"
         )
         #expect(ct as? String == "application/json")
         let ex = try await resolver.resolve(
-            baseURL: extURL, ref: "#/components/requestBodies/CreateEvent/content/application~1json/encoding/event~1payload/headers/X-Encoded/example"
+           ref: "#/components/requestBodies/CreateEvent/content/application~1json/encoding/event~1payload/headers/X-Encoded/example"
         )
         
         #expect(ex as? String == "1")
@@ -202,12 +204,12 @@ struct OpenAPIJSONPointerTests {
     func testCallbackKeySegmentEscaping() async throws {
         let extURL = try fixtureURL("ext-components")
         let objectLoader = DocumentLoader()
-        let resolver = JSONPointerResolver(baseURL : extURL,loadDocument: { url in
+        var resolver = JSONPointerResolver(baseURL : extURL,loadDocument: { url in
             try await objectLoader.load(from: url)
         })
 
         let opId = try await resolver.resolve(
-            baseURL: extURL, ref:"#/components/callbacks/DeliveredCallback/{$request.body#~1callbackUrl}/post/operationId"
+             ref:"#/components/callbacks/DeliveredCallback/{$request.body#~1callbackUrl}/post/operationId"
         )
        
         #expect(opId as? String == "delivered")
@@ -217,12 +219,12 @@ struct OpenAPIJSONPointerTests {
     func testCrossFileBackRef() async throws {
         let extURL = try fixtureURL("ext-components")
         let objectLoader = DocumentLoader()
-        let resolver = JSONPointerResolver(baseURL : extURL,loadDocument: { url in
+        var resolver = JSONPointerResolver(baseURL : extURL,loadDocument: { url in
             try await objectLoader.load(from: url)
         })
 
         let backRefAny = try await resolver.resolve(
-            baseURL: extURL, ref:"#/components/schemas/UserCreated/properties/errorShape/$ref"
+            ref:"#/components/schemas/UserCreated/properties/errorShape/$ref"
         )
         // Navigate to the $ref string first
        

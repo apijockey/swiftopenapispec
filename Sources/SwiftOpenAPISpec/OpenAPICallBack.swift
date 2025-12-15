@@ -7,6 +7,8 @@
 
 import Foundation
 public struct OpenAPICallBack : KeyedElement,PointerNavigable{
+    
+    
     public func element(for segmentName: String) throws -> Any? {
         try Self.element(for: segmentName)
     }
@@ -26,4 +28,5 @@ public struct OpenAPICallBack : KeyedElement,PointerNavigable{
     public var extensions : [OpenAPIExtension]?
     public var pathItems : [OpenAPIPathItem]?
     public var key: String?
+    public var ref : String? // PointerNavigable
 }

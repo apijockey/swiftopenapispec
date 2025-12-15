@@ -19,11 +19,12 @@ public struct OpenAPIRequestBody : KeyedElement , PointerNavigable {
         
     }
     public var key : String?
+    
     public var description : String? = nil
     public var required : Bool = false
     public var contents : [OpenAPIMediaType] = []
     public var userInfos =  [OpenAPIObject.UserInfo]()
-   
+    public var ref : String? // PointerNavigable
     public func element(for segmentName : String) throws -> Any? {
         switch segmentName {
             case "contents" : return self.contents

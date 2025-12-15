@@ -74,6 +74,7 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
     public var requestBody : OpenAPIRequestBody? = nil
     public var description : String? = nil
     public var tags : [String] = []
+    public var ref : String? // PointerNavigable
     public var responses : [OpenAPIResponse]? = []
     public var parameters : [OpenAPIParameter]? = []
     public var servers : [OpenAPIServer] = [OpenAPIServer(url: "/")]

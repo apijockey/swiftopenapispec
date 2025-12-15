@@ -38,6 +38,7 @@ public struct OpenAPISchemaProperty: KeyedElement , PointerNavigable {
     }
     public var userInfos =  [OpenAPIObject.UserInfo]()
     public  var key : String? = nil
+    public var ref : String? // PointerNavigable
     public var type : OpenAPIValidatableSchemaType?
     public var discriminator : OpenAPIDiscriminator?
     

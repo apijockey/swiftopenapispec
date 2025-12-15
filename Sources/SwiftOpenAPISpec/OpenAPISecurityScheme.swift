@@ -67,6 +67,7 @@ public struct OpenAPISecurityScheme : KeyedElement , PointerNavigable {
         try Self.element(for: segmentName)
     }
     public var key: String?
+    public var ref : String? // PointerNavigable
     public var securityType : SecurityType
     public var description : String? = nil
     public var name : String? = nil

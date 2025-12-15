@@ -58,7 +58,7 @@ components:
 
     # Dieses Schema wird absichtlich extern referenziert
     EventEnvelope:
-      $ref: "./ext-components.yaml#/components/schemas/EventEnvelope"
+      $ref: "./35-ext-components.yaml#/components/schemas/EventEnvelope"
 
     EventCreated:
       type: object
@@ -67,15 +67,15 @@ components:
         accepted: { type: boolean }
         # Ref in externe Datei, aber auf eine Schema-NAMEN mit "/" und "~"
         weirdRef:
-          $ref: "./ext-components.yaml#/components/schemas/user~1admin~0meta"
+          $ref: "./35-ext-components.yaml#/components/schemas/user~1admin~0meta"
       required: [id, accepted]
 
   requestBodies:
     CreateEvent:
-      $ref: "./ext-components.yaml#/components/requestBodies/CreateEvent"
+      $ref: "./35-ext-components.yaml#/components/requestBodies/CreateEvent"
 
     EventWebhook:
-      $ref: "./ext-components.yaml#/components/requestBodies/EventWebhook"
+      $ref: "./35-ext-components.yaml#/components/requestBodies/EventWebhook"
 
   examples:
     CreatedExample:

@@ -25,7 +25,6 @@ public struct OpenAPISchema :  KeyedElement, PointerNavigable {
     public enum DataType : String, CaseIterable {
         case integer, int32, int64, number, string
     }
-    public static let REF_KEY = "$ref"
     public static let TYPE_KEY = "type"
     public static let ALLOF_KEY = "allOf"
     public static let DISCRIMINATOR_KEY = "discriminator"
@@ -36,16 +35,10 @@ public struct OpenAPISchema :  KeyedElement, PointerNavigable {
     
    
     public init(_ map: [String : Any]) throws {
+        
         if let type = map[Self.TYPE_KEY] as? String,
             let validatableType = OpenAPISchemaType.validatableType(type) {
             self.schemaType = try validatableType.init(map)
-        }
-        else if map[Self.JSONREF_KEY] is String {
-            self.schemaType = try OpenAPIValidatableType(map)
-            
-        }
-        else if map[Self.ONEOF_KEY] is [Any] {
-            self.schemaType = try OpenAPIOneOfType(map)
         }
         else if map[Self.ANYOF_KEY] is [Any] {
             self.schemaType = try OpenAPIAnyOfType(map)
@@ -53,7 +46,16 @@ public struct OpenAPISchema :  KeyedElement, PointerNavigable {
         else if map[Self.ALLOF_KEY] is [Any] {
             self.schemaType = try OpenAPIAllOfType(map)
         }
-        self.ref = map.readIfPresent(Self.REF_KEY, String.self)
+        else if map[Self.JSONREF_KEY] is String {
+            self.schemaType = try OpenAPIValidatableType(map)
+            
+        }
+        
+        else if map[Self.ONEOF_KEY] is [Any] {
+            self.schemaType = try OpenAPIOneOfType(map)
+        }
+        
+        self.ref = map.readIfPresent(Self.JSONREF_KEY, String.self)
     
         extensions = try OpenAPIExtension.extensionElements(map)
        
@@ -67,20 +69,22 @@ public struct OpenAPISchema :  KeyedElement, PointerNavigable {
     public var ref: String? = nil
    
     public func element(for segmentName : String) throws -> Any? {
-        if let ref = self.ref,
-           !ref.isEmpty {
-            throw JSONPointerResolver.Errors.externalReference(ref)
-        }
         switch segmentName {
-            case Self.JSONREF_KEY : return self.schemaType
+            
+            case Self.JSONREF_KEY : return self.ref
             case Self.TYPE_KEY : return self.schemaType
             case Self.ONEOF_KEY: return schemaType
             case Self.ALLOF_KEY : return schemaType
-            case Self.REF_KEY : return self.ref
-            case "properties" : return (schemaType as? OpenAPIObjectType)?.properties
-            
-            
-            default : throw OpenAPIObject.Errors.unsupportedSegment("OpenAPISchema", segmentName)
+            default :
+            if let jsonRef =  self.ref,
+                !jsonRef.isEmpty {
+                return self.ref
+            }
+            else if let object = schemaType as? OpenAPIObjectType{
+                    return try object.element(for: segmentName)
+                
+            }
+            throw OpenAPIObject.Errors.unsupportedSegment("OpenAPISchema", segmentName)
         }
     }
 }

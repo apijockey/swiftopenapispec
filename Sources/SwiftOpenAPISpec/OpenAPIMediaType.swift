@@ -38,7 +38,7 @@ public struct OpenAPIMediaType :  KeyedElement , PointerNavigable {
     public var schema : OpenAPISchema? = nil
     public var examples : [OpenAPIExample] = []
     public var userInfos =  [OpenAPIObject.UserInfo]()
-    
+    public var ref : String? // PointerNavigable
     //ENCODING
 }
 

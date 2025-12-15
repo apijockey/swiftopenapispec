@@ -34,6 +34,7 @@ public struct OpenAPIResponse : KeyedElement, PointerNavigable {
     public var headers: [OpenAPIHeader] = []
     public var links : [OpenAPILink] =   []
     public var key : String? = nil
+    public var ref : String? // PointerNavigable
     public var userInfos =  [OpenAPIObject.UserInfo]()
     
     public func element(for segmentName : String) throws -> Any? {
