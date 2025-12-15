@@ -4,6 +4,7 @@
 import Foundation
 import Yams
 
+
 //https://swiftpackageindex.com/apple/swift-openapi-generator/1.2.1/tutorials/swift-openapi-generator/clientswiftpm
 struct S: Codable {
     var p: String
@@ -99,11 +100,13 @@ public struct OpenAPIObject : KeyedElement , PointerNavigable {
             case .notFound(let name): return "Fixture not found: \(name)"
             case .unreadable(let name, let err): return "Fixture unreadable: \(name) (\(err))"
             case .notUTF8(let name): return "Fixture not UTF-8 encoded: \(name)"
+            
             }
         }
         
         case invalidYaml(String), invalidSpecification(String, String), unsupportedSegment(String, String)
         case notFound(String)
+       
         case unreadable(String, Error)
         case notUTF8(String)
         public var errorDescription: String? {
@@ -118,18 +121,7 @@ public struct OpenAPIObject : KeyedElement , PointerNavigable {
              - Parameter text: the Yaml/JSON representation
              - Returns: an OpenAPISpec instance  which holds the text contents as simple Swift structs
      */
-    public static func load(from url: URL) throws -> OpenAPIObject{
-        do {
-            let data = try Data(contentsOf: url)
-            guard let string = String(data: data, encoding: .utf8) else {
-                throw Self.Errors.notUTF8(url.absoluteString)
-            }
-            let apiSpec = try OpenAPIObject.read(text: string, url:url.absoluteString )
-            return apiSpec
-        } catch {
-            throw Self.Errors.unreadable(url.absoluteString, error)
-        }
-    }
+    
     public static func read(text : String, url : String ) throws -> OpenAPIObject{
         guard let unflattened = try Yams.load(yaml: text) as? StringDictionary else {
             throw OpenAPIObject.Errors.invalidYaml("text cannot be interpreted as a Key/Value List")
@@ -268,7 +260,18 @@ public struct OpenAPIObject : KeyedElement , PointerNavigable {
     }
     public func element(for segmentName : String) throws -> Any? {
         switch segmentName {
-            case "components" : return self.components
+            case Self.COMPONENTS_KEY : return self.components
+            case Self.EXTERNAL_DOCS_KEY  : return self.externalDocumentation
+            case Self.INFO_KEY : return self.info
+            case Self.JSON_SCHEMA_DIALECT_KEY : return self.jsonSchemaDialect
+            case Self.OPENAPI_KEY : return self.version
+            case Self.PATHS_KEY : return self.paths
+            case Self.SECURITY_KEY :  return self.securityObjects
+            case Self.SERVERS_KEY : return self.servers
+            case Self.TAGS_KEY : return self.tags
+            case Self.SELF_URL_KEY : return self.selfUrl
+            case Self.WEBHOOKS_KEY :return self.webhooks
+            
             default : throw Self.Errors.unsupportedSegment("OpenAPIObject", segmentName)
         }
     }
@@ -299,6 +302,93 @@ public struct OpenAPIObject : KeyedElement , PointerNavigable {
     public var extensions : [OpenAPIExtension]?
     
     
+}
+
+// MARK: - Encoding to StringDictionary
+
+extension OpenAPIObject: ThrowingHashMapEncodable {
+    public func toDictionary() throws -> StringDictionary {
+        var dict: StringDictionary = [:]
+
+        // Required
+        dict[Self.OPENAPI_KEY] = version
+
+        // info
+        if let infoEnc = info as? ThrowingHashMapEncodable {
+            dict[Self.INFO_KEY] = try infoEnc.toDictionary()
+        } else {
+            // Fallback: minimal info map
+            dict[Self.INFO_KEY] = ["title": info.title, "version": info.version]
+        }
+
+        // $schema
+        try encodeKey(Self.JSON_SCHEMA_DIALECT_KEY, value: jsonSchemaDialect, into: &dict)
+
+        // $self
+        try encodeKey(Self.SELF_URL_KEY, value: selfUrl, into: &dict)
+
+        // externalDocs
+        if let ext = externalDocumentation as? ThrowingHashMapEncodable {
+            _ = try encodeKey(Self.EXTERNAL_DOCS_KEY, encodable: ext, into: &dict)
+        } else if let extDoc = externalDocumentation {
+            dict[Self.EXTERNAL_DOCS_KEY] = ["url": extDoc.url, "description": extDoc.description as Any].compactMapValues { $0 }
+        }
+
+        // servers (array of maps)
+        if let serversEnc = servers as? [ThrowingHashMapEncodable] {
+            dict[Self.SERVERS_KEY] = try serversEnc.map { try $0.toDictionary() }
+        } else {
+            // best-effort: map servers minimally
+            if !servers.isEmpty {
+                dict[Self.SERVERS_KEY] = servers.map { ["url": $0.url, "description": $0.description as Any].compactMapValues { $0 } }
+            }
+        }
+
+        // tags (array of maps)
+        if let tagsEnc = tags as? [ThrowingHashMapEncodable] {
+            dict[Self.TAGS_KEY] = try tagsEnc.map { try $0.toDictionary() }
+        } else if !tags.isEmpty {
+            dict[Self.TAGS_KEY] = tags.map { tag in
+                var t: [String: Any] = ["name": tag.name as Any,
+                                        "summary": tag.summary as Any,
+                                        "description": tag.description as Any]
+                // extensions for tags
+                encodeExtensions(tag.extensions, into: &t)
+                return t.compactMapValues { $0 }
+            }
+        }
+
+        // security: [[String: [String]]]
+        if !securityObjects.isEmpty {
+            let arr = securityObjects.map { ref -> [String: [String]] in
+                let name = ref.key ?? ""
+                return [name: ref.scopes]
+            }
+            dict[Self.SECURITY_KEY] = arr
+        }
+
+        // paths: [String: PathItem] Patric: 14.12.2025 für später
+        //_ = try encodeMapFromKeyedArray(Self.PATHS_KEY, array: paths as? [any (KeyedElement & ThrowingHashMapEncodable)] as? [OpenAPIPathItem], into: &dict)
+
+        // paths: [String: PathItem] Patric: 14.12.2025 für später
+        // webhooks: [String: PathItem]
+        //_ = try encodeMapFromKeyedArray(Self.WEBHOOKS_KEY, array: webhooks as? [any (KeyedElement & ThrowingHashMapEncodable)] as? [OpenAPIPathItem], into: &dict)
+
+        // components
+        if let comp = components as? ThrowingHashMapEncodable {
+            dict[Self.COMPONENTS_KEY] = try comp.toDictionary()
+        } else if components != nil{
+            // minimal fallback if not encodable yet
+            let c: [String: Any] = [:]
+            // You can expand this as soon as OpenAPIComponent conforms to ThrowingHashMapEncodable
+            dict[Self.COMPONENTS_KEY] = c
+        }
+
+        // x-* extensions at root
+        encodeExtensions(extensions, into: &dict)
+
+        return dict
+    }
 }
 
 

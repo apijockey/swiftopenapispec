@@ -62,7 +62,19 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
         self.extensions = try OpenAPIExtension.extensionElements(map)
     }
     public func element(for segmentName: String) throws -> Any? {
-        try Self.element(for: segmentName)
+        switch segmentName {
+            case Self.REF_KEY: return ref
+            case Self.SUMMARY_KEY: return summary
+            case Self.DESCRIPTION_KEY: return description
+            case Self.SERVERS_KEY: return servers
+            case Self.PARAMETERS_KEY: return parameters
+            case Self.ADDITIONAL_OPERATIONS_KEY: return additionalOperations
+            default :
+            if let operation = operations[key: segmentName] {
+                return operation
+            }
+            throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIPathItem", segmentName)
+        }
     }
     // Zugriff per HTTP-Methode (get, post, put, ...) -> Liste oder nil
     public subscript(httpMethod method: String) -> [OpenAPIOperation] {

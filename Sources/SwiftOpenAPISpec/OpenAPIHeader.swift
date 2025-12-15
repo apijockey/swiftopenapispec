@@ -22,11 +22,9 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
     public static let EXAMPLES_KEY = "examples"
     public static let CONTENT_KEY = "content"
     public init(_ map: [String : Any]) throws {
-        guard let required = map[Self.REQUIRED_KEY] as? Bool else {
-            throw OpenAPIObject.Errors.invalidSpecification(OpenAPIOperation.PARAMETERS_KEY, Self.REQUIRED_KEY)
-        }
+        
       
-        self.required = required
+        self.required = map.readIfPresent(Self.REQUIRED_KEY, Bool.self) ?? false
         self.description =  map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
         self.deprecated =  map.readIfPresent(Self.DEPRECATED_KEY, Bool.self)
         self.allowEmptyValue = map.readIfPresent(Self.ALLOW_EMPTYVALUE_KEY, Bool.self)
@@ -40,6 +38,7 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
             self.examples = try KeyedElementList.map(examplesMap)
         }
         self.content = map.readIfPresent(Self.CONTENT_KEY, OpenAPIMediaType.self)
+        extensions = try OpenAPIExtension.extensionElements(map)
        
     }
     public func element(for segmentName: String) throws -> Any? {
@@ -55,6 +54,7 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
     public var explode : Bool? = nil
     public var allowReserved : Bool? = nil
     public var example : Any? = nil
+    public var extensions : [OpenAPIExtension]?
     public var examples : [OpenAPIExample]? = []
     public var content : OpenAPIMediaType? = nil
     public var userInfos =  [OpenAPIObject.UserInfo]()
