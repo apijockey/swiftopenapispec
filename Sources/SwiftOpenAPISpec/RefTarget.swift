@@ -46,6 +46,11 @@ actor DocumentLoader {
 }
 
 struct JSONPointerResolver {
+    init(baseURL : URL,loadDocument: @escaping (URL) async throws -> any PointerNavigable) {
+        self.loadDocument = loadDocument
+        self.baseURL = baseURL
+        self.currentURL = baseURL
+    }
     enum Errors :LocalizedError {
        case missingHash(String), missingSlash(String), externalReference(String)
         
@@ -66,6 +71,8 @@ struct JSONPointerResolver {
     /// Load a document from disk/URL into your OpenAPIObject domain model.
     /// Replace with your real loader.
     let loadDocument: (URL) async throws -> any PointerNavigable
+    var baseURL : URL
+    var currentURL : URL
 
     // RFC 6901 decode: "~1" -> "/", "~0" -> "~" (order matters)
     func decodePointerSegment(_ segment: String) -> String {

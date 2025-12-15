@@ -6,7 +6,7 @@
 //
 
 import Foundation
-public struct OpenAPIInfo : ThrowingHashMapInitiable {
+public struct OpenAPIInfo : ThrowingHashMapInitiable, PointerNavigable {
     static let CONTACT_KEY = "contact"
     static let DESCRIPTION_KEY = "description"
     static let LICENSE_KEY = "license"
@@ -48,7 +48,7 @@ public struct OpenAPIInfo : ThrowingHashMapInitiable {
         case Self.DESCRIPTION_KEY: return description
         case Self.LICENSE_KEY: return license
         case Self.TERMS_KEY: return termsOfService
-        case Self.TITLE_KEY: return title
+        case Self.TITLE_KEY: return title as String
         case Self.VERSION_KEY: return version
         case Self.SUMMARY_KEY: return summary
         case Self.TERMS_KEY: return termsOfService
