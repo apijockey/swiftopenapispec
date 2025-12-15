@@ -44,7 +44,18 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
         
     }
     public func element(for segmentName: String) throws -> Any? {
-        try Self.element(for: segmentName)
+       switch segmentName {
+       case Self .OP_ID_KEY: return operationId as String?
+       case Self .PARAMETERS_KEY: return (parameters ?? []) as [OpenAPIParameter]
+       case Self .RESPONSES_KEY: return (responses  ?? []) as [OpenAPIResponse] 
+       case Self .SUMMARY_KEY: return summary as String?
+       case Self .TAGS_KEY: return tags as [String]
+       case Self .REQUEST_BODIES_KEY: return requestBody as OpenAPIRequestBody?
+       case Self .EXTERNAL_DOCS_KEY: return externalDocs as OpenAPIExternalDocumentation?
+       case Self .DEPRECATED_KEY: return deprecated as Bool?
+       default: return nil
+           
+        }
     }
     public static let OP_ID_KEY = "operationId"
     public static let PARAMETERS_KEY = "parameters"

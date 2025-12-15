@@ -41,6 +41,31 @@ public struct OpenAPIInfo : ThrowingHashMapInitiable {
         extensions = try OpenAPIExtension.extensionElements(map)
         
     }
+    
+    public func element(for segmentName: String) throws -> Any? {
+        switch segmentName {
+        case Self.CONTACT_KEY: return contact
+        case Self.DESCRIPTION_KEY: return description
+        case Self.LICENSE_KEY: return license
+        case Self.TERMS_KEY: return termsOfService
+        case Self.TITLE_KEY: return title
+        case Self.VERSION_KEY: return version
+        case Self.SUMMARY_KEY: return summary
+        case Self.TERMS_KEY: return termsOfService
+        case Self.CONTACT_KEY: return contact
+        
+        
+        default:
+            // Für x-* Vendor Extensions einzelne Keys erlauben: "x-..." -> passenden Extension-Wert liefern
+            if segmentName.hasPrefix("x-"), let exts = extensions {
+                if let ext = exts.first(where: { $0.key == segmentName }) {
+                    // Gib die strukturierte oder einfache Extension zurück
+                    return ext.structuredExtension?.properties ?? ext.simpleExtensionValue
+                }
+            }
+            throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIInfo", segmentName)
+        }
+    }
     public var contact : OpenAPIContact? = nil
     public var description : String? = nil
     public var extensions : [OpenAPIExtension]?

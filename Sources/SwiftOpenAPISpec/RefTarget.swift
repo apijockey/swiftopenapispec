@@ -11,13 +11,61 @@ struct RefTarget: Hashable {
     let fragment: String // e.g. "#/components/schemas/User"
 }
 
+
+actor DocumentLoader {
+    var objectCash: [URL: OpenAPIObject] = [:]
+    public enum Errors : CustomStringConvertible, LocalizedError {
+        public var description: String{
+            switch self {
+            case .unreadable(let name, let err): return "Fixture unreadable: \(name) (\(err))"
+            case .notUTF8(let name): return "Fixture not UTF-8 encoded: \(name)"
+            
+            }
+        }
+        
+        case unreadable(String, Error)
+        case notUTF8(String)
+        public var errorDescription: String? {
+            return description
+        }
+    }
+    
+    public func load(from url: URL) async throws -> PointerNavigable {
+        do {
+            let data = try Data(contentsOf: url)
+            guard let string = String(data: data, encoding: .utf8) else {
+                throw Self.Errors.notUTF8(url.absoluteString)
+            }
+            let apiSpec = try OpenAPIObject.read(text: string, url:url.absoluteString )
+            objectCash[url] = apiSpec
+            return apiSpec
+        } catch {
+            throw Self.Errors.unreadable(url.absoluteString, error)
+        }
+    }
+}
+
 struct JSONPointerResolver {
+    enum Errors :LocalizedError {
+       case missingHash(String), missingSlash(String), externalReference(String)
+        
+        var errorDescription: String? {
+            switch self {
+            case .missingSlash(let s):
+                    return "Fragment \(s) must start with '/'"
+            case .missingHash(let s):
+                return "Pointer \(s) must start with '#"
+            case .externalReference(let string):
+                return "reference in external file \(string)"
+            }
+        }
+    }
     /// Max recursion depth to protect against cycles / bad inputs
     let maxDepth: Int = 64
 
     /// Load a document from disk/URL into your OpenAPIObject domain model.
     /// Replace with your real loader.
-    let loadDocument: (URL) throws -> any PointerNavigable
+    let loadDocument: (URL) async throws -> any PointerNavigable
 
     // RFC 6901 decode: "~1" -> "/", "~0" -> "~" (order matters)
     func decodePointerSegment(_ segment: String) -> String {
@@ -53,13 +101,13 @@ struct JSONPointerResolver {
             return root
         }
         guard fragment.hasPrefix("#") else {
-            throw NSError(domain: "PointerHarness", code: 1, userInfo: [NSLocalizedDescriptionKey: "Fragment must start with #"])
+            throw Self.Errors.missingHash(fragment)
         }
 
         let pointer = String(fragment.dropFirst()) // remove leading '#'
         if pointer.isEmpty { return root }
         guard pointer.hasPrefix("/") else {
-            throw NSError(domain: "PointerHarness", code: 2, userInfo: [NSLocalizedDescriptionKey: "Pointer must start with /"])
+            throw Self.Errors.missingSlash(pointer)
         }
 
         let rawSegments = pointer.dropFirst().split(separator: "/").map(String.init)
@@ -70,31 +118,35 @@ struct JSONPointerResolver {
 
         for seg in segments {
             traversed += "/\(seg)"
-
-            // 1) Prefer domain navigation
-            if let nav = current as? PointerNavigable {
-                if let next = try nav.element(for: seg) {
-                    current = next
-                    continue
+            do {
+                // 1) Prefer domain navigation
+                if let nav = current as? PointerNavigable {
+                    if let next = try nav.element(for: seg) {
+                        current = next
+                        continue
+                    }
+                    throw NSError(domain: "PointerHarness", code: 3, userInfo: [NSLocalizedDescriptionKey: "Segment not found at \(traversed)"])
                 }
-                throw NSError(domain: "PointerHarness", code: 3, userInfo: [NSLocalizedDescriptionKey: "Segment not found at \(traversed)"])
+                else if let nav = current as? [any KeyedElement] {
+                    if let next = nav.element(for: seg) {
+                        current = next
+                        continue
+                    }
+                }
+                else if let stringValue = current as? String{
+                    return stringValue
+                }
             }
-
-            // 2) Fallback for common container types if your domain returns raw containers sometimes
-            if let dict = current as? [String: Any] {
-                guard let next = dict[seg] else {
-                    throw NSError(domain: "PointerHarness", code: 4, userInfo: [NSLocalizedDescriptionKey: "Key not found at \(traversed)"])
+            catch let error as JSONPointerResolver.Errors {
+                switch error {
+                case .externalReference(let s):
+                    throw NSError(domain: "PointerHarness", code: 6, userInfo: [NSLocalizedDescriptionKey: "external files \(s) not yet supported"])
+                default:
+                    throw error
                 }
-                current = next
-                continue
             }
-
-            if let arr = current as? [Any] {
-                guard let idx = Int(seg), idx >= 0, idx < arr.count else {
-                    throw NSError(domain: "PointerHarness", code: 5, userInfo: [NSLocalizedDescriptionKey: "Index not found at \(traversed)"])
-                }
-                current = arr[idx]
-                continue
+            catch {
+                throw error
             }
 
             throw NSError(domain: "PointerHarness", code: 6, userInfo: [NSLocalizedDescriptionKey: "Type mismatch at \(traversed)"])
@@ -110,9 +162,9 @@ struct JSONPointerResolver {
     func resolve(
         baseURL: URL,
         ref: String
-    ) throws -> Any {
+    ) async throws -> Any {
         var visited = Set<RefTarget>()
-        return try resolveRefInternal(baseURL: baseURL, ref: ref, visited: &visited, depth: 0)
+        return try await resolveRefInternal(baseURL: baseURL, ref: ref, visited: &visited, depth: 0)
     }
 
     private func resolveRefInternal(
@@ -120,7 +172,7 @@ struct JSONPointerResolver {
         ref: String,
         visited: inout Set<RefTarget>,
         depth: Int
-    ) throws -> Any {
+    ) async throws -> Any {
         if depth > maxDepth {
             throw NSError(domain: "PointerHarness", code: 7, userInfo: [NSLocalizedDescriptionKey: "Max $ref depth exceeded"])
         }
@@ -130,21 +182,22 @@ struct JSONPointerResolver {
             throw NSError(domain: "PointerHarness", code: 8, userInfo: [NSLocalizedDescriptionKey: "Circular $ref detected: \(ref)"])
         }
 
-        let doc = try loadDocument(target.url)
+        let doc = try await loadDocument(target.url)
         let resolved = try resolve(root: doc, fragment: target.fragment)
 
         // If resolved is a domain object that can yield "$ref", follow it
         if let nav = resolved as? PointerNavigable,
            let innerRef = try nav.element(for: "$ref") as? String {
-            return try resolveRefInternal(baseURL: target.url, ref: innerRef, visited: &visited, depth: depth + 1)
+            return try await resolveRefInternal(baseURL: target.url, ref: innerRef, visited: &visited, depth: depth + 1)
         }
 
         // Or if resolved is a raw dict
         if let dict = resolved as? [String: Any],
            let innerRef = dict["$ref"] as? String {
-            return try resolveRefInternal(baseURL: target.url, ref: innerRef, visited: &visited, depth: depth + 1)
+            return try await resolveRefInternal(baseURL: target.url, ref: innerRef, visited: &visited, depth: depth + 1)
         }
 
         return resolved
     }
 }
+

@@ -67,12 +67,18 @@ public struct OpenAPISchema :  KeyedElement, PointerNavigable {
     public var ref: String? = nil
    
     public func element(for segmentName : String) throws -> Any? {
+        if let ref = self.ref,
+           !ref.isEmpty {
+            throw JSONPointerResolver.Errors.externalReference(ref)
+        }
         switch segmentName {
             case Self.JSONREF_KEY : return self.schemaType
             case Self.TYPE_KEY : return self.schemaType
             case Self.ONEOF_KEY: return schemaType
             case Self.ALLOF_KEY : return schemaType
             case Self.REF_KEY : return self.ref
+            case "properties" : return (schemaType as? OpenAPIObjectType)?.properties
+            
             
             default : throw OpenAPIObject.Errors.unsupportedSegment("OpenAPISchema", segmentName)
         }
