@@ -6,7 +6,9 @@
 //
 
 import Foundation
-public struct OpenAPIInfo : ThrowingHashMapInitiable, PointerNavigable {
+public struct OpenAPIInfo : KeyedElement, PointerNavigable {
+    
+    
     static let CONTACT_KEY = "contact"
     static let DESCRIPTION_KEY = "description"
     static let LICENSE_KEY = "license"
@@ -74,6 +76,7 @@ public struct OpenAPIInfo : ThrowingHashMapInitiable, PointerNavigable {
     public var title : String
     public var  summary : String?
     public var ref : String? // PointerNavigable
+    public var key: String?
     public var userInfos =  [OpenAPIObject.UserInfo]()
     public var version : String
     

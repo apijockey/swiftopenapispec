@@ -27,9 +27,8 @@ public struct OpenAPIRequestBody : KeyedElement , PointerNavigable {
     public var ref : String? // PointerNavigable
     public func element(for segmentName : String) throws -> Any? {
         switch segmentName {
-            case "contents" : return self.contents
-        case "userInfos" : return self.userInfos
-            default : throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIObject", segmentName)
+        case Self.CONTENTS_KEY : return self.contents
+            default : throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIRequestBody", segmentName)
         }
     }
     

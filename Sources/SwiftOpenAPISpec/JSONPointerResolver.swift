@@ -44,11 +44,16 @@ public struct JSONPointerResolver {
     var currentURL : URL
     
     // RFC 6901 decode: "~1" -> "/", "~0" -> "~" (order matters)
-    func decodePointerSegment(_ segment: String) -> String {
+    static func decodePointerSegment(_ segment: String) -> String {
         segment
             .replacingOccurrences(of: "~1", with: "/")
             .replacingOccurrences(of: "~0", with: "~")
     }
+//    static func encodePointerSegment(_ segment: String) -> String {
+//        segment
+//            .replacingOccurrences(of: "/", with: "~1")
+//            .replacingOccurrences(of: "~", with: "~0")
+//    }
     
     /// Parse a ref string like:
     ///  - "#/components/schemas/X"
@@ -88,7 +93,7 @@ public struct JSONPointerResolver {
         }
         
         let rawSegments = pointer.dropFirst().split(separator: "/").map(String.init)
-        let segments = rawSegments.map(decodePointerSegment)
+        let segments = rawSegments.map(JSONPointerResolver.decodePointerSegment)
         
         var current: Any = root
         var traversed = ""
