@@ -6,7 +6,13 @@
 //
 
 
-public struct OpenAPIArrayType : OpenAPIValidatableSchemaType {
+public struct OpenAPIArrayType : OpenAPIValidatableSchemaType, PointerNavigable{
+    public func element(for segmentName: String) throws -> Any? {
+        return nil
+    }
+    
+    public var ref: String?
+    
     public static let TYPE_KEY = "array"
     public static let ARRAY_TYPE_KEY = "type"
     public static let MAX_ITEMS_KEY = "maxItems"

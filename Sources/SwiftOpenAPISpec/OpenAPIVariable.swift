@@ -23,6 +23,7 @@ public struct OpenAPIVariable : KeyedElement , PointerNavigable {
         try Self.element(for: segmentName)
     }
     public var enumList : [String]? = nil
+    public var ref : String? // PointerNavigable
     public var defaultValue : String
     public var description : String? = nil
     public var userInfos =  [OpenAPIObject.UserInfo]()

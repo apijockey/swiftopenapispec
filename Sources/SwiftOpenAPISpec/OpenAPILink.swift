@@ -28,6 +28,7 @@ public struct OpenAPILink : KeyedElement , PointerNavigable {
         try Self.element(for: segmentName)
     }
     public var key : String? = nil
+    public var ref : String? // PointerNavigable
     public var operationRef : String? = nil
     public var operationId : String? = nil
     public var description : String? = nil

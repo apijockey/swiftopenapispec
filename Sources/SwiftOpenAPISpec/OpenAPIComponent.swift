@@ -112,7 +112,7 @@ public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
     public var parameters : [OpenAPIParameter]?
     public var pathItems : [OpenAPIPathItem]?
     public var mediaTypes : [OpenAPIMediaType]?
-    
+    public var ref : String? // PointerNavigable
     public var requestBodies : [OpenAPIRequestBody]?
     public var responses : [OpenAPIResponse]?
     public var securitySchemas : [OpenAPISecurityScheme]?

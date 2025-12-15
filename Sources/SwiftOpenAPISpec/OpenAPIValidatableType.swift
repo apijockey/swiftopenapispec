@@ -6,7 +6,14 @@
 //
 
 
-public struct OpenAPIValidatableType :  OpenAPIValidatableSchemaType, ThrowingHashMapInitiable  {
+public struct OpenAPIValidatableType :  OpenAPIValidatableSchemaType, ThrowingHashMapInitiable, PointerNavigable  {
+    public func element(for segmentName: String) throws -> Any? {
+        if segmentName == Self.REF_KEY {
+            return ref 
+        }
+        throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIValidatableType", segmentName)
+    }
+    
     
     
   

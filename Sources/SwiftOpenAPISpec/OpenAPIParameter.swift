@@ -24,6 +24,7 @@ public struct OpenAPIParameter :  KeyedElement, PointerNavigable {
     }
     public static let FORMAT_KEY = "format"
     public static let NAME_KEY = "name"
+    
     public static let IN_KEY = "in"
     public static let REQUIRED_KEY = "required"
     public static let DESCRIPTION_KEY = "description"
@@ -75,6 +76,7 @@ public struct OpenAPIParameter :  KeyedElement, PointerNavigable {
         try Self.element(for: segmentName)
     }
     public var key: String?
+    public var ref : String? // PointerNavigable
     public let location : ParameterLocation?
     public let required : Bool
     public var description : String? = nil

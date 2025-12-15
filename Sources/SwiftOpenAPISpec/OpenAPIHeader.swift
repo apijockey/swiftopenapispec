@@ -52,6 +52,7 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
     public var schema : OpenAPISchema? = nil
     public var style : String? = nil
     public var explode : Bool? = nil
+    public var ref : String? // PointerNavigable
     public var allowReserved : Bool? = nil
     public var example : Any? = nil
     public var extensions : [OpenAPIExtension]?

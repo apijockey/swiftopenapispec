@@ -290,6 +290,7 @@ public struct OpenAPIObject : KeyedElement , PointerNavigable {
     public static let WEBHOOKS_KEY = "webhooks"
     public var version : String
     public var selfUrl : String?
+    public var ref : String? // PointerNavigable
     public var jsonSchemaDialect : String?
     public var info : OpenAPIInfo
     public var servers : [OpenAPIServer] = []

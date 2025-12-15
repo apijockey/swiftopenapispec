@@ -73,6 +73,7 @@ public struct OpenAPIInfo : ThrowingHashMapInitiable, PointerNavigable {
     public var termsOfService : String? = nil
     public var title : String
     public var  summary : String?
+    public var ref : String? // PointerNavigable
     public var userInfos =  [OpenAPIObject.UserInfo]()
     public var version : String
     

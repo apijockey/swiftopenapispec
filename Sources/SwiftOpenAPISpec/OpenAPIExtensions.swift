@@ -72,7 +72,7 @@ public struct OpenAPISimpleExtensionValues : KeyedElement, PointerNavigable {
     
     public var key: String?
     public var value : String?
-   
+    public var ref : String? // PointerNavigable
     
     
    
