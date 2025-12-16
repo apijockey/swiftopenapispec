@@ -11,16 +11,11 @@ import Foundation
 
 public protocol PointerNavigable {
     func element(for segmentName: String) throws -> Any?
-    var ref : String? {get}
-    var hasFilledRef : Bool { get }
+    var ref : OpenAPISchemaReference? { get }
+   
      
 }
 
-public extension PointerNavigable {
-    var hasFilledRef: Bool {
-        return self.ref != nil && self.ref?.isEmpty == false
-    }
-}
 
 // MARK: - Core Protocols
 

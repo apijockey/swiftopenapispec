@@ -6,7 +6,19 @@
 //
 
 import Foundation
-public struct OpenAPILicense : Codable {
+public struct OpenAPILicense : Codable , PointerNavigable {
+    public func element(for segmentName: String) throws -> Any? {
+        switch segmentName {
+            case Self.NAME_KEY: return name
+            case Self.IDENTIFIER_KEY: return identifier
+            case Self.URL_KEY: return url
+        default:
+            throw OpenAPIObject.Errors.unsupportedSegment("OpenAPILicense", segmentName)
+        }
+    }
+    
+    public var ref: OpenAPISchemaReference? { nil}
+    
     public static let NAME_KEY = "name"
     public static let IDENTIFIER_KEY = "identifier"
     public static let URL_KEY = "url"

@@ -6,8 +6,17 @@
 //
 
 import Foundation
-public struct OpenAPIContact : ThrowingHashMapInitiable {
+public struct OpenAPIContact : ThrowingHashMapInitiable , PointerNavigable {
+    public func element(for segmentName: String) throws -> Any? {
+        switch segmentName {
+        case Self.EMAIL_KEY: return email
+        case Self.NAME_KEY: return name
+        case Self.URL_KEY: return url
+        default: throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIContact", segmentName)
+        }
+    }
     
+   
     public static let EMAIL_KEY = "email"
     public  static let NAME_KEY = "name"
     public static let URL_KEY = "url"
@@ -29,4 +38,5 @@ public struct OpenAPIContact : ThrowingHashMapInitiable {
     public  var name : String? = nil
     public var url : String? = nil
     public var userInfos = [OpenAPIObject.UserInfo]()
+    public var ref: OpenAPISchemaReference? { nil}
 }

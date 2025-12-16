@@ -5,7 +5,19 @@
 //  Created by Patric Dubois on 10.12.25.
 //
 
-public struct OpenAPIExtension  {
+public struct OpenAPIExtension : PointerNavigable  {
+    public func element(for segmentName: String) throws -> Any? {
+        if let simpleValue = simpleExtensionValue  {
+            return simpleValue
+        }
+        else if let structuredExtension = structuredExtension {
+            return try structuredExtension.element(for: segmentName)
+        }
+        throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIExtension", segmentName)
+    }
+    
+    public var ref: OpenAPISchemaReference? { nil}
+    
     var key : String?
     var simpleExtensionValue : String?
     var structuredExtension : OpenAPIStructuredExtensionValues?
@@ -65,20 +77,34 @@ public struct OpenAPISimpleExtensionValues : KeyedElement, PointerNavigable {
         self.value = map.values.first as? String ?? ""
     }
     public func element(for segmentName: String) throws -> Any? {
-        try Self.element(for: segmentName)
+        switch segmentName {
+            case "key" : return self.key
+            case "value" : return self.value
+            case "$ref": return self.ref
+        default: throw OpenAPIObject.Errors.unsupportedSegment("OpenAPISimpleExtensionValues", segmentName)
+        }
     }
     
     public var userInfos: [OpenAPIObject.UserInfo] = []
     
     public var key: String?
     public var value : String?
-    public var ref : String? // PointerNavigable
-    
+   
+    public var ref: OpenAPISchemaReference? { nil}
     
    
 }
     
-public struct OpenAPIStructuredExtensionValues : ThrowingHashMapInitiable{
+public struct OpenAPIStructuredExtensionValues : ThrowingHashMapInitiable, PointerNavigable{
+    public func element(for segmentName: String) throws -> Any? {
+        if let properties = self.properties {
+            return properties[segmentName]
+        }
+        throw OpenAPIObject.Errors.unsupportedSegment("OOpenAPIStructuredExtensionValues", segmentName)
+    }
+    
+    public var ref: OpenAPISchemaReference? { nil}
+    
     public var userInfos =  [OpenAPIObject.UserInfo]()
         
     public init(_ map: StringDictionary) throws {

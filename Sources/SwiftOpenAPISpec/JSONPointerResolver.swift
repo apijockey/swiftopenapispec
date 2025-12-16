@@ -100,40 +100,49 @@ public struct JSONPointerResolver {
         
         for seg in segments {
             traversed += "/\(seg)"
-            
-                // 1) Prefer domain navigation
+            if let stringValue = current as? String{
+                return stringValue
+            }
+            if let nav = current as? [any KeyedElement] {
+                if let next = nav.element(for: seg) {
+                    current = next
+                    if traversed != pointer {
+                        continue
+                    }
+                    
+                }
+                else {
+                    throw NSError(domain: "PointerHarness", code: 3, userInfo: [NSLocalizedDescriptionKey: "Segment \(seg)not found at \(current)"])
+                }
+            }
+            //found the right element, now continue to resolve 
+            // try to resolve References before accessing their properties
             if let currentNavigatable = current as? PointerNavigable{
                 if seg == "$ref" {
                     if let element = try currentNavigatable.element(for: seg) {
                         return element
                     }
                 }
-                else if currentNavigatable.hasFilledRef,
-                        let ref = currentNavigatable.ref{
-                    current = try await resolve(ref: ref)
-                    continue
+                else if let reference =  currentNavigatable.ref,
+                        let ref = reference.reference{
+                    current = try await resolve(ref: ref) //recurse
+                    
                 }
-                //KLÄREN, waum
-                else if let next = try currentNavigatable.element(for: seg) {
+            }
+            //default ... walk through the object graph
+            if traversed == pointer {
+                return current
+            }
+
+            if let currentNavigatable = current as? PointerNavigable{
+                if let next = try currentNavigatable.element(for: seg) {
                     current = next
                     continue
                 }
                 // If resolved is a domain object that can yield "$ref", follow it
-                throw NSError(domain: "PointerHarness", code: 3, userInfo: [NSLocalizedDescriptionKey: "Segment \(seg)not found at \(traversed)"])
+                throw NSError(domain: "PointerHarness", code: 3, userInfo: [NSLocalizedDescriptionKey: "Segment \(seg)not found at \(current)"])
             }
-            if let nav = current as? [any KeyedElement] {
-                if let next = nav.element(for: seg) {
-                    current = next
-                    continue
-                }
-            }
-            if let stringValue = current as? String{
-                return stringValue
-            }
-            
-            
         }
-        
         return current
     }
     
@@ -168,12 +177,12 @@ public struct JSONPointerResolver {
         let doc = try await loadDocument(target.url)
         let resolved = try await resolve(root: doc, fragment: target.fragment)
       
-        // Or if resolved is a raw dict
-        if let dict = resolved as? PointerNavigable,
-           let innerRef = try dict.element(for: "$ref") as? String {
-                return try await resolveRefInternal(ref: innerRef, visited: &visited, depth: depth + 1)
-        }
-        
+//        // Or if resolved is a raw dict
+//        if let dict = resolved as? PointerNavigable,
+//           let innerRef = try dict.element(for: "$ref") as? String {
+//                return try await resolveRefInternal(ref: innerRef, visited: &visited, depth: depth + 1)
+//        }
+//        
         return resolved
     }
 }

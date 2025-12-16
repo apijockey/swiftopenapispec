@@ -39,7 +39,12 @@ public struct OpenAPIMediaType :  KeyedElement , PointerNavigable {
             if let subMap = map[Self.PREFIX_ENCODING_KEY] as? StringDictionary {
                 itemEncoding = try KeyedElementList<OpenAPIEncoding>.map(subMap)
             }
-            
+        if let refMap = map[OpenAPISchemaReference.REF_KEY] as? StringDictionary {
+                    self.ref = try OpenAPISchemaReference(refMap)
+                }
+        if let ref = map[OpenAPISchemaReference.REF_KEY] as? String {
+                    self.ref = OpenAPISchemaReference(ref: ref)
+            }
             
         
     }
@@ -53,6 +58,7 @@ public struct OpenAPIMediaType :  KeyedElement , PointerNavigable {
         case Self.ENCODING_KEY: return encoding
         case Self.PREFIX_ENCODING_KEY: return prefixEncoding
         case Self.ITEM_ENCODING_KEY: return itemEncoding
+        case OpenAPISchemaReference.REF_KEY: return ref
         default:
             if self.key == segmentName { return self.schema }
             throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIMediaType", segmentName)
@@ -65,7 +71,7 @@ public struct OpenAPIMediaType :  KeyedElement , PointerNavigable {
     public var encoding :[OpenAPIEncoding]? = nil
     public var prefixEncoding :[OpenAPIEncoding]? = nil
     public var itemEncoding :[OpenAPIEncoding]? = nil
-    public var ref : String? // PointerNavigable
+    public var ref : OpenAPISchemaReference? = nil
     //ENCODING
 }
 

@@ -50,7 +50,7 @@ public struct OpenAPIEncoding : KeyedElement, PointerNavigable {
                     return ext.structuredExtension?.properties ?? ext.simpleExtensionValue
                 }
             }
-            throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIInfo", segmentName)
+            throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIEncoding", segmentName)
         }
     }
     public var contentType : String? = nil
@@ -59,9 +59,9 @@ public struct OpenAPIEncoding : KeyedElement, PointerNavigable {
     public var encoding :[OpenAPIEncoding]? = nil
     public var prefixEncoding :[OpenAPIEncoding]? = nil
     public var itemEncoding :[OpenAPIEncoding]? = nil
-    public var ref : String? = nil  // PointerNavigable
+   
     public var key: String?
     public var userInfos =  [OpenAPIObject.UserInfo]()
-   
+    public var ref : OpenAPISchemaReference? { nil}
     
 }

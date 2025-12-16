@@ -5,12 +5,20 @@
 //  Created by Patric Dubois on 10.12.25.
 //
 
-public struct OpenAPIDiscriminator :  ThrowingHashMapInitiable {
-    public var userInfos = [OpenAPIObject.UserInfo]()
+public struct OpenAPIDiscriminator :  ThrowingHashMapInitiable, PointerNavigable {
+    public var ref: OpenAPISchemaReference? { nil}
     
-    public enum DataType : String, CaseIterable {
-        case integer, int32, int64, number, string
+    public func element(for segmentName: String) throws -> Any? {
+        switch segmentName {
+        case Self.PROPERTY_NAME_KEY: return propertyName
+        case Self.MAPPING_KEY: return mapping
+        case Self.DEFAULT_MAPPING_KEY: return defaultMapping
+        default: throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIDiscriminator", segmentName)
+        }
     }
+    
+   
+    public var userInfos = [OpenAPIObject.UserInfo]()
     public static let PROPERTY_NAME_KEY = "propertyName"
     public static let MAPPING_KEY = "mapping"
     public static let DEFAULT_MAPPING_KEY = "defaultMapping"
@@ -34,4 +42,5 @@ public struct OpenAPIDiscriminator :  ThrowingHashMapInitiable {
     public var propertyName: String?
     public var mapping: Dictionary<String, String>?
     public var defaultMapping: String?
+    
 }

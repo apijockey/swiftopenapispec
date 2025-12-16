@@ -14,16 +14,15 @@ public struct OpenAPIOneOfType : OpenAPIValidatableSchemaType,PointerNavigable {
            index < itemsCount{
             return self.items?[index]
         }
-        if segmentName ==  Self.REF_KEY {
+        if segmentName ==  OpenAPISchemaReference.REF_KEY {
             return ref
         }
         throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIOneOfType",segmentName)
     }
     
-    public var ref: String?
     
     public static let TYPE_KEY = "oneOf"
-    public static let REF_KEY = "$ref"
+   
     public init(_ map: [String : Any]) throws {
         self.type = map[Self.TYPE_KEY] as? String
         guard let list = (map["oneOf"] as? [Any]) else {
@@ -36,4 +35,5 @@ public struct OpenAPIOneOfType : OpenAPIValidatableSchemaType,PointerNavigable {
     public let type : String?
     public var items: [OpenAPIValidatableSchemaType]?
     public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var ref: OpenAPISchemaReference? { nil}
 }

@@ -73,7 +73,7 @@ struct OpenAPIJSONPointerTests {
         let result = try await resolver.resolve(
             ref: "\(arg.pointer)"
         )
-        print(result)
+     
         // Compare metatype instead of attempting a runtime cast target
         
         if let strResult = result as? String {
@@ -98,7 +98,7 @@ struct OpenAPIJSONPointerTests {
            ref:  "#/paths/~1events/post/responses/201/content/application~1json/schema/$ref"
         )
         
-        #expect((result as? String) == "#/components/schemas/EventCreated")
+        #expect((result as? OpenAPISchemaReference)?.reference == "#/components/schemas/EventCreated")
     }
 
     @Test
@@ -109,11 +109,11 @@ struct OpenAPIJSONPointerTests {
         var resolver = JSONPointerResolver(baseURL : mainURL,loadDocument: { url in
             try await objectLoader.load(from: url)
         })
-        var result = try await resolver.resolve(
+        let result = try await resolver.resolve(
             ref: "#/components/schemas/EventEnvelope/properties/payload/oneOf/0/$ref"
         )
 
-        #expect((result as? String) == "#/components/schemas/UserCreated")
+        #expect((result as? OpenAPISchemaReference)?.reference == "#/components/schemas/UserCreated")
     }
     
     @Test("Resolve external schema via $ref chain (main -> ext)")
@@ -149,11 +149,12 @@ struct OpenAPIJSONPointerTests {
         let ref0 = try await resolver.resolve(
              ref: "#/components/schemas/EventEnvelope/properties/payload/oneOf/0/$ref"
         )
-        #expect(ref0 as? String == "#/components/schemas/UserCreated")
+        #expect((ref0 as? OpenAPISchemaReference)?.reference == "#/components/schemas/UserCreated")
         let ref1 = try await resolver.resolve(
            ref: "#/components/schemas/EventEnvelope/properties/payload/oneOf/1/$ref"
         )
-        #expect(ref1 as? String == "#/components/schemas/UserDeleted")
+        
+        #expect((ref1 as? OpenAPISchemaReference)?.reference == "#/components/schemas/UserDeleted")
     }
 
     @Test("~0/~1 decoding in component name (user~1admin~0meta)")
@@ -217,7 +218,7 @@ struct OpenAPIJSONPointerTests {
         })
 
         let backRefAny = try await resolver.resolve(
-            ref:"#/components/schemas/UserCreated/properties/errorShape/$ref"
+            ref:"#/components/schemas/UserCreated/properties/errorShape"
         )
         // Navigate to the $ref string first
        

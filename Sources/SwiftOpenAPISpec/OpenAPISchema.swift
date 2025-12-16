@@ -22,15 +22,13 @@ import Foundation
 public struct OpenAPISchema :  KeyedElement, PointerNavigable {
     public var key: String?
     
-    public enum DataType : String, CaseIterable {
-        case integer, int32, int64, number, string
-    }
+   
     public static let TYPE_KEY = "type"
     public static let ALLOF_KEY = "allOf"
     public static let DISCRIMINATOR_KEY = "discriminator"
     public static let ONEOF_KEY = "oneOf"
     public static let ANYOF_KEY = "anyOf"
-    public static let JSONREF_KEY = "$ref"
+    public static let XML_KEY = "xml"
     public static let FORMAT_KEY = "format"
     
    
@@ -46,43 +44,76 @@ public struct OpenAPISchema :  KeyedElement, PointerNavigable {
         else if map[Self.ALLOF_KEY] is [Any] {
             self.schemaType = try OpenAPIAllOfType(map)
         }
-        else if map[Self.JSONREF_KEY] is String {
-            self.schemaType = try OpenAPIValidatableType(map)
-            
+        if let discriminatorMap = map[Self.DISCRIMINATOR_KEY] as? StringDictionary {
+            self.discriminator = try OpenAPIDiscriminator(discriminatorMap)
         }
+        
         
         else if map[Self.ONEOF_KEY] is [Any] {
             self.schemaType = try OpenAPIOneOfType(map)
         }
+        if let refMap = map[OpenAPISchemaReference.REF_KEY] as? StringDictionary {
+                   self.ref = try OpenAPISchemaReference(refMap)
+               }
+        if let ref = map[OpenAPISchemaReference.REF_KEY] as? String {
+            self.ref = OpenAPISchemaReference(ref: ref)
+               }
+        if let xmlMap = map[Self.XML_KEY] as? StringDictionary {
+            xml = try? OpenAPIXMLObject(xmlMap)
+        }
         
-        self.ref = map.readIfPresent(Self.JSONREF_KEY, String.self)
-    
         extensions = try OpenAPIExtension.extensionElements(map)
        
     }
     
     public var schemaType : OpenAPIValidatableSchemaType?
     //https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-01  ("null", "boolean", "object", "array", "number", or "string"), or "integer"
-    public var format : DataType? = nil
-    public var userInfos =  [OpenAPIObject.UserInfo]()
     public var extensions : [OpenAPIExtension]?
-    public var ref: String? = nil
+    public var discriminator : OpenAPIDiscriminator?
+   
+    public var ref : OpenAPISchemaReference? = nil
+    public var xml : OpenAPIXMLObject? = nil
+    public var userInfos =  [OpenAPIObject.UserInfo]()
+    
    
     public func element(for segmentName : String) throws -> Any? {
         switch segmentName {
             
-            case Self.JSONREF_KEY : return self.ref
+       
         case Self.TYPE_KEY : return self.schemaType
             case Self.ONEOF_KEY: return schemaType
             case Self.ALLOF_KEY : return schemaType
-            default :
-            if let jsonRef =  self.ref,
-                !jsonRef.isEmpty {
-                return self.ref
-            }
-            else if let object = schemaType as? OpenAPIObjectType{
+        
+            case OpenAPISchemaReference.REF_KEY: return ref
+        default:
+            if let object = schemaType as? OpenAPIObjectType{
                     return try object.element(for: segmentName)
                 
+            }
+            else if let integer = schemaType as? OpenAPIIntegerType{
+                return try integer.element(for: segmentName)
+            }
+            else if let oneOf = schemaType as? OpenAPIOneOfType{
+                return try oneOf.element(for: segmentName)
+            }
+            else if let anyOf = schemaType as? OpenAPIAnyOfType{
+                return try anyOf.element(for: segmentName)
+            }
+            else if let allOf = schemaType as? OpenAPIAllOfType{
+                return try allOf.element(for: segmentName)
+            }
+            else if let string  = schemaType as? OpenAPIStringType{
+                return try string.element(for: segmentName)
+            }
+            else if let double  = schemaType as? OpenAPIDoubleType{
+                return try double.element(for: segmentName)
+            }
+            else if let array  = schemaType as? OpenAPIArrayType{
+                return try array.element(for: segmentName)
+            }
+            //must lead to resolution of ref in the next traversal
+            else if let ref = self.ref{
+                return ref
             }
             throw OpenAPIObject.Errors.unsupportedSegment("OpenAPISchema", segmentName)
         }

@@ -44,19 +44,34 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
         
     }
     public func element(for segmentName: String) throws -> Any? {
-       switch segmentName {
-       case Self .OP_ID_KEY: return operationId as String?
-       case Self .PARAMETERS_KEY: return (parameters ?? []) as [OpenAPIParameter]
-       case Self .RESPONSES_KEY: return (responses  ?? []) as [OpenAPIResponse] 
-       case Self .SUMMARY_KEY: return summary as String?
-       case Self .TAGS_KEY: return tags as [String]
-       case Self .REQUEST_BODIES_KEY: return requestBody as OpenAPIRequestBody?
-       case Self .EXTERNAL_DOCS_KEY: return externalDocs as OpenAPIExternalDocumentation?
-       case Self .DEPRECATED_KEY: return deprecated as Bool?
-       default: return nil
-           
+        switch segmentName {
+            
+        case Self.DEPRECATED_KEY: return deprecated as Bool?
+        case Self.DESCRIPTION_KEY: return description as String?
+        case Self.EXTERNAL_DOCS_KEY: return externalDocs as OpenAPIExternalDocumentation?
+        case Self.OP_ID_KEY: return operationId as String?
+        case Self.PARAMETERS_KEY: return (parameters ?? []) as [OpenAPIParameter]
+        case Self.REQUEST_BODIES_KEY: return requestBody as OpenAPIRequestBody?
+        case Self.RESPONSES_KEY: return (responses  ?? []) as [OpenAPIResponse]
+        case Self.SUMMARY_KEY: return summary as String?
+        case Self.SECURITY_KEY: return securityObjects as [OpenAPISecuritySchemeReference]
+        case Self.TAGS_KEY: return tags as [String]
+        default:
+            if segmentName.hasPrefix("x-"), let exts = extensions {
+                if let ext = exts.first(where: { $0.key == segmentName }) {
+                    // Gib die strukturierte oder einfache Extension zurück
+                    return ext.structuredExtension?.properties ?? ext.simpleExtensionValue
+                }
+               
+                
+                
+            }
+            throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIOperation", segmentName)
         }
     }
+    public static let DEPRECATED_KEY = "deprecated"
+    public static let DESCRIPTION_KEY = "description"
+    public static let EXTERNAL_DOCS_KEY = "externalDocs"
     public static let OP_ID_KEY = "operationId"
     public static let PARAMETERS_KEY = "parameters"
     public static let RESPONSES_KEY = "responses"
@@ -64,17 +79,15 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
     public static let SUMMARY_KEY = "summary"
     public static let TAGS_KEY = "tags"
     public static let REQUEST_BODIES_KEY = "requestBody"
-    public static let EXTERNAL_DOCS_KEY = "externalDocs"
-    public static let DEPRECATED_KEY = "deprecated"
-    public static let DESCRIPTION_KEY = "description"
     public static let SECURITY_KEY = "security"
+    
     public var deprecated : Bool? = false
     public var operationId : String? = nil
     public var summary : String? = nil
     public var requestBody : OpenAPIRequestBody? = nil
     public var description : String? = nil
     public var tags : [String] = []
-    public var ref : String? // PointerNavigable
+   
     public var responses : [OpenAPIResponse]? = []
     public var parameters : [OpenAPIParameter]? = []
     public var servers : [OpenAPIServer] = [OpenAPIServer(url: "/")]
@@ -83,6 +96,7 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
     public var extensions : [OpenAPIExtension]?
     public var externalDocs : OpenAPIExternalDocumentation? = nil
     public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var ref: OpenAPISchemaReference? { nil}
   
     /// returns an OpenAPIResponse for the given HTTP Status  if declared on the operation or nil.
     public func response(httpstatus  status : String) -> OpenAPIResponse? {

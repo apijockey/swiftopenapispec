@@ -11,14 +11,14 @@ public struct OpenAPIAllOfType : OpenAPIValidatableSchemaType, PointerNavigable 
         if let index = Int(segmentName) {
             return self.items?[index]
         }
-        if segmentName ==  Self.REF_KEY {
+        if segmentName ==  OpenAPISchemaReference.REF_KEY {
             return ref
         }
         throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIOneOfType",segmentName)
     }
     
-    public var ref: String?
-    public static let REF_KEY = "$ref"
+    public var ref: OpenAPISchemaReference?
+   
     public static let TYPE_KEY = "allOf"
     public init(_ map: [String : Any]) throws {
         self.type = map[Self.TYPE_KEY] as? String

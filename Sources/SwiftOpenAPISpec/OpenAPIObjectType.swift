@@ -45,7 +45,7 @@ public struct OpenAPIObjectType : OpenAPIValidatableSchemaType, PointerNavigable
     public func validate() throws {
         
     }
-    public var ref : String? // PointerNavigable
+   
     public let type : String?
     public var dependentRequired : String?
     public var maxProperties : Int?
@@ -54,4 +54,5 @@ public struct OpenAPIObjectType : OpenAPIValidatableSchemaType, PointerNavigable
     public var required : [String] = []
     public var unevaluatedProperties : Bool = false
     public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var ref: OpenAPISchemaReference? { nil}
 }

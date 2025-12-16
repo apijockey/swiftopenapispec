@@ -8,10 +8,11 @@
 import Foundation
 public struct OpenAPICallBack : KeyedElement,PointerNavigable{
     
-    
+    //TODO: Call
     public func element(for segmentName: String) throws -> Any? {
        switch segmentName {
-       case "$ref": return ref
+       case OpenAPISchemaReference.REF_KEY: return ref
+           
        default:
            if let item = pathItems?.first(where: { $0.key == segmentName }) {
                return item
@@ -41,5 +42,5 @@ public struct OpenAPICallBack : KeyedElement,PointerNavigable{
     public var extensions : [OpenAPIExtension]?
     public var pathItems : [OpenAPIPathItem]?
     public var key: String?
-    public var ref : String? // PointerNavigable
+    public var ref : OpenAPISchemaReference? = nil
 }

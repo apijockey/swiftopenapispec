@@ -27,6 +27,12 @@ public struct OpenAPIResponse : KeyedElement, PointerNavigable {
         if let linkMap = map.readIfPresent(Self.LINKS_KEY, StringDictionary .self) {
             self.links = try KeyedElementList<OpenAPILink>.map(linkMap)
         }
+        if let refMap = map[OpenAPISchemaReference.REF_KEY] as? StringDictionary {
+            self.ref = try OpenAPISchemaReference(refMap)
+        }
+        if let ref = map[OpenAPISchemaReference.REF_KEY] as? String {
+                    self.ref = OpenAPISchemaReference(ref: ref)
+        }
     }
     public var summary : String?
     public var description : String?
@@ -34,14 +40,18 @@ public struct OpenAPIResponse : KeyedElement, PointerNavigable {
     public var headers: [OpenAPIHeader] = []
     public var links : [OpenAPILink] =   []
     public var key : String? = nil
-    public var ref : String? // PointerNavigable
+    public var ref : OpenAPISchemaReference? = nil
     public var userInfos =  [OpenAPIObject.UserInfo]()
     
     public func element(for segmentName : String) throws -> Any? {
         switch segmentName {
-            case "content" : return self.content
-            case "headers" : return self.headers
-            case "links" : return self.links
+        case Self.CONTENT_KEY: return self.content
+        case Self.DESCRIPTION_KEY : return self.content
+        case Self.HEADERS_KEY: return self.headers
+        case Self.LINKS_KEY: return self.links
+             
+        case Self.SUMMARY_KEY: return self.summary
+        case OpenAPISchemaReference.REF_KEY: return ref
             default : throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIResponse", segmentName)
         }
     }
