@@ -104,7 +104,9 @@ public struct JSONPointerResolver {
                 // 1) Prefer domain navigation
             if let currentNavigatable = current as? PointerNavigable{
                 if seg == "$ref" {
-                    return try currentNavigatable.element(for: seg)
+                    if let element = try currentNavigatable.element(for: seg) {
+                        return element
+                    }
                 }
                 else if currentNavigatable.hasFilledRef,
                         let ref = currentNavigatable.ref{
@@ -117,7 +119,7 @@ public struct JSONPointerResolver {
                     continue
                 }
                 // If resolved is a domain object that can yield "$ref", follow it
-                throw NSError(domain: "PointerHarness", code: 3, userInfo: [NSLocalizedDescriptionKey: "Segment not found at \(traversed)"])
+                throw NSError(domain: "PointerHarness", code: 3, userInfo: [NSLocalizedDescriptionKey: "Segment \(seg)not found at \(traversed)"])
             }
             if let nav = current as? [any KeyedElement] {
                 if let next = nav.element(for: seg) {

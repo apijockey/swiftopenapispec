@@ -10,7 +10,20 @@ public struct OpenAPICallBack : KeyedElement,PointerNavigable{
     
     
     public func element(for segmentName: String) throws -> Any? {
-        try Self.element(for: segmentName)
+       switch segmentName {
+       case "$ref": return ref
+       default:
+           if let item = pathItems?.first(where: { $0.key == segmentName }) {
+               return item
+           }
+           if segmentName.hasPrefix("x-"), let exts = extensions {
+                           if let ext = exts.first(where: { $0.key == segmentName }) {
+                               // Gib die strukturierte oder einfache Extension zurück
+                               return ext.structuredExtension?.properties ?? ext.simpleExtensionValue
+                           }
+                       }
+                       throw OpenAPIObject.Errors.unsupportedSegment("OpenAPICallBack", segmentName)
+        }
     }
     
     

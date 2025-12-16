@@ -6,7 +6,9 @@
 //
 
 import Foundation
-public struct OpenAPIEncoding : ThrowingHashMapInitiable, PointerNavigable {
+public struct OpenAPIEncoding : KeyedElement, PointerNavigable {
+   
+    
     static let CONTENT_TYPE_KEY = "contentType"
     static let HEADERS_KEY = "headers"
     static let ENCODING_KEY = "encoding"
@@ -15,6 +17,20 @@ public struct OpenAPIEncoding : ThrowingHashMapInitiable, PointerNavigable {
     static let EXTENSIONS_KEY = "extensions"
     public init(_ map: [String : Any]) throws {
         extensions = try OpenAPIExtension.extensionElements(map)
+        self.contentType = map.readIfPresent(Self.CONTENT_TYPE_KEY, String.self)
+        if let  subMap  = map[Self.HEADERS_KEY] as? StringDictionary {
+            headers = try KeyedElementList<OpenAPIHeader>.map(subMap)
+        }
+        if let subMap = map[Self.ENCODING_KEY] as? StringDictionary {
+            encoding = try KeyedElementList<OpenAPIEncoding>.map(subMap)
+        }
+        if let subMap = map[Self.PREFIX_ENCODING_KEY] as? StringDictionary {
+            prefixEncoding = try KeyedElementList<OpenAPIEncoding>.map(subMap)
+        }
+        if let subMap = map[Self.PREFIX_ENCODING_KEY] as? StringDictionary {
+            itemEncoding = try KeyedElementList<OpenAPIEncoding>.map(subMap)
+        }
+        
         
     }
     
@@ -43,8 +59,8 @@ public struct OpenAPIEncoding : ThrowingHashMapInitiable, PointerNavigable {
     public var encoding :[OpenAPIEncoding]? = nil
     public var prefixEncoding :[OpenAPIEncoding]? = nil
     public var itemEncoding :[OpenAPIEncoding]? = nil
-    public var  summary : String? = nil
     public var ref : String? = nil  // PointerNavigable
+    public var key: String?
     public var userInfos =  [OpenAPIObject.UserInfo]()
    
     

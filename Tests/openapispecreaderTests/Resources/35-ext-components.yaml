@@ -35,7 +35,7 @@ components:
         userId: { type: string }
         # Rück-Ref in die Hauptdatei (relativer Pfad)
         errorShape:
-          $ref: "./main.yaml#/components/schemas/CommonError"
+          $ref: "./35-main.yaml#/components/schemas/CommonError"
       required: [type, userId]
 
     UserDeleted:
