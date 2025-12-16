@@ -226,9 +226,7 @@ struct OpenAPIJSONPointerTests {
         if let nav = backRefAny as? PointerNavigable {
             
              let objectElement = try nav.element(for: "type")
-            #expect(objectElement  as? String == "object")
-        } else if let dict = backRefAny as? [String: Any] {
-            #expect(dict["type"] as? String == "object")
+            #expect(objectElement  is OpenAPIObjectType)
         } else {
             Issue.record("Resolved back-ref schema has unexpected type")
         }
