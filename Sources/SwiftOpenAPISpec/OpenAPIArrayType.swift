@@ -8,10 +8,19 @@
 
 public struct OpenAPIArrayType : OpenAPIValidatableSchemaType, PointerNavigable{
     public func element(for segmentName: String) throws -> Any? {
-        return nil
+        switch segmentName {
+        case Self.ITEMS_KEY: return self.items
+        case Self.ARRAY_TYPE_KEY: return self.type
+        case Self.MAX_ITEMS_KEY : return maxItems
+        case Self.ITEMS_KEY : return items
+        case Self.MIN_ITEMS_KEY : return minItems
+        case Self.UNIQE_ITEMS_KEY : return uniqueItems
+        case Self.MAX_CONTAINS_KEY : return maxContains
+        case Self.MIN_CONTAINS_KEY : return minContains
+        default:  throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIArrayType", segmentName)
+                    }
     }
     
-    public var ref: String?
     
     public static let TYPE_KEY = "array"
     public static let ARRAY_TYPE_KEY = "type"
@@ -50,4 +59,5 @@ public struct OpenAPIArrayType : OpenAPIValidatableSchemaType, PointerNavigable{
     public var minContains : Int?
     public var items: OpenAPIValidatableSchemaType?
     public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var ref: OpenAPISchemaReference? { nil}
 }

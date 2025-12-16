@@ -11,11 +11,19 @@ public struct OpenAPIRequestBody : KeyedElement , PointerNavigable {
     public static let REQUIRED_KEY = "required"
     public static let CONTENTS_KEY = "content"
     public init(_ map: [String : Any]) throws {
-        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
-        self.required = map.readIfPresent(Self.REQUIRED_KEY, Bool.self) ?? false
+       
+       
         if let contentsMap = map[Self.CONTENTS_KEY] as? [String : Any]{
             self.contents = try KeyedElementList.map(contentsMap )
         }
+        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
+        if let refMap = map[OpenAPISchemaReference.REF_KEY] as? StringDictionary {
+                    self.ref = try OpenAPISchemaReference(refMap)
+        }
+        if let ref = map[OpenAPISchemaReference.REF_KEY] as? String {
+                    self.ref = OpenAPISchemaReference(ref: ref)
+        }
+        self.required = map.readIfPresent(Self.REQUIRED_KEY, Bool.self) ?? false
         
     }
     public var key : String?
@@ -24,7 +32,7 @@ public struct OpenAPIRequestBody : KeyedElement , PointerNavigable {
     public var required : Bool = false
     public var contents : [OpenAPIMediaType] = []
     public var userInfos =  [OpenAPIObject.UserInfo]()
-    public var ref : String? // PointerNavigable
+    public var ref : OpenAPISchemaReference? = nil
     public func element(for segmentName : String) throws -> Any? {
         switch segmentName {
         case Self.CONTENTS_KEY : return self.contents

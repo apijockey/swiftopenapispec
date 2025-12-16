@@ -18,9 +18,13 @@ public struct OpenAPISchemaProperty: KeyedElement , PointerNavigable {
             let validatableType = OpenAPISchemaType.validatableType(type) {
             self.type = try validatableType.init(map)
         }
-        else if map[OpenAPISchema.JSONREF_KEY] is String {
-            self.type = try OpenAPIValidatableType(map)
+        else if let refMap = map[OpenAPISchemaReference.REF_KEY] as? StringDictionary {
+            self.ref = try OpenAPISchemaReference(refMap)
             
+           
+        }
+        else if let ref = map[OpenAPISchemaReference.REF_KEY] as? String {
+                    self.ref = OpenAPISchemaReference(ref: ref)
         }
         else if map[OpenAPISchema.ONEOF_KEY] is [Any] {
             self.type = try OpenAPIOneOfType(map)
@@ -38,13 +42,13 @@ public struct OpenAPISchemaProperty: KeyedElement , PointerNavigable {
     }
     public var userInfos =  [OpenAPIObject.UserInfo]()
     public  var key : String? = nil
-    public var ref : String? // PointerNavigable
+    public var ref : OpenAPISchemaReference?
     public var type : OpenAPIValidatableSchemaType?
     public var discriminator : OpenAPIDiscriminator?
     
     public func element(for segmentName : String) throws -> Any? {
         switch segmentName {
-            case OpenAPISchema.JSONREF_KEY : return self.type
+            case OpenAPISchemaReference.REF_KEY : return self.type
             case Self.TYPE_KEY : return self.type
             case OpenAPISchema.ONEOF_KEY: return type
             case OpenAPISchema.ALLOF_KEY : return type

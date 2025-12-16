@@ -180,8 +180,8 @@ struct FixtureTests {
         #expect((response201.content.first?.schema?.schemaType as? OpenAPIObjectType)?.required.count  == 1)
         let defaultResponse = try #require(apiSpec[path: "/create"]?.operations[operationID : "create"]?.response(httpstatus: "default"))
         #expect(defaultResponse.description == "error")
-        let component = try #require(defaultResponse.content.first?.schema?.schemaType as? OpenAPIValidatableType)
-        #expect(component.ref == "#/components/schemas/Error")
+        let component = try #require(defaultResponse.content.first?.schema?.ref as? OpenAPISchemaReference)
+        #expect(component.reference == "#/components/schemas/Error")
     }
     
     @Test("tictactor-nested-array-elements")

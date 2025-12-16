@@ -6,10 +6,28 @@
 //
 
 
-public struct OpenAPIDoubleType :  OpenAPIValidatableSchemaType, ThrowingHashMapInitiable  {
+public struct OpenAPIDoubleType :  OpenAPIValidatableSchemaType, ThrowingHashMapInitiable, PointerNavigable  {
+    public func element(for segmentName: String) throws -> Any? {
+        switch segmentName {
+        case Self.FORMAT_KEY : return format
+        case Self.TYPE_KEY : return type
+        case Self.DEFAULT_KEY :return defaultValue
+        case Self.MULTIPLEOF_KEY :return multipleOf
+        case Self.MINIMUM_KEY: return minimum
+        case Self.MAXIMUM_KEY :return maximum
+        case Self.EXCLUSIVEMINIMUM_KEY : return exclusiveMinimum
+        case Self.EXCLUSIVEMAXIMUM_KEY : return exclusiveMaximum
+        default:
+                    throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIDoubleType", segmentName)
+        }
+    }
+    
+  
+    
     public func validate() throws {
         
     }
+    public static let FORMAT_KEY : String = "format"
     public static let TYPE_KEY = "type"
     public static let DEFAULT_KEY = "default"
     public static let MULTIPLEOF_KEY = "multipleOf"
@@ -28,6 +46,7 @@ public struct OpenAPIDoubleType :  OpenAPIValidatableSchemaType, ThrowingHashMap
         self.exclusiveMinimum =  map[Self.EXCLUSIVEMINIMUM_KEY]  as? Double
     }
     public let type : String?
+    public var format : String?
     public let multipleOf : Double?
     public let defaultValue : Double?
     public let maximum : Double?
@@ -35,5 +54,6 @@ public struct OpenAPIDoubleType :  OpenAPIValidatableSchemaType, ThrowingHashMap
     public let minimum : Double?
     public let exclusiveMinimum : Double?
     public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var ref: OpenAPISchemaReference? { nil}
     
 }

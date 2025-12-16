@@ -5,7 +5,23 @@
 //  Created by Patric Dubois on 10.12.25.
 //
 
-public struct OpenAPITag:  ThrowingHashMapInitiable {
+public struct OpenAPITag:  ThrowingHashMapInitiable, PointerNavigable {
+   
+    public func element(for segmentName: String) throws -> Any? {
+        switch segmentName {
+            case Self.NAME_KEY: return name
+            case Self.SUMMARY_KEY : return summary
+            case Self.DESCRIPTION_KEY : return description
+            case Self.EXTERNAL_DOCS_KEY : return externalDocs
+            case Self.PARENT_KEY : return parent
+            case Self.KIND_KEY : return kind
+        default:
+        throw OpenAPIObject.Errors.unsupportedSegment("OpenAPITag", segmentName)
+
+        }
+    }
+    
+   
     
     //REQUIRED
     public static let NAME_KEY = "name"
@@ -37,7 +53,7 @@ public struct OpenAPITag:  ThrowingHashMapInitiable {
     public var kind : String?
     public var userInfos =  [OpenAPIObject.UserInfo]()
     public var extensions : [OpenAPIExtension]?
-    
+    public var ref: OpenAPISchemaReference? { nil}
 }
 public extension Array where Element == OpenAPITag {
     subscript (name name: String) -> OpenAPITag? {

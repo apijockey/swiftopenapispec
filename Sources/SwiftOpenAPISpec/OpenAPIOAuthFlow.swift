@@ -7,8 +7,23 @@
 
 import Foundation
 
-public struct OpenAPIOAuthFlow : ThrowingHashMapInitiable {
+public struct OpenAPIOAuthFlow : ThrowingHashMapInitiable, PointerNavigable {
+    public func element(for segmentName: String) throws -> Any? {
+        switch segmentName {
+        case Self.AUTHORIZATIONURL_KEY: return authorizationUrl
+        case Self.DEVICE_AUTHORIZATIONURL_KEY: return deviceAuthorizationUrl
+        case Self.TOKENURL_KEY: return tokenUrl
+        case Self.REFRESHURL_KEY : return refreshUrl
+            case Self.SCOPES_KEY : return scopes
+        default:
+            throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIOAuthFlow", segmentName)
+        }
+    }
+    
+   
+    
     public static let AUTHORIZATIONURL_KEY = "authorizationUrl"
+    public static let DEVICE_AUTHORIZATIONURL_KEY = "deviceAuthorizationUrl"
     public static let TOKENURL_KEY = "tokenUrl"
     public static let REFRESHURL_KEY = "refreshUrl"
     public static let SCOPES_KEY = "scopes"
@@ -19,8 +34,10 @@ public struct OpenAPIOAuthFlow : ThrowingHashMapInitiable {
         scopes = map.readIfPresent(Self.SCOPES_KEY, [String:String].self)
     }
     public var authorizationUrl : String? = nil
+    public var deviceAuthorizationUrl : String? = nil
     public var tokenUrl : String? = nil
     public var refreshUrl : String? = nil
     public var scopes : [String:String]? = nil
     public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var ref: OpenAPISchemaReference? { nil}
 }

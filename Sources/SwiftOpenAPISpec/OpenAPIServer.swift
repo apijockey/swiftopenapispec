@@ -9,7 +9,22 @@
 import Foundation
 
 
-public struct OpenAPIServer : ThrowingHashMapInitiable {
+public struct OpenAPIServer : ThrowingHashMapInitiable , PointerNavigable {
+    public func element(for segmentName: String) throws -> Any? {
+        switch segmentName {
+            case Self.DESCRIPTION_KEY : return self.description
+            case Self.URL_KEY : return url
+            case Self.NAME_KEY :return name
+            case Self.VARIABLES_KEY : return variables
+        default:
+            throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIInfo", segmentName)
+
+        }
+        
+    }
+    
+    public var ref: OpenAPISchemaReference? { nil}
+    
     public static let DESCRIPTION_KEY = "description"
     public static let URL_KEY = "url"
     public static let NAME_KEY = "name"

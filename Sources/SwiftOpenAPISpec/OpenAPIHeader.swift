@@ -24,13 +24,11 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
    
     public init(_ map: [String : Any]) throws {
         
-      
-        self.required = map.readIfPresent(Self.REQUIRED_KEY, Bool.self) ?? false
+        
         self.description =  map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
         self.deprecated =  map.readIfPresent(Self.DEPRECATED_KEY, Bool.self)
         self.allowEmptyValue = map.readIfPresent(Self.ALLOW_EMPTYVALUE_KEY, Bool.self)
-        self.schema = try map.MapIfPresent(Self.SCHEMA_KEY, OpenAPISchema.self)
-        self.style = map.readIfPresent(Self.STYLE_KEY, String.self)
+       
         self.explode = map.readIfPresent(Self.EXPLODE_KEY, Bool.self)
         self.allowReserved = map.readIfPresent(Self.ALLOW_RESERVED_KEY, Bool.self)
         self.example = map.readIfPresent(Self.EXAMPLE_KEY, String.self)
@@ -40,6 +38,15 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
         }
         self.content = map.readIfPresent(Self.CONTENT_KEY, OpenAPIMediaType.self)
         extensions = try OpenAPIExtension.extensionElements(map)
+        if let refMap = map[OpenAPISchemaReference.REF_KEY] as? StringDictionary {
+                   self.ref = try OpenAPISchemaReference(refMap)
+               }
+        if let ref = map[OpenAPISchemaReference.REF_KEY] as? String {
+                    self.ref = OpenAPISchemaReference(ref: ref)
+                       }
+        self.required = map.readIfPresent(Self.REQUIRED_KEY, Bool.self) ?? false
+        self.schema = try map.MapIfPresent(Self.SCHEMA_KEY, OpenAPISchema.self)
+        self.style = map.readIfPresent(Self.STYLE_KEY, String.self)
        
     }
     public func element(for segmentName: String) throws -> Any? {
@@ -47,15 +54,16 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
        case Self.ALLOW_EMPTYVALUE_KEY: return allowEmptyValue
        case Self.ALLOW_RESERVED_KEY: return allowReserved
        case Self.CONTENT_KEY: return content
-       case Self.EXAMPLES_KEY: return examples
+       
        case Self.EXAMPLE_KEY: return example
+       case Self.EXAMPLES_KEY: return examples
        case Self.EXPLODE_KEY: return explode
        case Self.EXTENSIONS_KEY: return extensions
        case Self.DESCRIPTION_KEY: return description
        case Self.DEPRECATED_KEY: return deprecated
-       case Self.SCHEMA_KEY: return schema
-       case Self.EXAMPLE_KEY: return example
+       case Self.SCHEMA_KEY: return schema       
        case Self.STYLE_KEY: return style
+       case OpenAPISchemaReference.REF_KEY: return ref
        default:
            // Für x-* Vendor Extensions einzelne Keys erlauben: "x-..." -> passenden Extension-Wert liefern
            if segmentName.hasPrefix("x-"), let exts = extensions {
@@ -78,7 +86,7 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
     public var schema : OpenAPISchema? = nil
     public var style : String? = nil
     public var explode : Bool? = nil
-    public var ref : String? // PointerNavigable
+    public var ref : OpenAPISchemaReference? = nil
     public var allowReserved : Bool? = nil
     public var example : Any? = nil
     public var extensions : [OpenAPIExtension]?

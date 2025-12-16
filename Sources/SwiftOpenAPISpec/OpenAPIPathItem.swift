@@ -22,7 +22,7 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
         case get, post, put, delete, options, head, patch, trace, query
     }
     
-    public static let REF_KEY = "$ref"
+   
     public static let SUMMARY_KEY = "summary"
     public static let DESCRIPTION_KEY = "description"
     public static let SERVERS_KEY = "servers"
@@ -45,7 +45,12 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
                 self.operations.append(operation)
             }
         }
-        self.ref  = map.readIfPresent(Self.REF_KEY, String.self)
+        if let refMap = map[OpenAPISchemaReference.REF_KEY] as? StringDictionary {
+                    self.ref = try OpenAPISchemaReference(refMap)
+                }
+        if let ref = map[OpenAPISchemaReference.REF_KEY] as? String {
+                    self.ref = OpenAPISchemaReference(ref: ref)
+        }
         self.summary  = map.readIfPresent(Self.SUMMARY_KEY, String.self)
         self.description  = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
         let servers = try map.tryListIfPresent(OpenAPIObject.SERVERS_KEY, root: "OpenAPIPath", OpenAPIServer.self)
@@ -63,12 +68,13 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
     }
     public func element(for segmentName: String) throws -> Any? {
         switch segmentName {
-            case Self.REF_KEY: return ref
+           
             case Self.SUMMARY_KEY: return summary
             case Self.DESCRIPTION_KEY: return description
             case Self.SERVERS_KEY: return servers
             case Self.PARAMETERS_KEY: return parameters
             case Self.ADDITIONAL_OPERATIONS_KEY: return additionalOperations
+            case OpenAPISchemaReference.REF_KEY: return ref
             default :
             if let operation = operations[key: segmentName] {
                 return operation
@@ -93,7 +99,7 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
     public var extensions : [OpenAPIExtension] = []
     public var operations: [OpenAPIOperation] = []
     public var parameters: [OpenAPIParameter] = []
-    public var ref : String? = nil
+    public var ref : OpenAPISchemaReference? = nil
     public var servers: [OpenAPIServer] = []
     public var summary: String? = nil
     public var userInfos =  [OpenAPIObject.UserInfo]()

@@ -159,7 +159,7 @@ struct OpenAPILegacyPortedTests {
         #expect(response.content.count == 1)
         let content = try #require(response.content.first)
         #expect(content.key == "application/json")
-        #expect(content.schema?.ref == "#/components/schemas/Greeting")
+        #expect(content.schema?.ref?.reference == "#/components/schemas/Greeting")
     }
 
     @Test
@@ -234,7 +234,7 @@ struct OpenAPILegacyPortedTests {
         #expect(generalError.description == "General Error")
         #expect(generalError.content.count == 1)
         let jsonContent = try #require(generalError.content.first { $0.key == "application/json" })
-        #expect(jsonContent.schema?.ref == "#/components/schemas/GeneralError")
+        #expect(jsonContent.schema?.ref?.reference == "#/components/schemas/GeneralError")
     }
 
     @Test
@@ -390,7 +390,7 @@ struct OpenAPILegacyPortedTests {
         let mediatype = try #require(patchOperation.requestBody?.contents.first(where: { $0.key == "application/json" }))
         #expect(mediatype.examples.count == 1)
         let refExample = try #require(mediatype.examples[key:"confirmation-success"])
-        #expect(refExample.ref == "#/components/examples/confirmation-success")
+        #expect(refExample.ref?.reference == "#/components/examples/confirmation-success")
     }
 
     @Test

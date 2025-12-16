@@ -22,8 +22,7 @@ public struct OpenAPISchemaType : OpenAPIValidatableSchemaType {
             case "number" : return OpenAPIDoubleType.self
             case "string" : return OpenAPIStringType.self
             case "object" : return OpenAPIObjectType.self
-            case "$ref" : return OpenAPIValidatableType.self
-           
+            case OpenAPISchemaReference.REF_KEY  : return OpenAPISchemaReference.self
             default:
                 return nil
         }

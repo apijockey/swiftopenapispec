@@ -7,10 +7,10 @@
 
 
 public struct OpenAPIAnyOfType : OpenAPIValidatableSchemaType, PointerNavigable {
-    public var ref: String?
+    public var ref: OpenAPISchemaReference? { nil}
     
     public static let TYPE_KEY = "anyOf"
-    public static let REF_KEY = "$ref"
+   
     public init(_ map: [String : Any]) throws {
         self.type = map[Self.TYPE_KEY] as? String
         guard let list = (map["anyOf"] as? [Any]) else {
@@ -28,10 +28,10 @@ public struct OpenAPIAnyOfType : OpenAPIValidatableSchemaType, PointerNavigable 
         if let index = Int(segmentName) {
             return self.items?[index]
         }
-        if segmentName ==  Self.REF_KEY {
+        if segmentName ==  OpenAPISchemaReference.REF_KEY {
             return ref
         }
-        throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIOneOfType",segmentName)
+        throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIAnyOfType",segmentName)
     }
     public let type : String?
     public var items: [OpenAPIValidatableSchemaType]?
