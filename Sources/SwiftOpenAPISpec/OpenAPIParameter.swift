@@ -41,7 +41,7 @@ public struct OpenAPIParameter :  KeyedElement, PointerNavigable {
         
       
         guard let location = map[Self.IN_KEY] as? String  else {
-            throw OpenAPIObject.Errors.invalidSpecification(OpenAPIOperation.PARAMETERS_KEY, Self.IN_KEY)
+            throw OpenAPISpecification.Errors.invalidSpecification(OpenAPIOperation.PARAMETERS_KEY, Self.IN_KEY)
         }
         self.allowEmptyValue = map.readIfPresent(Self.ALLOW_EMPTYVALUE_KEY, Bool.self)
         self.allowReserved = map.readIfPresent(Self.ALLOW_RESERVED_KEY, Bool.self)
@@ -98,7 +98,7 @@ public struct OpenAPIParameter :  KeyedElement, PointerNavigable {
                                return ext.structuredExtension?.properties ?? ext.simpleExtensionValue
                            }
                        }
-           throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIParameter", segmentName)
+           throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIParameter", segmentName)
         }
     }
     public var key: String?
@@ -117,7 +117,7 @@ public struct OpenAPIParameter :  KeyedElement, PointerNavigable {
     public var examples : [OpenAPIExample]? = []
     public var content : OpenAPIMediaType? = nil
     public var format : String?
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
     public var extensions : [OpenAPIExtension]?
    
     //TODO: Examples Object

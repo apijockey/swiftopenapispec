@@ -41,7 +41,7 @@ public struct OpenAPIResponse : KeyedElement, PointerNavigable {
     public var links : [OpenAPILink] =   []
     public var key : String? = nil
     public var ref : OpenAPISchemaReference? = nil
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
     
     public func element(for segmentName : String) throws -> Any? {
         switch segmentName {
@@ -52,7 +52,7 @@ public struct OpenAPIResponse : KeyedElement, PointerNavigable {
              
         case Self.SUMMARY_KEY: return self.summary
         case OpenAPISchemaReference.REF_KEY: return ref
-            default : throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIResponse", segmentName)
+            default : throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIResponse", segmentName)
         }
     }
 }

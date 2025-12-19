@@ -21,14 +21,14 @@ public struct OpenAPISchemaType : OpenAPIValidatableSchemaType {
             case "integer" : return OpenAPIIntegerType.self
             case "number" : return OpenAPIDoubleType.self
             case "string" : return OpenAPIStringType.self
-            case "object" : return OpenAPIObjectType.self
+            case "object" : return OpenAPISpecificationType.self
             case OpenAPISchemaReference.REF_KEY  : return OpenAPISchemaReference.self
             default:
                 return nil
         }
     }
     public let type : String?
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
 }
 public extension Array where Element == OpenAPISchemaType   {
     init(_ map: [AnyHashable : Any]) throws {

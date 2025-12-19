@@ -7,6 +7,7 @@
 
 import Foundation
 import Testing
+import Yams
 @testable import SwiftOpenAPISpec
 
 struct APIWithExamplesTests {
@@ -24,7 +25,7 @@ struct APIWithExamplesTests {
             }
         }
     }
-    private func specString(_ resource: String, ext: String = "yaml") throws -> String {
+    private func specString(_ resource: String, ext: String = "yaml") throws -> StringDictionary {
         let name = "\(resource).\(ext)"
 
         guard let url = Bundle.module.url(forResource: resource, withExtension: ext) else {
@@ -33,10 +34,11 @@ struct APIWithExamplesTests {
 
         do {
             let data = try Data(contentsOf: url)
-            guard let string = String(data: data, encoding: .utf8) else {
+            guard let string = String(data: data, encoding: .utf8),
+                  let map = try Yams.load(yaml: string) as? StringDictionary else {
                 throw Self.Errors.notUTF8(name)
             }
-            return string
+            return map
         } catch {
             throw Self.Errors.unreadable(name, error)
         }
@@ -45,7 +47,7 @@ struct APIWithExamplesTests {
     func minimal() async throws {
         let yaml = try specString("minimal-3_0")
         
-        let apiSpec = try OpenAPIObject.read(text: yaml,url:"minimal-3_0")
+        let apiSpec = try OpenAPISpecification.read(unflattened: yaml,url:"minimal-3_0", documentLoader: YamsDocumentLoader())
         #expect(apiSpec.version == "3.0.3")
         #expect(apiSpec.servers.count == 0)
         #expect(apiSpec.paths.count > 0)

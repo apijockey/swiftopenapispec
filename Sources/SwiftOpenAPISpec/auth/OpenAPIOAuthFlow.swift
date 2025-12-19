@@ -16,7 +16,7 @@ public struct OpenAPIOAuthFlow : ThrowingHashMapInitiable, PointerNavigable {
         case Self.REFRESHURL_KEY : return refreshUrl
             case Self.SCOPES_KEY : return scopes
         default:
-            throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIOAuthFlow", segmentName)
+            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIOAuthFlow", segmentName)
         }
     }
     
@@ -38,6 +38,6 @@ public struct OpenAPIOAuthFlow : ThrowingHashMapInitiable, PointerNavigable {
     public var tokenUrl : String? = nil
     public var refreshUrl : String? = nil
     public var scopes : [String:String]? = nil
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
     public var ref: OpenAPISchemaReference? { nil}
 }

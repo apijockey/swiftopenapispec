@@ -18,7 +18,7 @@ public struct OpenAPIExternalDocumentation :
         case Self.URL_KEY: return url
         case Self.DESCRIPTION_KEY: return self.description
         default:
-            throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIExternalDocumentation", segmentName)
+            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIExternalDocumentation", segmentName)
         }
     }
     
@@ -30,7 +30,7 @@ public struct OpenAPIExternalDocumentation :
     }
     public var description : String? = nil
     public var url : String
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
     public var ref: OpenAPISchemaReference? { nil}
     
 }

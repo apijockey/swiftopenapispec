@@ -7,39 +7,32 @@ import Foundation
 struct OpenAPILegacyPortedTests {
 
     @Test
-    func testBasics() throws {
+    func testBasics() async throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
             #expect(Bool(false), "no openapi")
             return
         }
-        let data = try Data(contentsOf: settingsURL)
-        guard let string = String(data: data, encoding: .utf8) else  {
-            #expect(Bool(false), "no valid yaml")
-            return
-        }
-        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
+        let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
+        
         #expect(apiSpec.version == "3.1.0")
-        #expect(apiSpec.info.title == "GreetingService")
-        #expect(apiSpec.info.version == "1.0.0")
-        #expect(apiSpec.info.summary == "Prints a greeting on GET request")
-        #expect(apiSpec.info.termsOfService == "Displayss the terms of services")
-        #expect((apiSpec.info.contact?.name ?? "") == "API Support")
-        #expect((apiSpec.info.contact?.url ?? "") == "https://www.example.com/support")
-        #expect((apiSpec.info.contact?.email ?? "") == "support@example.com")
-        #expect((apiSpec.info.license?.name ?? "") == "Apache 2.0")
-        #expect((apiSpec.info.license?.url ?? "") == "https://www.apache.org/licenses/LICENSE-2.0.html")
+        #expect(apiSpec.info?.title == "GreetingService")
+        #expect(apiSpec.info?.version == "1.0.0")
+        #expect(apiSpec.info?.summary == "Prints a greeting on GET request")
+        #expect(apiSpec.info?.termsOfService == "Displayss the terms of services")
+        #expect((apiSpec.info?.contact?.name ?? "") == "API Support")
+        #expect((apiSpec.info?.contact?.url ?? "") == "https://www.example.com/support")
+        #expect((apiSpec.info?.contact?.email ?? "") == "support@example.com")
+        #expect((apiSpec.info?.license?.name ?? "") == "Apache 2.0")
+        #expect((apiSpec.info?.license?.url ?? "") == "https://www.apache.org/licenses/LICENSE-2.0.html")
     }
 
     @Test
-    func testServers() throws {
+    func testServers() async throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            #expect(Bool(false), "no openapi"); return
+            #expect(Bool(false), "no openapi")
+            return
         }
-        let data = try Data(contentsOf: settingsURL)
-        guard let string = String(data: data, encoding: .utf8) else  {
-            #expect(Bool(false), "no valid yaml"); return
-        }
-        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
+        let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
         #expect(apiSpec.servers.count == 3)
         #expect(apiSpec.servers[0].url == "https://example.com/api")
         #expect(apiSpec.servers[0].description == "Example service deployment.")
@@ -64,15 +57,12 @@ struct OpenAPILegacyPortedTests {
     }
 
     @Test
-    func testPathInfo() throws {
+    func testPathInfo() async throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            #expect(Bool(false), "no openapi"); return
-        }
-        let data = try Data(contentsOf: settingsURL)
-        guard let string = String(data: data, encoding: .utf8) else  {
-            #expect(Bool(false), "no valid yaml"); return
-        }
-        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
+                #expect(Bool(false), "no openapi")
+                return
+            }
+        let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
         #expect(apiSpec.paths.count == 4)
 
         let getGreetPath = try #require(apiSpec.paths.first { $0.key == "/greet" })
@@ -95,15 +85,12 @@ struct OpenAPILegacyPortedTests {
     }
 
     @Test
-    func testOperations() throws {
+    func testOperations() async throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            #expect(Bool(false), "no openapi"); return
+            #expect(Bool(false), "no openapi")
+            return
         }
-        let data = try Data(contentsOf: settingsURL)
-        guard let string = String(data: data, encoding: .utf8) else  {
-            #expect(Bool(false), "no valid yaml"); return
-        }
-        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
+        let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
         let getClipPath = try #require(apiSpec.paths.first { $0.key == "/clip" })
         let clipPathOperation = try #require(getClipPath.operations.first)
         #expect(clipPathOperation.key == "get")
@@ -115,15 +102,12 @@ struct OpenAPILegacyPortedTests {
     }
 
     @Test
-    func testParameters() throws {
+    func testParameters() async throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            #expect(Bool(false), "no openapi"); return
+            #expect(Bool(false), "no openapi")
+            return
         }
-        let data = try Data(contentsOf: settingsURL)
-        guard let string = String(data: data, encoding: .utf8) else  {
-            #expect(Bool(false), "no valid yaml"); return
-        }
-        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
+        let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
         let getGreetPath = try #require(apiSpec.paths.first { $0.key == "/greet" })
         let getEmojiPath = try #require(apiSpec.paths.first { $0.key == "/emoji" })
         let getClipPath = try #require(apiSpec.paths.first { $0.key == "/clip" })
@@ -143,15 +127,12 @@ struct OpenAPILegacyPortedTests {
     }
 
     @Test
-    func testResponses() throws {
+    func testResponses() async throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            #expect(Bool(false), "no openapi"); return
+            #expect(Bool(false), "no openapi")
+            return
         }
-        let data = try Data(contentsOf: settingsURL)
-        guard let string = String(data: data, encoding: .utf8) else  {
-            #expect(Bool(false), "no valid yaml"); return
-        }
-        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
+        let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
         let getGreetPath = try #require(apiSpec.paths.first { $0.key == "/greet" })
         let greetPathOperation = try #require(getGreetPath.operations.first)
         let response = try #require(greetPathOperation.responses?.first)
@@ -163,25 +144,22 @@ struct OpenAPILegacyPortedTests {
     }
 
     @Test
-    func testSchemaComponents() throws {
+    func testSchemaComponents() async throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            #expect(Bool(false), "no openapi"); return
+            #expect(Bool(false), "no openapi")
+            return
         }
-        let data = try Data(contentsOf: settingsURL)
-        guard let string = String(data: data, encoding: .utf8) else  {
-            #expect(Bool(false), "no valid yaml"); return
-        }
-        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
+        let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
         #expect(apiSpec.components?.schemas?.count == 4)
         let greetingComponent = try #require(apiSpec.components?.schemas?.first { $0.key == "Greeting" })
-        let greetingObject = try #require(greetingComponent.schemaType as? OpenAPIObjectType)
+        let greetingObject = try #require(greetingComponent.schemaType as? OpenAPISpecificationType)
         #expect(greetingObject.properties.count == 1)
         let messageProperty = try #require(greetingObject.properties.first)
         #expect(messageProperty.type is OpenAPIStringType)
         #expect(greetingObject.required == ["message"])
 
         let generalErrorComponent = try #require(apiSpec[schemacomponent: "GeneralError"])
-        let errorObject = try #require(generalErrorComponent.schemaType as? OpenAPIObjectType)
+        let errorObject = try #require(generalErrorComponent.schemaType as? OpenAPISpecificationType)
         #expect(errorObject.properties.count == 2)
         let errorMessageCodeProperty = errorObject.properties[key: "code"]
         #expect(errorMessageCodeProperty?.type is OpenAPIIntegerType)
@@ -191,15 +169,13 @@ struct OpenAPILegacyPortedTests {
     }
 
     @Test
-    func testParameterComponents() throws {
+    func testParameterComponents() async throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            #expect(Bool(false), "no openapi"); return
-        }
-        let data = try Data(contentsOf: settingsURL)
-        guard let string = String(data: data, encoding: .utf8) else  {
-            #expect(Bool(false), "no valid yaml"); return
-        }
-        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
+           
+                #expect(Bool(false), "no openapi")
+                return
+            }
+            let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
         #expect(apiSpec.components?.parameters?.count == 2)
         let skipParamComponent = try #require(apiSpec[parametercomponent: "skipParam"])
         #expect(skipParamComponent.key == "skipParam")
@@ -210,15 +186,13 @@ struct OpenAPILegacyPortedTests {
     }
 
     @Test
-    func testResponsesComponents() throws {
+    func testResponsesComponents() async throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            #expect(Bool(false), "no openapi"); return
-        }
-        let data = try Data(contentsOf: settingsURL)
-        guard let string = String(data: data, encoding: .utf8) else  {
-            #expect(Bool(false), "no valid yaml"); return
-        }
-        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
+           
+                #expect(Bool(false), "no openapi")
+                return
+            }
+            let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
         #expect(apiSpec.components?.responses?.count == 4)
 
         let notFoundResponse = try #require(apiSpec.components?.responses?.first(where: { $0.key == "NotFound" }))
@@ -238,15 +212,12 @@ struct OpenAPILegacyPortedTests {
     }
 
     @Test
-    func testRequestBody() throws {
+    func testRequestBody() async throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            #expect(Bool(false), "no openapi"); return
+            #expect(Bool(false), "no openapi")
+            return
         }
-        let data = try Data(contentsOf: settingsURL)
-        guard let string = String(data: data, encoding: .utf8) else  {
-            #expect(Bool(false), "no valid yaml"); return
-        }
-        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
+        let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
         #expect(apiSpec.paths.count == 4)
         let getPetsPath = try #require(apiSpec.paths.first { $0.key == "/pets" })
         let postOperation = try #require(getPetsPath.operations.first { $0.key == "post" })
@@ -256,15 +227,13 @@ struct OpenAPILegacyPortedTests {
     }
 
     @Test
-    func testOneOfSchema() throws {
+    func testOneOfSchema() async throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            #expect(Bool(false), "no openapi"); return
+            #expect(Bool(false), "no openapi")
+            return
         }
-        let data = try Data(contentsOf: settingsURL)
-        guard let string = String(data: data, encoding: .utf8) else  {
-            #expect(Bool(false), "no valid yaml"); return
-        }
-        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
+        let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
+        
         #expect(apiSpec.paths.count == 4)
         let getPetsPath = try #require(apiSpec.paths.first { $0.key == "/pets" })
         #expect(getPetsPath.operations.count == 3)
@@ -276,15 +245,13 @@ struct OpenAPILegacyPortedTests {
     }
 
     @Test
-    func testOperationSecurityScheme() throws {
+    func testOperationSecurityScheme() async throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            #expect(Bool(false), "no openapi"); return
-        }
-        let data = try Data(contentsOf: settingsURL)
-        guard let string = String(data: data, encoding: .utf8) else  {
-            #expect(Bool(false), "no valid yaml"); return
-        }
-        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
+        
+                #expect(Bool(false), "no openapi")
+                return
+            }
+            let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
         #expect(apiSpec.paths.count == 4)
         let getGreetPath = try #require(apiSpec.paths.first { $0.key == "/greet" })
         let getOperation = try #require(getGreetPath.operations.first { $0.key == "get" })
@@ -298,15 +265,13 @@ struct OpenAPILegacyPortedTests {
     }
 
     @Test
-    func testSecurityComponents() throws {
+    func testSecurityComponents() async throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            #expect(Bool(false), "no openapi"); return
-        }
-        let data = try Data(contentsOf: settingsURL)
-        guard let string = String(data: data, encoding: .utf8) else  {
-            #expect(Bool(false), "no valid yaml"); return
-        }
-        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
+            
+                #expect(Bool(false), "no openapi")
+                return
+            }
+            let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
         #expect(apiSpec.components?.securitySchemas?.count == 5)
 
         let httpKeySecurityScheme = try #require(apiSpec.components?.securitySchemas?.first{ $0.key == "http_Key"})
@@ -347,15 +312,13 @@ struct OpenAPILegacyPortedTests {
     }
 
     @Test
-    func testExamples() throws {
+    func testExamples() async throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            #expect(Bool(false), "no openapi"); return
-        }
-        let data = try Data(contentsOf: settingsURL)
-        guard let string = String(data: data, encoding: .utf8) else  {
-            #expect(Bool(false), "no valid yaml"); return
-        }
-        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
+            
+                #expect(Bool(false), "no openapi")
+                return
+            }
+            let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
         #expect(apiSpec.paths.count == 4)
         let getPetsPath = try #require(apiSpec.paths.first { $0.key == "/pets" })
         #expect(getPetsPath.operations.count == 3)
@@ -374,15 +337,12 @@ struct OpenAPILegacyPortedTests {
     }
 
     @Test
-    func testExamplesRef() throws {
+    func testExamplesRef() async throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            #expect(Bool(false), "no openapi"); return
+            #expect(Bool(false), "no openapi")
+            return
         }
-        let data = try Data(contentsOf: settingsURL)
-        guard let string = String(data: data, encoding: .utf8) else  {
-            #expect(Bool(false), "no valid yaml"); return
-        }
-        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
+        let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
         #expect(apiSpec.paths.count == 4)
         let getPetsPath = try #require(apiSpec.paths.first { $0.key == "/pets" })
         #expect(getPetsPath.operations.count == 3)
@@ -394,15 +354,12 @@ struct OpenAPILegacyPortedTests {
     }
 
     @Test
-    func testLinks() throws {
+    func testLinks() async throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
-            #expect(Bool(false), "no openapi"); return
+            #expect(Bool(false), "no openapi")
+            return
         }
-        let data = try Data(contentsOf: settingsURL)
-        guard let string = String(data: data, encoding: .utf8) else  {
-            #expect(Bool(false), "no valid yaml"); return
-        }
-        let apiSpec = try OpenAPIObject.read(text: string, url: "openapi")
+        let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
         let getPetsPath = try #require(apiSpec.paths.first { $0.key == "/pets" })
         let patchOperation = try #require(getPetsPath.operations.first { $0.key == "patch" })
         let links = try #require(patchOperation.responses?.first(where: { $0.key == "200" })?.links)

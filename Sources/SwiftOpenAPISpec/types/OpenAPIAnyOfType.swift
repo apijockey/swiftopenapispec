@@ -31,9 +31,9 @@ public struct OpenAPIAnyOfType : OpenAPIValidatableSchemaType, PointerNavigable 
         if segmentName ==  OpenAPISchemaReference.REF_KEY {
             return ref
         }
-        throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIAnyOfType",segmentName)
+        throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIAnyOfType",segmentName)
     }
     public let type : String?
     public var items: [OpenAPIValidatableSchemaType]?
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
 }

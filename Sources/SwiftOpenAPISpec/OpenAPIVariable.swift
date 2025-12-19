@@ -35,14 +35,14 @@ public struct OpenAPIVariable : KeyedElement , PointerNavigable {
                 }
                
             }
-            throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIVariable", segmentName)
+            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIVariable", segmentName)
         }
     }
     public var enumList : [String]? = nil
     public var ref: OpenAPISchemaReference? { nil}
     public var defaultValue : String
     public var description : String? = nil
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
     public var extensions : [OpenAPIExtension]?
     
 }

@@ -12,7 +12,7 @@ public struct OpenAPIContact : ThrowingHashMapInitiable , PointerNavigable {
         case Self.EMAIL_KEY: return email
         case Self.NAME_KEY: return name
         case Self.URL_KEY: return url
-        default: throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIContact", segmentName)
+        default: throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIContact", segmentName)
         }
     }
     
@@ -37,6 +37,6 @@ public struct OpenAPIContact : ThrowingHashMapInitiable , PointerNavigable {
     public var extensions : [OpenAPIExtension]?
     public  var name : String? = nil
     public var url : String? = nil
-    public var userInfos = [OpenAPIObject.UserInfo]()
+    public var userInfos = [OpenAPISpecification.UserInfo]()
     public var ref: OpenAPISchemaReference? { nil}
 }

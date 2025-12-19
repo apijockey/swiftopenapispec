@@ -61,13 +61,13 @@ public struct OpenAPIMediaType :  KeyedElement , PointerNavigable {
         case OpenAPISchemaReference.REF_KEY: return ref
         default:
             if self.key == segmentName { return self.schema }
-            throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIMediaType", segmentName)
+            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIMediaType", segmentName)
         }
     }
     public var schema : OpenAPISchema? = nil
     public var itemSchema : OpenAPISchema? = nil
     public var examples : [OpenAPIExample] = []
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
     public var encoding :[OpenAPIEncoding]? = nil
     public var prefixEncoding :[OpenAPIEncoding]? = nil
     public var itemEncoding :[OpenAPIEncoding]? = nil

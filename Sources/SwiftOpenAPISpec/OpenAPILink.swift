@@ -41,7 +41,7 @@ public struct OpenAPILink : KeyedElement , PointerNavigable {
            case Self.SERVER_KEY :return server
        case OpenAPISchemaReference.REF_KEY: return ref
        default:
-           throw OpenAPIObject.Errors.unsupportedSegment("OpenAPILink", segmentName)
+           throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPILink", segmentName)
         }
     }
     public var key : String? = nil
@@ -52,7 +52,7 @@ public struct OpenAPILink : KeyedElement , PointerNavigable {
     public var server : OpenAPIServer? = nil
     public var parameters : [String:String] = [:]
     public var requestBody : String? = nil
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
     public var extensions : [OpenAPIExtension]?
  
 }

@@ -17,7 +17,7 @@ public struct OpenAPIServer : ThrowingHashMapInitiable , PointerNavigable {
             case Self.NAME_KEY :return name
             case Self.VARIABLES_KEY : return variables
         default:
-            throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIInfo", segmentName)
+            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIInfo", segmentName)
 
         }
         
@@ -47,7 +47,7 @@ public struct OpenAPIServer : ThrowingHashMapInitiable , PointerNavigable {
     public var extensions : [OpenAPIExtension]?
     public var name : String? = nil
     public var url : String = "/"
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
     //https://spec.openapis.org/oas/latest.html#server-variable-object
     public var variables : [OpenAPIVariable] = []
     

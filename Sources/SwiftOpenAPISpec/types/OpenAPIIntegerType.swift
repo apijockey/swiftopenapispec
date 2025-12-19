@@ -18,7 +18,7 @@ public struct OpenAPIIntegerType :  OpenAPIValidatableSchemaType, ThrowingHashMa
             case Self.EXCLUSIVEMINIMUM_KEY : return exclusiveMinimum
             case Self.EXCLUSIVEMAXIMUM_KEY : return exclusiveMaximum
             default:
-                throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIIntegerType", segmentName)
+                throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIIntegerType", segmentName)
         }
     }
     
@@ -54,6 +54,6 @@ public struct OpenAPIIntegerType :  OpenAPIValidatableSchemaType, ThrowingHashMa
     public let minimum : Int?
     public let exclusiveMinimum : Int?
     public var format : String?
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
     
 }

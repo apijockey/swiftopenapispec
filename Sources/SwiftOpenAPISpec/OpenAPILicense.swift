@@ -13,7 +13,7 @@ public struct OpenAPILicense : Codable , PointerNavigable {
             case Self.IDENTIFIER_KEY: return identifier
             case Self.URL_KEY: return url
         default:
-            throw OpenAPIObject.Errors.unsupportedSegment("OpenAPILicense", segmentName)
+            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPILicense", segmentName)
         }
     }
     

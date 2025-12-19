@@ -50,7 +50,7 @@ public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
         case Self.SECURITY_SCHEMES_KEY:
             return self.securitySchemas
         default :
-            throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIComponent", segmentName)
+            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIComponent", segmentName)
         }
     }
    
@@ -117,7 +117,7 @@ public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
     public var responses : [OpenAPIResponse]?
     public var securitySchemas : [OpenAPISecurityScheme]?
     public var schemas : [OpenAPISchema]?
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
     public var ref : OpenAPISchemaReference? { nil}
     
     

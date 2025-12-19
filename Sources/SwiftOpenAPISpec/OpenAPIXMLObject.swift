@@ -37,7 +37,7 @@ public struct OpenAPIXMLObject : PointerNavigable {
         case Self.ATTRIBUTE_KEY : return attribute
         case Self.WRAPPED_KEY : return wrapped
         default:
-        throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIXMLObject", segmentName)
+        throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIXMLObject", segmentName)
         }
     }
     public var nodeType : NodeKind?
@@ -46,7 +46,7 @@ public struct OpenAPIXMLObject : PointerNavigable {
     public var prefix : String?
     public var attribute : Bool?
     public var wrapped : Bool?
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
     public var extensions : [OpenAPIExtension]?
     public var ref: OpenAPISchemaReference? { nil}
     

@@ -16,7 +16,7 @@ public struct OpenAPISchemaReference  : ThrowingHashMapInitiable, PointerNavigab
         if segmentName == Self.REF_KEY {
             return self
         }
-        throw OpenAPIObject.Errors.unsupportedSegment("OpenAPISchemaReference", segmentName)
+        throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPISchemaReference", segmentName)
     }
     
     public static let REF_KEY = "$ref"
@@ -27,7 +27,7 @@ public struct OpenAPISchemaReference  : ThrowingHashMapInitiable, PointerNavigab
         self.summary = map.readIfPresent(Self.SUMMARY_KEY, String.self)
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
         if self.reference == nil {
-            userInfos.append(OpenAPIObject.UserInfo(message: "ref ist mandatory", infoType: .error))
+            userInfos.append(OpenAPISpecification.UserInfo(message: "ref ist mandatory", infoType: .error))
         }
     }
     public init(ref: String) {
@@ -37,5 +37,5 @@ public struct OpenAPISchemaReference  : ThrowingHashMapInitiable, PointerNavigab
     public var reference : String? = nil
     public var summary : String? = nil
     public var description : String? = nil
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
 }

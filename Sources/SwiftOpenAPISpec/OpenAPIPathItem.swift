@@ -53,7 +53,7 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
         }
         self.summary  = map.readIfPresent(Self.SUMMARY_KEY, String.self)
         self.description  = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
-        let servers = try map.tryListIfPresent(OpenAPIObject.SERVERS_KEY, root: "OpenAPIPath", OpenAPIServer.self)
+        let servers = try map.tryListIfPresent(OpenAPISpecification.SERVERS_KEY, root: "OpenAPIPath", OpenAPIServer.self)
         if servers.count > 0 {
             self.servers = servers
         }
@@ -79,7 +79,7 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
             if let operation = operations[key: segmentName] {
                 return operation
             }
-            throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIPathItem", segmentName)
+            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIPathItem", segmentName)
         }
     }
     // Zugriff per HTTP-Methode (get, post, put, ...) -> Liste oder nil
@@ -102,7 +102,7 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
     public var ref : OpenAPISchemaReference? = nil
     public var servers: [OpenAPIServer] = []
     public var summary: String? = nil
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
 }
 
 

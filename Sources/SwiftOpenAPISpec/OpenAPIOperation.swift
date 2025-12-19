@@ -34,7 +34,7 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
                 }
             }
         }
-        let servers =  try map.tryOptionalList(OpenAPIObject.SERVERS_KEY, root: "operations", OpenAPIServer.self)
+        let servers =  try map.tryOptionalList(OpenAPISpecification.SERVERS_KEY, root: "operations", OpenAPIServer.self)
         if servers.count > 0 {
             self.servers = servers
         }
@@ -66,7 +66,7 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
                 
                 
             }
-            throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIOperation", segmentName)
+            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIOperation", segmentName)
         }
     }
     public static let DEPRECATED_KEY = "deprecated"
@@ -95,7 +95,7 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
     public var securityObjects : [OpenAPISecuritySchemeReference] = []
     public var extensions : [OpenAPIExtension]?
     public var externalDocs : OpenAPIExternalDocumentation? = nil
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
     public var ref: OpenAPISchemaReference? { nil}
   
     /// returns an OpenAPIResponse for the given HTTP Status  if declared on the operation or nil.

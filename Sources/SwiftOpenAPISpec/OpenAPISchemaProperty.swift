@@ -40,7 +40,7 @@ public struct OpenAPISchemaProperty: KeyedElement , PointerNavigable {
         }
    
     }
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
     public  var key : String? = nil
     public var ref : OpenAPISchemaReference?
     public var type : OpenAPIValidatableSchemaType?
@@ -54,7 +54,7 @@ public struct OpenAPISchemaProperty: KeyedElement , PointerNavigable {
             case OpenAPISchema.ALLOF_KEY : return type
             case OpenAPISchema.DISCRIMINATOR_KEY : return self.discriminator
             
-            default : throw OpenAPIObject.Errors.unsupportedSegment("OpenAPISchema", segmentName)
+            default : throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPISchema", segmentName)
         }
     }
     

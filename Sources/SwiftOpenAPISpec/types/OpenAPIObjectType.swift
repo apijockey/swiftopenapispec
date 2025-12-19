@@ -6,7 +6,7 @@
 //
 
 
-public struct OpenAPIObjectType : OpenAPIValidatableSchemaType, PointerNavigable{
+public struct OpenAPISpecificationType : OpenAPIValidatableSchemaType, PointerNavigable{
     public func element(for segmentName: String) throws -> Any? {
         switch segmentName {
         case Self.DEPENDENT_REQUIRED_KEY : return self.dependentRequired
@@ -20,7 +20,7 @@ public struct OpenAPIObjectType : OpenAPIValidatableSchemaType, PointerNavigable
             if let prop = self.properties[key: segmentName] {
                 return prop
             }
-            throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIObjectType", segmentName)
+            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPISpecificationType", segmentName)
             
         }
     }
@@ -53,6 +53,6 @@ public struct OpenAPIObjectType : OpenAPIValidatableSchemaType, PointerNavigable
     public var properties : [OpenAPISchemaProperty] = []
     public var required : [String] = []
     public var unevaluatedProperties : Bool = false
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
     public var ref: OpenAPISchemaReference? { nil}
 }

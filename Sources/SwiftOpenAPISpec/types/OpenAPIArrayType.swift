@@ -17,7 +17,7 @@ public struct OpenAPIArrayType : OpenAPIValidatableSchemaType, PointerNavigable{
         case Self.UNIQE_ITEMS_KEY : return uniqueItems
         case Self.MAX_CONTAINS_KEY : return maxContains
         case Self.MIN_CONTAINS_KEY : return minContains
-        default:  throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIArrayType", segmentName)
+        default:  throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIArrayType", segmentName)
                     }
     }
     
@@ -58,6 +58,6 @@ public struct OpenAPIArrayType : OpenAPIValidatableSchemaType, PointerNavigable{
     public var maxContains : Int?
     public var minContains : Int?
     public var items: OpenAPIValidatableSchemaType?
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
     public var ref: OpenAPISchemaReference? { nil}
 }

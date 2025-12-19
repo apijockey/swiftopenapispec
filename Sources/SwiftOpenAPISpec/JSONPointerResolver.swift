@@ -37,7 +37,7 @@ public struct JSONPointerResolver {
     /// Max recursion depth to protect against cycles / bad inputs
     let maxDepth: Int = 64
     
-    /// Load a document from disk/URL into your OpenAPIObject domain model.
+    /// Load a document from disk/URL into your OpenAPISpecification domain model.
     /// Replace with your real loader.
     let loadDocument: (URL) async throws -> any PointerNavigable
     var baseURL : URL
@@ -73,7 +73,7 @@ public struct JSONPointerResolver {
     
     /// Resolve an OpenAPI fragment like "#/components/schemas/EventEnvelope"
     /// by walking segments using element(for:).
-    mutating func resolve(
+    public mutating func resolve(
         root: any PointerNavigable,
         fragment: String,
         _ depth: Int = 0
@@ -150,7 +150,7 @@ public struct JSONPointerResolver {
     /// - loads referenced doc if needed
     /// - resolves fragment within that doc
     /// - if result has "$ref" (as String), follow recursively
-    mutating func resolve(
+    public mutating func resolve(
         
         ref: String
     ) async throws -> Any {

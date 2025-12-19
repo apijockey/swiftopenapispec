@@ -217,12 +217,14 @@ print(specFromYaml.info!.title)
 print(specFromYaml.info!.version)
 print("---")
 
+// Use a proper file URL and catch errors so the Playground task doesn't crash.
+let path = "/Users/patricdubois/xcodeprojects/SwiftOpenAPISpec/Tests/openapispecreaderTests/Resources/02-minimal-31.yaml"
+let url = URL(fileURLWithPath: path)
 
-let url = Bundle.main.url(forResource: <#T##String?#>, withExtension: <#T##String?#>)
-let specFromURL = try await OpenAPISpecification.read(url: url)
-let operation = specFromURL[operationId: "getPetsByID"].first
-let httpMethod = specFromURL[httpMethod: "GET"].first
-let path = specFromURL[path: "/getPetsByID"]
-let webhook = specFromURL[webhook: "orderCreated"]
-
-let
+do {
+    let specFromURL = try await OpenAPISpecification.read(url: url)
+    print("Loaded spec from URL:", specFromURL.version ?? "(no version)")
+} catch {
+    print("Failed to load spec from URL:", url.path)
+    print("Error:", error.localizedDescription)
+}

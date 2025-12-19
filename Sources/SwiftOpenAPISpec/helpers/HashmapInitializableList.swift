@@ -56,7 +56,7 @@ public struct KeyedElementList<T> where T :  KeyedElement {
                     types.append(element)
             }
             else {
-                throw OpenAPIObject.Errors.invalidYaml("Could not find a entry in \(list.debugDescription) for \(yamlKeyName)")
+                throw OpenAPISpecification.Errors.invalidYaml("Could not find a entry in \(list.debugDescription) for \(yamlKeyName)")
             }
             
             
@@ -73,19 +73,19 @@ public protocol JSONPointerResolvable {
 
 public protocol ThrowingHashMapInitiable {
     init(_ map : StringDictionary) throws
-    var userInfos :  [OpenAPIObject.UserInfo] {get}
+    var userInfos :  [OpenAPISpecification.UserInfo] {get}
    
 }
 /**A KeyedElement expects that the key Value is set from outside**/
 
 public struct RelativeReferenceResolver {
     
-    var specMap : [URL:OpenAPIObject] = [URL:OpenAPIObject]()
+    var specMap : [URL:OpenAPISpecification] = [URL:OpenAPISpecification]()
     enum Errors : LocalizedError {
         case invalidURL(String)
     }
     private let baseURL : String
-    private let baseSpec : OpenAPIObject
+    private let baseSpec : OpenAPISpecification
     public static func resolve(_ url: String, baseUrl: String) throws -> URL {
         guard let baseURL = URL(string: baseUrl),
         let resolvedURL = URL(string: url, relativeTo: baseURL)else {
@@ -95,7 +95,7 @@ public struct RelativeReferenceResolver {
         
     }
     
-    public init(baseURL: String, baseSpec: OpenAPIObject) {
+    public init(baseURL: String, baseSpec: OpenAPISpecification) {
         self.baseURL = baseURL
         self.baseSpec = baseSpec
     }

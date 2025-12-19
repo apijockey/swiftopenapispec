@@ -23,7 +23,7 @@ public struct OpenAPICallBack : KeyedElement,PointerNavigable{
                                return ext.structuredExtension?.properties ?? ext.simpleExtensionValue
                            }
                        }
-                       throw OpenAPIObject.Errors.unsupportedSegment("OpenAPICallBack", segmentName)
+                       throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPICallBack", segmentName)
         }
     }
     
@@ -38,7 +38,7 @@ public struct OpenAPICallBack : KeyedElement,PointerNavigable{
      
     }
     
-    public var userInfos = [OpenAPIObject.UserInfo]()
+    public var userInfos = [OpenAPISpecification.UserInfo]()
     public var extensions : [OpenAPIExtension]?
     public var pathItems : [OpenAPIPathItem]?
     public var key: String?

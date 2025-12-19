@@ -16,7 +16,7 @@ public struct OpenAPIOAuthFlows : ThrowingHashMapInitiable, PointerNavigable {
             case Self.AUTHORIZATION_CODE_KEY: return self.authorizationCode as Any?
             case Self.DEVICE_AUTHORIZATION_KEY: return self.deviceAuthorization as Any?
         default:
-            throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIOAuthFlows", segmentName)
+            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIOAuthFlows", segmentName)
         }
     }
     
@@ -38,6 +38,6 @@ public struct OpenAPIOAuthFlows : ThrowingHashMapInitiable, PointerNavigable {
     public var clienCredentials : OpenAPIOAuthFlow? = nil
     public var authorizationCode : OpenAPIOAuthFlow? = nil
     public var deviceAuthorization : OpenAPIOAuthFlow? = nil
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
     public var ref: OpenAPISchemaReference? { nil}
 }

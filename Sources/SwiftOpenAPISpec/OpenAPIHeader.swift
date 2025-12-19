@@ -72,7 +72,7 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
                    return ext.structuredExtension?.properties ?? ext.simpleExtensionValue
                }
            }
-           throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIHeader", segmentName)
+           throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIHeader", segmentName)
     
        
         
@@ -92,7 +92,7 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
     public var extensions : [OpenAPIExtension]?
     public var examples : [OpenAPIExample]? = []
     public var content : OpenAPIMediaType? = nil
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
    
     //TODO: Examples Object
    

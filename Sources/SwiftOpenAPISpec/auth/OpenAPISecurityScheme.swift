@@ -84,7 +84,7 @@ public struct OpenAPISecurityScheme : KeyedElement , PointerNavigable {
        case Self.DEPRECATED_KEY : return deprecated
        case OpenAPISchemaReference.REF_KEY: return ref
        default:
-       throw OpenAPIObject.Errors.unsupportedSegment("OpenAPISecurityScheme", segmentName)
+       throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPISecurityScheme", segmentName)
         }
     }
     public var key: String?
@@ -99,7 +99,7 @@ public struct OpenAPISecurityScheme : KeyedElement , PointerNavigable {
     public var openIdConnectURL : String? = nil
     public var oauth2MetadataURL : String? = nil
     public var deprecated : Bool? = nil
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
     
     
 }

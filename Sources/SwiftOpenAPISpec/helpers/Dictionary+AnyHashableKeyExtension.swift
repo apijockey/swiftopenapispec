@@ -21,7 +21,7 @@ extension Dictionary where Key == String, Value == Any {
             return value
         }
         else {
-            throw OpenAPIObject.Errors.invalidSpecification(root, key.description)
+            throw OpenAPISpecification.Errors.invalidSpecification(root, key.description)
         }
     }
     
@@ -36,7 +36,7 @@ extension Dictionary where Key == String, Value == Any {
             return try V.init(value)
         }
         else {
-            throw OpenAPIObject.Errors.invalidSpecification(root, key.description)
+            throw OpenAPISpecification.Errors.invalidSpecification(root, key.description)
         }
     }
     /**
@@ -97,7 +97,7 @@ extension Dictionary where Key == String, Value == Any {
     ///
     /// - Parameters:
     ///   - key: dictionary key
-    ///   - root: Used to improve error output in `OpenAPIObject/UserInfo`
+    ///   - root: Used to improve error output in `OpenAPISpecification/UserInfo`
     ///   - result: expected type to init from the Dictionary
     /// - Returns: returns the list or throws if the key does not exist, does not point to an [AnyHashable:Any]  or the list cannot be mapped to [V]
     func tryList<V>(_ key : String,root: String,_ result : V.Type) throws -> [V]  where V : KeyedElement{
@@ -105,7 +105,7 @@ extension Dictionary where Key == String, Value == Any {
             return try KeyedElementList.map(list)
         }
         else {
-            throw OpenAPIObject.Errors.invalidSpecification(root, key)
+            throw OpenAPISpecification.Errors.invalidSpecification(root, key)
         }
     }
     
@@ -114,7 +114,7 @@ extension Dictionary where Key == String, Value == Any {
             return try HashmapInitializableList.map(list)
         }
         else {
-            throw OpenAPIObject.Errors.invalidSpecification(root, key)
+            throw OpenAPISpecification.Errors.invalidSpecification(root, key)
         }
     }
     func tryOptionalList<V>(_ key : String,root: String,_ result : V.Type) throws -> [V]  where V : ThrowingHashMapInitiable{
@@ -169,7 +169,7 @@ extension Dictionary where Key == String, Value == Any {
     /// Inits an instance of Type *V* by loading the value from the current Dictionary with the given *key*
     /// - Parameters:
     ///   - key: dictionary key
-    ///   - root: Used to improve error output in `OpenAPIObject/UserInfo`
+    ///   - root: Used to improve error output in `OpenAPISpecification/UserInfo`
     ///   - result: expected type to init from the Dictionary
     /// - Returns: an instance of type *V*, if the key exists and maps to  a Dictionary of StringDictionary
     func tryMapIfPresent<V>(_ key : String,root: String,_ result : V.Type) throws -> V?  where V : ThrowingHashMapInitiable{

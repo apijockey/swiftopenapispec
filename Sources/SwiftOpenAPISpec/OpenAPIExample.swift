@@ -36,7 +36,7 @@ public struct OpenAPIExample : KeyedElement, PointerNavigable {
             case Self.EXTERNAL_VALUE_KEY: return self.externalValue
         case OpenAPISchemaReference.REF_KEY: return self.ref
         default:
-            throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIExample", segmentName)
+            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIExample", segmentName)
         }
     }
     public var key : String?
@@ -47,6 +47,6 @@ public struct OpenAPIExample : KeyedElement, PointerNavigable {
     public var serializedValue : String? = nil
     public var externalValue : String? = nil
     public var ref : OpenAPISchemaReference? = nil
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
    
 }

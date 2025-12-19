@@ -13,14 +13,14 @@ public struct OpenAPIExtension : PointerNavigable  {
         else if let structuredExtension = structuredExtension {
             return try structuredExtension.element(for: segmentName)
         }
-        throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIExtension", segmentName)
+        throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIExtension", segmentName)
     }
     
     public var ref: OpenAPISchemaReference? { nil}
     
-    var key : String?
-    var simpleExtensionValue : String?
-    var structuredExtension : OpenAPIStructuredExtensionValues?
+    public var key : String?
+    public var simpleExtensionValue : String?
+    public var structuredExtension : OpenAPIStructuredExtensionValues?
     
     
     public static func extensionElements(_ map : StringDictionary) throws -> [OpenAPIExtension] {
@@ -81,11 +81,11 @@ public struct OpenAPISimpleExtensionValues : KeyedElement, PointerNavigable {
             case "key" : return self.key
             case "value" : return self.value
             case "$ref": return self.ref
-        default: throw OpenAPIObject.Errors.unsupportedSegment("OpenAPISimpleExtensionValues", segmentName)
+        default: throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPISimpleExtensionValues", segmentName)
         }
     }
     
-    public var userInfos: [OpenAPIObject.UserInfo] = []
+    public var userInfos: [OpenAPISpecification.UserInfo] = []
     
     public var key: String?
     public var value : String?
@@ -100,12 +100,12 @@ public struct OpenAPIStructuredExtensionValues : ThrowingHashMapInitiable, Point
         if let properties = self.properties {
             return properties[segmentName]
         }
-        throw OpenAPIObject.Errors.unsupportedSegment("OOpenAPIStructuredExtensionValues", segmentName)
+        throw OpenAPISpecification.Errors.unsupportedSegment("OOpenAPIStructuredExtensionValues", segmentName)
     }
     
     public var ref: OpenAPISchemaReference? { nil}
     
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
         
     public init(_ map: StringDictionary) throws {
         self.properties = map.mapValues({ value in

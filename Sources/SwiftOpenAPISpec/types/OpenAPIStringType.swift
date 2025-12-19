@@ -17,7 +17,7 @@ public struct OpenAPIStringType :  OpenAPIValidatableSchemaType, ThrowingHashMap
             case Self.ALLOWED_ELEMENTS_KEY : return allowedElements
             case OpenAPISchemaReference.REF_KEY : return ref
         default:
-        throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIStringType", segmentName)
+        throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIStringType", segmentName)
 
         }
         
@@ -55,6 +55,6 @@ public struct OpenAPIStringType :  OpenAPIValidatableSchemaType, ThrowingHashMap
     public let maxLength: Int?
     public let minLength: Int?
     public let pattern: String?
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
     public var ref: OpenAPISchemaReference? { nil}
 }

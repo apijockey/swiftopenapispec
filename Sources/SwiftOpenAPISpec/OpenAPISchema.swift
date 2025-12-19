@@ -73,7 +73,7 @@ public struct OpenAPISchema :  KeyedElement, PointerNavigable {
    
     public var ref : OpenAPISchemaReference? = nil
     public var xml : OpenAPIXMLObject? = nil
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
     
    
     public func element(for segmentName : String) throws -> Any? {
@@ -86,7 +86,7 @@ public struct OpenAPISchema :  KeyedElement, PointerNavigable {
         
             case OpenAPISchemaReference.REF_KEY: return ref
         default:
-            if let object = schemaType as? OpenAPIObjectType{
+            if let object = schemaType as? OpenAPISpecificationType{
                     return try object.element(for: segmentName)
                 
             }
@@ -115,7 +115,7 @@ public struct OpenAPISchema :  KeyedElement, PointerNavigable {
             else if let ref = self.ref{
                 return ref
             }
-            throw OpenAPIObject.Errors.unsupportedSegment("OpenAPISchema", segmentName)
+            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPISchema", segmentName)
         }
     }
 }

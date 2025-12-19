@@ -1,0 +1,54 @@
+#
+//  openapi-parametercomponent.yaml
+//  SwiftOpenAPISpec
+//
+//  Created by Patric Dubois on 18.12.25.
+openapi: 3.0.0
+info:
+  title: Parameter Component Demo
+  version: 1.0.0
+
+paths:
+  /items:
+    get:
+      operationId: listItems
+      summary: List items with pagination
+      parameters:
+        - $ref: '#/components/parameters/skipParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: string
+                required:
+                  - items
+
+components:
+  parameters:
+    skipParam:
+      name: skip
+      in: query
+      description: number of items to skip
+      required: true
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    limitParam:
+      name: limit
+      in: query
+      description: max number of items to return
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10

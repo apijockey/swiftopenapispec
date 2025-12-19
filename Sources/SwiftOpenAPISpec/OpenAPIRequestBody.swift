@@ -31,12 +31,12 @@ public struct OpenAPIRequestBody : KeyedElement , PointerNavigable {
     public var description : String? = nil
     public var required : Bool = false
     public var contents : [OpenAPIMediaType] = []
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
     public var ref : OpenAPISchemaReference? = nil
     public func element(for segmentName : String) throws -> Any? {
         switch segmentName {
         case Self.CONTENTS_KEY : return self.contents
-            default : throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIRequestBody", segmentName)
+            default : throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIRequestBody", segmentName)
         }
     }
     

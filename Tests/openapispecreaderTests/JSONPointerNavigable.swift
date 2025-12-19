@@ -8,9 +8,11 @@
 
 import Foundation
 import Testing
+import Yams
+@testable import SwiftOpenAPISpec
 
 
-extension Tag {
+extension Testing.Tag {
   @Tag static var jsonpointer: Self
     @Tag static var externalJsonPointer: Self
 }
@@ -20,12 +22,12 @@ extension Tag {
 @testable import SwiftOpenAPISpec
 // MARK: - Minimal contract your domain objects already satisfy
 
-/// Your domain objects (OpenAPIObject, Components, Schema, MediaType, etc.)
+/// Your domain objects (OpenAPISpecification, Components, Schema, MediaType, etc.)
 /// should conform to this protocol (or at least provide this method).
 
 
 // Optional: If you already have element(for:) on your structs, you can just
-// add `extension OpenAPIObject: PointerNavigable {}` in your codebase.
+// add `extension OpenAPISpecification: PointerNavigable {}` in your codebase.
 
 // MARK: - Test Harness: JSON Pointer + $ref recursion
 
@@ -68,7 +70,7 @@ struct OpenAPIJSONPointerTests {
     ])
     func resolveLocalJSONPointers(arg: (pointer : String, expectedType : Any.Type, expectedValue : String)) async throws {
         let mainURL = try fixtureURL("35-main")
-        let objectLoader = DocumentLoader()
+        let objectLoader = YamsDocumentLoader()
         var resolver = JSONPointerResolver(baseURL : mainURL,loadDocument: objectLoader.load(from:))
         let result = try await resolver.resolve(
             ref: "\(arg.pointer)"
@@ -80,16 +82,12 @@ struct OpenAPIJSONPointerTests {
             #expect(strResult == arg.expectedValue)
         }
     }
-    
-//    @Test("Sanity: JSONPointer throws external schema file error", .tags(.jsonpointer),arguments:
-//    [
-//        ("#/paths/~1events/post/responses/201/content/application~1json/schema/$ref","#/components/schemas/EventCreated","./ext-components.yaml#")
-//    ])
+
     
     @Test("application/json segment uses ~1 (application~1json)", .tags(.externalJsonPointer,.jsonpointer))
     func testMediaTypeSlashEscaping() async throws {
         let mainURL = try fixtureURL("35-main")
-        let objectLoader = DocumentLoader()
+        let objectLoader = YamsDocumentLoader()
         var resolver = JSONPointerResolver(baseURL : mainURL,loadDocument: { url in
             try await objectLoader.load(from: url)
         })
@@ -104,7 +102,7 @@ struct OpenAPIJSONPointerTests {
     @Test
     func testOneOfIndexPointer() async throws {
         let mainURL = try fixtureURL("35-main")
-        let objectLoader = DocumentLoader()
+        let objectLoader = YamsDocumentLoader()
         // resolver will call the async loader closure
         var resolver = JSONPointerResolver(baseURL : mainURL,loadDocument: { url in
             try await objectLoader.load(from: url)
@@ -119,7 +117,7 @@ struct OpenAPIJSONPointerTests {
     @Test("Resolve external schema via $ref chain (main -> ext)")
     func testMainToExternalSchema() async throws {
         let mainURL = try fixtureURL("35-main")
-        let objectLoader = DocumentLoader()
+        let objectLoader = YamsDocumentLoader()
         var resolver = JSONPointerResolver(baseURL : mainURL,loadDocument: { url in
             try await objectLoader.load(from: url)
         })
@@ -131,17 +129,17 @@ struct OpenAPIJSONPointerTests {
         
         // EventEnvelope in ext has type: object
         if let nav = resolved as? PointerNavigable,
-           let t = try nav.element(for: "type") as? OpenAPIObjectType {
+           let t = try nav.element(for: "type") as? OpenAPISpecificationType {
             #expect(t.type == "object")
         }  else {
-            Issue.record("Resolved schema is not a OpenAPIObjectType")
+            Issue.record("Resolved schema is not a OpenAPISpecificationType")
         }
     }
 
     @Test("oneOf array indexing: /oneOf/0 and /oneOf/1")
     func testOneOfIndexPointers() async throws {
         let mainURL = try fixtureURL("35-main")
-        let objectLoader = DocumentLoader()
+        let objectLoader = YamsDocumentLoader()
         var resolver = JSONPointerResolver(baseURL : mainURL,loadDocument: { url in
             try await objectLoader.load(from: url)
         })
@@ -160,7 +158,7 @@ struct OpenAPIJSONPointerTests {
     @Test("~0/~1 decoding in component name (user~1admin~0meta)")
     func testWeirdComponentNameEscaping() async throws {
         let extURL = try fixtureURL("35-ext-components")
-        let objectLoader = DocumentLoader()
+        let objectLoader = YamsDocumentLoader()
         var resolver = JSONPointerResolver(baseURL : extURL,loadDocument: { url in
             try await objectLoader.load(from: url)
         })
@@ -176,7 +174,7 @@ struct OpenAPIJSONPointerTests {
     @Test("Encoding map key contains '/', must use ~1 (event~1payload)")
     func testEncodingKeySlashEscaping() async throws {
         let extURL = try fixtureURL("35-ext-components")
-        let objectLoader = DocumentLoader()
+        let objectLoader = YamsDocumentLoader()
         var resolver = JSONPointerResolver(baseURL : extURL,loadDocument: { url in
             try await objectLoader.load(from: url)
         })
@@ -197,7 +195,7 @@ struct OpenAPIJSONPointerTests {
     @Test("Callback key contains '/callbackUrl' inside segment, so segment uses ~1: {$request.body#~1callbackUrl}")
     func testCallbackKeySegmentEscaping() async throws {
         let extURL = try fixtureURL("35-ext-components")
-        let objectLoader = DocumentLoader()
+        let objectLoader = YamsDocumentLoader()
         var resolver = JSONPointerResolver(baseURL : extURL,loadDocument: { url in
             try await objectLoader.load(from: url)
         })
@@ -212,7 +210,7 @@ struct OpenAPIJSONPointerTests {
     @Test("Cross-file ref inside ext schema back to main (UserCreated.errorShape -> main CommonError)")
     func testCrossFileBackRef() async throws {
         let extURL = try fixtureURL("35-ext-components")
-        let objectLoader = DocumentLoader()
+        let objectLoader = YamsDocumentLoader()
         var resolver = JSONPointerResolver(baseURL : extURL,loadDocument: { url in
             try await objectLoader.load(from: url)
         })
@@ -227,7 +225,7 @@ struct OpenAPIJSONPointerTests {
         if let nav = backRefAny as? PointerNavigable {
             
              let objectElement = try nav.element(for: "type")
-            #expect(objectElement  is OpenAPIObjectType)
+            #expect(objectElement  is OpenAPISpecificationType)
         } else {
             Issue.record("Resolved back-ref schema has unexpected type")
         }

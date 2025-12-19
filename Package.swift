@@ -22,7 +22,6 @@ let package = Package(
         .target(
             name: "SwiftOpenAPISpec",
             dependencies: [
-               
                 .product(name: "Yams", package: "Yams")]
                 
         ),

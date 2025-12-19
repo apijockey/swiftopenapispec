@@ -16,7 +16,7 @@ public struct OpenAPITag:  ThrowingHashMapInitiable, PointerNavigable {
             case Self.PARENT_KEY : return parent
             case Self.KIND_KEY : return kind
         default:
-        throw OpenAPIObject.Errors.unsupportedSegment("OpenAPITag", segmentName)
+        throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPITag", segmentName)
 
         }
     }
@@ -51,7 +51,7 @@ public struct OpenAPITag:  ThrowingHashMapInitiable, PointerNavigable {
     public var externalDocs : OpenAPIExternalDocumentation?
     public var parent : String?
     public var kind : String?
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
     public var extensions : [OpenAPIExtension]?
     public var ref: OpenAPISchemaReference? { nil}
 }

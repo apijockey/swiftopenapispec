@@ -18,7 +18,7 @@ public struct OpenAPIDoubleType :  OpenAPIValidatableSchemaType, ThrowingHashMap
         case Self.EXCLUSIVEMINIMUM_KEY : return exclusiveMinimum
         case Self.EXCLUSIVEMAXIMUM_KEY : return exclusiveMaximum
         default:
-                    throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIDoubleType", segmentName)
+                    throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIDoubleType", segmentName)
         }
     }
     
@@ -53,7 +53,7 @@ public struct OpenAPIDoubleType :  OpenAPIValidatableSchemaType, ThrowingHashMap
     public let exclusiveMaximum :Double?
     public let minimum : Double?
     public let exclusiveMinimum : Double?
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
     public var ref: OpenAPISchemaReference? { nil}
     
 }

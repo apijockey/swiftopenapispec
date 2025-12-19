@@ -11,7 +11,7 @@
 //        if segmentName == OpenAPISchemaReference.REF_KEY {
 //            return ref
 //        }
-//        throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIValidatableType", segmentName)
+//        throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIValidatableType", segmentName)
 //    }
 //    
 //    
@@ -27,6 +27,6 @@
 //        
 //    }
 //    public let ref : String?
-//    public var userInfos =  [OpenAPIObject.UserInfo]()
+//    public var userInfos =  [OpenAPISpecification.UserInfo]()
 //     
 //}

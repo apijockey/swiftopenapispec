@@ -19,7 +19,7 @@ public struct OpenAPIInfo : KeyedElement, PointerNavigable {
     public init(_ map: [String : Any]) throws {
         guard let titleString = map[Self.TITLE_KEY] as? String ,
         let versionString = map[Self.VERSION_KEY] as? String else {
-            throw OpenAPIObject.Errors.invalidSpecification("info", Self.TITLE_KEY)
+            throw OpenAPISpecification.Errors.invalidSpecification("info", Self.TITLE_KEY)
         }
         self.title = titleString
         self.version = versionString
@@ -65,7 +65,7 @@ public struct OpenAPIInfo : KeyedElement, PointerNavigable {
                     return ext.structuredExtension?.properties ?? ext.simpleExtensionValue
                 }
             }
-            throw OpenAPIObject.Errors.unsupportedSegment("OpenAPIInfo", segmentName)
+            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIInfo", segmentName)
         }
     }
     public var contact : OpenAPIContact? = nil
@@ -77,7 +77,7 @@ public struct OpenAPIInfo : KeyedElement, PointerNavigable {
     public var  summary : String?
     public var ref: OpenAPISchemaReference? { nil}
     public var key: String?
-    public var userInfos =  [OpenAPIObject.UserInfo]()
+    public var userInfos =  [OpenAPISpecification.UserInfo]()
     public var version : String
     
 }
