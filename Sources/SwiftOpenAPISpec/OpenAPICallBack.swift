@@ -38,7 +38,7 @@ public struct OpenAPICallBack : KeyedElement,PointerNavigable{
      
     }
     
-    public var userInfos = [OpenAPISpecification.UserInfo]()
+   
     public var extensions : [OpenAPIExtension]?
     public var pathItems : [OpenAPIPathItem]?
     public var key: String?

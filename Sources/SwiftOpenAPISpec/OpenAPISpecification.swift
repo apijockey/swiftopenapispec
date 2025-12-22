@@ -17,7 +17,7 @@ import Foundation
 /// let apiSpec = try OpenAPISpec.read(text: string)
 /// ```
 ///
-public struct OpenAPISpecification : KeyedElement , PointerNavigable {
+public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     public var key: String?
     public var documentLoader : DocumentLoadable?
     
@@ -61,36 +61,13 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable {
         
         self.extensions = try OpenAPIExtension.extensionElements(map)
 
-        //https://swagger.io/docs/specification/v3_0/components/
-        if self.components == nil  && self.paths.count == 0 && self.webhooks.count == 0 {
-            self.userInfos.append(UserInfo(message: "components and paths element missing", infoType: .warning))
-        }
+       
         
        
     }
     
     /// Userinfo  holds information about validation or generation errors on each struct to simplify and streamline error handling and navigation
-    public struct UserInfo : Codable {
-        /// user message
-        public let message : String
-        
-        /// info type
-        public let infoType : UserInfoType
-    }
-    /// Info type
-    ///
-    /// - ``OpenAPISpecification.UserInfoType.error``
-    /// - ``OpenAPISpecification.UserInfoType.warning``
-    /// - ``OpenAPISpecification.UserInfoType.info``
-    ///
-    public enum UserInfoType : String, Codable, CaseIterable {
-        /// Further  processing stops
-        case error
-        /// Results may be inconsistent or unexpected
-        case warning
-        /// User handling expected but processing was sucessful
-        case info
-    }
+    
     public enum Errors : CustomStringConvertible, LocalizedError {
         public var description: String{
             switch self {
@@ -539,7 +516,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable {
         }
     }
     
-    public var userInfos =  [UserInfo]()
+  
     public static let COMPONENTS_KEY = "components"
     public static let EXTERNAL_DOCS_KEY = "externalDocs"
     public static let INFO_KEY = "info"

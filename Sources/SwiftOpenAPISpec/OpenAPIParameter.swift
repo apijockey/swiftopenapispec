@@ -117,7 +117,7 @@ public struct OpenAPIParameter :  KeyedElement, PointerNavigable {
     public var examples : [OpenAPIExample]? = []
     public var content : OpenAPIMediaType? = nil
     public var format : String?
-    public var userInfos =  [OpenAPISpecification.UserInfo]()
+    
     public var extensions : [OpenAPIExtension]?
    
     //TODO: Examples Object

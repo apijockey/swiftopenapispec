@@ -92,7 +92,7 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
     public var extensions : [OpenAPIExtension]?
     public var examples : [OpenAPIExample]? = []
     public var content : OpenAPIMediaType? = nil
-    public var userInfos =  [OpenAPISpecification.UserInfo]()
+ 
    
     //TODO: Examples Object
    

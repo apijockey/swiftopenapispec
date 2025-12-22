@@ -85,7 +85,7 @@ public struct OpenAPISimpleExtensionValues : KeyedElement, PointerNavigable {
         }
     }
     
-    public var userInfos: [OpenAPISpecification.UserInfo] = []
+    
     
     public var key: String?
     public var value : String?
@@ -105,7 +105,7 @@ public struct OpenAPIStructuredExtensionValues : ThrowingHashMapInitiable, Point
     
     public var ref: OpenAPISchemaReference? { nil}
     
-    public var userInfos =  [OpenAPISpecification.UserInfo]()
+  
         
     public init(_ map: StringDictionary) throws {
         self.properties = map.mapValues({ value in

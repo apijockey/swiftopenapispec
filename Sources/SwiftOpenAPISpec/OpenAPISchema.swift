@@ -21,8 +21,7 @@ import Foundation
 
 public struct OpenAPISchema :  KeyedElement, PointerNavigable {
     public var key: String?
-    
-   
+    static let NULLABLE_KEY = "nullable"
     public static let TYPE_KEY = "type"
     public static let ALLOF_KEY = "allOf"
     public static let DISCRIMINATOR_KEY = "discriminator"
@@ -31,7 +30,19 @@ public struct OpenAPISchema :  KeyedElement, PointerNavigable {
     public static let XML_KEY = "xml"
     public static let FORMAT_KEY = "format"
     
-   
+    public init() {
+        
+    }
+    public func clone() -> OpenAPISchema {
+        var newSchema = OpenAPISchema()
+        newSchema.schemaType = self.schemaType
+        newSchema.extensions = self.extensions
+        newSchema.discriminator = self.discriminator
+        newSchema.ref = self.ref
+        newSchema.nullable = self.nullable
+        newSchema.xml = self.xml
+        return newSchema
+    }
     public init(_ map: [String : Any]) throws {
         
         if let type = map[Self.TYPE_KEY] as? String,
@@ -57,23 +68,23 @@ public struct OpenAPISchema :  KeyedElement, PointerNavigable {
                }
         if let ref = map[OpenAPISchemaReference.REF_KEY] as? String {
             self.ref = OpenAPISchemaReference(ref: ref)
-               }
+        }
         if let xmlMap = map[Self.XML_KEY] as? StringDictionary {
             xml = try? OpenAPIXMLObject(xmlMap)
         }
         
         extensions = try OpenAPIExtension.extensionElements(map)
-       
+        self.nullable = map.readIfPresent(Self.NULLABLE_KEY, Bool.self) ?? false
     }
     
-    public var schemaType : OpenAPIValidatableSchemaType?
+    public var schemaType : (any OpenAPIValidatableSchemaType)?
     //https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-01  ("null", "boolean", "object", "array", "number", or "string"), or "integer"
     public var extensions : [OpenAPIExtension]?
     public var discriminator : OpenAPIDiscriminator?
-   
+  
     public var ref : OpenAPISchemaReference? = nil
     public var xml : OpenAPIXMLObject? = nil
-    public var userInfos =  [OpenAPISpecification.UserInfo]()
+    public var nullable : Bool = false // 3.0
     
    
     public func element(for segmentName : String) throws -> Any? {
@@ -86,7 +97,7 @@ public struct OpenAPISchema :  KeyedElement, PointerNavigable {
         
             case OpenAPISchemaReference.REF_KEY: return ref
         default:
-            if let object = schemaType as? OpenAPISpecificationType{
+            if let object = schemaType as? OpenAPIObjectType{
                     return try object.element(for: segmentName)
                 
             }

@@ -61,7 +61,7 @@ public struct OpenAPIEncoding : KeyedElement, PointerNavigable {
     public var itemEncoding :[OpenAPIEncoding]? = nil
    
     public var key: String?
-    public var userInfos =  [OpenAPISpecification.UserInfo]()
+   
     public var ref : OpenAPISchemaReference? { nil}
     
 }

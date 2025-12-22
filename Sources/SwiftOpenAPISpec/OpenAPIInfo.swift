@@ -77,7 +77,7 @@ public struct OpenAPIInfo : KeyedElement, PointerNavigable {
     public var  summary : String?
     public var ref: OpenAPISchemaReference? { nil}
     public var key: String?
-    public var userInfos =  [OpenAPISpecification.UserInfo]()
+   
     public var version : String
     
 }

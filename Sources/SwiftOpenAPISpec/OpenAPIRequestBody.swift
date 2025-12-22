@@ -31,7 +31,7 @@ public struct OpenAPIRequestBody : KeyedElement , PointerNavigable {
     public var description : String? = nil
     public var required : Bool = false
     public var contents : [OpenAPIMediaType] = []
-    public var userInfos =  [OpenAPISpecification.UserInfo]()
+   
     public var ref : OpenAPISchemaReference? = nil
     public func element(for segmentName : String) throws -> Any? {
         switch segmentName {

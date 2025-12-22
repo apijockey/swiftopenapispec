@@ -47,6 +47,6 @@ public struct OpenAPIExample : KeyedElement, PointerNavigable {
     public var serializedValue : String? = nil
     public var externalValue : String? = nil
     public var ref : OpenAPISchemaReference? = nil
-    public var userInfos =  [OpenAPISpecification.UserInfo]()
+  
    
 }

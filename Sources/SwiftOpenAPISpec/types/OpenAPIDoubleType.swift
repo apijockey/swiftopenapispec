@@ -53,7 +53,7 @@ public struct OpenAPIDoubleType :  OpenAPIValidatableSchemaType, ThrowingHashMap
     public let exclusiveMaximum :Double?
     public let minimum : Double?
     public let exclusiveMinimum : Double?
-    public var userInfos =  [OpenAPISpecification.UserInfo]()
+   
     public var ref: OpenAPISchemaReference? { nil}
     
 }

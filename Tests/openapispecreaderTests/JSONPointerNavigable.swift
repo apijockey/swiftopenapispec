@@ -129,7 +129,7 @@ struct OpenAPIJSONPointerTests {
         
         // EventEnvelope in ext has type: object
         if let nav = resolved as? PointerNavigable,
-           let t = try nav.element(for: "type") as? OpenAPISpecificationType {
+           let t = try nav.element(for: "type") as? OpenAPIObjectType {
             #expect(t.type == "object")
         }  else {
             Issue.record("Resolved schema is not a OpenAPISpecificationType")
@@ -225,7 +225,7 @@ struct OpenAPIJSONPointerTests {
         if let nav = backRefAny as? PointerNavigable {
             
              let objectElement = try nav.element(for: "type")
-            #expect(objectElement  is OpenAPISpecificationType)
+            #expect(objectElement  is OpenAPIObjectType)
         } else {
             Issue.record("Resolved back-ref schema has unexpected type")
         }

@@ -46,7 +46,7 @@ public struct OpenAPIXMLObject : PointerNavigable {
     public var prefix : String?
     public var attribute : Bool?
     public var wrapped : Bool?
-    public var userInfos =  [OpenAPISpecification.UserInfo]()
+    
     public var extensions : [OpenAPIExtension]?
     public var ref: OpenAPISchemaReference? { nil}
     

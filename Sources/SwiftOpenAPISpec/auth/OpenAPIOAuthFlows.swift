@@ -38,6 +38,6 @@ public struct OpenAPIOAuthFlows : ThrowingHashMapInitiable, PointerNavigable {
     public var clienCredentials : OpenAPIOAuthFlow? = nil
     public var authorizationCode : OpenAPIOAuthFlow? = nil
     public var deviceAuthorization : OpenAPIOAuthFlow? = nil
-    public var userInfos =  [OpenAPISpecification.UserInfo]()
+   
     public var ref: OpenAPISchemaReference? { nil}
 }

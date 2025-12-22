@@ -37,6 +37,6 @@ public struct OpenAPIContact : ThrowingHashMapInitiable , PointerNavigable {
     public var extensions : [OpenAPIExtension]?
     public  var name : String? = nil
     public var url : String? = nil
-    public var userInfos = [OpenAPISpecification.UserInfo]()
+    
     public var ref: OpenAPISchemaReference? { nil}
 }

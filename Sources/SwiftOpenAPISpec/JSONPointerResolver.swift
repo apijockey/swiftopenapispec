@@ -9,9 +9,25 @@ import Foundation
 
 
 
+public protocol JSONPointerResolving {
+    func parseRef(_ ref: String) async -> RefTarget
+    mutating func resolve(ref: String) async throws -> Any
+}
 
-
-public struct JSONPointerResolver {
+public struct JSONPointerResolver : JSONPointerResolving {
+   
+    /// Resolve a ref fully:
+    /// - loads referenced doc if needed
+    /// - resolves fragment within that doc
+    /// - if result has "$ref" (as String), follow recursively
+    public mutating func resolve(
+        
+        ref: String
+    ) async throws -> Any {
+        var visited = Set<RefTarget>()
+        return try await resolveRefInternal( ref: ref, visited: &visited, depth: 0)
+    }
+    
     static let internalReferencePrefix:String = "#"
     public init(baseURL : URL,loadDocument: @escaping (URL) async throws -> any PointerNavigable) {
         self.loadDocument = loadDocument
@@ -24,9 +40,9 @@ public struct JSONPointerResolver {
         public var errorDescription: String? {
             switch self {
             case .missingSlash(let s):
-                return "Fragment \(s) must start with '/'"
+                return "Fragment \(s) muss mit '/' beginnen"
             case .missingHash(let s):
-                return "Pointer \(s) must start with '#"
+                return "Pointer \(s) muss mit '# beginnen"
             case .externalReference(let string):
                 return "reference in external file \(string)"
             case .internalReference(let string):
@@ -146,17 +162,7 @@ public struct JSONPointerResolver {
         return current
     }
     
-    /// Resolve a ref fully:
-    /// - loads referenced doc if needed
-    /// - resolves fragment within that doc
-    /// - if result has "$ref" (as String), follow recursively
-    public mutating func resolve(
-        
-        ref: String
-    ) async throws -> Any {
-        var visited = Set<RefTarget>()
-        return try await resolveRefInternal( ref: ref, visited: &visited, depth: 0)
-    }
+  
     
     private mutating func resolveRefInternal(
         
@@ -186,4 +192,3 @@ public struct JSONPointerResolver {
         return resolved
     }
 }
-

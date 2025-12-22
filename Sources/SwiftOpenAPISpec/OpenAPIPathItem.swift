@@ -102,7 +102,7 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
     public var ref : OpenAPISchemaReference? = nil
     public var servers: [OpenAPIServer] = []
     public var summary: String? = nil
-    public var userInfos =  [OpenAPISpecification.UserInfo]()
+  
 }
 
 

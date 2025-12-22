@@ -152,14 +152,14 @@ struct OpenAPILegacyPortedTests {
         let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
         #expect(apiSpec.components?.schemas?.count == 4)
         let greetingComponent = try #require(apiSpec.components?.schemas?.first { $0.key == "Greeting" })
-        let greetingObject = try #require(greetingComponent.schemaType as? OpenAPISpecificationType)
+        let greetingObject = try #require(greetingComponent.schemaType as? OpenAPIObjectType)
         #expect(greetingObject.properties.count == 1)
         let messageProperty = try #require(greetingObject.properties.first)
         #expect(messageProperty.type is OpenAPIStringType)
         #expect(greetingObject.required == ["message"])
 
         let generalErrorComponent = try #require(apiSpec[schemacomponent: "GeneralError"])
-        let errorObject = try #require(generalErrorComponent.schemaType as? OpenAPISpecificationType)
+        let errorObject = try #require(generalErrorComponent.schemaType as? OpenAPIObjectType)
         #expect(errorObject.properties.count == 2)
         let errorMessageCodeProperty = errorObject.properties[key: "code"]
         #expect(errorMessageCodeProperty?.type is OpenAPIIntegerType)

@@ -43,7 +43,7 @@ public struct OpenAPITag:  ThrowingHashMapInitiable, PointerNavigable {
         self.extensions = try OpenAPIExtension.extensionElements(map)
     }
     
-    public var schemaType : OpenAPIValidatableSchemaType?
+    public var schemaType : (any OpenAPIValidatableSchemaType)?
     //https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-01  ("null", "boolean", "object", "array", "number", or "string"), or "integer"
     public var name : String?
     public var summary : String?
@@ -51,7 +51,7 @@ public struct OpenAPITag:  ThrowingHashMapInitiable, PointerNavigable {
     public var externalDocs : OpenAPIExternalDocumentation?
     public var parent : String?
     public var kind : String?
-    public var userInfos =  [OpenAPISpecification.UserInfo]()
+   
     public var extensions : [OpenAPIExtension]?
     public var ref: OpenAPISchemaReference? { nil}
 }

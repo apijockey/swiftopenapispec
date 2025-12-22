@@ -18,7 +18,7 @@ public struct OpenAPIDiscriminator :  ThrowingHashMapInitiable, PointerNavigable
     }
     
    
-    public var userInfos = [OpenAPISpecification.UserInfo]()
+  
     public static let PROPERTY_NAME_KEY = "propertyName"
     public static let MAPPING_KEY = "mapping"
     public static let DEFAULT_MAPPING_KEY = "defaultMapping"
@@ -29,9 +29,7 @@ public struct OpenAPIDiscriminator :  ThrowingHashMapInitiable, PointerNavigable
         if let propertyName = map[Self.PROPERTY_NAME_KEY] as? String {
             self.propertyName = propertyName
         }
-        else {
-            userInfos.append(OpenAPISpecification.UserInfo(message: "propertyname in descriminator is missing, but required", infoType: .error))
-        }
+        
         if let mapping = map[Self.MAPPING_KEY] as? [String: String] {
             self.mapping = mapping
         }

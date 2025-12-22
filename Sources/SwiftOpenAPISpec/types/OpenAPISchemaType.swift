@@ -15,20 +15,21 @@ public struct OpenAPISchemaType : OpenAPIValidatableSchemaType {
     public func validate() throws {
         
     }
-    public static func validatableType(_ string : String)  -> OpenAPIValidatableSchemaType.Type? {
+    public static func validatableType(_ string : String)  -> (any OpenAPIValidatableSchemaType.Type)? {
         switch string {
             case "array" : return OpenAPIArrayType.self
             case "integer" : return OpenAPIIntegerType.self
             case "number" : return OpenAPIDoubleType.self
             case "string" : return OpenAPIStringType.self
-            case "object" : return OpenAPISpecificationType.self
+            case "object" : return OpenAPIObjectType.self
+            case "null": return OpenAPINullType.self
             case OpenAPISchemaReference.REF_KEY  : return OpenAPISchemaReference.self
             default:
                 return nil
         }
     }
     public let type : String?
-    public var userInfos =  [OpenAPISpecification.UserInfo]()
+  
 }
 public extension Array where Element == OpenAPISchemaType   {
     init(_ map: [AnyHashable : Any]) throws {
@@ -38,8 +39,8 @@ public extension Array where Element == OpenAPISchemaType   {
 }
 
 public extension Array where Element == Any   {
-    func asValidatableSchemaType() throws -> [OpenAPIValidatableSchemaType] {
-        var map : [OpenAPIValidatableSchemaType] = []
+    func asValidatableSchemaType() throws -> [(any OpenAPIValidatableSchemaType)] {
+        var map : [any OpenAPIValidatableSchemaType] = []
             for element in self {
                 if let dict = element as? [String : Any],
                    let firstKey = dict.keys.first,

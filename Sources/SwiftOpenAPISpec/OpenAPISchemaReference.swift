@@ -26,9 +26,7 @@ public struct OpenAPISchemaReference  : ThrowingHashMapInitiable, PointerNavigab
         self.reference = map.readIfPresent(Self.REF_KEY, String.self)
         self.summary = map.readIfPresent(Self.SUMMARY_KEY, String.self)
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
-        if self.reference == nil {
-            userInfos.append(OpenAPISpecification.UserInfo(message: "ref ist mandatory", infoType: .error))
-        }
+        
     }
     public init(ref: String) {
         self.reference = ref
@@ -37,5 +35,5 @@ public struct OpenAPISchemaReference  : ThrowingHashMapInitiable, PointerNavigab
     public var reference : String? = nil
     public var summary : String? = nil
     public var description : String? = nil
-    public var userInfos =  [OpenAPISpecification.UserInfo]()
+   
 }

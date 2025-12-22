@@ -7,6 +7,22 @@
 
 
 public struct OpenAPIOneOfType : OpenAPIValidatableSchemaType,PointerNavigable {
+    public static func == (lhs: OpenAPIOneOfType, rhs: OpenAPIOneOfType) -> Bool {
+        guard lhs.type == rhs.type else { return false }
+        switch (lhs.items, rhs.items) {
+        case (nil, nil):
+            return true
+        case let (l?, r?):
+            guard l.count == r.count else { return false }
+            for (le, re) in zip(l, r) {
+                if !le.isEqual(to: re) { return false }
+            }
+            return true
+        default:
+            return false
+        }
+    }
+    
     public func element(for segmentName: String) throws -> Any? {
         if let index = Int(segmentName),
            index >= 0,
@@ -33,7 +49,7 @@ public struct OpenAPIOneOfType : OpenAPIValidatableSchemaType,PointerNavigable {
     public func validate() throws {
     }
     public let type : String?
-    public var items: [OpenAPIValidatableSchemaType]?
-    public var userInfos =  [OpenAPISpecification.UserInfo]()
+    public var items: [any OpenAPIValidatableSchemaType]?
+  
     public var ref: OpenAPISchemaReference? { nil}
 }

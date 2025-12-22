@@ -8,9 +8,27 @@
 import Foundation
 
 
-public struct OpenAPISchemaProperty: KeyedElement , PointerNavigable {
+public struct OpenAPISchemaProperty: KeyedElement , PointerNavigable, Equatable {
+    public static func == (lhs: OpenAPISchemaProperty, rhs: OpenAPISchemaProperty) -> Bool {
+        // Compare type via existential-safe isEqual(to:)
+        let typesEqual: Bool = {
+            switch (lhs.type, rhs.type) {
+            case (nil, nil):
+                return true
+            case let (l?, r?):
+                return l.isEqual(to: r)
+            default:
+                return false
+            }
+        }()
+
+        return typesEqual &&
+        lhs.ref == rhs.ref &&
+        lhs.key == rhs.key
+    }
     
     
+   
     static let TYPE_KEY = "type"
     
     public init(_ map: [String : Any]) throws {
@@ -23,6 +41,7 @@ public struct OpenAPISchemaProperty: KeyedElement , PointerNavigable {
             
            
         }
+        
         else if let ref = map[OpenAPISchemaReference.REF_KEY] as? String {
                     self.ref = OpenAPISchemaReference(ref: ref)
         }
@@ -38,12 +57,14 @@ public struct OpenAPISchemaProperty: KeyedElement , PointerNavigable {
         if let discriminatorMap = map[OpenAPISchema.DISCRIMINATOR_KEY] as? [String : Any] {
             self.discriminator = try OpenAPIDiscriminator(discriminatorMap)
         }
+      
    
     }
-    public var userInfos =  [OpenAPISpecification.UserInfo]()
+    
     public  var key : String? = nil
+  
     public var ref : OpenAPISchemaReference?
-    public var type : OpenAPIValidatableSchemaType?
+    public var type : (any OpenAPIValidatableSchemaType)?
     public var discriminator : OpenAPIDiscriminator?
     
     public func element(for segmentName : String) throws -> Any? {
@@ -59,6 +80,4 @@ public struct OpenAPISchemaProperty: KeyedElement , PointerNavigable {
     }
     
 }
-
-
 

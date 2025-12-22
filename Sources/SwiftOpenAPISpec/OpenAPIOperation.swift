@@ -95,7 +95,7 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
     public var securityObjects : [OpenAPISecuritySchemeReference] = []
     public var extensions : [OpenAPIExtension]?
     public var externalDocs : OpenAPIExternalDocumentation? = nil
-    public var userInfos =  [OpenAPISpecification.UserInfo]()
+  
     public var ref: OpenAPISchemaReference? { nil}
   
     /// returns an OpenAPIResponse for the given HTTP Status  if declared on the operation or nil.

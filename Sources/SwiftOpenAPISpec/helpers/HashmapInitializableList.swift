@@ -73,7 +73,7 @@ public protocol JSONPointerResolvable {
 
 public protocol ThrowingHashMapInitiable {
     init(_ map : StringDictionary) throws
-    var userInfos :  [OpenAPISpecification.UserInfo] {get}
+   
    
 }
 /**A KeyedElement expects that the key Value is set from outside**/

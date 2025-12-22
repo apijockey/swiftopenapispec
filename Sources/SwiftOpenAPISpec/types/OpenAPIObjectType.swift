@@ -6,7 +6,17 @@
 //
 
 
-public struct OpenAPISpecificationType : OpenAPIValidatableSchemaType, PointerNavigable{
+public struct OpenAPIObjectType : OpenAPIValidatableSchemaType, PointerNavigable, Equatable{
+    public static func == (lhs: OpenAPIObjectType, rhs: OpenAPIObjectType) -> Bool {
+        lhs.type == rhs.type &&
+        lhs.dependentRequired == rhs.dependentRequired &&
+        lhs.minProperties == rhs.minProperties &&
+        lhs.maxProperties == rhs.maxProperties &&
+        lhs.unevaluatedProperties == rhs.unevaluatedProperties &&
+        lhs.required == rhs.required &&
+        lhs.properties == rhs.properties
+    }
+    
     public func element(for segmentName: String) throws -> Any? {
         switch segmentName {
         case Self.DEPENDENT_REQUIRED_KEY : return self.dependentRequired
@@ -53,6 +63,6 @@ public struct OpenAPISpecificationType : OpenAPIValidatableSchemaType, PointerNa
     public var properties : [OpenAPISchemaProperty] = []
     public var required : [String] = []
     public var unevaluatedProperties : Bool = false
-    public var userInfos =  [OpenAPISpecification.UserInfo]()
+  
     public var ref: OpenAPISchemaReference? { nil}
 }

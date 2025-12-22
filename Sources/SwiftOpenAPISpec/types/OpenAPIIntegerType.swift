@@ -54,6 +54,6 @@ public struct OpenAPIIntegerType :  OpenAPIValidatableSchemaType, ThrowingHashMa
     public let minimum : Int?
     public let exclusiveMinimum : Int?
     public var format : String?
-    public var userInfos =  [OpenAPISpecification.UserInfo]()
+   
     
 }

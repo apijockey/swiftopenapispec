@@ -7,18 +7,39 @@
 
 
 public struct OpenAPIArrayType : OpenAPIValidatableSchemaType, PointerNavigable{
+    public static func == (lhs: OpenAPIArrayType, rhs: OpenAPIArrayType) -> Bool {
+        // 1) einfache skalare Felder vergleichen
+        guard lhs.type == rhs.type,
+              lhs.maxItems == rhs.maxItems,
+              lhs.minItems == rhs.minItems,
+              lhs.uniqueItems == rhs.uniqueItems,
+              lhs.maxContains == rhs.maxContains,
+              lhs.minContains == rhs.minContains
+        else { return false }
+
+        // 2) items (Existential) über isEqual(to:) vergleichen
+        switch (lhs.items, rhs.items) {
+        case (nil, nil):
+            return true
+        case let (li?, ri?):
+            return li.isEqual(to: ri)
+        default:
+            return false
+        }
+    }
+    
     public func element(for segmentName: String) throws -> Any? {
         switch segmentName {
         case Self.ITEMS_KEY: return self.items
         case Self.ARRAY_TYPE_KEY: return self.type
         case Self.MAX_ITEMS_KEY : return maxItems
-        case Self.ITEMS_KEY : return items
         case Self.MIN_ITEMS_KEY : return minItems
         case Self.UNIQE_ITEMS_KEY : return uniqueItems
         case Self.MAX_CONTAINS_KEY : return maxContains
         case Self.MIN_CONTAINS_KEY : return minContains
-        default:  throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIArrayType", segmentName)
-                    }
+        default:
+            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIArrayType", segmentName)
+        }
     }
     
     
@@ -40,12 +61,9 @@ public struct OpenAPIArrayType : OpenAPIValidatableSchemaType, PointerNavigable{
         self.uniqueItems = map[Self.UNIQE_ITEMS_KEY] as? Bool
         if let items = map[Self.ITEMS_KEY] as? [String : Any],
            let type = items[Self.ARRAY_TYPE_KEY] as? String,
-            let validatableType = OpenAPISchemaType.validatableType(type) {
-                self.items = try validatableType.init(items)
-           
+           let validatableType = OpenAPISchemaType.validatableType(type) {
+            self.items = try validatableType.init(items)
         }
-        
-        
     }
     
     public func validate() throws {
@@ -57,7 +75,8 @@ public struct OpenAPIArrayType : OpenAPIValidatableSchemaType, PointerNavigable{
     public var uniqueItems : Bool?
     public var maxContains : Int?
     public var minContains : Int?
-    public var items: OpenAPIValidatableSchemaType?
-    public var userInfos =  [OpenAPISpecification.UserInfo]()
+    public var items: (any OpenAPIValidatableSchemaType)?
+    
     public var ref: OpenAPISchemaReference? { nil}
 }
+

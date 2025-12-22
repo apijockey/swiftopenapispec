@@ -52,7 +52,7 @@ public struct OpenAPILink : KeyedElement , PointerNavigable {
     public var server : OpenAPIServer? = nil
     public var parameters : [String:String] = [:]
     public var requestBody : String? = nil
-    public var userInfos =  [OpenAPISpecification.UserInfo]()
+   
     public var extensions : [OpenAPIExtension]?
  
 }

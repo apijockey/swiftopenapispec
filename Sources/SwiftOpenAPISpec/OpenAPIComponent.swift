@@ -117,7 +117,7 @@ public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
     public var responses : [OpenAPIResponse]?
     public var securitySchemas : [OpenAPISecurityScheme]?
     public var schemas : [OpenAPISchema]?
-    public var userInfos =  [OpenAPISpecification.UserInfo]()
+   
     public var ref : OpenAPISchemaReference? { nil}
     
     

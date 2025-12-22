@@ -99,7 +99,7 @@ public struct OpenAPISecurityScheme : KeyedElement , PointerNavigable {
     public var openIdConnectURL : String? = nil
     public var oauth2MetadataURL : String? = nil
     public var deprecated : Bool? = nil
-    public var userInfos =  [OpenAPISpecification.UserInfo]()
+    
     
     
 }
