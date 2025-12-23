@@ -97,3 +97,5 @@ will print:
 Simple API overview
 2.0.0
 ```
+## 🌍 Github Pages repo docs
+👉 [view on GitHub Pages](https://apijockey.github.io/swiftopenapispec/)
