@@ -5,7 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "SwiftOpenAPISpec",
-    
+    platforms: [.macOS(.v10_15)],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
@@ -13,7 +13,8 @@ let package = Package(
             targets: ["SwiftOpenAPISpec"]),
     ],
     dependencies: [
-            .package(url: "https://github.com/jpsim/Yams", from: "5.1.0")
+            .package(url: "https://github.com/jpsim/Yams", from: "5.1.0"),
+            .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
           
         ],
     targets: [

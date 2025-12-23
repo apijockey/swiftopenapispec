@@ -11,7 +11,7 @@ import Foundation
 /**
   Struct containing an **OpenAPI Path** containing endpoints and their ``operations``
    
-   The ``OpenAPIPath`` provides a set of convenient getter subscripts to filter for specific operations
+   The ``OpenAPIPathItem`` provides a set of convenient getter subscripts to filter for specific operations
  
    
  */
@@ -128,9 +128,9 @@ public extension Array where Element == OpenAPIPathItem  {
     }
     /// search for a **path** declaration
      ///
-    /// An OpenAPI specification may hold a list of **Path** elements. The subscript provides an easy access to a list of matching ``OpenAPIPath`` elements for that **path** string.
+    /// An OpenAPI specification may hold a list of **Path** elements. The subscript provides an easy access to a list of matching ``OpenAPIPathItem`` elements for that **path** string.
     ///
-    /// - Parameters: an OpenApi path string, starting with a slash.
+    /// - Parameters: an OpenApi path item string, starting with a slash.
     /// - Returns: a list of  OpenAPIPath structs matching the search **path** string
     ///
     /// ```swift

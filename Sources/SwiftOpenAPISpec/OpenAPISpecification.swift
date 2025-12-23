@@ -115,14 +115,14 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
         
     }
     
-    /// reads a textual representantation of an OpenAPI specification starting with version 3.0.0
-    ///
+    
+    /// reads a textual representantation of an OpenAPI specification starting with version
     /// - Parameters:
-    ///   - text: the Yaml/JSON representation
+    ///   - unflattened: A ``StringDictionary`` representing the speicification in Yaml/JSON
     ///   - url: the url of the root file of the specifiation to use when dererencing JSON Pointer references, not required, if no JSONPointer references to other files are used.
-    /// - Returns: an OpenAPISpec instance  which holds the text contents as simple Swift structs
-    ///
-    ///sample code for usage:
+    ///   - documentLoader: an implementation of ``DocumentLoadable`` or ``YamsDocumentLoader``if nil.
+    /// - Returns: an OpenAPISpec instance  which holds the text contents as plain Swift structs
+    /// sample code for usage:
     /// ```swift
     /// import Yams
     /// let yaml = """
@@ -135,6 +135,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     ///throw OpenAPISpecification.Errors.invalidYaml("text cannot be interpreted as a Key/Value List")
     ///}
     ///let specFromYaml = try OpenAPISpecification.read(unflattened: jsonMap)
+    ///```
     public static func read(unflattened : StringDictionary, url : String? = nil , documentLoader : DocumentLoadable? = YamsDocumentLoader()) throws -> OpenAPISpecification{
         var openapispec = try OpenAPISpecification(unflattened)
         openapispec.documentLoader = documentLoader
@@ -207,7 +208,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     ///Access a schema component item like _orderCreated:_
     ///
     ///- Parameters:
-    ///  - schemacomponent: the schema component name from the specification file
+    ///   - component: the schema component name from the specification file
     ///- Returns:an ``OpenAPISchema``  or nil if none is found
     ///
     ///Assume, you have a schema compoent like this:
@@ -240,7 +241,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     ///Access a parameter component item like _skipParam_
     ///
     ///- Parameters:
-    ///  - parametercomponent: the schema component name from the specification file
+    ///  - component: the schema component name from the specification file
     ///- Returns:an ``OpenAPIParameter``  or nil if none is found
     ///
     ///Assume, you have a schema compoent like this:
@@ -283,7 +284,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
      Access a response component item like _ImageResponse_
      
       - Parameters:
-        - responsecomponent: the response component name from the specification file
+        - component: the response component name from the specification file
       -  returns:an ``OpenAPIResponse``  or nil if none is found
     
     Assume, you have a schema compoent like this:
@@ -323,7 +324,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
      Access a security schema component item like _http_Key_
      
       - Parameters:
-        - securityschemacomponent: the schema component name from the specification file
+        - component: the schema component name from the specification file
       -  returns:an ``OpenAPISecurityScheme``  or nil if none is found
     
     Assume, you have security schema compoents like this:
@@ -382,7 +383,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
      Access a requestbodycomponent item like _http_Key_
      
       - Parameters:
-        - requestbodycomponent: the request body component name from the specification file
+        - component: the request body component name from the specification file
       -  returns:an ``OpenAPIRequestBody``  or nil if none is found
     
     Assume, you have security schema compoents like this:

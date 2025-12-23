@@ -73,7 +73,7 @@ guard let unflattened = try Yams.load(yaml: yaml) as? StringDictionary else {
 let specFromYaml = try OpenAPISpecification.read(unflattened: jsonMap)
 ```
 
-### Read information from the ``OpenAPISpecification``
+### Read information
 
 You access the information with standard properties of the ``OpenAPISpecification`` instance:
 ```swift

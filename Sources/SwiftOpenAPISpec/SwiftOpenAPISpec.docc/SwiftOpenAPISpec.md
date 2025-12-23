@@ -29,7 +29,6 @@ The library makes no other assumptions on spec versions.
 - ``OpenAPIInfo``
 - ``OpenAPIServer``
 - ``OpenAPIPathItem``
-- ``OpenAPIWebhooks``
 - ``OpenAPIComponent``
 - ``OpenAPISecurityScheme``
 - ``OpenAPITag``
@@ -57,6 +56,4 @@ The library makes no other assumptions on spec versions.
 - ``DocumentLoadable``
 - ``YamsDocumentLoader``
 
-### Reader strategy
-- <doc:ReaderStrategy>
 
