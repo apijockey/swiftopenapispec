@@ -12,28 +12,29 @@ name: Swift
 on: [push]
 
 jobs:
-  build:
-    name: Swift ${{ matrix.swift }} on ${{ matrix.os }}
+  macos:
     strategy:
+      fail-fast: false
       matrix:
-        os: [macos-latest]
-        swift: ["5.10","6.0"]
-    runs-on: ${{ matrix.os }}
-    steps: 
-      - name: setup xcode
-        uses: maxim-lobanov/setup-xcode@v1.6.0
+        include:
+          - runs_on: macos-15
+            xcode: "16.2"   # Beispiel
+            swift: "6.0"
+          - runs_on: macos-14
+            xcode: "15.0.1" # Beispiel
+            swift: "5.9"
+    runs-on: ${{ matrix.runs_on }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: latest
-      - name : Setup swift
-        uses: swift-actions/setup-swift@v3
-        with:
-          swift-version: ${{ matrix.swift }}
-          skip-verify-signature: true
-      - name: get swift version
-        run: swift --version 
-      - name: Checkout sources
-        uses: actions/checkout@v5
-      - name: Build
-        run: swift build -Xswiftc -strict-concurrency=complete
-      - name: Run tests
-        run: swift test -Xswiftc -strict-concurrency=complete
+          xcode-version: ${{ matrix.xcode }}
+      - name: Verify toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+          xcrun --find swiftc
+      - name: Build & test
+        run: |
+          swift test -Xswiftc -strict-concurrency=complete
