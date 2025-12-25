@@ -21,8 +21,8 @@ jobs:
             xcode: "16.2"   # Beispiel
             swift: "6.0"
           - runs_on: macos-14
-            xcode: "15.0.1" # Beispiel
-            swift: "5.9"
+            xcode: "15.4"   # Beispiel: Swift 5.9
+            label: "swift-5.9 (Xcode 15.x, macOS 14)"
     runs-on: ${{ matrix.runs_on }}
     steps:
       - uses: actions/checkout@v4
