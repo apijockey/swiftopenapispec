@@ -21,7 +21,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps: 
       - name : Setup swift
-        uses: swift-actions/setup-swift@65540b95f51493d65f5e59e97dcef9629ddf11bf
+        uses: swift-actions/setup-swift@v3
         with:
           swift-version: ${{ matrix.swift }}
           skip-verify-signature: true
