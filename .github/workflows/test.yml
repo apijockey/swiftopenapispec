@@ -30,6 +30,6 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v5
       - name: Build
-        run: swift build
+        run: swift build -Xswiftc -strict-concurrency=complete
       - name: Run tests
-        run: swift test
+        run: swift test -Xswiftc -strict-concurrency=complete
