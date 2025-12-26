@@ -43,19 +43,16 @@ jobs:
             --transform-for-static-hosting \
             --hosting-base-path "$BASE_PATH" \
             --output-path docs
-
+  
           touch docs/.nojekyll
-          echo "=== grep base path in generated html ==="
-          grep -R --line-number "swiftopenapispec" docs/index.html docs/documentation/swiftopenapispec/index.html || true
+          cat > docs/index.html <<'HTML'
+          <!doctype html>
+          <meta charset="utf-8">
+          <meta http-equiv="refresh" content="0; url=/swiftopenapispec/documentation/swiftopenapispec/">
+          <link rel="canonical" href="/swiftopenapispec/documentation/swiftopenapispec/">
+          <title>Redirecting…</title>
+          HTML
           
-          echo "=== show first 60 lines of doc index ==="
-          sed -n '1,60p' docs/documentation/swiftopenapispec/index.html
-
-          # Debug: sicherstellen, dass Assets wirklich da sind
-          ls -la docs | head
-          ls -la docs/js | head
-          ls -la docs/data/documentation | head
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
