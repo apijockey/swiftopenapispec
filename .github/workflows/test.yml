@@ -38,3 +38,11 @@ jobs:
       - name: Build & test
         run: |
           swift test --enable-experimental-swift-testing
+      - name: build github documentation
+        run: swift package --allow-writing-to-directory ./docs \    
+              generate-documentation \
+              --target SwiftOpenAPISpec \
+              --disable-indexing \
+              --transform-for-static-hosting \
+              --hosting-base-path swiftopenapispec \
+              --output-path ./docs
