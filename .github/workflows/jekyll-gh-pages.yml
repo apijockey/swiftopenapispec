@@ -29,15 +29,21 @@ jobs:
           swift-version: "6.0"
       - name: Generate docs
         run: |
-          echo "Base path from configure-pages: '${{ steps.pages.outputs.base_path }}'"
           mkdir -p docs
+
+          BASE_PATH='${{ steps.pages.outputs.base_path }}'
+          BASE_PATH="${BASE_PATH#/}"   # entfernt führenden Slash
+          
+          echo "DocC hosting base path: '$BASE_PATH' (from '${{ steps.pages.outputs.base_path }}')"
+
           swift package --allow-writing-to-directory docs \
             generate-documentation \
             --target SwiftOpenAPISpec \
             --disable-indexing \
             --transform-for-static-hosting \
-            --hosting-base-path "${{ steps.pages.outputs.base_path }}" \
+            --hosting-base-path "$BASE_PATH" \
             --output-path docs
+
           touch docs/.nojekyll
           echo "=== grep base path in generated html ==="
           grep -R --line-number "swiftopenapispec" docs/index.html docs/documentation/swiftopenapispec/index.html || true
