@@ -19,17 +19,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
-
       # (Optional aber empfehlenswert auf Ubuntu: Swift Toolchain explizit installieren)
       - name: Setup Swift
         uses: swift-actions/setup-swift@v2
         with:
           swift-version: "6.0"
-
       - name: Generate docs
         run: |
           echo "Base path from configure-pages: '${{ steps.pages.outputs.base_path }}'"
@@ -42,6 +39,11 @@ jobs:
             --hosting-base-path "${{ steps.pages.outputs.base_path }}" \
             --output-path docs
           touch docs/.nojekyll
+          echo "=== grep base path in generated html ==="
+          grep -R --line-number "swiftopenapispec" docs/index.html docs/documentation/swiftopenapispec/index.html || true
+          
+          echo "=== show first 60 lines of doc index ==="
+          sed -n '1,60p' docs/documentation/swiftopenapispec/index.html
 
           # Debug: sicherstellen, dass Assets wirklich da sind
           ls -la docs | head
