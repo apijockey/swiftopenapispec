@@ -35,6 +35,13 @@ jobs:
             --hosting-base-path swiftopenapispec \
             --output-path docs
           touch docs/.nojekyll
+          cat > docs/index.html <<'HTML'
+          <!doctype html>
+          <meta charset="utf-8">
+          <meta http-equiv="refresh" content="0; url=./documentation/swiftopenapispec/">
+          <link rel="canonical" href="./documentation/swiftopenapispec/">
+          <title>Redirecting…</title>
+          HTML
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
