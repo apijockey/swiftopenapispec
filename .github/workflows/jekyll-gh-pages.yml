@@ -18,35 +18,40 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Pages
+        id: pages
         uses: actions/configure-pages@v5
+
+      # (Optional aber empfehlenswert auf Ubuntu: Swift Toolchain explizit installieren)
+      - name: Setup Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.0"
 
       - name: Generate docs
         run: |
+          echo "Base path from configure-pages: '${{ steps.pages.outputs.base_path }}'"
           mkdir -p docs
           swift package --allow-writing-to-directory docs \
             generate-documentation \
             --target SwiftOpenAPISpec \
             --disable-indexing \
             --transform-for-static-hosting \
-            --hosting-base-path /swiftopenapispec \
+            --hosting-base-path "${{ steps.pages.outputs.base_path }}" \
             --output-path docs
           touch docs/.nojekyll
-          cat > docs/index.html <<'HTML'
-          <!doctype html>
-          <meta charset="utf-8">
-          <meta http-equiv="refresh" content="0; url=./documentation/swiftopenapispec/">
-          <link rel="canonical" href="./documentation/swiftopenapispec/">
-          <title>Redirecting…</title>
-          HTML
+
+          # Debug: sicherstellen, dass Assets wirklich da sind
+          ls -la docs | head
+          ls -la docs/js | head
+          ls -la docs/data/documentation | head
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs
+          path: docs   # wichtig: sonst Default _site/ :contentReference[oaicite:2]{index=2}
 
   deploy:
     runs-on: ubuntu-latest
@@ -55,6 +60,5 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
+      - id: deployment
         uses: actions/deploy-pages@v4
