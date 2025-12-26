@@ -32,7 +32,7 @@ jobs:
             --target SwiftOpenAPISpec \
             --disable-indexing \
             --transform-for-static-hosting \
-            --hosting-base-path swiftopenapispec \
+            --hosting-base-path /swiftopenapispec \
             --output-path docs
           touch docs/.nojekyll
           cat > docs/index.html <<'HTML'
