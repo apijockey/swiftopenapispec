@@ -41,7 +41,7 @@ jobs:
       - name: build github documentation
         run: |
          mkdir -p ./docs
-         swift package --allow-writing-to-directory ./docs \    
+         swift package --allow-writing-to-directory ./docs \
               generate-documentation \
               --target SwiftOpenAPISpec \
               --disable-indexing \
