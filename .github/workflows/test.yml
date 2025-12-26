@@ -7,7 +7,7 @@
 # To get a newer version, you will need to update the SHA.
 # You can also reference a tag or branch, but the action may change without warning.
 
-name: Swift
+name: build and test with documentation
 
 on: [push]
 
@@ -39,7 +39,9 @@ jobs:
         run: |
           swift test --enable-experimental-swift-testing
       - name: build github documentation
-        run: swift package --allow-writing-to-directory ./docs \    
+        run: |
+         mkdir -p ./docs
+         swift package --allow-writing-to-directory ./docs \    
               generate-documentation \
               --target SwiftOpenAPISpec \
               --disable-indexing \
