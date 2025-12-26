@@ -9,7 +9,7 @@ import Foundation
 
 // MARK: - Navigation
 
-public protocol PointerNavigable {
+public protocol PointerNavigable : Sendable {
     func element(for segmentName: String) throws -> Any?
     var ref : OpenAPISchemaReference? { get }
    

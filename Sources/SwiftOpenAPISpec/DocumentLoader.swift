@@ -12,7 +12,7 @@ import Yams
  
  This package provides a default implementation with ``YamsDocumentLoader`` using the Yams package.
  */
-public protocol DocumentLoadable {
+public protocol DocumentLoadable : Sendable{
     func load(from url: URL) async throws -> OpenAPISpecification
 }
 

@@ -16,10 +16,10 @@ import Foundation
 public struct OpenAPIParameter :  KeyedElement, PointerNavigable {
     
     
-    public enum ParameterLocation : String, Codable, CaseIterable {
+    public enum ParameterLocation : String, Codable, CaseIterable, Sendable {
         case cookie, query, queryString, header ,path
     }
-    public enum ParameterStyle : String, Codable, CaseIterable {
+    public enum ParameterStyle : String, Codable, CaseIterable, Sendable {
         case simple,form, label, matrix
     }
     public static let FORMAT_KEY = "format"
@@ -113,7 +113,7 @@ public struct OpenAPIParameter :  KeyedElement, PointerNavigable {
     public var style : ParameterStyle? = nil
     public var explode : Bool? = nil
     public var allowReserved : Bool? = nil
-    public var example : Any? = nil
+    public var example : (any Sendable)? = nil
     public var examples : [OpenAPIExample]? = []
     public var content : OpenAPIMediaType? = nil
     public var format : String?

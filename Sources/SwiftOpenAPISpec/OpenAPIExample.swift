@@ -42,8 +42,8 @@ public struct OpenAPIExample : KeyedElement, PointerNavigable {
     public var key : String?
     public var summary : String? = nil
     public var description : String? = nil
-    public var value : Any? = nil
-    public var dataValue : Any? = nil
+    public var value : (any Sendable)? = nil
+    public var dataValue :(any Sendable)? = nil
     public var serializedValue : String? = nil
     public var externalValue : String? = nil
     public var ref : OpenAPISchemaReference? = nil

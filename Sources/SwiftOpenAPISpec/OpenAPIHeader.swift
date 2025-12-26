@@ -88,7 +88,7 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
     public var explode : Bool? = nil
     public var ref : OpenAPISchemaReference? = nil
     public var allowReserved : Bool? = nil
-    public var example : Any? = nil
+    public var example :(any Sendable)? = nil
     public var extensions : [OpenAPIExtension]?
     public var examples : [OpenAPIExample]? = []
     public var content : OpenAPIMediaType? = nil

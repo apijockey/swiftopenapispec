@@ -71,7 +71,7 @@ public protocol JSONPointerResolvable {
     func resolveSubscript(key : String) -> String?
 }
 
-public protocol ThrowingHashMapInitiable {
+public protocol ThrowingHashMapInitiable : Sendable {
     init(_ map : StringDictionary) throws
    
    

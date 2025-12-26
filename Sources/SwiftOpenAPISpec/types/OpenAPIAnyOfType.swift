@@ -27,8 +27,8 @@ public struct OpenAPIAnyOfType : OpenAPIValidatableSchemaType, PointerNavigable 
     
     public static let TYPE_KEY = "anyOf"
    
-    public init(types :[OpenAPIValidatableSchemaType]) {
-        self.items = types as? [any OpenAPIValidatableSchemaType]
+    public init(types :[any OpenAPIValidatableSchemaType]) {
+        self.items = types
         self.type = "anyOf"
     }
     public init(_ map: [String : Any]) throws {

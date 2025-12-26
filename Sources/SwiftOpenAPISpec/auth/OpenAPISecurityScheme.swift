@@ -19,10 +19,10 @@ public struct OpenAPISecurityScheme : KeyedElement , PointerNavigable {
     public static let OPENID_CONNECT_URL_KEY = "openIdConnectUrl"
     public static let OAUTH2_METADATA_URL_KEY = "oauth2MetadataUrl"
     public static let DEPRECATED_KEY = "deprecated"
-    public enum SecurityType : String {
+    public enum SecurityType : String , Sendable{
         case apiKey, http, mutualTLS, oauth2, openIdConnect
     }
-    public enum APIKeyLocation : String {
+    public enum APIKeyLocation : String, Sendable {
         case query,header,cookie
     }
     public enum Errors : LocalizedError {

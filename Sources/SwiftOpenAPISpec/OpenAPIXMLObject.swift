@@ -6,7 +6,7 @@
 //
 
 public struct OpenAPIXMLObject : PointerNavigable {
-    public enum NodeKind: String, Codable {
+    public enum NodeKind: String, Codable, Sendable {
         case element, attribute, text, cdata, none
     }
     public static let NODETYPE_KEY = "nodeType"

@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct OpenAPISecuritySchemeReference  {
+public struct OpenAPISecuritySchemeReference  : Sendable {
     public var key : String? = nil
     public var scopes : [String] = []
    
