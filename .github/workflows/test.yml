@@ -9,7 +9,7 @@
 
 name: build and test with documentation
 
-on: [push]
+on: [push, workflow_dispatch]
 
 jobs:
   macos:
