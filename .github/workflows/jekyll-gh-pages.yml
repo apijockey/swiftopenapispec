@@ -22,7 +22,6 @@ jobs:
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
-      # (Optional aber empfehlenswert auf Ubuntu: Swift Toolchain explizit installieren)
       - name: Setup Swift
         uses: swift-actions/setup-swift@v2
         with:
@@ -34,8 +33,6 @@ jobs:
           BASE_PATH='${{ steps.pages.outputs.base_path }}'
           BASE_PATH="${BASE_PATH#/}"   # entfernt führenden Slash
           
-          echo "DocC hosting base path: '$BASE_PATH' (from '${{ steps.pages.outputs.base_path }}')"
-
           swift package --allow-writing-to-directory docs \
             generate-documentation \
             --target SwiftOpenAPISpec \
