@@ -11,8 +11,8 @@ paths:
             schema:
               type: string
               enum:
-              - Alice
-              - Bob
-              - Carl
+                - Alice
+                - Bob
+                - Carl
       responses:
         "201": {description: created}
