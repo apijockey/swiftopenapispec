@@ -12,7 +12,7 @@ paths:
               allOf:
                 - $ref: "#/components/schemas/Base"
                 - type: object
-                properties: {tag: {type: string}}
+                  properties: {tag: {type: string}}
       responses: {"200": {description: ok}}
 components:
   schemas:

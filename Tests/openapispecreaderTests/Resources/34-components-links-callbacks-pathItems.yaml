@@ -1,16 +1,7 @@
-#
-//  34-components-links-callbacks-pathItems.yaml
-//  SwiftOpenAPISpec
-//
-//  Created by Patric Dubois on 12.12.25.
-//
-
-
 openapi: "3.1.0"
 info:
   title: Components – Links, Callbacks, PathItems
   version: "1.0.0"
-
 components:
   links:
     GetUserById:
@@ -18,7 +9,6 @@ components:
       operationId: getUser
       parameters:
         userId: "$response.body#/id"
-
   callbacks:
     UserCreatedCallback:
       "{$request.body#/callbackUrl}":
@@ -41,7 +31,6 @@ components:
               description: Callback empfangen
             "400":
               description: Invalid callback payload
-
   pathItems:
     UserByIdPathItem:
       parameters:

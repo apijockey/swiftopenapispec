@@ -2,7 +2,6 @@ openapi: "3.1.0"
 info:
   title: Components – Requests & Examples
   version: "1.0.0"
-
 components:
   schemas:
     User:
@@ -14,17 +13,15 @@ components:
           type: string
           format: email
       required: [id, email]
-
     Error:
       type: object
       properties:
         code: {type: string}
         message: {type: string}
       required: [code, message]
-
   requestBodies:
     CreateUserRequest:
-      description: JSON-Payload für User-Erstellung (external components)
+      description: JSON-Payload für User-Erstellung (ext. components)
       required: true
       content:
         application/json:
@@ -33,7 +30,6 @@ components:
           examples:
             userExample:
               $ref: "#/components/examples/UserExample"
-
   examples:
     UserExample:
       summary: Beispiel-User (external components)

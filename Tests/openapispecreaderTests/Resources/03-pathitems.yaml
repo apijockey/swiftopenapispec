@@ -67,14 +67,15 @@ paths:
           username:
             # note! no enum here means it is an open value
             default: demo
-            description: A user-specific subdomain. Use `demo` for a free sandbox environment.
+            description: A user-specific subdomain. Use `demo`.
           port:
             enum:
               - '8443'
               - '443'
             default: '8443'
           basePath:
-            # open meaning there is the opportunity to use special base paths as assigned by the provider, default is "v2"
+            # open meaning there is the opportunity to use special
+            # base paths as assigned by the provider, default is "v2"
             default: v2
     parameters:
       - in: query
