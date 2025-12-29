@@ -16,5 +16,3 @@ paths:
                   ok: {type: boolean}
                 required: [ok]
                 unevaluatedProperties: false
-
-   
