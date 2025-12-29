@@ -9,10 +9,10 @@ paths:
         content:
           application/json:
             schema:
-               allOf:
-                    - $ref: "#/components/schemas/Base"
-                    - type: object
-                      properties: {tag: {type: string}}
+              allOf:
+                - $ref: "#/components/schemas/Base"
+                - type: object
+                properties: {tag: {type: string}}
       responses: {"200": {description: ok}}
 components:
   schemas:
@@ -28,5 +28,3 @@ components:
       type: object
       properties: {id: {type: integer}, name: {type: string}}
       required: [id, name]
-  
-
