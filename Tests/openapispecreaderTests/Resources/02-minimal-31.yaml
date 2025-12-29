@@ -1,6 +1,6 @@
 openapi: 3.1.0
 jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
-info: { title: Minimal 3.1, version: "1.0" }
+info: {title: Minimal 3.1, version: "1.0"}
 paths:
   /ping:
     get:
@@ -13,7 +13,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  ok: { type: boolean }
+                  ok: {type: boolean}
                 required: [ok]
                 unevaluatedProperties: false
 

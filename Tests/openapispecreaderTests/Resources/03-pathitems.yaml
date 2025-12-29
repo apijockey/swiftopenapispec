@@ -1,5 +1,5 @@
 openapi: 3.0.3
-info: { title: Params, version: "1.0" }
+info: {title: Params, version: "1.0"}
 paths:
   /pets/{id}:
     description: Returns pets information
@@ -10,21 +10,21 @@ paths:
         - in: path
           name: id
           required: true
-          schema: { type: string }
+          schema: {type: string}
       responses:
-        "200": { description: ok }
+        "200": {description: ok}
   /pets:
     get:
       operationId: searchPets
       parameters:
         - in: query
           name: limit
-          schema: { type: integer, default: 10, minimum: 1, maximum: 100 }
+          schema: {type: integer, default: 10, minimum: 1, maximum: 100}
         - in: header
           name: X-Trace
-          schema: { type: string }
+          schema: {type: string}
       responses:
-        "200": { description: ok }
+        "200": {description: ok}
     additionalOperations:
       COPY:
         description: Copies pet information based on ID
@@ -48,8 +48,8 @@ paths:
     servers:
       - url: https://{region}.api.example.com/{basePath}
         variables:
-          region: { default: eu, enum: [eu, us] }
-          basePath: { default: v1 }
+          region: {default: eu, enum: [eu, us]}
+          basePath: {default: v1}
       - url: .
         description: The production API on this device
       - url: ./test
@@ -79,7 +79,7 @@ paths:
     parameters:
       - in: query
         name: limit
-        schema: { type: integer, default: 10, minimum: 1, maximum: 100 }
+        schema: {type: integer, default: 10, minimum: 1, maximum: 100}
       - in: header
         name: X-Trace
-        schema: { type: string }
+        schema: {type: string}
