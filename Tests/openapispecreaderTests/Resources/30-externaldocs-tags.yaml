@@ -55,7 +55,7 @@ paths:
         - name: paymentId
           in: path
           required: true
-          schema: { type: string }
+          schema: {type: string}
       responses:
         "200":
           description: OK
@@ -69,17 +69,17 @@ components:
     CreatePaymentRequest:
       type: object
       properties:
-        amount: { type: number }
-        currency: { type: string, minLength: 3, maxLength: 3 }
-        recipientId: { type: string }
+        amount: {type: number}
+        currency: {type: string, minLength: 3, maxLength: 3}
+        recipientId: {type: string}
       required: [amount, currency, recipientId]
 
     Payment:
       type: object
       properties:
-        id: { type: string }
-        amount: { type: number }
-        currency: { type: string }
+        id: {type: string}
+        amount: {type: number}
+        currency: {type: string}
         status:
           type: string
           enum: [created, processing, succeeded, failed]

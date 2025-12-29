@@ -10,15 +10,15 @@ paths:
           description: created
           content:
             application/json:
-              schema: { type: object, properties: { id: { type: integer } }, required: [id] }
+              schema: {type: object, properties: {id:{type: integer}}, required: [id]}
         default:
           description: error
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/Error" }
+              schema: {$ref: "#/components/schemas/Error"}
 components:
   schemas:
     Error:
       type: object
-      properties: { message: { type: string } }
+      properties: {message: {type: string}}
       required: [message]

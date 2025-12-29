@@ -1,5 +1,5 @@
 openapi: 3.0.3
-info: { title: Combinators, version: "1.0" }
+info: {title: Combinators, version: "1.0"}
 paths:
   /shape:
     post:
@@ -12,21 +12,21 @@ paths:
                allOf:
                     - $ref: "#/components/schemas/Base"
                     - type: object
-                      properties: { tag: { type: string } }
-      responses: { "200": { description: ok } }
+                      properties: {tag: {type: string}}
+      responses: {"200": {description: ok}}
 components:
   schemas:
     Circle:
       type: object
-      properties: { r: { type: number, minimum: 0 } }
+      properties: {r: {type: number, minimum: 0}}
       required: [r]
     Square:
       type: object
-      properties: { a: { type: number, minimum: 0 } }
+      properties: {a: {type: number, minimum: 0}}
       required: [a]
     Base:
       type: object
-      properties: { id: { type: integer }, name: { type: string } }
+      properties: {id: {type: integer}, name: {type: string}}
       required: [id, name]
   
 

@@ -32,7 +32,7 @@ components:
                 schema:
                   type: object
                   properties:
-                    eventType: { type: string }
+                    eventType: {type: string}
                     user:
                       $ref: "#/components/schemas/User"
                   required: [eventType, user]
@@ -48,7 +48,7 @@ components:
         - name: userId
           in: path
           required: true
-          schema: { type: string }
+          schema: {type: string}
       get:
         operationId: getUser
         summary: Get user by id (from external pathItem)

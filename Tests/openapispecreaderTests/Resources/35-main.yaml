@@ -49,8 +49,8 @@ components:
     CommonError:
       type: object
       properties:
-        code: { type: string }
-        message: { type: string }
+        code: {type: string}
+        message: {type: string}
         meta:
           type: object
           additionalProperties: true
@@ -63,8 +63,8 @@ components:
     EventCreated:
       type: object
       properties:
-        id: { type: string }
-        accepted: { type: boolean }
+        id: {type: string}
+        accepted: {type: boolean}
         # Ref in externe Datei, aber auf eine Schema-NAMEN mit "/" und "~"
         weirdRef:
           $ref: "./35-ext-components.yaml#/components/schemas/user~1admin~0meta"
@@ -102,7 +102,7 @@ components:
         - name: eventId
           in: path
           required: true
-          schema: { type: string }
+          schema: {type: string}
       get:
         operationId: getEvent
         responses:

@@ -37,14 +37,14 @@ components:
     UserCreated:
       type: object
       properties:
-        id: { type: string }
-        email: { type: string, format: email }
-        createdAt: { type: string, format: date-time }
+        id: {type: string}
+        email: {type: string, format: email}
+        createdAt: {type: string, format: date-time}
       required: [id, email, createdAt]
 
     UserDeleted:
       type: object
       properties:
-        id: { type: string }
-        deletedAt: { type: string, format: date-time }
+        id: {type: string}
+        deletedAt: {type: string, format: date-time}
       required: [id, deletedAt]

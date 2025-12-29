@@ -9,14 +9,14 @@ components:
     "user/admin~meta":
       type: object
       properties:
-        note: { type: string }
+        note: {type: string}
       required: [note]
 
     # oneOf Array + $ref Kette + Array-Index Pointer Tests
     EventEnvelope:
       type: object
       properties:
-        type: { type: string }
+        type: {type: string}
         payload:
           oneOf:
             - $ref: "#/components/schemas/UserCreated"
@@ -31,8 +31,8 @@ components:
     UserCreated:
       type: object
       properties:
-        type: { const: "user.created" }
-        userId: { type: string }
+        type: {const: "user.created"}
+        userId: {type: string}
         # Rück-Ref in die Hauptdatei (relativer Pfad)
         errorShape:
           $ref: "./35-main.yaml#/components/schemas/CommonError"
@@ -41,8 +41,8 @@ components:
     UserDeleted:
       type: object
       properties:
-        type: { const: "user.deleted" }
-        userId: { type: string }
+        type: {const: "user.deleted"}
+        userId: {type: string}
       required: [type, userId]
 
   examples:
@@ -64,7 +64,7 @@ components:
           schema:
             type: object
             properties:
-              callbackUrl: { type: string, format: uri }
+              callbackUrl: {type: string, format: uri}
               event:
                 $ref: "#/components/schemas/EventEnvelope"
             required: [callbackUrl, event]
@@ -112,8 +112,8 @@ components:
                 schema:
                   type: object
                   properties:
-                    delivered: { type: boolean }
-                    eventId: { type: string }
+                    delivered: {type: boolean}
+                    eventId: {type: string}
                   required: [delivered, eventId]
           responses:
             "200":
