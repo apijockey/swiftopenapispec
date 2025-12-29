@@ -1,6 +1,6 @@
 # base
 openapi: 3.0.3
-info: { title: Minimal 3.0, version: "1.0" }
+info: {title: Minimal 3.0, version: "1.0"}
 paths:
   /ping:
     get:
@@ -10,4 +10,4 @@ paths:
           description: ok
           content:
             application/json:
-              schema: { type: object, properties: { ok: { type: boolean } }, required: [ok] }
+              schema: {type: object, properties: {ok:{type: boolean}}, required: [ok]}
