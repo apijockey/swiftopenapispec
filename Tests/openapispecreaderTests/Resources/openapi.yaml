@@ -51,11 +51,11 @@ paths:
                 $ref: '#/components/schemas/Greeting'
       security:
         - petstore_auth:
-           - write:pets
-           - read:pets
+          - write:pets
+          - read:pets
         - clip_auth:
-           - write:clips
-           - read:clips
+          - write:clips
+          - read:clips
   /emoji:
     get:
       operationId: getEmoji
