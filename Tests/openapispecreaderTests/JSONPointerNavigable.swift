@@ -63,10 +63,10 @@ struct OpenAPIJSONPointerTests {
     }
     
     //TODO: mit anderen Dateien arbeiten und Tag .jsonPointer verwenden
-    @Test("Sanity: resolve pointers in main file", .tags(.jsonpointer), arguments:
+    @Test("Resolve pointers in main file", .tags(.jsonpointer), arguments:
     [
         ("#/openapi",String.self,"3.1.0"),
-        ("#/info/title",String.self,"JSON Pointer Torture Main")
+        ("#/info/title",String.self,"JSON Pointer Main")
     ])
     func resolveLocalJSONPointers(arg: (pointer : String, expectedType : Any.Type, expectedValue : String)) async throws {
         let mainURL = try fixtureURL("35-main")

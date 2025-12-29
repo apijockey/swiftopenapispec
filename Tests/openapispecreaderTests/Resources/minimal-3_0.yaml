@@ -1,4 +1,3 @@
----
 # base
 openapi: 3.0.3
 info: { title: Minimal 3.0, version: "1.0" }
