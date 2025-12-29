@@ -7,44 +7,71 @@
 # To get a newer version, you will need to update the SHA.
 # You can also reference a tag or branch, but the action may change without warning.
 
-name: build and test with documentation
+name: Swift
 
-on: [push, workflow_dispatch]
+on: [push]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  macos:
+  tests-using-native:
+    needs: [soundness]
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - runs_on: macos-15
-            xcode: "16.2"   # Beispiel
-            swift: "6.0"
-          - runs_on: macos-14
-            xcode: "16.1"   
-            label: "swift-5.9 (Xcode 15.x, macOS 14)"
-    runs-on: ${{ matrix.runs_on }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Select Xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: ${{ matrix.xcode }}
-      - name: Verify toolchain
-        run: |
-          xcodebuild -version
-          xcrun swift --version
-          xcrun --find swiftc
-      - name: Build & test
-        run: |
-          swift test --enable-experimental-swift-testing
-      - name: build github documentation
-        run: |
-         mkdir -p ./docs
-         swift package --allow-writing-to-directory ./docs \
-              generate-documentation \
-              --target SwiftOpenAPISpec \
-              --disable-indexing \
-              --transform-for-static-hosting \
-              --hosting-base-path swiftopenapispec \
-              --output-path ./docs
+        buildSystem: ["native", "swiftbuild"]
+        linuxSwiftVersion: ['["nightly-main", "nightly-6.2"]', '["nightly-main"]']
+        enable_windows_checks: [true]
+        exclude:
+          - buildSystem: "swiftbuild"
+            linuxSwiftVersion: '["nightly-main", "nightly-6.2"]'
+          - buildSystem: "swiftbuild"
+            enable_windows_checks: true
+          - buildSystem: "native"
+            linuxSwiftVersion: '["nightly-main"]'
+    name: Test (${{ matrix.buildSystem }})
+    uses: swiftlang/github-workflows/.github/workflows/swift_package_test.yml@0.0.2
+    with:
+      linux_os_versions: '["amazonlinux2", "bookworm", "noble", "jammy", "rhel-ubi9"]'
+      linux_swift_versions: ${{ matrix.linuxSwiftVersion }}
+      linux_pre_build_command: ./.github/scripts/prebuild.sh
+      linux_build_command: 'swift run swift-build --build-tests --build-system ${{ matrix.buildSystem}}'
+      windows_swift_versions: '["nightly-main"]'
+      windows_pre_build_command: 'Invoke-Program .\.github\scripts\prebuild.ps1'
+      windows_build_command: 'Invoke-Program swift run swift-build --build-tests --build-system ${{ matrix.buildSystem}}'
+      enable_windows_checks: ${{ matrix.enable_windows_checks }}
+      enable_ios_checks: true
+      enable_macos_checks: true
+      macos_exclude_xcode_versions: "[{\"xcode_version\": \"16.3\"}, {\"xcode_version\": \"16.4\"}]"
+      macos_build_command: 'swift run swift-build --build-tests --build-system ${{ matrix.buildSystem}}'
+
+  tests-using-swiftbuild:
+    name: Test (all SwiftBuild)
+    needs: [soundness]
+    uses: swiftlang/github-workflows/.github/workflows/swift_package_test.yml@0.0.2
+    with:
+      linux_os_versions: '["amazonlinux2", "bookworm", "noble", "jammy", "rhel-ubi9"]'
+      linux_swift_versions: '["nightly-main"]'
+      linux_pre_build_command: ./.github/scripts/prebuild.sh
+      linux_build_command: 'swift run --build-system swiftbuild swift-build --build-tests --build-system swiftbuild'
+      enable_windows_checks: false
+      windows_swift_versions: '["nightly-main"]'
+      windows_pre_build_command: 'Invoke-Program .\.github\scripts\prebuild.ps1'
+      windows_build_command: 'Invoke-Program swift run --build-system swiftbuild swift-build --build-tests --build-system swiftbuild'
+      enable_ios_checks: true
+      enable_macos_checks: true
+      macos_exclude_xcode_versions: "[{\"xcode_version\": \"16.3\"}, {\"xcode_version\": \"16.4\"}]"
+      macos_build_command: 'swift run --build-system swiftbuild swift-build --build-tests --build-system swiftbuild'
+
+  soundness:
+    name: Soundness
+    uses: swiftlang/github-workflows/.github/workflows/soundness.yml@0.0.2
+    with:
+      license_header_check_project_name: "Swift"
+      license_header_check_enabled: true
+      unacceptable_language_check_enabled: true
+      api_breakage_check_enabled: false
+      format_check_enabled: false
+      shell_check_enabled: false
