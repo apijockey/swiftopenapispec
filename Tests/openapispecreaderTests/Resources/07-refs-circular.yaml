@@ -1,5 +1,5 @@
 openapi: 3.0.3
-info: { title: Circular, version: "1.0" }
+info: {title: Circular, version: "1.0"}
 paths:
   /node:
     get:

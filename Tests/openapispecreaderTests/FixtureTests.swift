@@ -1,7 +1,10 @@
+// Copyright (c) 2025 CgSe Computergrafik und Softwareentwicklung GmbH
+// Licensed under Apache License v2.0
 //
-//  Test.swift
-//  openapispecreader
+// See LICENSE.txt for license information
 //
+// SPDX-License-Identifier: Apache-2.0
+
 //  Created by Patric Dubois on 30.11.25.
 //
 
