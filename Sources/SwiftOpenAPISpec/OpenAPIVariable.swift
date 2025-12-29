@@ -1,7 +1,8 @@
+// Licensed under Apache License v2.0
 //
-//  File 3.swift
-//  
+// See LICENSE.txt for license information
 //
+// SPDX-License-Identifier: Apache-2.0
 //  Created by Patric Dubois on 30.03.24.
 //
 

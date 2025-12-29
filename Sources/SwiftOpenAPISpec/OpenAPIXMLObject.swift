@@ -1,7 +1,8 @@
+// Licensed under Apache License v2.0
 //
-//  OpenAPIXMLObject.swift
-//  SwiftOpenAPISpec
+// See LICENSE.txt for license information
 //
+// SPDX-License-Identifier: Apache-2.0
 //  Created by Patric Dubois on 16.12.25.
 //
 

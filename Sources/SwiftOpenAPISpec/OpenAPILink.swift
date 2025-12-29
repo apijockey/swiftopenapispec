@@ -1,8 +1,9 @@
+// Copyright (c) 2025 CgSe Computergrafik und Softwareentwicklung GmbH
+// Licensed under Apache License v2.0
 //
-//  File.swift
-//  
+// See LICENSE.txt for license information
 //
-//  Created by Patric Dubois on 01.04.24.
+// SPDX-License-Identifier: Apache-2.0//  Created by Patric Dubois on 01.04.24.
 //
 
 import Foundation

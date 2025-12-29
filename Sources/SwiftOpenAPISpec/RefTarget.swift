@@ -1,7 +1,8 @@
+// Licensed under Apache License v2.0
 //
-//  RefTarget 2.swift
-//  SwiftOpenAPISpec
+// See LICENSE.txt for license information
 //
+// SPDX-License-Identifier: Apache-2.0
 //  Created by Patric Dubois on 15.12.25.
 //
 

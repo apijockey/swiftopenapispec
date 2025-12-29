@@ -1,5 +1,9 @@
+// Copyright (c) 2025 CgSe Computergrafik und Softwareentwicklung GmbH
+// Licensed under Apache License v2.0
 //
-//  OpenAPIValidatableDiscriminator.swift
+// See LICENSE.txt for license information
+//
+// SPDX-License-Identifier: Apache-2.0
 //  SwiftOpenAPISpec
 //
 //  Created by Patric Dubois on 10.12.25.

@@ -1,5 +1,9 @@
-// The Swift Programming Language
-// https://docs.swift.org/swift-book
+// Copyright (c) 2025 CgSe Computergrafik und Softwareentwicklung GmbH
+// Licensed under Apache License v2.0
+//
+// See LICENSE.txt for license information
+//
+// SPDX-License-Identifier: Apache-2.0
 
 import Foundation
 
