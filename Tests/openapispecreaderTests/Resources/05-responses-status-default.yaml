@@ -1,6 +1,5 @@
-
 openapi: 3.0.3
-info: { title: Responses, version: "1.0" }
+info: {title: Responses, version: "1.0"}
 paths:
   /create:
     post:
