@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+#
 # This file is licensed under the Creative Commons Attribution 4.0 International License.
 #
 # Copyright (c) OpenAPI Initiative
@@ -21,9 +21,6 @@
 #
 # Changes:
 # - Adapted for use in this project
-
-
-
 openapi: '3.1.0'
 info:
   title: GreetingService
