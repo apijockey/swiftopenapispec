@@ -17,7 +17,7 @@
 //
 
 import Foundation
-import Foundation
+
 public struct OpenAPIExample : KeyedElement, PointerNavigable {
     public static let SUMMARY_KEY = "summary"
     public static let DESCRIPTION_KEY = "description"
@@ -28,7 +28,7 @@ public struct OpenAPIExample : KeyedElement, PointerNavigable {
     public init(_ map: [String : Any]) throws {
         self.summary = map.readIfPresent(Self.SUMMARY_KEY, String.self)
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
-        self.value = map[Self.VALUE_KEY]
+        self.value = map[Self.VALUE_KEY].stringifyValue
         self.externalValue = map.readIfPresent(Self.EXTERNAL_VALUE_KEY, String.self)
        
         if let refMap = map[OpenAPISchemaReference.REF_KEY] as? StringDictionary {
@@ -37,14 +37,14 @@ public struct OpenAPIExample : KeyedElement, PointerNavigable {
         if let ref = map[OpenAPISchemaReference.REF_KEY] as? String {
                     self.ref =  OpenAPISchemaReference(ref: ref)
         }
-        self.serializedValue = map.readIfPresent(Self.SERIALIZED_VALUE_KEY, String.self)
+        self.serializedValue = map[Self.SERIALIZED_VALUE_KEY].stringifyValue
     }
     public func element(for segmentName: String) throws -> Any? {
         switch segmentName {
         case Self.SUMMARY_KEY: return self.summary
         case Self.DESCRIPTION_KEY: return self.description
         case Self.VALUE_KEY: return self.value
-            case Self.EXTERNAL_VALUE_KEY: return self.externalValue
+        case Self.EXTERNAL_VALUE_KEY: return self.externalValue
         case OpenAPISchemaReference.REF_KEY: return self.ref
         default:
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIExample", segmentName)
@@ -53,9 +53,9 @@ public struct OpenAPIExample : KeyedElement, PointerNavigable {
     public var key : String?
     public var summary : String? = nil
     public var description : String? = nil
-    public var value : (any Sendable)? = nil
-    public var dataValue :(any Sendable)? = nil
-    public var serializedValue : String? = nil
+    public var value : String? = nil
+    public var dataValue :Data? = nil
+    public var serializedValue : String?
     public var externalValue : String? = nil
     public var ref : OpenAPISchemaReference? = nil
   

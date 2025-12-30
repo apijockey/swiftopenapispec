@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 openapi: 3.0.3
 info: {title: Responses, version: "1.0"}
 paths:
@@ -24,7 +23,15 @@ paths:
           description: created
           content:
             application/json:
-              schema: {type: object, properties: {id:{type: integer}}, required: [id]}
+              schema: {
+                type: object,
+                properties: {
+                        id: {
+                            type: integer
+                        }
+                    },
+                    required: [id]
+                }
         default:
           description: error
           content:

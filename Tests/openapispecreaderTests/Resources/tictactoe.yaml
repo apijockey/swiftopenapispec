@@ -54,8 +54,8 @@ paths:
                       minItems: 3
                       items:
                         type: array
-                        maxItems: 2
-                        minItems: 2
+                        maxItems: 3
+                        minItems: 3
                         items:
                           type: string
                           enum: [".", "X", "O"]

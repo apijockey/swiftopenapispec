@@ -26,24 +26,30 @@ let package = Package(
             targets: ["SwiftOpenAPISpec"]),
     ],
     dependencies: [
-            .package(url: "https://github.com/jpsim/Yams", from: "5.1.0"),
-            .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
-          
-        ],
+        .package(url: "https://github.com/jpsim/Yams", from: "5.1.0"),
+        .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
+        // Explicit Swift Testing package for availability on older deployment targets/toolchains
+        .package(url: "https://github.com/apple/swift-testing", from: "0.9.0"),
+    ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
             name: "SwiftOpenAPISpec",
             dependencies: [
-                .product(name: "Yams", package: "Yams")]
-                
+                .product(name: "Yams", package: "Yams")
+            ]
         ),
         .testTarget(
             name: "openapispecreaderTests",
-            dependencies: ["SwiftOpenAPISpec"],
+            dependencies: [
+                "SwiftOpenAPISpec",
+                // Link the Testing module from the explicit package
+                .product(name: "Testing", package: "swift-testing")
+            ],
             resources: [
                 .process("Resources"),
-                ]),
+            ]
+        ),
     ]
 )

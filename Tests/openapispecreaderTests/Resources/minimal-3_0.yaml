@@ -24,4 +24,11 @@ paths:
           description: ok
           content:
             application/json:
-              schema: {type: object, properties: {ok:{type: boolean}}, required: [ok]}
+              schema: {
+                type: object,
+                properties: {
+                    ok: {
+                        type: boolean
+                    }
+                }, required: [ok]
+            }

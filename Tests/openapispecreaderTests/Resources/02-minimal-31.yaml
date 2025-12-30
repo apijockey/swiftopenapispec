@@ -27,6 +27,8 @@ paths:
               schema:
                 type: object
                 properties:
-                  ok: {type: boolean}
+                  ok: {
+                    type: boolean
+                    }
                 required: [ok]
                 unevaluatedProperties: false

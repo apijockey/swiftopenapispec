@@ -22,7 +22,7 @@ header:
     - ".git/**"
     - "**/*.md"
     - "LICENSE.txt"
-    - "scripts/prebuild.*"
+    - ".github/scripts/prebuild.*"
     - "NOTICE*"
     - "**/*.json"
     - "**/*.license"

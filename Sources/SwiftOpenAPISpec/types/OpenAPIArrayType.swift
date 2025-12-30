@@ -97,7 +97,7 @@ public struct OpenAPIArrayType : OpenAPIValidatableSchemaType, PointerNavigable{
             self.items = try validatableType.init(items)
         }
     }
-    
+   
     public func validate() throws {
         
     }
