@@ -29,12 +29,12 @@ paths:
                       maxItems: 3
                       minItems: 3
                       items:
-                          type: array
-                          maxItems: 2
-                          minItems: 2
-                          items:
-                            type: string
-                            enum: [".", "X", "O"]
-                            description: |
-                              Possible values for a board square.
-                              `.` means empty square.
+                        type: array
+                        maxItems: 2
+                        minItems: 2
+                        items:
+                          type: string
+                          enum: [".", "X", "O"]
+                          description: |
+                            Possible values for a board square.
+                            `.` means empty square.
