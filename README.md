@@ -99,3 +99,22 @@ Simple API overview
 ```
 ## 🌍 Github Pages repo docs
 👉 [view on GitHub Pages](https://apijockey.github.io/swiftopenapispec/)
+
+## License
+
+This project is licensed under the Apache License, Version 2.0.
+
+It includes third-party components from the Swift open source project
+(specifically `scripts/prebuild.sh` and `scripts/prebuild.ps1`),
+which are licensed under the Apache License, Version 2.0
+with Runtime Library Exception.
+
+It also includes specification files licensed under the
+Creative Commons Attribution 4.0 International License (CC BY 4.0),
+specifically:
+
+- specs/openapi.yml
+- specs/petstore.yml
+- specs/tictactoe.yml
+
+See the LICENSE and NOTICE files for details.

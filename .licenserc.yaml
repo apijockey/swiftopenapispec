@@ -12,16 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# base
-openapi: 3.0.3
-info: {title: Minimal 3.0, version: "1.0"}
-paths:
-  /ping:
-    get:
-      operationId: ping
-      responses:
-        "200":
-          description: ok
-          content:
-            application/json:
-              schema: {type: object, properties: {ok:{type: boolean}}, required: [ok]}
+header:
+  license:
+    spdx-id: Apache-2.0
+    copyright-owner: "CgSe Computergrafik und Softwareentwicklung GmbH"
+    copyright-year: "2025"
+
+  paths-ignore:
+    - ".git/**"
+    - "**/*.md"
+    - "LICENSE.txt"
+    - "scripts/prebuild.*"
+    - "NOTICE*"
+    - "**/*.json"
+    - "**/*.license"
+    - "**/NOTICE*"
+    - "**/playgrounds/**"
+    - "Tests/Resources/openapi.yml"
+    - "Tests/Resources/petstore.yml"
+    - "Tests/Resources/tictactoe.yml"
+  comment: on-failure

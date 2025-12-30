@@ -1,0 +1,32 @@
+This project includes third-party components from the Swift open source project.
+
+The following files are derived from the Swift Package Manager project:
+- scripts/prebuild.sh
+- scripts/prebuild.ps1
+
+Copyright (c) 2025 Apple Inc. and the Swift project authors.
+
+Licensed under the Apache License, Version 2.0 with Runtime Library Exception.
+
+Source:
+https://github.com/swiftlang/swift-package-manager
+
+The Apache License, Version 2.0 is included in this repository as LICENSE.
+
+This project includes specification files licensed under the
+Creative Commons Attribution 4.0 International License (CC BY 4.0).
+
+The following files are licensed under CC BY 4.0:
+- specs/openapi.yml
+- specs/petstore.yml
+- specs/tictactoe.yml
+
+Source: https://learn.openapis.org/examples/
+
+Copyright:
+OpenAPI Initiative
+
+License:
+https://creativecommons.org/licenses/by/4.0/
+
+

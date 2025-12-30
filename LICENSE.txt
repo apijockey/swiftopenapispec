@@ -188,3 +188,21 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+This project includes JSON specification files licensed under the
+Creative Commons Attribution 4.0 International License (CC BY 4.0).
+
+The following files are licensed under CC BY 4.0:
+- Tests/Resources/api-with-examples.json
+
+License:
+   http://www.apache.org/licenses/LICENSE-2.0
+
+This project includes JSON specification files licensed under the
+   Licensed under the Apache License, Version 2.0 (the "License")).
+
+The following files are licensed under CC BY 4.0:
+- Tests/Resources/petstore.json
+
+License:
+   https://creativecommons.org/licenses/by/4.0/
