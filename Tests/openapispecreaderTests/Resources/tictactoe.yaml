@@ -19,11 +19,11 @@ paths:
               schema:
                 type: object
                 properties:
-                    winner:
-                      type: string
-                      enum: [".", "X", "O"]
-                      description: |
-                        Winner of the game. `.` means nobody has won yet.
+                  winner:
+                    type: string
+                    enum: [".", "X", "O"]
+                    description: |
+                      Winner of the game. `.` means nobody has won yet.
                     board:
                       type: array
                       maxItems: 3

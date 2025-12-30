@@ -1,19 +1,15 @@
 name: Deploy Docs to GitHub Pages
-
 on:
   push:
     branches: ["main"]
   workflow_dispatch:
-
 permissions:
   contents: read
   pages: write
   id-token: write
-
 concurrency:
   group: "pages"
   cancel-in-progress: false
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -29,10 +25,8 @@ jobs:
       - name: Generate docs
         run: |
           mkdir -p docs
-
           BASE_PATH='${{ steps.pages.outputs.base_path }}'
           BASE_PATH="${BASE_PATH#/}"   # entfernt führenden Slash
-          
           swift package --allow-writing-to-directory docs \
             generate-documentation \
             --target SwiftOpenAPISpec \
@@ -49,12 +43,10 @@ jobs:
           <link rel="canonical" href="/swiftopenapispec/documentation/swiftopenapispec/">
           <title>Redirecting…</title>
           HTML
-          
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs   # wichtig: sonst Default _site/ :contentReference[oaicite:2]{index=2}
-
   deploy:
     runs-on: ubuntu-latest
     needs: build
