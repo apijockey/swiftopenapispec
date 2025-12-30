@@ -48,17 +48,17 @@ paths:
                     enum: [".", "X", "O"]
                     description: |
                       Winner of the game. `.` means nobody has won yet.
-                    board:
+                  board:
+                    type: array
+                    maxItems: 3
+                    minItems: 3
+                    items:
                       type: array
                       maxItems: 3
                       minItems: 3
                       items:
-                        type: array
-                        maxItems: 3
-                        minItems: 3
-                        items:
-                          type: string
-                          enum: [".", "X", "O"]
-                          description: |
-                            Possible values for a board square.
-                            `.` means empty square.
+                        type: string
+                        enum: [".", "X", "O"]
+                        description: |
+                          Possible values for a board square.
+                          `.` means empty square.

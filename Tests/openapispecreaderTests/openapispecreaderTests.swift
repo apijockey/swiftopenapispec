@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import Testing
 import Yams
 import Foundation
+import Testing
 @testable import SwiftOpenAPISpec
 
 @Suite("OpenAPI Spec (legacy XCTest -> Swift Testing)")

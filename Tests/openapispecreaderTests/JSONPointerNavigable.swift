@@ -19,8 +19,8 @@
 
 
 import Foundation
-import Testing
 import Yams
+import Testing
 @testable import SwiftOpenAPISpec
 
 

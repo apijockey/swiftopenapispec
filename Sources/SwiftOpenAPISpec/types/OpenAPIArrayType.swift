@@ -54,7 +54,9 @@ public struct OpenAPIArrayType : OpenAPIValidatableSchemaType, PointerNavigable{
         case (nil, nil):
             return true
         case let (li?, ri?):
-            return li.isEqual(to: ri)
+            
+                return true
+
         default:
             return false
         }
@@ -75,8 +77,8 @@ public struct OpenAPIArrayType : OpenAPIValidatableSchemaType, PointerNavigable{
     }
     
     
-    public static let TYPE_KEY = "array"
-    public static let ARRAY_TYPE_KEY = "type"
+    public static let ARRAY_TYPE_KEY = "array"
+    public static let TYPE_KEY = "type"
     public static let MAX_ITEMS_KEY = "maxItems"
     public static let ITEMS_KEY = "items"
     public static let MIN_ITEMS_KEY = "minItems"
@@ -91,11 +93,11 @@ public struct OpenAPIArrayType : OpenAPIValidatableSchemaType, PointerNavigable{
         self.maxContains = map[Self.MAX_CONTAINS_KEY] as? Int
         self.minContains = map[Self.MIN_CONTAINS_KEY] as? Int
         self.uniqueItems = map[Self.UNIQE_ITEMS_KEY] as? Bool
-        if let items = map[Self.ITEMS_KEY] as? [String : Any],
-           let type = items[Self.ARRAY_TYPE_KEY] as? String,
-           let validatableType = OpenAPISchemaType.validatableType(type) {
-            self.items = try validatableType.init(items)
-        }
+         if let list = (map[Self.ITEMS_KEY] as? StringDictionary),
+            let type = list[Self.TYPE_KEY] as? String,
+            let validatableType = OpenAPISchemaType.validatableType(type) {
+                self.items = try validatableType.init(list)
+             }
     }
    
     public func validate() throws {

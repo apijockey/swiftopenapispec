@@ -1,13 +1,25 @@
 /*
- * Copyright 2025 CgSe ...
+ * Copyright 2025 CgSe Computergrafik und Softwareentwicklung GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
+//  Created by Patric Dubois on 30.11.25.
+//
 import Foundation
-import Testing
 import Yams
 import SwiftOpenAPISpec
+import Testing
 
-@Suite("Array MediaTypes (paths -> request/response)")
 struct ArrayMediaTypesTests {
 
     enum Errors: LocalizedError, CustomStringConvertible {
@@ -41,7 +53,7 @@ struct ArrayMediaTypesTests {
         }
     }
 
-    @Test("GET /tags -> 200 -> application/json: array<string> with minItems")
+    @Test("String array")
     func getTagsResponseArrayOfString() async throws {
         let yaml = try fixtureMap("37-array-mediatypes")
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url: "37-array-mediatypes", documentLoader: YamsDocumentLoader())
@@ -60,30 +72,29 @@ struct ArrayMediaTypesTests {
         #expect(itemsType.type == "string")
     }
 
-    @Test("POST /tags -> requestBody -> application/json: array<object> uniqueItems")
+    @Test("Object array")
     func postTagsRequestArrayOfObject() async throws {
         let yaml = try fixtureMap("37-array-mediatypes")
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url: "37-array-mediatypes", documentLoader: YamsDocumentLoader())
-
+       
         let path = try #require(apiSpec[path: "/tags"])
+    
         let postOp = try #require(path[operationId: "createTags"].first)
-
+       
         let reqBody = try #require(postOp.requestBody)
         let media = try #require(reqBody.contents[key: "application/json"])
+       
         let schemaType = try #require(media.schema?.schemaType as? OpenAPIArrayType)
-
+        
         // Array-Flag
         #expect(schemaType.uniqueItems == true)
-
-        // items: object mit properties id:int, name:string
         let objectItems = try #require(schemaType.items as? OpenAPIObjectType)
+        
         #expect(objectItems.properties.count == 2)
         #expect(objectItems.properties.contains(name: "id"))
         #expect(objectItems.properties.contains(name: "name"))
         #expect(objectItems.properties[key: "id"]?.type is OpenAPIIntegerType)
         #expect(objectItems.properties[key: "name"]?.type is OpenAPIStringType)
-
-        // Response 204 vorhanden
         let resp204 = try #require(postOp.response(httpstatus: "204"))
         #expect(resp204.description == "No Content")
     }

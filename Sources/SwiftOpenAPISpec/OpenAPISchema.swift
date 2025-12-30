@@ -20,7 +20,11 @@
 
 import Foundation
 
-public struct OpenAPISchema :  KeyedElement, PointerNavigable {
+public struct OpenAPISchema :  KeyedElement, PointerNavigable, Equatable {
+    public static func == (lhs: OpenAPISchema, rhs: OpenAPISchema) -> Bool {
+        return false
+    }
+    
     public var key: String?
     static let NULLABLE_KEY = "nullable"
     public static let TYPE_KEY = "type"

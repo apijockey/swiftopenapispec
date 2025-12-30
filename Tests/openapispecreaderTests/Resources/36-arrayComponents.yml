@@ -13,8 +13,8 @@
 # limitations under the License.
 openapi: 3.1.0
 info:
-title: Array Components
-version: "1.0.0"
+  title: Array Components
+  version: "1.0.0"
 components:
     schemas:
         SimpleStringArray:

@@ -17,8 +17,8 @@
 //
 
 import Foundation
-import Testing
 import Yams
+import Testing
 import SwiftOpenAPISpec
 
 struct FixtureTests {
@@ -202,9 +202,9 @@ struct FixtureTests {
         let operations = try #require(apiSpec[path: "/board"]?.operations)
         #expect(operations.count == 1)
         #expect(operations.first?.response(httpstatus: "200")?.content.count == 1)
-        let objectType = try #require(operations.first?.response(httpstatus: "200")?.content.first?.schema?.schemaType as? OpenAPIArrayType)
-        #expect(objectType.items.count == 1)
-        let winnerProperty = try #require(objectType.items)
+        let objectType = try #require(operations.first?.response(httpstatus: "200")?.content.first?.schema?.schemaType as? OpenAPIObjectType)
+        #expect(objectType.properties.count == 2)
+        let winnerProperty = try #require(objectType.properties[key: "winner"])
         let stringPropertyInfo = try #require(winnerProperty.type as? OpenAPIStringType )
         #expect(stringPropertyInfo.allowedElements == ["X", "O", "."])
         let boardProperty = try #require((objectType.properties[key: "board"]?.type as? OpenAPIArrayType))
@@ -212,6 +212,7 @@ struct FixtureTests {
         #expect(boardProperty.minItems == 3)
         let boardSubItems = try #require(boardProperty.items as? OpenAPIArrayType)
         #expect(boardSubItems.items is OpenAPIStringType)
+
         
     }
     
