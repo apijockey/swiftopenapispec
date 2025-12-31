@@ -15,7 +15,7 @@
 # Copyright 2025
 #
 
-name: Swift
+name: Swift on linux and macos
 on: [push]
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
