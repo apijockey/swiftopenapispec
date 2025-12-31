@@ -69,6 +69,31 @@ jobs:
             Write-Host "$d exists in System32: $(Test-Path (Join-Path $system32 $d))"
           }
   
+      - name: Repair Windows image (UCRT / system components)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+      
+          Write-Host "=== DISM RestoreHealth (this can take a while) ==="
+          DISM /Online /Cleanup-Image /RestoreHealth
+      
+          Write-Host "=== Check presence of key UCRT DLLs after DISM ==="
+          $system32 = Join-Path $env:WINDIR 'System32'
+          $syswow64 = Join-Path $env:WINDIR 'SysWOW64'
+      
+          $runtimeDlls = @(
+            'api-ms-win-crt-runtime-l1-1-0.dll',
+            'api-ms-win-crt-heap-l1-1-0.dll',
+            'api-ms-win-crt-math-l1-1-0.dll',
+            'api-ms-win-crt-stdio-l1-1-0.dll',
+            'api-ms-win-crt-locale-l1-1-0.dll'
+          )
+      
+          foreach ($d in $runtimeDlls) {
+            $p1 = Join-Path $system32 $d
+            $p2 = Join-Path $syswow64 $d
+            Write-Host ("{0,-35} System32={1}  SysWOW64={2}" -f $d, (Test-Path $p1), (Test-Path $p2))
+          }
 
       - name: Install Swift (winget)
         shell: pwsh
