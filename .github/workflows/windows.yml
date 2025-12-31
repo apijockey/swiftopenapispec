@@ -1,20 +1,3 @@
-# Copyright 2025 CgSe Computergrafik und Softwareentwicklung GmbH
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# Copyright 2025
-#
-
 name: Swift on Windows
 on: [push]
 
@@ -41,18 +24,15 @@ jobs:
       matrix:
         os: [windows-latest]
         swift: [latest]
-        # Optional, wenn du später pinnen willst:
-        # swift: [latest, "6.2.2", "6.2.3"]
 
     steps:
       - uses: actions/checkout@v4
+
       - name: Install Visual Studio components required by Swift
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-
           Write-Host "Installing Visual Studio components required by Swift..."
-
           winget install `
             --id Microsoft.VisualStudio.2022.Community `
             --exact `
@@ -60,11 +40,18 @@ jobs:
             --accept-source-agreements `
             --accept-package-agreements `
             --custom "--add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Tools.ARM64"
+
+      # ✅ NEU: VC++ Runtime (oft nötig, damit swift.exe startet)
+      - name: Install VC++ Redistributable (runtime)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          winget install --id Microsoft.VCRedist.2015+.x64 -e --accept-source-agreements --accept-package-agreements
+
       - name: Install Swift (winget)
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-
           Write-Host "=== winget version ==="
           winget --version
 
@@ -79,6 +66,7 @@ jobs:
             winget install --id Swift.Toolchain -e --version '${{ matrix.swift }}' --accept-source-agreements --accept-package-agreements
           }
 
+      # ✅ GEÄNDERT: bessere Diagnose + korrektes Fail bei swift exitcode
       - name: Locate swift and add to PATH (fail if not found)
         shell: pwsh
         run: |
@@ -88,7 +76,10 @@ jobs:
           & where.exe swift 2>$null
           if ($LASTEXITCODE -eq 0) {
             Write-Host "swift already on PATH"
-            swift --version
+            & swift --version
+            $code = $LASTEXITCODE
+            Write-Host "swift exit code: $code"
+            if ($code -ne 0) { exit $code }
             exit 0
           }
 
@@ -127,14 +118,24 @@ jobs:
             exit 1
           }
 
-          # For subsequent steps:
           Add-Content -Path $env:GITHUB_PATH -Value $foundBin
-
-          # For this step too:
           $env:PATH = "$foundBin;$env:PATH"
 
-          Write-Host "Added swift bin to PATH: $foundBin"
-          swift --version
+          Write-Host "=== where swift (after PATH add) ==="
+          & where.exe swift
+
+          Write-Host "=== swift resolved path ==="
+          $swiftExe = (Get-Command swift -ErrorAction SilentlyContinue)?.Source
+          Write-Host "swift resolved to: $swiftExe"
+
+          Write-Host "=== swift --version ==="
+          & swift --version
+          $code = $LASTEXITCODE
+          Write-Host "swift exit code: $code"
+          if ($code -ne 0) {
+            Write-Error "Swift is present but failed to run (exit=$code)."
+            exit $code
+          }
 
       - name: build package
         shell: pwsh
