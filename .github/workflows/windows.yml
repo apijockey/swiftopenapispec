@@ -19,7 +19,7 @@ name: Swift on Windows
 on: [push]
 
 env:
-  SWIFT_VERSION: 6.2.3
+  SWIFT_VERSION: 6.2.2
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -39,9 +39,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, macos-latest]
-        # linux-latest kannst du später wieder hinzufügen
-
+        os: [windows-latest]
     steps:
       - uses: actions/checkout@v4
 
