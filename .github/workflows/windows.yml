@@ -69,43 +69,64 @@ jobs:
       - name: Locate swift and add to PATH if necessary
         shell: pwsh
         run: |
-          $where = & where.exe swift 2>$null
-          if ($where) {
-            Write-Host 'swift found by where.exe:'
-            $where | ForEach-Object { Write-Host "  $_" }
-          } else {
-            Write-Host 'swift not found by where.exe - searching common install locations...'
-            $candidates = @(
-              "$env:LOCALAPPDATA\Programs\Swift\Toolchains",
-              'C:\Users\ContainerAdministrator\AppData\Local\Programs\Swift\Toolchains',
-              'C:\Library\Developer\Toolchains',
-              "$env:ProgramFiles\Swift"
-            )
-            $found = $false
-            $ErrorActionPreference = 'Continue'
-            foreach ($p in $candidates) {
-              # print error
+          $ErrorActionPreference = 'Stop'
+          Write-Host '=== Checking for swift in PATH ==='
+          $swiftInPath = & where.exe swift 2>$null
+          if ($LASTEXITCODE -eq 0 -and $swiftInPath) {
+            Write-Host 'swift found in PATH:'
+            $swiftInPath | ForEach-Object { Write-Host "  $_" }
+            exit 0
+          }
+
+          Write-Host 'swift not found in PATH - searching common install locations...'
+
+          $candidates = @(
+            Join-Path $env:LOCALAPPDATA 'Programs\Swift\Toolchains',
+            'C:\Users\runneradmin\AppData\Local\Programs\Swift\Toolchains',
+            'C:\Users\ContainerAdministrator\AppData\Local\Programs\Swift\Toolchains',
+            'C:\Library\Developer\Toolchains',
+            Join-Path $env:ProgramFiles 'Swift'
+          ) | Where-Object { $_ -and (Test-Path $_) } | Select-Object -Unique
+
+          $foundBin = $null
+
+          foreach ($p in $candidates) {
+            Write-Host "Searching: $p"
+            Get-ChildItem $p -Directory | ForEach-Object {
+              $bin = Join-Path $_.FullName 'usr\bin'
               if (Test-Path $bin) {
-                Write-Host "Found candidate bin: $bin"
-                try {
-                  if (-not $Env:GITHUB_PATH) { throw "GITHUB_PATH is not set" }
-                  Add-Content -Path $Env:GITHUB_PATH -Value $bin -ErrorAction Stop
-                  $found = $true
-                } catch {
-                  Write-Host "WARNING: Failed to write to GITHUB_PATH: $($_.Exception.Message)"
-                  # Optional: not fail
-                }
+                Write-Host "Found swift bin: $bin"
+                $foundBin = $bin
+                break
               }
             }
-            Write-Host "GITHUB_PATH file: '$Env:GITHUB_PATH'"
-            Test-Path $Env:GITHUB_PATH | ForEach-Object { Write-Host "GITHUB_PATH exists: $_" }
-            if (-not $found) {
-              Write-Host 'No swift binary found in expected install locations. Listing C:\ for quick inspection (limited):'
-              Get-ChildItem 'C:\' -Directory -ErrorAction SilentlyContinue | Select-Object -First 20 | Format-List Name
-            } else {
-              Write-Host 'Added detected swift bin to PATH (via GITHUB_PATH).'
-            }
+            if ($foundBin) { break }
           }
+
+          if (-not $foundBin) {
+            Write-Error 'ERROR: swift binary not found in PATH or known install locations.'
+            exit 1
+          }
+
+          # Add to PATH for subsequent steps
+          if (-not $Env:GITHUB_PATH) {
+            Write-Error 'ERROR: GITHUB_PATH is not set.'
+            exit 1
+          }
+
+          Add-Content -Path $Env:GITHUB_PATH -Value $foundBin
+          Write-Host "Added swift bin to PATH via GITHUB_PATH: $foundBin"
+
+          # Optional: also for this step
+          $env:PATH = "$foundBin;$env:PATH"
+
+          Write-Host '=== swift --version ==='
+          & swift --version
+
+          Write-Host 'Swift setup OK.'
+          exit 0
+
+
       - name: Verify swift and environment
         shell: powershell
         run: |
