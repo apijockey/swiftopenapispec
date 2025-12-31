@@ -120,6 +120,23 @@ jobs:
       
           Add-Content -Path $env:GITHUB_PATH -Value $foundBin
           $env:PATH = "$foundBin;$env:PATH"
+
+          # Add additional loader paths that often contain required DLLs
+          $usrDir  = Split-Path $foundBin -Parent          # ...\usr
+          $libDir  = Join-Path $usrDir 'lib'               # ...\usr\lib
+          $swiftWinLibDir = Join-Path $libDir 'swift\windows'  # ...\usr\lib\swift\windows
+          
+          $extra = @($libDir, $swiftWinLibDir) | Where-Object { Test-Path $_ } | Select-Object -Unique
+          foreach ($p in $extra) {
+            Write-Host "Adding loader PATH: $p"
+            Add-Content -Path $env:GITHUB_PATH -Value $p   # for subsequent steps
+            $env:PATH = "$p;$env:PATH"                     # for this step
+          }
+          
+          Write-Host "=== Quick check for ICU / runtime DLLs ==="
+          Get-ChildItem $libDir -Filter "icu*.dll" -ErrorAction SilentlyContinue |
+            Select-Object -First 20 Name, Length | Format-Table -AutoSize | Out-String -Width 200 | Write-Host
+
       
           Write-Host "=== where swift (after PATH add) ==="
           & where.exe swift
