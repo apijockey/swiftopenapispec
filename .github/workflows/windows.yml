@@ -17,6 +17,7 @@ jobs:
       format_check_enabled: false
       shell_check_enabled: false
   wtest:
+    runs-on: windows-latest
     steps:
       - name: Run tests in Swift Windows container
         shell: pwsh
