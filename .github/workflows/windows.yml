@@ -18,12 +18,10 @@
 name: Swift on Windows
 on: [push]
 
-env:
-  SWIFT_VERSION: 6.2.2
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
 jobs:
   soundness:
     name: Soundness
@@ -35,22 +33,95 @@ jobs:
       api_breakage_check_enabled: false
       format_check_enabled: false
       shell_check_enabled: false
+
   wtest:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [windows-latest]
+        swift: [latest]
+        # Optional, wenn du später pinnen willst:
+        # swift: [latest, "6.2.2", "6.2.3"]
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Swift
-        uses: SwiftyLab/setup-swift@v1
-        with:
-          swift-version: ${{ env.SWIFT_VERSION }}
-
-      - name: Verify Swift
+      - name: Install Swift (winget)
         shell: pwsh
-        run: swift --version
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          Write-Host "=== winget version ==="
+          winget --version
+
+          Write-Host "=== updating winget sources ==="
+          winget source update
+
+          if ('${{ matrix.swift }}' -eq 'latest') {
+            Write-Host "Installing Swift.Toolchain (latest)..."
+            winget install --id Swift.Toolchain -e --accept-source-agreements --accept-package-agreements
+          } else {
+            Write-Host "Installing Swift.Toolchain version ${{ matrix.swift }} ..."
+            winget install --id Swift.Toolchain -e --version '${{ matrix.swift }}' --accept-source-agreements --accept-package-agreements
+          }
+
+      - name: Locate swift and add to PATH (fail if not found)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          Write-Host "=== Check swift in PATH (where.exe) ==="
+          & where.exe swift 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "swift already on PATH"
+            swift --version
+            exit 0
+          }
+
+          Write-Host "swift not on PATH - searching toolchain install locations..."
+
+          $roots = @(
+            (Join-Path $env:LOCALAPPDATA 'Programs\Swift\Toolchains'),
+            'C:\Users\runneradmin\AppData\Local\Programs\Swift\Toolchains',
+            'C:\Library\Developer\Toolchains',
+            (Join-Path $env:ProgramFiles 'Swift')
+          ) | Where-Object { $_ -and (Test-Path $_) } | Select-Object -Unique
+
+          $foundBin = $null
+
+          foreach ($root in $roots) {
+            Write-Host "Searching: $root"
+            Get-ChildItem $root -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+              $candidate = Join-Path $_.FullName 'usr\bin'
+              if (Test-Path $candidate) {
+                $foundBin = $candidate
+                Write-Host "Found candidate bin: $foundBin"
+              }
+            }
+            if ($foundBin) { break }
+          }
+
+          if (-not $foundBin) {
+            Write-Error "ERROR: swift toolchain bin not found under expected locations."
+            Write-Host "Tried roots:"
+            $roots | ForEach-Object { Write-Host "  $_" }
+            exit 1
+          }
+
+          if (-not $env:GITHUB_PATH) {
+            Write-Error "ERROR: GITHUB_PATH is not set."
+            exit 1
+          }
+
+          # For subsequent steps:
+          Add-Content -Path $env:GITHUB_PATH -Value $foundBin
+
+          # For this step too:
+          $env:PATH = "$foundBin;$env:PATH"
+
+          Write-Host "Added swift bin to PATH: $foundBin"
+          swift --version
 
       - name: build package
         shell: pwsh
