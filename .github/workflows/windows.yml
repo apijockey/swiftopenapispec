@@ -66,12 +66,12 @@ jobs:
             winget install --id Swift.Toolchain -e --version '${{ matrix.swift }}' --accept-source-agreements --accept-package-agreements
           }
 
-      # ✅ GEÄNDERT: bessere Diagnose + korrektes Fail bei swift exitcode
+        # ✅ GEÄNDERT: bessere Diagnose + korrektes Fail bei swift exitcode
       - name: Locate swift and add to PATH (fail if not found)
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-
+      
           Write-Host "=== Check swift in PATH (where.exe) ==="
           & where.exe swift 2>$null
           if ($LASTEXITCODE -eq 0) {
@@ -82,18 +82,18 @@ jobs:
             if ($code -ne 0) { exit $code }
             exit 0
           }
-
+      
           Write-Host "swift not on PATH - searching toolchain install locations..."
-
+      
           $roots = @(
             (Join-Path $env:LOCALAPPDATA 'Programs\Swift\Toolchains'),
             'C:\Users\runneradmin\AppData\Local\Programs\Swift\Toolchains',
             'C:\Library\Developer\Toolchains',
             (Join-Path $env:ProgramFiles 'Swift')
           ) | Where-Object { $_ -and (Test-Path $_) } | Select-Object -Unique
-
+      
           $foundBin = $null
-
+      
           foreach ($root in $roots) {
             Write-Host "Searching: $root"
             Get-ChildItem $root -Directory -ErrorAction SilentlyContinue | ForEach-Object {
@@ -105,37 +105,52 @@ jobs:
             }
             if ($foundBin) { break }
           }
-
+      
           if (-not $foundBin) {
             Write-Error "ERROR: swift toolchain bin not found under expected locations."
             Write-Host "Tried roots:"
             $roots | ForEach-Object { Write-Host "  $_" }
             exit 1
           }
-
+      
           if (-not $env:GITHUB_PATH) {
             Write-Error "ERROR: GITHUB_PATH is not set."
             exit 1
           }
-
+      
           Add-Content -Path $env:GITHUB_PATH -Value $foundBin
           $env:PATH = "$foundBin;$env:PATH"
-
+      
           Write-Host "=== where swift (after PATH add) ==="
           & where.exe swift
-
+      
           Write-Host "=== swift resolved path ==="
           $swiftExe = (Get-Command swift -ErrorAction SilentlyContinue)?.Source
           Write-Host "swift resolved to: $swiftExe"
-
-          Write-Host "=== swift --version ==="
-          & swift --version
-          $code = $LASTEXITCODE
-          Write-Host "swift exit code: $code"
+      
+          Write-Host "=== List toolchain DLLs next to swift.exe (first 50) ==="
+          Get-ChildItem $foundBin -Filter *.dll -ErrorAction SilentlyContinue |
+            Select-Object -First 50 Name, Length | Format-Table -AutoSize | Out-String -Width 200 | Write-Host
+      
+          Write-Host "=== Try running swift --version (capture exit code reliably) ==="
+          $code = 0
+          try {
+            & swift --version
+            $code = $LASTEXITCODE
+          } catch {
+            Write-Host "caught: $($_.Exception.Message)"
+            # If swift crashed before setting LASTEXITCODE, treat as failure:
+            if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { $code = $LASTEXITCODE } else { $code = 1 }
+          }
+      
+          Write-Host "swift exit code (LASTEXITCODE): $LASTEXITCODE"
+          Write-Host "swift exit code (code var): $code"
+      
           if ($code -ne 0) {
             Write-Error "Swift is present but failed to run (exit=$code)."
             exit $code
           }
+
 
       - name: build package
         shell: pwsh
