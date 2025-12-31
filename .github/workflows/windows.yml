@@ -19,7 +19,7 @@ name: Swift on Windows
 on: [push]
 
 env:
-  SWIFT_VERSION: 6.2.3
+  SWIFT_VERSION: 6.2.2
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
