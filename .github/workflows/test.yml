@@ -98,7 +98,11 @@ jobs:
         run: |
           Write-Host "winget location:"
           Get-Command winget -ErrorAction SilentlyContinue | Format-List -Force
-          winget --version || Write-Host "winget not available or returned non-zero."
+           try {
+             winget --version 
+          } catch {
+              Write-Host "winget not available or returned non-zero."
+          }
       - name: Install Swift.Toolchain via winget
         shell: powershell
         run: |
@@ -180,10 +184,19 @@ jobs:
         shell: powershell
         run: |
           Write-Host "=== PATH ==="; echo $env:PATH
-          Write-Host "=== where swift ==="; where.exe swift || Write-Host "swift not found"
-          Write-Host "=== swift --version ==="; swift --version || Write-Host "swift --version failed"
+          try {
+            Write-Host "=== where swift ==="; where.exe swift
+          }
+          catch {
+            Write-Host "swift not found"
+          }
+          try {
+            Write-Host "=== swift --version ==="; swift --version
+          }
+          catch {
+            Write-Host "swift --version failed"
+          }
           Write-Host "=== Toolchain folders ==="
           Get-ChildItem 'C:\Users\ContainerAdministrator\AppData\Local\Programs\Swift\Toolchains' -Recurse -Force -ErrorAction SilentlyContinue | Select-Object FullName, Length | Out-String -Width 200 | Write-Host
           Get-ChildItem 'C:\Library\Developer\Toolchains' -Recurse -Force -ErrorAction SilentlyContinue | Select-Object FullName, Length | Out-String -Width 200 | Write-Host
           Get-ChildItem -Path 'C:\' -Filter '*_InternalSwiftScan*.dll' -Recurse -ErrorAction SilentlyContinue | Select-Object FullName, Length | Out-String -Width 200 | Write-Host
-          
