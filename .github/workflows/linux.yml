@@ -1,0 +1,84 @@
+# Copyright 2025 CgSe Computergrafik und Softwareentwicklung GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Copyright 2025
+#
+
+name: Swift
+on: [push]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  tests-using-native:
+    if: vars.RUN_LINUX_TESTS == 'true'
+    needs: [soundness]
+    strategy:
+      fail-fast: false
+      matrix:
+        buildSystem: ["native", "swiftbuild"]
+        linuxSwiftVersion: ['["nightly-main", "nightly-6.2"]', '["nightly-main"]']
+        enable_windows_checks: [false]
+        exclude:
+          - buildSystem: "swiftbuild"
+            linuxSwiftVersion: '["nightly-main", "nightly-6.2"]'
+          - buildSystem: "swiftbuild"
+            enable_windows_checks: false
+          - buildSystem: "native"
+            linuxSwiftVersion: '["nightly-main"]'
+    name: Test (${{ matrix.buildSystem }})
+    uses: swiftlang/github-workflows/.github/workflows/swift_package_test.yml@0.0.2
+    with:
+      linux_os_versions: '["amazonlinux2", "bookworm", "noble", "jammy", "rhel-ubi9"]'
+      linux_swift_versions: ${{ matrix.linuxSwiftVersion }}
+      linux_pre_build_command: ./.github/scripts/prebuild.sh
+      linux_build_command: 'swift test'
+      windows_swift_versions: '["nightly-main"]'
+      windows_pre_build_command: 'Invoke-Program .\.github\scripts\prebuild.ps1'
+      windows_build_command: 'Invoke-Program swift test'
+      enable_windows_checks: ${{ matrix.enable_windows_checks }}
+      enable_ios_checks: true
+      enable_macos_checks: true
+      macos_exclude_xcode_versions: "[{\"xcode_version\": \"16.3\"}, {\"xcode_version\": \"16.4\"}]"
+      macos_build_command: 'swift test'
+  tests-using-swiftbuild:
+    if: vars.RUN_LINUX_TESTS == 'true'
+    name: Test (all SwiftBuild)
+    needs: [soundness]
+    uses: swiftlang/github-workflows/.github/workflows/swift_package_test.yml@0.0.2
+    with:
+      linux_os_versions: '["amazonlinux2", "bookworm", "noble", "jammy", "rhel-ubi9"]'
+      linux_swift_versions: '["nightly-main"]'
+      linux_pre_build_command: ./.github/scripts/prebuild.sh
+      linux_build_command: 'swift test'
+      enable_windows_checks: false
+      windows_swift_versions: '["nightly-main"]'
+      windows_pre_build_command: 'Invoke-Program .\.github\scripts\prebuild.ps1'
+      windows_build_command: 'Invoke-Program swift test'
+      enable_ios_checks: true
+      enable_macos_checks: true
+      macos_exclude_xcode_versions: "[{\"xcode_version\": \"16.3\"}, {\"xcode_version\": \"16.4\"}]"
+      macos_build_command: 'swift test'
+
+  soundness:
+    if: vars.RUN_LINUX_TESTS == 'true'
+    name: Soundness
+    uses: swiftlang/github-workflows/.github/workflows/soundness.yml@0.0.2
+    with:
+      license_header_check_project_name: "swiftopenapispec"
+      license_header_check_enabled: false
+      unacceptable_language_check_enabled: true
+      api_breakage_check_enabled: false
+      format_check_enabled: false
+      shell_check_enabled: false
