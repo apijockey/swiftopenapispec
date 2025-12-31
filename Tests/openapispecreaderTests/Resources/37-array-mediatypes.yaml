@@ -16,36 +16,36 @@ info:
   title: Array MediaTypes
   version: "1.0.0"
 paths:
-    /tags:
-        get:
-          operationId: getTags
-          responses:
-            "200":
-              description: OK
-              content:
-                application/json:
-                  schema:
-                    type: array
-                    minItems: 1
-                    items:
-                        type: string
-        post:
-          operationId: createTags
-          requestBody:
-            required: true
-            content:
-              application/json:
-                schema:
-                  type: array
-                  uniqueItems: true
-                  items:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                      name:
-                        type: string
-                    required: [id, name]
-          responses:
-            "204":
-              description: No Content
+  /tags:
+    get:
+      operationId: getTags
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                minItems: 1
+                items:
+                  type: string
+    post:
+      operationId: createTags
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              uniqueItems: true
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                required: [id, name]
+      responses:
+        "204":
+          description: No Content

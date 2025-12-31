@@ -27,8 +27,9 @@ paths:
               schema: {
                 type: object,
                 properties: {
-                    ok: {
-                        type: boolean
-                    }
-                }, required: [ok]
-            }
+                  ok: {
+                    type: boolean
+                  }
+                }, 
+                required: [ok]
+              }

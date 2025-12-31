@@ -16,49 +16,49 @@ info:
   title: Array Components
   version: "1.0.0"
 components:
-    schemas:
-        SimpleStringArray:
-          type: array
-          items:
-            id:
-              type: string
-        IntArrayWithBounds:
-          type: array
-          minItems: 1
-          maxItems: 5
-          items:
+  schemas:
+    SimpleStringArray:
+      type: array
+      items:
+        id:
+          type: string
+    IntArrayWithBounds:
+      type: array
+      minItems: 1
+      maxItems: 5
+      items:
+        type: integer
+    UniqueBooleanArray:
+      type: array
+      uniqueItems: true
+      items:
+        type: boolean
+    NestedStringArray:
+      type: array
+      items:
+        type: array
+        items:
+          type: string
+    ObjectArray:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
             type: integer
-        UniqueBooleanArray:
-          type: array
-          uniqueItems: true
-          items:
-            type: boolean
-        NestedStringArray:
-          type: array
-          items:
-            type: array
-            items:
-              type: string
-        ObjectArray:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: integer
-              name:
-                type: string
-            required: [id, name]
-        NumberArrayWithContains:
-          type: array
-          minContains: 1
-          maxContains: 2
-          items:
-            type: number
-        ItemsWithoutType:
-          type: array
-          items:
-            format: uuid
-        ArrayWithoutItems:
-          type: array
-          minItems: 0
+          name:
+            type: string
+        required: [id, name]
+    NumberArrayWithContains:
+      type: array
+      minContains: 1
+      maxContains: 2
+      items:
+        type: number
+    ItemsWithoutType:
+      type: array
+      items:
+        format: uuid
+    ArrayWithoutItems:
+      type: array
+      minItems: 0
