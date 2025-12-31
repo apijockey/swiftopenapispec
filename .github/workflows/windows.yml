@@ -17,6 +17,10 @@
 
 name: Swift on Windows
 on: [push]
+
+env:
+  SWIFT_VERSION: 6.2.3
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -31,147 +35,29 @@ jobs:
       api_breakage_check_enabled: false
       format_check_enabled: false
       shell_check_enabled: false
-  windows-test:
-    name: Windows Test (winget Swift.Toolchain 6.2.3)
-    runs-on: windows-latest
-    env:
-      SWIFT_VERSION: '6.2.3'
+  wtest:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+        # linux-latest kannst du später wieder hinzufügen
+
     steps:
       - uses: actions/checkout@v4
-      - name: Clean old Swift toolchains
-        shell: powershell
-        run: |
-          Remove-Item -Recurse -Force 'C:\Users\ContainerAdministrator\AppData\Local\Programs\Swift\Toolchains\*' -ErrorAction SilentlyContinue
-          Remove-Item -Recurse -Force 'C:\Library\Developer\Toolchains\*' -ErrorAction SilentlyContinue
-          Write-Host "Old Swift toolchains removed (if present)."
-      - name: Ensure winget is available
-        shell: powershell
-        run: |
-          Write-Host "winget location:"
-          Get-Command winget -ErrorAction SilentlyContinue | Format-List -Force
-           try {
-             winget --version
-          } catch {
-              Write-Host "winget not available or returned non-zero."
-          }
-      - name: Install Swift.Toolchain via winget
-        shell: powershell
-        run: |
-          # Install official Swift toolchain package via winget.
-          # -e / --exact anchors to the package id; accept agreements to avoid prompts.
-          Write-Host "Installing Swift.Toolchain (version: $env:SWIFT_VERSION) via winget..."
-          winget install --id Swift.Toolchain -e --accept-package-agreements --accept-source-agreements
-          $rc = $LASTEXITCODE
-          if ($rc -ne 0) {
-            Write-Host "winget install returned exit code $rc"
-            exit $rc
-          }
-      - name: Locate swift and add to PATH if necessary
+
+      - name: Setup Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: ${{ env.SWIFT_VERSION }}
+
+      - name: Verify Swift
         shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          Write-Host '=== Checking for swift in PATH ==='
-          $swiftInPath = & where.exe swift 2>$null
-          if ($LASTEXITCODE -eq 0 -and $swiftInPath) {
-            Write-Host 'swift found in PATH:'
-            $swiftInPath | ForEach-Object { Write-Host "  $_" }
-            exit 0
-          }
+        run: swift --version
 
-          Write-Host 'swift not found in PATH - searching common install locations...'
+      - name: build package
+        shell: pwsh
+        run: swift build
 
-          $candidates = @(
-            Join-Path $env:LOCALAPPDATA 'Programs\Swift\Toolchains',
-            'C:\Users\runneradmin\AppData\Local\Programs\Swift\Toolchains',
-            'C:\Users\ContainerAdministrator\AppData\Local\Programs\Swift\Toolchains',
-            'C:\Library\Developer\Toolchains',
-            Join-Path $env:ProgramFiles 'Swift'
-          ) | Where-Object { $_ -and (Test-Path $_) } | Select-Object -Unique
-
-          $foundBin = $null
-
-          foreach ($p in $candidates) {
-            Write-Host "Searching: $p"
-            Get-ChildItem $p -Directory | ForEach-Object {
-              $bin = Join-Path $_.FullName 'usr\bin'
-              if (Test-Path $bin) {
-                Write-Host "Found swift bin: $bin"
-                $foundBin = $bin
-                break
-              }
-            }
-            if ($foundBin) { break }
-          }
-
-          if (-not $foundBin) {
-            Write-Error 'ERROR: swift binary not found in PATH or known install locations.'
-            exit 1
-          }
-
-          # Add to PATH for subsequent steps
-          if (-not $Env:GITHUB_PATH) {
-            Write-Error 'ERROR: GITHUB_PATH is not set.'
-            exit 1
-          }
-
-          Add-Content -Path $Env:GITHUB_PATH -Value $foundBin
-          Write-Host "Added swift bin to PATH via GITHUB_PATH: $foundBin"
-
-          # Optional: also for this step
-          $env:PATH = "$foundBin;$env:PATH"
-
-          Write-Host '=== swift --version ==='
-          & swift --version
-
-          Write-Host 'Swift setup OK.'
-          exit 0
-
-
-      - name: Verify swift and environment
-        shell: powershell
-        run: |
-          Write-Host "=== where swift ==="
-          where.exe swift
-          try {
-              where.exe swift
-          } catch {
-              Write-Host "swift not found"
-          }
-          try {
-              swift --version
-          } catch {
-              Write-Host "swift --version failed"
-          }
-          Write-Host "=== swift --version ==="
-          swift --version
-          Write-Host "=== swift info (verbose) ==="
-          try {
-            swift -v --version
-          } catch { Write-Host "swift -v --version failed: $_" }
-      - name: Build & Test (Windows)
-        shell: powershell
-        run: |
-          Write-Host "Running swift build..."
-          swift build -v
-          Write-Host "Running swift test..."
-      - name: Collect debug info on failure
-        if: failure()
-        shell: powershell
-        run: |
-          Write-Host "=== PATH ==="; echo $env:PATH
-          try {
-            Write-Host "=== where swift ==="; where.exe swift
-          }
-          catch {
-            Write-Host "swift not found"
-          }
-          try {
-            Write-Host "=== swift --version ==="; swift --version
-          }
-          catch {
-            Write-Host "swift --version failed"
-          }
-          Write-Host "=== Toolchain folders ==="
-          Get-ChildItem 'C:\Users\ContainerAdministrator\AppData\Local\Programs\Swift\Toolchains' -Recurse -Force -ErrorAction SilentlyContinue | Select-Object FullName, Length | Out-String -Width 200 | Write-Host
-          Get-ChildItem 'C:\Library\Developer\Toolchains' -Recurse -Force -ErrorAction SilentlyContinue | Select-Object FullName, Length | Out-String -Width 200 | Write-Host
-          Get-ChildItem -Path 'C:\' -Filter '*_InternalSwiftScan*.dll' -Recurse -ErrorAction SilentlyContinue | Select-Object FullName, Length | Out-String -Width 200 | Write-Host
+      - name: test package
+        shell: pwsh
+        run: swift test
