@@ -30,13 +30,11 @@ jobs:
           # Pick a Swift tag that exists for windowsservercore-ltsc2022.
           # Example shown; adjust tag to what you want to test.
           $image = "ghcr.io/swiftlang/swift:6.2.3-windowsservercore-ltsc2022"
-          - name: Login to GHCR
-          shell: pwsh
-          run: |
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-
+      - name: Login to GHCR
+        shell: pwsh
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
           docker pull $image
-      
           # Run swift in container; mount repo into C:\src
           docker run --rm `
             -v "${{ github.workspace }}:C:\src" `
