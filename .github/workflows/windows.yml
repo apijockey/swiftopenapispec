@@ -22,23 +22,19 @@ jobs:
   wtest:
     runs-on: windows-latest
     steps:
-      - name: Run tests in Swift Windows container
+      - uses: actions/checkout@v4
+  
+      - name: Run Swift build & tests in Windows container
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-      
-          # Pick a Swift tag that exists for windowsservercore-ltsc2022.
-          # Example shown; adjust tag to what you want to test.
-          $image = "ghcr.io/swiftlang/swift:6.2.3-windowsservercore-ltsc2022"
-      - name: Login to GHCR
-        shell: pwsh
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+  
+          $image = "swift:windowsservercore-ltsc2022"
+  
           docker pull $image
-          # Run swift in container; mount repo into C:\src
+  
           docker run --rm `
             -v "${{ github.workspace }}:C:\src" `
             -w "C:\src" `
             $image `
             cmd /c "swift --version && swift build && swift test"
-            
