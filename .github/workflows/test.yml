@@ -131,18 +131,23 @@ jobs:
               "$env:ProgramFiles\Swift"
             )
             $found = $false
+            $ErrorActionPreference = 'Continue'
             foreach ($p in $candidates) {
-              if (Test-Path $p) {
-                Get-ChildItem $p -Directory -ErrorAction SilentlyContinue | ForEach-Object {
-                  $bin = Join-Path $_.FullName 'usr\bin'
-                  if (Test-Path $bin) {
-                    Write-Host "Found candidate bin: $bin"
-                    Add-Content -Path $Env:GITHUB_PATH -Value $bin
-                    $found = $true
-                  }
+              # print error
+              if (Test-Path $bin) {
+                Write-Host "Found candidate bin: $bin"
+                try {
+                  if (-not $Env:GITHUB_PATH) { throw "GITHUB_PATH is not set" }
+                  Add-Content -Path $Env:GITHUB_PATH -Value $bin -ErrorAction Stop
+                  $found = $true
+                } catch {
+                  Write-Host "WARNING: Failed to write to GITHUB_PATH: $($_.Exception.Message)"
+                  # Optional: not fail
                 }
               }
             }
+            Write-Host "GITHUB_PATH file: '$Env:GITHUB_PATH'"
+            Test-Path $Env:GITHUB_PATH | ForEach-Object { Write-Host "GITHUB_PATH exists: $_" }
             if (-not $found) {
               Write-Host 'No swift binary found in expected install locations. Listing C:\ for quick inspection (limited):'
               Get-ChildItem 'C:\' -Directory -ErrorAction SilentlyContinue | Select-Object -First 20 | Format-List Name
