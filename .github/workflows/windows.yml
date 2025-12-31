@@ -148,7 +148,65 @@ jobs:
           Write-Host "=== List toolchain DLLs next to swift.exe (first 50) ==="
           Get-ChildItem $foundBin -Filter *.dll -ErrorAction SilentlyContinue |
             Select-Object -First 50 Name, Length | Format-Table -AutoSize | Out-String -Width 200 | Write-Host
-      
+         
+          # --- verify & add likely DLL locations (and log them) ---
+          $usrDir = Split-Path $foundBin -Parent                 # ...\usr
+          $libDir = Join-Path $usrDir 'lib'                      # ...\usr\lib
+          $swiftWinLibDir = Join-Path $libDir 'swift\windows'    # ...\usr\lib\swift\windows
+          
+          Write-Host "=== Toolchain paths ==="
+          Write-Host "usrDir:          $usrDir (exists=$(Test-Path $usrDir))"
+          Write-Host "libDir:          $libDir (exists=$(Test-Path $libDir))"
+          Write-Host "swiftWinLibDir:  $swiftWinLibDir (exists=$(Test-Path $swiftWinLibDir))"
+          
+          $extra = @($libDir, $swiftWinLibDir) | Where-Object { Test-Path $_ } | Select-Object -Unique
+          foreach ($p in $extra) {
+            Write-Host "Adding loader PATH: $p"
+            Add-Content -Path $env:GITHUB_PATH -Value $p
+            $env:PATH = "$p;$env:PATH"
+          }
+          
+          Write-Host "=== swift --version ==="
+          & swift --version
+          $code = $LASTEXITCODE
+          Write-Host "swift exit code: $code"
+          
+          if ($code -ne 0) {
+            Write-Host "=== swift failed; dumpbin /DEPENDENTS to identify missing DLLs ==="
+          
+            # locate vswhere
+            $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+            if (-not (Test-Path $vswhere)) {
+              Write-Error "vswhere.exe not found at expected location: $vswhere"
+              exit $code
+            }
+          
+            $vsInstallPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+            Write-Host "VS installationPath: $vsInstallPath"
+          
+            if (-not $vsInstallPath -or -not (Test-Path $vsInstallPath)) {
+              Write-Error "Visual Studio installation path not found (vswhere returned empty)."
+              exit $code
+            }
+          
+            # find dumpbin.exe
+            $dumpbin = Get-ChildItem -Path (Join-Path $vsInstallPath 'VC\Tools\MSVC') -Recurse -Filter dumpbin.exe -ErrorAction SilentlyContinue |
+                       Select-Object -First 1 -ExpandProperty FullName
+          
+            if (-not $dumpbin) {
+              Write-Error "dumpbin.exe not found under: $vsInstallPath\VC\Tools\MSVC"
+              exit $code
+            }
+          
+            Write-Host "dumpbin: $dumpbin"
+            Write-Host "swiftExe: $swiftExe"
+          
+            & $dumpbin /DEPENDENTS $swiftExe
+          
+            # hard fail (as requested)
+            exit $code
+          }
+
           Write-Host "=== Try running swift --version (capture exit code reliably) ==="
           $code = 0
           try {
