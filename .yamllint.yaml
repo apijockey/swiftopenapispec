@@ -33,3 +33,4 @@ rules:
     level: warning
     allow-non-breakable-inline-mappings: true
   truthy: disable
+  trailing-spaces: enable

@@ -30,6 +30,6 @@ paths:
                   ok: {
                     type: boolean
                   }
-                }, 
+                },
                 required: [ok]
               }

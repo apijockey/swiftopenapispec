@@ -27,12 +27,12 @@ paths:
             schema:
               type: object
               properties: {
-                name: { 
-                  type:string 
-                } 
+                name: {
+                  type:string
+                }
               }
               required: [name]
       responses:
-        "201": { 
-          description: created 
+        "201": {
+          description: created
         }
