@@ -152,7 +152,17 @@ jobs:
         shell: powershell
         run: |
           Write-Host "=== where swift ==="
-          where.exe swift || Write-Host "where.exe did not find swift"
+          where.exe swift
+          try {
+              where.exe swift
+          } catch {
+              Write-Host "swift not found"
+          }
+          try {
+              swift --version
+          } catch {
+              Write-Host "swift --version failed"
+          }
           Write-Host "=== swift --version ==="
           swift --version
           Write-Host "=== swift info (verbose) ==="
@@ -176,3 +186,4 @@ jobs:
           Get-ChildItem 'C:\Users\ContainerAdministrator\AppData\Local\Programs\Swift\Toolchains' -Recurse -Force -ErrorAction SilentlyContinue | Select-Object FullName, Length | Out-String -Width 200 | Write-Host
           Get-ChildItem 'C:\Library\Developer\Toolchains' -Recurse -Force -ErrorAction SilentlyContinue | Select-Object FullName, Length | Out-String -Width 200 | Write-Host
           Get-ChildItem -Path 'C:\' -Filter '*_InternalSwiftScan*.dll' -Recurse -ErrorAction SilentlyContinue | Select-Object FullName, Length | Out-String -Width 200 | Write-Host
+          
