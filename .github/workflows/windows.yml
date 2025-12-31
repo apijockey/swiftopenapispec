@@ -173,7 +173,9 @@ jobs:
           
           if ($code -ne 0) {
             Write-Host "=== swift failed; dumpbin /DEPENDENTS to identify missing DLLs ==="
+            Write-Host "=== Check presence of key runtime DLLs ==="
           
+
             # locate vswhere
             $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
             if (-not (Test-Path $vswhere)) {
@@ -202,7 +204,23 @@ jobs:
             Write-Host "swiftExe: $swiftExe"
           
             & $dumpbin /DEPENDENTS $swiftExe
-          
+            $system32 = Join-Path $env:WINDIR 'System32'
+            $syswow64 = Join-Path $env:WINDIR 'SysWOW64'
+            
+            $runtimeDlls = @(
+              'VCRUNTIME140.dll',
+              'api-ms-win-crt-runtime-l1-1-0.dll',
+              'api-ms-win-crt-heap-l1-1-0.dll',
+              'api-ms-win-crt-math-l1-1-0.dll',
+              'api-ms-win-crt-stdio-l1-1-0.dll',
+              'api-ms-win-crt-locale-l1-1-0.dll'
+            )
+            
+            foreach ($d in $runtimeDlls) {
+              $p1 = Join-Path $system32 $d
+              $p2 = Join-Path $syswow64 $d
+              Write-Host ("{0,-35} System32={1}  SysWOW64={2}" -f $d, (Test-Path $p1), (Test-Path $p2))
+            }
             # hard fail (as requested)
             exit $code
           }
