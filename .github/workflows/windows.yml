@@ -41,12 +41,22 @@ jobs:
             --accept-package-agreements `
             --custom "--add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Tools.ARM64"
 
-      # ✅ NEU: VC++ Runtime (oft nötig, damit swift.exe startet)
-      - name: Install VC++ Redistributable (runtime)
+     - name: Install Microsoft Visual C++ Runtime (direct installer)
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          winget install --id Microsoft.VCRedist.2015+.x64 -e --accept-source-agreements --accept-package-agreements
+      
+          $url = "https://aka.ms/vs/17/release/vc_redist.x64.exe"
+          $out = Join-Path $env:TEMP "vc_redist.x64.exe"
+      
+          Invoke-WebRequest -Uri $url -OutFile $out
+          Start-Process -FilePath $out -ArgumentList "/install", "/quiet", "/norestart" -Wait -NoNewWindow
+      
+          # Optional: also x86 (harmless, sometimes needed by tooling)
+          $url86 = "https://aka.ms/vs/17/release/vc_redist.x86.exe"
+          $out86 = Join-Path $env:TEMP "vc_redist.x86.exe"
+          Invoke-WebRequest -Uri $url86 -OutFile $out86
+          Start-Process -FilePath $out86 -ArgumentList "/install", "/quiet", "/norestart" -Wait -NoNewWindow
 
       - name: Install Swift (winget)
         shell: pwsh
@@ -191,9 +201,21 @@ jobs:
               exit $code
             }
           
-            # find dumpbin.exe
-            $dumpbin = Get-ChildItem -Path (Join-Path $vsInstallPath 'VC\Tools\MSVC') -Recurse -Filter dumpbin.exe -ErrorAction SilentlyContinue |
-                       Select-Object -First 1 -ExpandProperty FullName
+            # find dumpbin.exe (prefer Hostx64\x64)
+            $dumpbin = Get-ChildItem -Path (Join-Path $vsInstallPath 'VC\Tools\MSVC') `
+              -Recurse -Filter dumpbin.exe -ErrorAction SilentlyContinue |
+              Where-Object {
+                $_.FullName -match '\\bin\\Hostx64\\x64\\dumpbin\.exe$'
+              } |
+              Select-Object -First 1 -ExpandProperty FullName
+            
+            if (-not $dumpbin) {
+              Write-Error "dumpbin.exe (Hostx64\\x64) not found under VS install."
+              exit 1
+            }
+            
+            Write-Host "Using dumpbin: $dumpbin"
+
           
             if (-not $dumpbin) {
               Write-Error "dumpbin.exe not found under: $vsInstallPath\VC\Tools\MSVC"
