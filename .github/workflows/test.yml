@@ -99,7 +99,7 @@ jobs:
           Write-Host "winget location:"
           Get-Command winget -ErrorAction SilentlyContinue | Format-List -Force
            try {
-             winget --version 
+             winget --version
           } catch {
               Write-Host "winget not available or returned non-zero."
           }
@@ -116,29 +116,27 @@ jobs:
             exit $rc
           }
       - name: Locate swift and add to PATH if necessary
-        shell: powershell
+        shell: pwsh
         run: |
-          # Check whether swift is already on PATH
           $where = & where.exe swift 2>$null
           if ($where) {
-            Write-Host "swift found by where.exe:"
+            Write-Host 'swift found by where.exe:'
             $where | ForEach-Object { Write-Host "  $_" }
           } else {
-            Write-Host "swift not found by where.exe — searching common install locations..."
+            Write-Host 'swift not found by where.exe - searching common install locations...'
             $candidates = @(
               "$env:LOCALAPPDATA\Programs\Swift\Toolchains",
-              "C:\Users\ContainerAdministrator\AppData\Local\Programs\Swift\Toolchains",
-              "C:\Library\Developer\Toolchains",
+              'C:\Users\ContainerAdministrator\AppData\Local\Programs\Swift\Toolchains',
+              'C:\Library\Developer\Toolchains',
               "$env:ProgramFiles\Swift"
             )
-            $found = $null
+            $found = $false
             foreach ($p in $candidates) {
               if (Test-Path $p) {
                 Get-ChildItem $p -Directory -ErrorAction SilentlyContinue | ForEach-Object {
                   $bin = Join-Path $_.FullName 'usr\bin'
                   if (Test-Path $bin) {
                     Write-Host "Found candidate bin: $bin"
-                    # Add to PATH for subsequent steps
                     Add-Content -Path $Env:GITHUB_PATH -Value $bin
                     $found = $true
                   }
@@ -146,10 +144,10 @@ jobs:
               }
             }
             if (-not $found) {
-              Write-Host "No swift binary found in expected install locations. Listing C:\\ for quick inspection (limited):"
+              Write-Host 'No swift binary found in expected install locations. Listing C:\ for quick inspection (limited):'
               Get-ChildItem 'C:\' -Directory -ErrorAction SilentlyContinue | Select-Object -First 20 | Format-List Name
             } else {
-              Write-Host "Added detected swift bin to PATH (via GITHUB_PATH)."
+              Write-Host 'Added detected swift bin to PATH (via GITHUB_PATH).'
             }
           }
       - name: Verify swift and environment
