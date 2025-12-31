@@ -46,17 +46,29 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
       
-          $url = "https://aka.ms/vs/17/release/vc_redist.x64.exe"
-          $out = Join-Path $env:TEMP "vc_redist.x64.exe"
+          function Run-Redist($url, $name) {
+            $out = Join-Path $env:TEMP $name
+            Invoke-WebRequest -Uri $url -OutFile $out
       
-          Invoke-WebRequest -Uri $url -OutFile $out
-          Start-Process -FilePath $out -ArgumentList "/install", "/quiet", "/norestart" -Wait -NoNewWindow
+            Write-Host "Running $name /repair ..."
+            $p = Start-Process -FilePath $out -ArgumentList "/repair", "/quiet", "/norestart" -Wait -PassThru
+            Write-Host "$name exit code: $($p.ExitCode)"
+            if ($p.ExitCode -ne 0) { throw "$name failed with exit code $($p.ExitCode)" }
+          }
       
-          # Optional: also x86 (harmless, sometimes needed by tooling)
-          $url86 = "https://aka.ms/vs/17/release/vc_redist.x86.exe"
-          $out86 = Join-Path $env:TEMP "vc_redist.x86.exe"
-          Invoke-WebRequest -Uri $url86 -OutFile $out86
-          Start-Process -FilePath $out86 -ArgumentList "/install", "/quiet", "/norestart" -Wait -NoNewWindow
+          Run-Redist "https://aka.ms/vs/17/release/vc_redist.x64.exe" "vc_redist.x64.exe"
+          Run-Redist "https://aka.ms/vs/17/release/vc_redist.x86.exe" "vc_redist.x86.exe"
+      
+          # Verify immediately
+          $system32 = Join-Path $env:WINDIR 'System32'
+          $dlls = @(
+            'api-ms-win-crt-runtime-l1-1-0.dll',
+            'api-ms-win-crt-stdio-l1-1-0.dll'
+          )
+          foreach ($d in $dlls) {
+            Write-Host "$d exists in System32: $(Test-Path (Join-Path $system32 $d))"
+          }
+  
 
       - name: Install Swift (winget)
         shell: pwsh
