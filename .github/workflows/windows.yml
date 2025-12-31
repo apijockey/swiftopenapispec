@@ -41,3 +41,4 @@ jobs:
             -w "C:\src" `
             $image `
             cmd /c "swift --version && swift build && swift test"
+            
