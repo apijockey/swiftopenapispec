@@ -16,22 +16,22 @@ jobs:
       api_breakage_check_enabled: false
       format_check_enabled: false
       shell_check_enabled: false
-
   wtest:
-    - name: Run tests in Swift Windows container
-      shell: pwsh
-      run: |
-        $ErrorActionPreference = 'Stop'
-    
-        # Pick a Swift tag that exists for windowsservercore-ltsc2022.
-        # Example shown; adjust tag to what you want to test.
-        $image = "ghcr.io/swiftlang/swift:6.2.3-windowsservercore-ltsc2022"
-    
-        docker pull $image
-    
-        # Run swift in container; mount repo into C:\src
-        docker run --rm `
-          -v "${{ github.workspace }}:C:\src" `
-          -w "C:\src" `
-          $image `
-          cmd /c "swift --version && swift build && swift test"
+    steps:
+      - name: Run tests in Swift Windows container
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+      
+          # Pick a Swift tag that exists for windowsservercore-ltsc2022.
+          # Example shown; adjust tag to what you want to test.
+          $image = "ghcr.io/swiftlang/swift:6.2.3-windowsservercore-ltsc2022"
+      
+          docker pull $image
+      
+          # Run swift in container; mount repo into C:\src
+          docker run --rm `
+            -v "${{ github.workspace }}:C:\src" `
+            -w "C:\src" `
+            $image `
+            cmd /c "swift --version && swift build && swift test"
