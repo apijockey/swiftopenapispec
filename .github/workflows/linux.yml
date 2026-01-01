@@ -15,19 +15,26 @@
 # Copyright 2025
 #
 
-name: Pull request
+name: Swift Linux and MacOS Test
 
 permissions:
   contents: read
 on:
-  pull_request:
-    types: [opened, reopened, synchronize]
+  push:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   linux:
+    if: vars.RUN_LINUX_TESTS == 'true'
     runs-on: ubuntu-latest
+    needs: [soundness]
+    steps:
+      - name: Test
+        run: swift build && swift test
+  macos:
+    if: vars.RUN_MACOS_TESTS == 'true'
+    runs-on: macos-latest
     needs: [soundness]
     steps:
       - name: Test
