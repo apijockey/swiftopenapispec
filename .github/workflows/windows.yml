@@ -23,16 +23,12 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-  
       - name: Run Swift build & tests in Windows container
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-  
           $image = "swift:windowsservercore-ltsc2022"
-  
           docker pull $image
-  
           docker run --rm `
             -v "${{ github.workspace }}:C:\src" `
             -w "C:\src" `
