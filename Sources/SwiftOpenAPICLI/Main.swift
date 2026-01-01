@@ -14,7 +14,7 @@ struct Main {
         var standardOut : (any TextOutputStream) = FileHandleTextOutputStream(.standardOutput)
         var standardErr : (any TextOutputStream) = FileHandleTextOutputStream(.standardError)
         let code = await SwiftOpenAPICLIApp().run(args: CommandLine.arguments, stdout: &standardOut, stderr: &standardErr)
-        // Setze Exit-Code
+        
         if code != 0 {
             exit(Int32(code))
         }

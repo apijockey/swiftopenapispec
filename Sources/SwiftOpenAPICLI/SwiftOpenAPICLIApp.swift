@@ -38,10 +38,18 @@ public struct SwiftOpenAPICLIApp {
     @discardableResult
     public func run(args: [String], stdout: inout TextOutputStream, stderr: inout TextOutputStream) async -> Int {
         do {
+            // args[0] = Executable-Name
             guard args.count >= 2 else {
                 throw SwiftOpenAPICLIError.missingArgument
             }
             let path = args[1]
+            let option: String? = args.count >= 3 ? args[2] : nil
+
+            // --version: gibt nur die CLI-Version aus und beendet sich
+            if option == "--version" {
+                stdout.write("\(SwiftOpenAPICLIVersion)\n")
+                return 0
+            }
 
             // Erzeuge URL aus Pfad (lokal)
             let url: URL
@@ -59,7 +67,28 @@ public struct SwiftOpenAPICLIApp {
             // Spezifikation laden
             let spec = try await OpenAPISpecification.read(url: url, documentLoader: YamsDocumentLoader())
 
-            // Beispielausgabe: OpenAPI-Version und Titel
+            // --validate: einfache Validierung
+            if let opt = option {
+                switch opt {
+                case "--validate":
+                    let ok = Validator.validate(spec: spec)
+                    if ok {
+                        stdout.write("Validation: OK\n")
+                        return 0
+                    } else {
+                        stdout.write("Validation: FAILED\n")
+                        return 1
+                    }
+                case "--version":
+                    // bereits oben behandelt; hier nur Vollständigkeit
+                    stdout.write("\(SwiftOpenAPICLIVersion)\n")
+                    return 0
+                default:
+                    throw SwiftOpenAPICLIError.invalidOption(opt)
+                }
+            }
+
+            // Default-Ausgabe (wie bisher), wenn kein zweites Argument übergeben wurde
             let version = spec.version ?? "(unknown)"
             let title = spec.info?.title ?? "(no title)"
             var out = ""

@@ -5,10 +5,10 @@
 //  Created by Patric Dubois on 01.01.26.
 //
 
-
 import Foundation
 import Testing
 @testable import SwiftOpenAPICLI
+
 // Das CLI-Target ist ein Executable. Wir testen die Run-Logik direkt, darum importieren wir es nicht als Modul,
 // sondern verwenden seine öffentliche API, die im gleichen Package sichtbar ist.
 @Suite("SwiftOpenAPICLI Run() tests")
@@ -25,8 +25,8 @@ struct CLIRunTests {
     @Test("CLI prints version and title for a valid spec")
     func testCLIWithValidSpec() async throws {
         let url = try fixtureURL("openapi", ext: "yaml")
-        var out : (any TextOutputStream) = StringTextOutputStream()
-        var err : (any TextOutputStream)  = StringTextOutputStream()
+        var out: (any TextOutputStream) = StringTextOutputStream()
+        var err: (any TextOutputStream) = StringTextOutputStream()
         let app = SwiftOpenAPICLIApp()
         let code = await app.run(args: ["SwiftOpenAPICLI", url.path], stdout: &out, stderr: &err)
 
@@ -41,14 +41,60 @@ struct CLIRunTests {
 
     @Test("CLI returns error on missing argument")
     func testCLIMissingArgument() async throws {
-        var out : (any TextOutputStream)  = StringTextOutputStream()
-        var err : (any TextOutputStream) = StringTextOutputStream()
+        var out: (any TextOutputStream) = StringTextOutputStream()
+        var err: (any TextOutputStream) = StringTextOutputStream()
         let app = SwiftOpenAPICLIApp()
         let code = await app.run(args: ["SwiftOpenAPICLI"], stdout: &out, stderr: &err)
 
         #expect(code != 0)
         let string = try #require((err as? StringTextOutputStream)?.string)
         #expect(string.contains("Usage: SwiftOpenAPICLI"))
+    }
+
+    @Test("CLI --version prints semantic version")
+    func testCLIVersionFlag() async throws {
+        // Für --version wird laut Spezifikation ein Dateiname als 1. Argument erwartet,
+        // auch wenn er inhaltlich nicht verwendet wird.
+        let dummyPath = "/tmp/dummy.yaml"
+        var out: (any TextOutputStream) = StringTextOutputStream()
+        var err: (any TextOutputStream) = StringTextOutputStream()
+        let app = SwiftOpenAPICLIApp()
+        let code = await app.run(args: ["SwiftOpenAPICLI", dummyPath, "--version"], stdout: &out, stderr: &err)
+
+        #expect(code == 0)
+        let errString = try #require((err as? StringTextOutputStream)?.string)
+        let outString = try #require((out as? StringTextOutputStream)?.string)
+        #expect(errString.isEmpty)
+        // Erwartet die exakt konfigurierte Version
+        #expect(outString.trimmingCharacters(in: .whitespacesAndNewlines) == SwiftOpenAPICLIVersion)
+    }
+
+    @Test("CLI --validate returns OK for a valid spec")
+    func testCLIValidateOK() async throws {
+        let url = try fixtureURL("openapi", ext: "yaml")
+        var out: (any TextOutputStream) = StringTextOutputStream()
+        var err: (any TextOutputStream) = StringTextOutputStream()
+        let app = SwiftOpenAPICLIApp()
+        let code = await app.run(args: ["SwiftOpenAPICLI", url.path, "--validate"], stdout: &out, stderr: &err)
+
+        #expect(code == 0)
+        let errString = try #require((err as? StringTextOutputStream)?.string)
+        let outString = try #require((out as? StringTextOutputStream)?.string)
+        #expect(errString.isEmpty)
+        #expect(outString.contains("Validation: OK"))
+    }
+
+    @Test("CLI with invalid option returns error")
+    func testCLIInvalidOption() async throws {
+        let url = try fixtureURL("openapi", ext: "yaml")
+        var out: (any TextOutputStream) = StringTextOutputStream()
+        var err: (any TextOutputStream) = StringTextOutputStream()
+        let app = SwiftOpenAPICLIApp()
+        let code = await app.run(args: ["SwiftOpenAPICLI", url.path, "--unknown"], stdout: &out, stderr: &err)
+
+        #expect(code != 0)
+        let errString = try #require((err as? StringTextOutputStream)?.string)
+        #expect(errString.contains("Invalid option"))
     }
 }
 
