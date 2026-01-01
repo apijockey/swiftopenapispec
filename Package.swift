@@ -18,12 +18,18 @@ import PackageDescription
 
 let package = Package(
     name: "SwiftOpenAPISpec",
-    platforms: [.macOS(.v10_15)],
+    platforms: [.macOS(.v11)],
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
+        // Library-Produkt
         .library(
             name: "SwiftOpenAPISpec",
-            targets: ["SwiftOpenAPISpec"]),
+            targets: ["SwiftOpenAPISpec"]
+        ),
+        // CLI-Produkt
+        .executable(
+            name: "SwiftOpenAPICLI",
+            targets: ["SwiftOpenAPICLI"]
+        ),
     ],
     dependencies: [
         .package(url: "https://github.com/jpsim/Yams", from: "5.1.0"),
@@ -32,19 +38,29 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-testing", from: "0.9.0"),
     ],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
+        // Library-Target
         .target(
             name: "SwiftOpenAPISpec",
             dependencies: [
                 .product(name: "Yams", package: "Yams")
             ]
         ),
+
+        // Executable-Target für die CLI
+        .executableTarget(
+            name: "SwiftOpenAPICLI",
+            dependencies: [
+                "SwiftOpenAPISpec",
+                .product(name: "Yams", package: "Yams")
+            ]
+        ),
+
+        // Test-Target
         .testTarget(
             name: "openapispecreaderTests",
             dependencies: [
                 "SwiftOpenAPISpec",
-                // Link the Testing module from the explicit package
+                "SwiftOpenAPICLI", // <- hinzufügen, damit die Symbole gelinkt werden
                 .product(name: "Testing", package: "swift-testing")
             ],
             resources: [
