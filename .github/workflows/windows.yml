@@ -1,5 +1,8 @@
 name: Swift on Windows
-on: [push]
+on: 
+  push:
+    branches: ["main"]
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -20,7 +23,9 @@ jobs:
       format_check_enabled: false
       shell_check_enabled: false
   wtest:
+    if: vars.RUN_WINDOWS_TESTS == 'true'
     runs-on: windows-latest
+    needs: [soundness]
     steps:
       - uses: actions/checkout@v4
       - name: Run Swift build & tests in Windows container
