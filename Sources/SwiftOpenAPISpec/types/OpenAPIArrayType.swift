@@ -53,10 +53,8 @@ public struct OpenAPIArrayType : OpenAPIValidatableSchemaType, PointerNavigable{
         switch (lhs.items, rhs.items) {
         case (nil, nil):
             return true
-        case let (li?, ri?):
-            
-                return true
-
+        case let (lItems?, rItems?):
+            return lItems.isEqual(to: rItems)
         default:
             return false
         }
@@ -113,4 +111,3 @@ public struct OpenAPIArrayType : OpenAPIValidatableSchemaType, PointerNavigable{
     
     public var ref: OpenAPISchemaReference? { nil}
 }
-

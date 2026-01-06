@@ -41,7 +41,7 @@ public struct OpenAPIExternalDocumentation :
         self.description = map.readIfPresent("description", String.self)
     }
     public var description : String? = nil
-    public var url : String
+    public var url : String?
    
     public var ref: OpenAPISchemaReference? { nil}
     

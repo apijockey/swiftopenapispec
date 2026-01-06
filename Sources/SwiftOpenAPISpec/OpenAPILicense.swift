@@ -48,7 +48,7 @@ public struct OpenAPILicense : Codable , PointerNavigable {
             self.identifier = identifier
         }
     }
-    public var name : String
+    public var name : String?
     public var identifier : String? = nil
     public var url : String? = nil
 }

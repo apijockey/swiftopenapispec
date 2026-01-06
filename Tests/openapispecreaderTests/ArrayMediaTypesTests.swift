@@ -17,7 +17,7 @@
 //
 import Foundation
 import Yams
-import SwiftOpenAPISpec
+@testable import SwiftOpenAPISpec
 import Testing
 
 struct ArrayMediaTypesTests {

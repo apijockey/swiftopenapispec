@@ -74,7 +74,7 @@ struct OpenAPIJSONPointerTests {
         return url
     }
     
-    //TODO: mit anderen Dateien arbeiten und Tag .jsonPointer verwenden
+   
     @Test("Resolve pointers in main file", .tags(.jsonpointer), arguments:
     [
         ("#/openapi",String.self,"3.1.0"),

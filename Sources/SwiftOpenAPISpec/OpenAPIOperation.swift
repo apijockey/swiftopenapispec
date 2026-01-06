@@ -36,7 +36,10 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
         if let responseMap = map[Self.RESPONSES_KEY] as? StringDictionary {
             self.responses = try KeyedElementList<OpenAPIResponse>.map(responseMap)
         }
-         //CALLBACKS
+        if let map = map[Self.CALLBACKS_KEY] as? StringDictionary{
+            self.callbacks = try KeyedElementList<OpenAPICallBack>.map(map)
+        }
+        
         self.deprecated = map.readIfPresent(Self.DEPRECATED_KEY, Bool.self)
         if let securityObjectMap = map[Self.SECURITY_KEY] as?  [[String:[String]]] {
             for element in securityObjectMap {
@@ -83,6 +86,7 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
         }
     }
     public static let DEPRECATED_KEY = "deprecated"
+    public static let CALLBACKS_KEY = "callbacks"
     public static let DESCRIPTION_KEY = "description"
     public static let EXTERNAL_DOCS_KEY = "externalDocs"
     public static let OP_ID_KEY = "operationId"
@@ -101,6 +105,7 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
     public var description : String? = nil
     public var tags : [String] = []
    
+    public var callbacks : [OpenAPICallBack]? = []
     public var responses : [OpenAPIResponse]? = []
     public var parameters : [OpenAPIParameter]? = []
     public var servers : [OpenAPIServer] = [OpenAPIServer(url: "/")]

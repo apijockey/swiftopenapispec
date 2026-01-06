@@ -57,7 +57,7 @@ public struct OpenAPIServer : ThrowingHashMapInitiable , PointerNavigable {
     public var description : String? = nil
     public var extensions : [OpenAPIExtension]?
     public var name : String? = nil
-    public var url : String = "/"
+    public var url : String? = "/"
    
     //https://spec.openapis.org/oas/latest.html#server-variable-object
     public var variables : [OpenAPIVariable] = []

@@ -15,6 +15,7 @@ public enum SwiftOpenAPICLIError: LocalizedError {
     case fileNotFound(String)
     case invalidURL(String)
     case loadFailed(String)
+    case invalidOption(String)
 
     public var errorDescription: String? {
         switch self {
@@ -26,6 +27,8 @@ public enum SwiftOpenAPICLIError: LocalizedError {
             return "Invalid URL or path: \(path)"
         case .loadFailed(let reason):
             return "Failed to load specification: \(reason)"
+        case .invalidOption(let option):
+            return "Invalid option: \(option)"
         }
     }
 }
@@ -71,12 +74,12 @@ public struct SwiftOpenAPICLIApp {
             if let opt = option {
                 switch opt {
                 case "--validate":
-                    let ok = Validator.validate(spec: spec)
-                    if ok {
+                    let diagnostics = Validator.validate(spec: spec,baseURI: path)
+                    if diagnostics.isEmpty {
                         stdout.write("Validation: OK\n")
                         return 0
                     } else {
-                        stdout.write("Validation: FAILED\n")
+                        stdout.write(diagnostics.description)
                         return 1
                     }
                 case "--version":

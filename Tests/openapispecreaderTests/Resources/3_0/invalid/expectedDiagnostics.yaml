@@ -1,0 +1,33 @@
+cases:
+  - fixture: "01-minimal-30"
+    shouldPass: true
+    expected:
+    onlyThese: true
+  - fixture: "01-minimal-30-missingInfo"
+    shouldPass: false
+    expected:
+      - code: "missingRequired"
+        pointer: "/info"
+        rule: "OAS.RequiredInfo"
+        severity: "error"
+        messageContains: "Missing required field"
+    onlyThese: true
+  - fixture: "02-minimal-30-missingPaths"
+    shouldPass: false
+    expected:
+      - code: "missingRequired"
+        pointer: "/paths"
+        rule: "OAS.RequiredPaths"
+        severity: "error"
+        messageContains: "Missing required field 'paths' or it is empty."
+    onlyThese: true
+  - fixture: "03-minimal-30-unsupportedV3"
+    shouldPass: false
+    expected:
+      - code: "invalidValue"
+        pointer: "/openapi"
+        rule: "OAS.UnsupportedVersion3"
+        severity: "error"
+        messageContains: "unsupported Version"
+    onlyThese: true
+

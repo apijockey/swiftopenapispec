@@ -19,7 +19,7 @@
 import Foundation
 import Yams
 import Testing
-import SwiftOpenAPISpec
+@testable import SwiftOpenAPISpec
 
 struct FixtureTests {
     enum Errors: LocalizedError, CustomStringConvertible {
@@ -57,7 +57,7 @@ struct FixtureTests {
     @Test("minimal-3_0/Parser-Happy-Path für 3.0.x.")
     func minimal() async throws {
         
-        let yaml = try fixtureMap("minimal-3_0")
+        let yaml = try fixtureMap("01-minimal-30")
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url:"minimal-3_0" , documentLoader: YamsDocumentLoader())
         #expect(apiSpec.version == "3.0.3")
         #expect(apiSpec.servers.count == 0)

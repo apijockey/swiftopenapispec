@@ -61,7 +61,7 @@ public struct OpenAPIInfo : KeyedElement, PointerNavigable {
         case Self.DESCRIPTION_KEY: return description
         case Self.LICENSE_KEY: return license
         case Self.TERMS_KEY: return termsOfService
-        case Self.TITLE_KEY: return title as String
+        case Self.TITLE_KEY: return title
         case Self.VERSION_KEY: return version
         case Self.SUMMARY_KEY: return summary
         case Self.TERMS_KEY: return termsOfService
@@ -84,11 +84,11 @@ public struct OpenAPIInfo : KeyedElement, PointerNavigable {
     public var extensions : [OpenAPIExtension]?
     public var license : OpenAPILicense? = nil
     public var termsOfService : String? = nil
-    public var title : String
+    public var title : String?
     public var  summary : String?
     public var ref: OpenAPISchemaReference? { nil}
     public var key: String?
    
-    public var version : String
+    public var version : String?
     
 }

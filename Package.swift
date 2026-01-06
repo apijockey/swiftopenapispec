@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.0
 /*
  * Copyright 2025 CgSe Computergrafik und Softwareentwicklung GmbH
  *
@@ -33,9 +33,8 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/jpsim/Yams", from: "5.1.0"),
-        .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
-        // Explicit Swift Testing package for availability on older deployment targets/toolchains
-        .package(url: "https://github.com/apple/swift-testing", from: "0.9.0"),
+        .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0")
+        // Keine externe swift-testing Dependency mehr – Toolchain liefert 'Testing'
     ],
     targets: [
         // Library-Target
@@ -60,11 +59,12 @@ let package = Package(
             name: "openapispecreaderTests",
             dependencies: [
                 "SwiftOpenAPISpec",
-                "SwiftOpenAPICLI", // <- hinzufügen, damit die Symbole gelinkt werden
-                .product(name: "Testing", package: "swift-testing")
+                "SwiftOpenAPICLI",
+                .product(name: "Yams", package: "Yams")
+               
             ],
             resources: [
-                .process("Resources"),
+                .copy("Resources"),
             ]
         ),
     ]

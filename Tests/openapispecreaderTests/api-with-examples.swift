@@ -56,9 +56,9 @@ struct APIWithExamplesTests {
     }
     @Test("Test OpanAPI Object")
     func minimal() async throws {
-        let yaml = try specString("minimal-3_0")
+        let yaml = try specString("01-minimal-30")
         
-        let apiSpec = try OpenAPISpecification.read(unflattened: yaml,url:"minimal-3_0", documentLoader: YamsDocumentLoader())
+        let apiSpec = try OpenAPISpecification.read(unflattened: yaml,url:"01-minimal-30", documentLoader: YamsDocumentLoader())
         #expect(apiSpec.version == "3.0.3")
         #expect(apiSpec.servers.count == 0)
         #expect(apiSpec.paths.count > 0)

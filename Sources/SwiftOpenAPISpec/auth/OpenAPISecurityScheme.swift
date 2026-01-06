@@ -74,37 +74,38 @@ public struct OpenAPISecurityScheme : KeyedElement , PointerNavigable {
         if let ref = map[OpenAPISchemaReference.REF_KEY] as? String {
                     self.ref = OpenAPISchemaReference(ref: ref)
                        }
-        guard let securityRawType = map.readIfPresent(Self.TYPE_KEY, String.self),
-        let securityType =  SecurityType(rawValue: securityRawType) else {
-            throw Self.Errors.missingSecurityType
+        if let securityRawType = map.readIfPresent(Self.TYPE_KEY, String.self),
+           let securityType =  SecurityType(rawValue: securityRawType) {
+            self.securityType = securityType
+            switch securityType  {
+            case .apiKey:
+                self.name = map.readIfPresent(Self.NAME_KEY, String.self)
+                if let locationRawValue = map.readIfPresent(Self.LOCATION_KEY, String.self),
+                   let location = APIKeyLocation(rawValue: locationRawValue) {
+                    self.location = location
+                }
+            case .http:
+                self.httpScheme = map.readIfPresent(Self.SCHEME_KEY, String.self)
+                self.httpBearerFormat = map.readIfPresent(Self.BEARER_FORMAT_KEY, String.self)
+            case .oauth2:
+                if let flowsMap = map.readIfPresent(Self.FLOWS_KEY, StringDictionary.self) {
+                    self.flows = try OpenAPIOAuthFlows(flowsMap)
+                }
+                self.oauth2MetadataURL = map.readIfPresent(Self.OAUTH2_METADATA_URL_KEY, String.self)
+            case .openIdConnect:
+                self.openIdConnectURL = map.readIfPresent(Self.OPENID_CONNECT_URL_KEY, String.self)
+                
+            case .mutualTLS:
+                return
+            }
         }
-        self.securityType = securityType
+
          
-        switch securityType  {
-        case .apiKey:
-            self.name = map.readIfPresent(Self.NAME_KEY, String.self)
-            if let locationRawValue = map.readIfPresent(Self.LOCATION_KEY, String.self),
-               let location = APIKeyLocation(rawValue: locationRawValue) {
-                self.location = location
-            }
-        case .http:
-            self.httpScheme = map.readIfPresent(Self.SCHEME_KEY, String.self)
-            self.httpBearerFormat = map.readIfPresent(Self.BEARER_FORMAT_KEY, String.self)
-        case .oauth2:
-            if let flowsMap = map.readIfPresent(Self.FLOWS_KEY, StringDictionary.self) {
-                self.flows = try OpenAPIOAuthFlows(flowsMap)
-            }
-            self.oauth2MetadataURL = map.readIfPresent(Self.OAUTH2_METADATA_URL_KEY, String.self)
-        case .openIdConnect:
-            self.openIdConnectURL = map.readIfPresent(Self.OPENID_CONNECT_URL_KEY, String.self)
-            
-        case .mutualTLS:
-            return
-        }
+       
     }
     public func element(for segmentName: String) throws -> Any? {
        switch segmentName {
-       case Self.TYPE_KEY : return securityType.rawValue
+       case Self.TYPE_KEY : return securityType?.rawValue
        case Self.DESCRIPTION_KEY : return description
        case Self.NAME_KEY : return name
        case Self.LOCATION_KEY : return location?.rawValue
@@ -121,7 +122,7 @@ public struct OpenAPISecurityScheme : KeyedElement , PointerNavigable {
     }
     public var key: String?
     public var ref : OpenAPISchemaReference? = nil
-    public var securityType : SecurityType
+    public var securityType : SecurityType?
     public var description : String? = nil
     public var name : String? = nil
     public var location : APIKeyLocation? = nil

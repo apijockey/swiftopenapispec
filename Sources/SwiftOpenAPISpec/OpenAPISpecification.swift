@@ -41,7 +41,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
         //Mandatory
         self.version = try map.tryRead(OpenAPISpecification.OPENAPI_KEY, String.self, root: "root")
         //Mandatory
-        self.info = try map.tryMap(OpenAPISpecification.INFO_KEY, root: "root", OpenAPIInfo.self)
+        self.info = try? map.tryMap(OpenAPISpecification.INFO_KEY, root: "root", OpenAPIInfo.self)
         if map[OpenAPISpecification.COMPONENTS_KEY]  as? StringDictionary != nil {
             components =  try map.tryMap(OpenAPISpecification.COMPONENTS_KEY, root: "root", OpenAPIComponent.self)
         }
