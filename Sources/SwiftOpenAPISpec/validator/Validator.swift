@@ -20,39 +20,10 @@
 import Foundation
 
 public struct Validator {
-    // Platzhalter-Validierung:
-    // - prüft, ob openapi version existiert
-    // - prüft, ob info.title und info.version vorhanden sind
-    // Hier kannst du später echte Regeln ergänzen.
+   
     public static func validate(spec: OpenAPISpecification, baseURI: String) -> [Diagnostic] {
         let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: baseURI)
-        let runner = RuleRunner(rules: [
-            RequiredOpenAPIFixedFieldsRule(),
-            SupportedVersion3(),
-            RequiredInfoRule(),
-            RequiredPathsRule(),
-            RequiredOpenAPIFixedLicenseFieldsRule(),
-            RequiredLicenseNameRule(),
-            RequiredServerURLRule(),
-            RequiredServerVariablesRule(),
-            RequiredSchemaComponentNamessRule(),
-            RequiredResponsesComponentNamessRule(),
-            RequiredExamplesComponentNamessRule(),
-            RequiredRequestBodiesComponentsNamessRule(),
-            RequiredsHeaderComponentsNamessRule(),
-            RequiredSecuritySchemeComponentsNamessRule(),
-            RequiredLinksComponentsNamessRule(),
-            RequiredCallBackomponentsNamessRule(),
-            OperationMustHaveResponsesRule(),
-            ExternalDocumentationMustHaveURLRule(),
-            ParameterLocationsMustHaveInRule(),
-            RequestBodiesMustHaveContentRule(),
-            ResponsesMustHaveDesccriptionRule(),
-            LinkMustHaveRefOrIdentifier(),
-            TagMustHaveName(),
-            OperationMustHaveResponsesRule(),
-            ReferencesMustHaveRefRule()
-        ])
+        let runner = RuleRunner.defaultRuleRunner
         
         return runner.run(spec: spec, ctx: ctx)
     }

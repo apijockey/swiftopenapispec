@@ -41,35 +41,25 @@ struct RequiredOpenAPIFixedFieldsRule: Rule {
             return [.init(severity: .error,
                           code: .missingRequired,
                           message: "openapi, info, and paths are required",
-                          pointer: "/openapi",
+                          pointer: "/",
                           rule: name)]
         }
         return []
     }
 }
 
-struct RequiredInfoRule: Rule {
-    let name = "OAS.RequiredInfo"
-    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
-        guard spec.info != nil else {
-            return [.init(severity: .error,
-                          code: .missingRequired,
-                          message: "Missing required field 'info'.",
-                          pointer: "/info",
-                          rule: name)]
-        }
-        return []
-    }
-}
+
+
 struct RequiredOpenAPIFixedInfoFieldsRule: Rule {
     let name = "OAS.RequiredOpenAPIFixedInfoFields"
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         guard let info = spec.info,
               info.title != nil,
-              info.version != nil else{
+              let version = info.version,
+              !version.isEmpty else {
             return [.init(severity: .error,
                           code: .missingRequired,
-                          message: "info element requires 'title' and 'version'",
+                          message: "info element requires 'title' and 'version'.",
                           pointer: "/info",
                           rule: name)]
         }
@@ -77,27 +67,12 @@ struct RequiredOpenAPIFixedInfoFieldsRule: Rule {
     }
 }
 
-struct RequiredOpenAPIFixedLicenseFieldsRule: Rule {
-    let name = "OAS.RequiredOpenAPIFixedLicenseFields"
-    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
-        guard let info = spec.info,
-              info.title != nil,
-              info.version != nil else{
-            return [.init(severity: .error,
-                          code: .missingRequired,
-                          message: "info element requires 'title' and 'version'",
-                          pointer: "/info",
-                          rule: name)]
-        }
-        return []
-    }
-}
 
 
 struct RequiredLicenseNameRule: Rule {
     let name = "OAS.RequiredLicenseName"
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
-        // falls spec.paths optional wäre – bei dir scheint es non-optional zu sein
+        
         if let license = spec.info?.license,
            license.name == nil {
             return [.init(severity: .error,
@@ -114,7 +89,7 @@ struct RequiredServerURLRule: Rule {
     let name = "OAS.ServerURL"
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         var diagnostics: [Diagnostic] = []
-        // falls spec.paths optional wäre – bei dir scheint es non-optional zu sein
+       
         for server in spec.servers  {
             if server.url == nil {
                 diagnostics.append( .init(severity: .error,
@@ -135,7 +110,7 @@ struct RequiredServerVariablesRule: Rule {
     
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         var diagnostics: [Diagnostic] = []
-        // falls spec.paths optional wäre – bei dir scheint es non-optional zu sein
+       
         for server in spec.servers  {
             for variable in server.variables  {
                 if variable.defaultValue == nil {
@@ -177,20 +152,16 @@ struct RequiredSchemaComponentNamessRule: Rule {
     
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         var diagnostics: [Diagnostic] = []
-        // falls spec.paths optional wäre – bei dir scheint es non-optional zu sein
+        
         guard let schemas = spec.components?.schemas else { return diagnostics }
         for schema in schemas {
             if let key = schema.key {
-                if #available(macOS 13.0, *) {
-                    if !key.matches(pattern: "[a-zA-Z0-9\\.\\-_]+") {
-                        diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "/components/schema/\(key)", rule: name))
-                    }
-                } else {
-                    if !key.matches(regex:"[a-zA-Z0-9\\-\\._]+") {
-                        diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\-\\._]+$'", pointer: "/components/schema/\(key)", rule: name))
-                    }
+                
+                if !key.matches("[a-zA-Z0-9\\-\\._]+") {
+                    diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\-\\._]+$'", pointer: "/components/schema/\(key)", rule: name))
                 }
             }
+            
             
         }
         return diagnostics
@@ -206,17 +177,13 @@ struct RequiredResponsesComponentNamessRule: Rule {
         guard let schemas = spec.components?.responses else { return diagnostics }
         for schema in schemas {
             if let key = schema.key {
-                if #available(macOS 13.0, *) {
-                    if !key.matches(pattern: "[a-zA-Z0-9\\.\\-_]+") {
-                        diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "/components/responses/\(key)", rule: name))
-                    }
-                } else {
-                    if !key.matches(regex:"[a-zA-Z0-9\\-\\._]+") {
-                        diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\-\\._]+$'", pointer: "/components/responses/\(key)", rule: name))
-                    }
+                if !key.matches("[a-zA-Z0-9\\.\\-_]+") {
+                    diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "/components/responses/\(key)", rule: name))
+                    
                 }
+                
             }
-            
+           
         }
         return diagnostics
     }
@@ -227,19 +194,15 @@ struct RequiredParameterComponentsNamessRule: Rule {
     
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         var diagnostics: [Diagnostic] = []
-        // falls spec.paths optional wäre – bei dir scheint es non-optional zu sein
+      
         guard let schemas = spec.components?.parameters else { return diagnostics }
         for schema in schemas {
             if let key = schema.key {
-                if #available(macOS 13.0, *) {
-                    if !key.matches(pattern: "[a-zA-Z0-9\\.\\-_]+") {
+                
+                    if !key.matches("[a-zA-Z0-9\\.\\-_]+") {
                         diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "/components/parameters/\(key)", rule: name))
                     }
-                } else {
-                    if !key.matches(regex:"[a-zA-Z0-9\\-\\._]+") {
-                        diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\-\\._]+$'", pointer: "/components/parameters/\(key)", rule: name))
-                    }
-                }
+                
             }
             
         }
@@ -252,19 +215,14 @@ struct RequiredExamplesComponentNamessRule: Rule {
     
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         var diagnostics: [Diagnostic] = []
-        // falls spec.paths optional wäre – bei dir scheint es non-optional zu sein
+       
         guard let schemas = spec.components?.examples else { return diagnostics }
         for schema in schemas {
             if let key = schema.key {
-                if #available(macOS 13.0, *) {
-                    if !key.matches(pattern: "[a-zA-Z0-9\\.\\-_]+") {
+                    if !key.matches("[a-zA-Z0-9\\.\\-_]+") {
                         diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "/components/examples/\(key)", rule: name))
                     }
-                } else {
-                    if !key.matches(regex:"[a-zA-Z0-9\\-\\._]+") {
-                        diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\-\\._]+$'", pointer: "/components/examples/\(key)", rule: name))
-                    }
-                }
+              
             }
             
         }
@@ -277,19 +235,14 @@ struct RequiredRequestBodiesComponentsNamessRule: Rule {
     
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         var diagnostics: [Diagnostic] = []
-        // falls spec.paths optional wäre – bei dir scheint es non-optional zu sein
+       
         guard let schemas = spec.components?.requestBodies else { return diagnostics }
         for schema in schemas {
             if let key = schema.key {
-                if #available(macOS 13.0, *) {
-                    if !key.matches(pattern: "[a-zA-Z0-9\\.\\-_]+") {
+                    if !key.matches("[a-zA-Z0-9\\.\\-_]+") {
                         diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "/components/requestBodies/\(key)", rule: name))
                     }
-                } else {
-                    if !key.matches(regex:"[a-zA-Z0-9\\-\\._]+") {
-                        diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\-\\._]+$'", pointer: "/components/requestBodies/\(key)", rule: name))
-                    }
-                }
+                
             }
             
         }
@@ -302,19 +255,14 @@ struct RequiredsHeaderComponentsNamessRule: Rule {
     
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         var diagnostics: [Diagnostic] = []
-        // falls spec.paths optional wäre – bei dir scheint es non-optional zu sein
+       
         guard let schemas = spec.components?.headers else { return diagnostics }
         for schema in schemas {
             if let key = schema.key {
-                if #available(macOS 13.0, *) {
-                    if !key.matches(pattern: "[a-zA-Z0-9\\.\\-_]+") {
+                    if !key.matches( "[a-zA-Z0-9\\.\\-_]+") {
                         diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "/components/headers/\(key)", rule: name))
                     }
-                } else {
-                    if !key.matches(regex:"[a-zA-Z0-9\\-\\._]+") {
-                        diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\-\\._]+$'", pointer: "/components/headers/\(key)", rule: name))
-                    }
-                }
+               
             }
             
         }
@@ -332,15 +280,10 @@ struct RequiredSecuritySchemeComponentsNamessRule: Rule {
         guard let schemas = spec.components?.securitySchemas else { return diagnostics }
         for schema in schemas {
             if let key = schema.key {
-                if #available(macOS 13.0, *) {
-                    if !key.matches(pattern: "[a-zA-Z0-9\\.\\-_]+") {
-                        diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "/components/securitySchemes/\(key)", rule: name))
-                    }
-                } else {
-                    if !key.matches(regex:"[a-zA-Z0-9\\-\\._]+") {
+             
+                    if !key.matches("[a-zA-Z0-9\\-\\._]+") {
                         diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\-\\._]+$'", pointer: "/components/securitySchemes/\(key)", rule: name))
                     }
-                }
             }
             
         }
@@ -357,15 +300,11 @@ struct RequiredLinksComponentsNamessRule: Rule {
         guard let schemas = spec.components?.links else { return diagnostics }
         for schema in schemas {
             if let key = schema.key {
-                if #available(macOS 13.0, *) {
-                    if !key.matches(pattern: "[a-zA-Z0-9\\.\\-_]+") {
+               
+                    if !key.matches("[a-zA-Z0-9\\.\\-_]+") {
                         diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "/components/links/\(key)", rule: name))
                     }
-                } else {
-                    if !key.matches(regex:"[a-zA-Z0-9\\-\\._]+") {
-                        diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\-\\._]+$'", pointer: "/components/links/\(key)", rule: name))
-                    }
-                }
+               
             }
             
         }
@@ -382,17 +321,44 @@ struct RequiredCallBackomponentsNamessRule: Rule {
         guard let schemas = spec.components?.callbacks else { return diagnostics }
         for schema in schemas {
             if let key = schema.key {
-                if #available(macOS 13.0, *) {
-                    if !key.matches(pattern: "[a-zA-Z0-9\\.\\-_]+") {
-                        diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "/components/callbacks/\(key)", rule: name))
-                    }
-                } else {
-                    if !key.matches(regex:"[a-zA-Z0-9\\-\\._]+") {
-                        diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\-\\._]+$'", pointer: "/components/callbacks/\(key)", rule: name))
-                    }
+                if !key.matches("[a-zA-Z0-9\\.\\-_]+") {
+                    diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "/components/callbacks/\(key)", rule: name))
                 }
             }
             
+        }
+        return diagnostics
+    }
+}
+
+struct PathsMustStartWithSlashRule: Rule {
+    let name = "OAS.PathsMustStartWithSlashRule"
+    
+    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
+        var diagnostics: [Diagnostic] = []
+        // falls spec.paths optional wäre – bei dir scheint es non-optional zu sein
+        for path in spec.paths {
+            
+            if let key = path.key,
+               !key.hasPrefix("/") {
+                diagnostics.append(.init(severity: .error, code: .invalidValue, message: "path must start with a '/'", pointer: "/paths/\(key)", rule: name))
+            }
+        }
+        return diagnostics
+    }
+}
+
+struct SupportedHTTPMethodRule: Rule {
+    let name = "OAS.SupportedHTTPMethodRule"
+    
+    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
+        var diagnostics: [Diagnostic] = []
+        let supportedMethods = ["get", "put", "post", "delete", "options", "head", "patch", "trace"]
+        for path in spec.paths {
+            
+            for (operation) in path.operations where !supportedMethods.contains(operation.key ?? "nil") {
+                diagnostics.append(.init(severity: .error, code: .invalidValue, message: "http operation not supported: '\(operation.key ?? "")'", pointer: "/paths\(path.key ?? "")", rule: name))
+            }
         }
         return diagnostics
     }
@@ -527,6 +493,61 @@ struct ResponsesMustHaveDesccriptionRule: Rule {
     }
 }
 
+struct SupportedHTPStatusRule: Rule {
+    let name = "OAS.SupportedHTPStatusRule"
+    
+    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
+        var diags: [Diagnostic] = []
+          
+        for pathItem in spec.paths {
+            for op in pathItem.operations {
+                guard let responses = op.responses else {
+                    return []
+                }
+                for response in responses {
+                    guard let key = response.key else {
+                        continue
+                    }
+                    if !key.matches("^[1-5](?:\\d{2}|XX)$") {
+                        diags.append(Diagnostic(severity: .error,
+                                                code: .invalidValue,
+                                                message: "Response code '\(key)' is not a valid HTTP status code.",
+                                                pointer: "/paths/\(pathItem.key!)/\(op.key ?? "")/\(response.key ?? "")",
+                                                rule: name))
+                    }
+                    
+                }
+            }
+        }
+        guard let pathItems = spec.components?.pathItems else { return diags }
+        for pathItem in pathItems  {
+            for op in pathItem.operations {
+                guard let responses = op.responses else {
+                    return []
+                }
+                for response in responses {
+                    guard let key = response.key else {
+                        continue
+                    }
+                    if !key.matches("^[1-5](?:\\d{2}|XX)$") {
+                        diags.append(Diagnostic(severity: .error,
+                                                code: .invalidValue,
+                                                message: "Response code \(key) is not a valid HTTP status code.",
+                                                pointer: "/components/paths/\(pathItem.key!)/\(op.key ?? "")/\(response.key ?? "")",
+                                                rule: name))
+                    }
+                    
+                }
+            }
+        }
+        
+        return diags
+    }
+}
+
+
+
+
 struct LinkMustHaveRefOrIdentifier: Rule {
     let name = "OAS.LinkMustHaveRefOrIdentifier"
 
@@ -632,13 +653,13 @@ struct ReferencesMustHaveRefRule : Rule {
                 let diagnotics = Diagnostic( severity: .error,
                                              code: .missingRequired,
                                              message: "Path needs a ref or an operation",
-                                             pointer: "/paths/\(path.key ?? "")",
+                                             pointer: "/paths\(path.key ?? "")",
                                              rule: name)
                 diags.append(diagnotics)
             }
             else {
                 for operation in path.operations {
-                    diags.append(contentsOf: ReusableOperationRefRule().check(operation: operation, ctx: ctx, pointer: "/paths/\(path.key ?? "")", rule: name))
+                    diags.append(contentsOf: ReusableOperationRefRule().check(operation: operation, ctx: ctx, pointer: "/paths\(path.key ?? "")", rule: name))
                 }
             }
          
@@ -673,22 +694,21 @@ struct RequiredPathsRule: Rule {
 extension String {
     // Prüft, ob der gesamte String dem Regex-Pattern entspricht (plattformneutral, Swift Regex).
     // Ungültige Patterns führen zu false.
-    @available(macOS 13.0, *)
-    func matches(pattern: String) -> Bool {
-        guard let regex = try? Regex(pattern) else { return false }
-        return self.wholeMatch(of: regex) != nil
-    }
-    func matches(regex: String) -> Bool {
-        do {
-            let regex = try NSRegularExpression(pattern: "^\(regex)$")
-            let range = NSRange(self.startIndex..<self.endIndex, in: self)
-            return regex.firstMatch(in: self, options: [], range: range) != nil
-        } catch {
-            return false
+    
+    func matches(_ pattern: String) -> Bool {
+        if #available(macOS 13.0, *) {
+            guard let regex = try? Regex(pattern) else { return false }
+            return self.wholeMatch(of: regex) != nil
+        } else {
+            do {
+                let regex = try NSRegularExpression(pattern: "^\(pattern)$")
+                let range = NSRange(self.startIndex..<self.endIndex, in: self)
+                return regex.firstMatch(in: self, options: [], range: range) != nil
+            } catch {
+                return false
+            }
         }
     }
-
-
-    
 }
+
 

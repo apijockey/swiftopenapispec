@@ -16,7 +16,7 @@
 //  Created by Patric Dubois on 02.01.2026.
 //
 
-public protocol Rule {
+public protocol Rule : Sendable{
     var name: String { get }
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic]
 }

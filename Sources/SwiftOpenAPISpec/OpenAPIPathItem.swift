@@ -50,12 +50,12 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
     public init(_ map: [String: Any]) throws {
         // one resource may foresee several httpOperations
         for (key, httpOperation) in map {
-            if Self.Operations(rawValue: key) != nil,
-               let httpOperationMap = httpOperation as? [String: Any] {
+               if let httpOperationMap = httpOperation as? [String: Any] {
                 var operation = try OpenAPIOperation(httpOperationMap)
                 operation.key = key
                 self.operations.append(operation)
             }
+            
         }
         if let refMap = map[OpenAPISchemaReference.REF_KEY] as? StringDictionary {
                     self.ref = try OpenAPISchemaReference(refMap)

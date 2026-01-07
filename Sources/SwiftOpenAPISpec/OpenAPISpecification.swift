@@ -38,10 +38,11 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     /// - Parameter unmerged: ``StringDictionary``
     public init(_ unmerged: StringDictionary) throws {
         let map = resolveMergeKeys(in: unmerged)
-        //Mandatory
+        
         self.version = try map.tryRead(OpenAPISpecification.OPENAPI_KEY, String.self, root: "root")
-        //Mandatory
-        self.info = try? map.tryMap(OpenAPISpecification.INFO_KEY, root: "root", OpenAPIInfo.self)
+        if let infoMap =  map[OpenAPISpecification.INFO_KEY] as? StringDictionary {
+            self.info = try OpenAPIInfo(infoMap)
+        }
         if map[OpenAPISpecification.COMPONENTS_KEY]  as? StringDictionary != nil {
             components =  try map.tryMap(OpenAPISpecification.COMPONENTS_KEY, root: "root", OpenAPIComponent.self)
         }
@@ -87,7 +88,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
             case .invalidYaml(let string):
                 return string
             case .invalidSpecification(let hierarchy, let key):
-                return "\(key) not found  in \(hierarchy) or does not contain expected elements"
+                return "required: field '\(key)' not found  in \(hierarchy) "
             case .unsupportedSegment(let type, let segment):
                 return "\(type) does not contain expected element for \(segment)"
             case .notFound(let name): return "Fixture not found: \(name)"

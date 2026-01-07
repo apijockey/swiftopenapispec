@@ -15,9 +15,45 @@
 //
 //  Created by Patric Dubois on 02.01.2026.
 //
-public struct RuleRunner {
+public struct RuleRunner  : Sendable{
     public let rules: [Rule]
     public func run(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
-        rules.flatMap { $0.check(spec: spec, ctx: ctx) }
+        rules.flatMap { (rule: Rule) -> [Diagnostic] in
+            rule.check(spec: spec, ctx: ctx)
+        }
     }
+    public init(rules: [Rule]) {
+        self.rules = rules
+    }
+    public static let defaultRuleRunner : RuleRunner =  { ()
+        let rules: [Rule] = [
+            SupportedVersion3(),
+            RequiredOpenAPIFixedFieldsRule(),
+            RequiredOpenAPIFixedInfoFieldsRule(),
+            RequiredPathsRule(),
+            SupportedHTTPMethodRule(),
+            PathsMustStartWithSlashRule(),
+            RequiredLicenseNameRule(),
+            SupportedHTPStatusRule(),
+            RequiredServerURLRule(),
+            RequiredServerVariablesRule(),
+            RequiredSchemaComponentNamessRule(),
+            RequiredResponsesComponentNamessRule(),
+            RequiredExamplesComponentNamessRule(),
+            RequiredRequestBodiesComponentsNamessRule(),
+            RequiredsHeaderComponentsNamessRule(),
+            RequiredSecuritySchemeComponentsNamessRule(),
+            RequiredLinksComponentsNamessRule(),
+            RequiredCallBackomponentsNamessRule(),
+            OperationMustHaveResponsesRule(),
+            ExternalDocumentationMustHaveURLRule(),
+            ParameterLocationsMustHaveInRule(),
+            RequestBodiesMustHaveContentRule(),
+            ResponsesMustHaveDesccriptionRule(),
+            LinkMustHaveRefOrIdentifier(),
+            TagMustHaveName(),
+            ReferencesMustHaveRefRule()
+        ]
+        return RuleRunner(rules: rules)
+    }()
 }

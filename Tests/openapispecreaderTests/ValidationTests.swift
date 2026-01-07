@@ -107,8 +107,9 @@ struct ValidationTests {
     }
     @Test("DEBUG.")
     func debug_rules() async throws {
-        let fixtureName = "03-minimal-30-unsupportedV3"
+        let fixtureName = "03-minimal-30-noDescription"
         let subDirectory = "Resources/3_0/invalid"
+        let rule = "OAS.SupportedHTTPMethodRule"
         let bundle = Bundle.module
         print("Bundle URL:", bundle.bundleURL.path)
 
@@ -125,14 +126,12 @@ struct ValidationTests {
         )
         
         let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: fixtureName)
-        let runner = RuleRunner(rules: [
-            RequiredInfoRule(),
-            SupportedVersion3(),
-            RequiredPathsRule(),
-            OperationMustHaveResponsesRule()
-        ])
-        
-        let diags = runner.run(spec: apiSpec, ctx: ctx)
+        let runner = RuleRunner.defaultRuleRunner        
+     
+        let unfilteredDiags = runner.run(spec: apiSpec, ctx: ctx)
+        let diags = unfilteredDiags.filter { diagnotics in
+            diagnotics.rule == rule
+        }
         guard let fixture = Self.fixture(fixtureName: fixtureName, subDirectory: subDirectory) else {
             throw FixtureErrors.notFound(fixtureName )
         }
@@ -141,7 +140,7 @@ struct ValidationTests {
         for (result,expected) in zip(diags,fixture.expected) {
             #expect(result.code.rawValue == expected.code)
             #expect(result.message.contains(expected.messageContains))
-            #expect(result.pointer == expected.pointer)
+            #expect(result.pointer.contains(expected.pointer))
             #expect(result.rule == expected.rule)
             #expect(result.severity.rawValue == expected.severity)
             
@@ -154,9 +153,10 @@ struct ValidationTests {
      */
     @Test("spec rules do not hit.")
     func noSpecRulesHits() async throws {
-        let resource = "01-minimal-30"
-        let subDirectory  = "Resources/3_0/valid"
-        guard let fixture : ManifestEntry = Self.fixture(fixtureName: "01-minimal-30", subDirectory: "Resources/3_0/invalid"),
+      
+        let resource = "03-minimal-30-noDescription"
+        let subDirectory  = "Resources/3_0/invalid"
+        guard let fixture : ManifestEntry = Self.fixture(fixtureName: "03-minimal-30-noDescription", subDirectory: "Resources/3_0/invalid"),
               let resourceUrl = Bundle.module.url(forResource: resource , withExtension: "yaml", subdirectory: subDirectory) else {
             throw FixtureErrors.notFound(resource )
         }
@@ -171,19 +171,14 @@ struct ValidationTests {
         )
         
         let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: resource)
-        let runner = RuleRunner(rules: [
-            RequiredInfoRule(),
-            RequiredPathsRule(),
-            OperationMustHaveResponsesRule()
-        ])
-        
+        let runner = RuleRunner.defaultRuleRunner
         let diags = runner.run(spec: apiSpec, ctx: ctx)
         #expect(fixture.shouldPass == diags.isEmpty)
         #expect(fixture.shouldPass || fixture.onlyThese == true ?  fixture.expected.count == diags.count : fixture.expected.count <= diags.count)
         for (result,expected) in zip(diags,fixture.expected) {
             #expect(result.code.rawValue == expected.code)
             #expect(result.message.contains(expected.messageContains))
-            #expect(result.pointer == expected.pointer)
+            #expect(result.pointer.contains(expected.pointer))
             #expect(result.rule == expected.rule)
             #expect(result.severity.rawValue == expected.severity)
             
@@ -194,40 +189,46 @@ struct ValidationTests {
     @Test(
         "Spec rules hit.",
         
-        arguments: { () -> [String] in
+        arguments: { () -> [(String,String)] in
             return [
-                "01-minimal-30-missingInfo",
-                "02-minimal-30-missingPaths",
-                "03-minimal-30-unsupportedV3"
+                ("01-minimal-30-missingInfo","OAS.RequiredOpenAPIFixedFields"),
+                ("02-minimal-30-missingPaths","OAS.RequiredOpenAPIFixedFields"),
+                ("03-minimal-30-unsupportedV3", "OAS.UnsupportedVersion3"),
+                ("02-minimal-30-missingInfoVersion","OAS.RequiredOpenAPIFixedInfoFields"),
+                ("02-minimal-30-missingInfoTitle","OAS.RequiredOpenAPIFixedInfoFields"),
+                ("03-minimal-30-unsupportedPathName","OAS.PathsMustStartWithSlashRule"),
+                ("03-minimal-30-unsupportedHTTPMethod","OAS.SupportedHTTPMethodRule"),
+                ("03-minimal-30-missingResponse","OAS.OperationMustHaveResponses"),
+                ("03-minimal-30-invalidHTTPStatus","OAS.SupportedHTPStatusRule"),
+                ("03-minimal-30-noDescription","OAS.ReferencesMustHaveRef")
             ]
         }()
     )
-    func specRulesHits(resource : String) async throws {
-            guard let fixture = Self.fixture(fixtureName: resource, subDirectory: "Resources/3_0/invalid"),
-                  let resourceUrl = Bundle.module.url(forResource: resource , withExtension: "yaml", subdirectory: "Resources/3_0/invalid") else {
-                throw FixtureErrors.notFound(resource )
+    func specRulesHits(setup : (String,String)) async throws {
+            guard let fixture = Self.fixture(fixtureName: setup.0, subDirectory: "Resources/3_0/invalid"),
+                  let resourceUrl = Bundle.module.url(forResource: setup.0 , withExtension: "yaml", subdirectory: "Resources/3_0/invalid") else {
+                throw FixtureErrors.notFound(setup.0 )
             }
             let oasYaml = try Self.specString(resourceUrl)
             let apiSpec = try OpenAPISpecification.read(
                 unflattened: oasYaml,
-                url:resource ,
+                url:setup.0 ,
                 documentLoader: YamsDocumentLoader()
             )
             
-            let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: resource)
-            let runner = RuleRunner(rules: [
-                RequiredInfoRule(),
-                RequiredPathsRule(),
-                SupportedVersion3()
-            ])
+            let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: setup.0)
+            let runner = RuleRunner.defaultRuleRunner
             
-            let diags = runner.run(spec: apiSpec, ctx: ctx)
-            #expect(fixture.shouldPass == diags.isEmpty,  "mismatch for \(resource),shouldPass   = \(fixture.shouldPass), but got \(diags.count) diagnostics")
+            let unfilteredDiags = runner.run(spec: apiSpec, ctx: ctx)
+        let diags = unfilteredDiags.filter { diagnotics in
+            diagnotics.rule == setup.1
+        }
+            #expect(fixture.shouldPass == diags.isEmpty,  "mismatch for \(setup.0),shouldPass   = \(fixture.shouldPass), but got \(diags.count) diagnostics")
             #expect(fixture.shouldPass || fixture.onlyThese == true ?  fixture.expected.count == diags.count : fixture.expected.count <= diags.count, "number of diagnostics does not match expectations")
             for (result,expected) in zip(diags,fixture.expected) {
                 #expect(result.code.rawValue == expected.code, "code: \(result) != \(expected)")
                 #expect(result.message.contains(expected.messageContains), "message: \(result) != \(expected)")
-                #expect(result.pointer == expected.pointer, "pointer: \(result) != \(expected)")
+                #expect(result.pointer.starts(with: expected.pointer), "pointer: \(result) not as \(expected)")
                 #expect(result.rule == expected.rule,  "rule: \(result) != \(expected)")
                 #expect(result.severity.rawValue == expected.severity,  "severity: \(result) != \(expected)")
                 

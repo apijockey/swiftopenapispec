@@ -7,19 +7,37 @@ cases:
     shouldPass: false
     expected:
       - code: "missingRequired"
-        pointer: "/info"
-        rule: "OAS.RequiredInfo"
+        pointer: "/"
+        rule: "OAS.RequiredOpenAPIFixedFields"
         severity: "error"
-        messageContains: "Missing required field"
+        messageContains: "openapi, info, and paths are required"
     onlyThese: true
+  - fixture: "02-minimal-30-missingInfoTitle"
+    shouldPass: false
+    expected:
+      expected:
+      - code: "missingRequired"
+        pointer: "/info"
+        rule: "OAS.RequiredOpenAPIFixedInfoFields"
+        severity: "error"
+        messageContains: "info element requires 'title' and 'version'."
+  - fixture: "02-minimal-30-missingInfoVersion"
+    shouldPass: false
+    expected:
+      expected:
+      - code: "missingRequired"
+        pointer: "/info"
+        rule: "OAS.RequiredOpenAPIFixedInfoFields"
+        severity: "error"
+        messageContains: "info element requires 'title' and 'version'."
   - fixture: "02-minimal-30-missingPaths"
     shouldPass: false
     expected:
       - code: "missingRequired"
-        pointer: "/paths"
-        rule: "OAS.RequiredPaths"
+        pointer: "/"
+        rule: "OAS.RequiredOpenAPIFixedFields"
         severity: "error"
-        messageContains: "Missing required field 'paths' or it is empty."
+        messageContains: "openapi, info, and paths are required"
     onlyThese: true
   - fixture: "03-minimal-30-unsupportedV3"
     shouldPass: false
@@ -30,4 +48,44 @@ cases:
         severity: "error"
         messageContains: "unsupported Version"
     onlyThese: true
+  - fixture: "03-minimal-30-unsupportedPathName"
+    shouldPass: false
+    expected:
+      - code: "invalidValue"
+        pointer: "/paths"
+        rule: "OAS.PathsMustStartWithSlashRule"
+        severity: "error"
+        messageContains: "path must start with a '/'"
+  - fixture: "03-minimal-30-unsupportedHTTPMethod"
+    shouldPass: false
+    expected:
+      - code: "invalidValue"
+        pointer: "/paths"
+        rule: "OAS.SupportedHTTPMethodRule"
+        severity: "error"
+        messageContains: "http operation not supported"
+  - fixture: "03-minimal-30-missingResponse"
+    shouldPass: false
+    expected:
+      - code: "missingResponses"
+        pointer: "/"
+        rule: "OAS.OperationMustHaveResponses"
+        severity: "error"
+        messageContains: "Operation must define at least one response."
+  - fixture: "03-minimal-30-invalidHTTPStatus"
+    shouldPass: false
+    expected:
+      - code: "invalidValue"
+        pointer: "/"
+        rule: "OAS.SupportedHTPStatusRule"
+        severity: "error"
+        messageContains: "is not a valid HTTP status code."
+  - fixture: "03-minimal-30-noDescription"
+    shouldPass: false
+    expected:
+      - code: "missingRequired"
+        pointer: "/"
+        rule: "OAS.ReferencesMustHaveRef"
+        severity: "error"
+        messageContains: "Response needs a ref or a response object with 'description'"
 

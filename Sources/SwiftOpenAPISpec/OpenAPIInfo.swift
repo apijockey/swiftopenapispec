@@ -28,12 +28,8 @@ public struct OpenAPIInfo : KeyedElement, PointerNavigable {
     static let TITLE_KEY = "title"
     static let VERSION_KEY = "version"
     public init(_ map: [String : Any]) throws {
-        guard let titleString = map[Self.TITLE_KEY] as? String ,
-        let versionString = map[Self.VERSION_KEY] as? String else {
-            throw OpenAPISpecification.Errors.invalidSpecification("info", Self.TITLE_KEY)
-        }
-        self.title = titleString
-        self.version = versionString
+        self.version = map[Self.VERSION_KEY] as? String  ?? ""
+        self.title = map[Self.TITLE_KEY] as? String
         if let text = map[Self.SUMMARY_KEY] as? String {
             self.summary = text
         }

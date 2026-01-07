@@ -193,10 +193,10 @@ struct ReusableResponseRefRule {
     func check(response : OpenAPIResponse, ctx: ValidationContext, pointer : String, rule: String) -> [Diagnostic] {
         var diags: [Diagnostic] = []
         let pointer =  "\(pointer)/\(response.key ?? "")"
-        if response.ref == nil  && response.description == nil {
+        if response.ref == nil  && (response.description == nil){
             let diagnotics = Diagnostic( severity: .error,
                                          code: .missingRequired,
-                                         message: "Response needs a ref or a response object",
+                                         message: "Response needs a ref or a response object with 'description'",
                                          pointer: pointer,
                                          rule: rule)
             diags.append(diagnotics)
