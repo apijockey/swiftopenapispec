@@ -109,7 +109,7 @@ struct ValidationTests {
     func debug_rules() async throws {
         let fixtureName = "03-minimal-30-noDescription"
         let subDirectory = "Resources/3_0/invalid"
-        let rule = "OAS.SupportedHTTPMethodRule"
+        let rule = "OAS.ReferencesMustHaveRef"
         let bundle = Bundle.module
         print("Bundle URL:", bundle.bundleURL.path)
 
@@ -125,8 +125,8 @@ struct ValidationTests {
             documentLoader: YamsDocumentLoader()
         )
         
-        let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: fixtureName)
-        let runner = RuleRunner.defaultRuleRunner        
+        let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: fixtureName, operationIds: [])
+        let runner = RuleRunner.defaultRuleRunner
      
         let unfilteredDiags = runner.run(spec: apiSpec, ctx: ctx)
         let diags = unfilteredDiags.filter { diagnotics in
@@ -143,21 +143,44 @@ struct ValidationTests {
             #expect(result.pointer.contains(expected.pointer))
             #expect(result.rule == expected.rule)
             #expect(result.severity.rawValue == expected.severity)
-            
         }
     }
     
-    /*
-     arguments: [
-       (",,),
-     */
-    @Test("spec rules do not hit.")
-    func noSpecRulesHits() async throws {
-      
-        let resource = "03-minimal-30-noDescription"
-        let subDirectory  = "Resources/3_0/invalid"
-        guard let fixture : ManifestEntry = Self.fixture(fixtureName: "03-minimal-30-noDescription", subDirectory: "Resources/3_0/invalid"),
-              let resourceUrl = Bundle.module.url(forResource: resource , withExtension: "yaml", subdirectory: subDirectory) else {
+    
+    @Test("Schema rules hit",arguments: [
+        ("05-response-invalidType","Schema.SupportedTypes"),
+        ("05-response-invalidPropertyType","Schema.SupportedTypes")
+    ])
+    func schemaRulesHit(resource : String, rule : String) async throws {
+        
+        let subDirectory = "Resources/3_0/invalid"
+       guard let resourceUrl = Bundle.module.url(forResource: resource , withExtension: "yaml", subdirectory: subDirectory) else {
+            throw FixtureErrors.notFound(resource )
+        }
+        
+        
+        let oasYaml = try Self.specString(resourceUrl)
+        let apiSpec = try OpenAPISpecification.read(
+            unflattened: oasYaml,
+            url:resource ,
+            documentLoader: YamsDocumentLoader()
+        )
+        
+        let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: resource, operationIds: [])
+        let diags = Validator.validateSchema(spec: apiSpec, ctx: ctx, baseURI: resource)
+        #expect(diags.count >= 1)
+        let expectedDiagnostic = try #require(diags.first(where: { $0.rule == rule }))
+        #expect(expectedDiagnostic.message.contains("unknown type"))
+    
+    }
+     
+    @Test("spec rules do not hit.", arguments: [
+        "01-minimal-30",
+         "03-minimal-30-noContent"
+        ])
+    func noSpecRulesHits(resource: String) async throws {
+        let subDirectory = "Resources/3_0/valid"
+       guard let resourceUrl = Bundle.module.url(forResource: resource , withExtension: "yaml", subdirectory: subDirectory) else {
             throw FixtureErrors.notFound(resource )
         }
        
@@ -170,25 +193,15 @@ struct ValidationTests {
             documentLoader: YamsDocumentLoader()
         )
         
-        let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: resource)
+        let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: resource, operationIds: [])
         let runner = RuleRunner.defaultRuleRunner
         let diags = runner.run(spec: apiSpec, ctx: ctx)
-        #expect(fixture.shouldPass == diags.isEmpty)
-        #expect(fixture.shouldPass || fixture.onlyThese == true ?  fixture.expected.count == diags.count : fixture.expected.count <= diags.count)
-        for (result,expected) in zip(diags,fixture.expected) {
-            #expect(result.code.rawValue == expected.code)
-            #expect(result.message.contains(expected.messageContains))
-            #expect(result.pointer.contains(expected.pointer))
-            #expect(result.rule == expected.rule)
-            #expect(result.severity.rawValue == expected.severity)
-            
-        }
+        #expect(diags.isEmpty)
         
     }
     
     @Test(
         "Spec rules hit.",
-        
         arguments: { () -> [(String,String)] in
             return [
                 ("01-minimal-30-missingInfo","OAS.RequiredOpenAPIFixedFields"),
@@ -216,7 +229,7 @@ struct ValidationTests {
                 documentLoader: YamsDocumentLoader()
             )
             
-            let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: setup.0)
+            let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: setup.0, operationIds: [])
             let runner = RuleRunner.defaultRuleRunner
             
             let unfilteredDiags = runner.run(spec: apiSpec, ctx: ctx)

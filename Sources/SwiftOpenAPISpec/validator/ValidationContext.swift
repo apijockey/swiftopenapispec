@@ -17,14 +17,20 @@
 //
 
 
-public struct ValidationContext {
-    public enum OASVersion { case v30, v31, v32 }
+public struct ValidationContext : Sendable {
+    public enum OASVersion : Sendable{ case v30, v31, v32 }
     public let version: OASVersion
     public let dialect: ConverterConfig.Dialect
     public let baseURI: String?
-
+    
     // Optional: registrierte component names, operationIds, resolved refs, etc.
     public var operationIds: Set<String> = []
+    public init(version: OASVersion, dialect: ConverterConfig.Dialect, baseURI: String?, operationIds: Set<String>) {
+        self.version = version
+        self.dialect = dialect
+        self.baseURI = baseURI
+        self.operationIds = operationIds
+    }
 }
 
 

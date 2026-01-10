@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 //
 //  OpenAPIStringType.swift
 //  SwiftOpenAPISpec
@@ -23,23 +22,24 @@
 //
 
 
-public struct OpenAPINullType :  OpenAPIValidatableSchemaType, ThrowingHashMapInitiable , PointerNavigable {
+public struct OpenAPIUnknownType :  OpenAPIValidatableSchemaType, ThrowingHashMapInitiable  {
     public func validate() throws {
         
     }
-    
+    public var type: String?
+    public static let TYPE_KEY : String = "type"
     public init(_ map: StringDictionary) throws {
-        
+        self.type = map[Self.TYPE_KEY] as? String
     }
     public init () {
         
     }
-    public var ref: OpenAPISchemaReference?
+ 
     
     public func element(for segmentName: String) throws -> Any? {
       
           
-        throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPINullType", segmentName)
+        throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIUnknownType", segmentName)
 
         
     }

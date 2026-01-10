@@ -508,7 +508,7 @@ struct SupportedHTPStatusRule: Rule {
                     guard let key = response.key else {
                         continue
                     }
-                    if !key.matches("^[1-5](?:\\d{2}|XX)$") {
+                    if !key.matches("^[1-5](?:\\d{2}|XX)$") && key != "default" {
                         diags.append(Diagnostic(severity: .error,
                                                 code: .invalidValue,
                                                 message: "Response code '\(key)' is not a valid HTTP status code.",

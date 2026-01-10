@@ -1,8 +1,4 @@
 cases:
-  - fixture: "01-minimal-30"
-    shouldPass: true
-    expected:
-    onlyThese: true
   - fixture: "01-minimal-30-missingInfo"
     shouldPass: false
     expected:
@@ -88,4 +84,5 @@ cases:
         rule: "OAS.ReferencesMustHaveRef"
         severity: "error"
         messageContains: "Response needs a ref or a response object with 'description'"
+ 
 

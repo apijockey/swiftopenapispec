@@ -21,17 +21,14 @@ import Foundation
 
 public struct Validator {
    
-    public static func validate(spec: OpenAPISpecification, baseURI: String) -> [Diagnostic] {
-        let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: baseURI)
+    public static func validate(spec: OpenAPISpecification, baseURI: String, ctx: ValidationContext) -> [Diagnostic] {
         let runner = RuleRunner.defaultRuleRunner
-        
         return runner.run(spec: spec, ctx: ctx)
     }
-    public static func validateSchema(spec: OpenAPISpecification, baseURI: String) -> [Diagnostic] {
-        let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: baseURI)
+    public static func validateSchema(spec: OpenAPISpecification, ctx: ValidationContext,baseURI: String) -> [Diagnostic] {
         var diagnostics: [Diagnostic] = []
-        let schemaRules : [(any SchemaRule)] = []
-        let schemaRuleRunner = SchemaRuleRunner(rules: schemaRules, ctx: ctx)
+       
+        let schemaRuleRunner = SchemaRuleRunner.defaultRunner(ctx: ctx)
         if let schemas = spec.components?.schemas {
             for schema in schemas {
                 diagnostics.append(contentsOf:schemaRuleRunner.run(schema: schema, pointer: "/components/schema"))
@@ -46,6 +43,13 @@ public struct Validator {
                     }
                     
                 }
+                (op.responses ?? []).forEach( { response in
+                    response.content.forEach { content in
+                        if let schema = content.schema  {
+                            diagnostics.append(contentsOf:schemaRuleRunner.run(schema: schema, pointer: "/paths/schema/responses/\(response.key ?? "")/content/\(content.key ?? "")"))
+                        }
+                    }
+                })
             }
         }
        

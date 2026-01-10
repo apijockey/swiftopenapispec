@@ -55,9 +55,10 @@ public struct OpenAPISchemaType : OpenAPIValidatableSchemaType {
             case "string" : return OpenAPIStringType.self
             case "object" : return OpenAPIObjectType.self
             case "null": return OpenAPINullType.self
+            
             case OpenAPISchemaReference.REF_KEY  : return OpenAPISchemaReference.self
             default:
-                return nil
+            return  OpenAPIUnknownType.self
         }
     }
     public let type : String?

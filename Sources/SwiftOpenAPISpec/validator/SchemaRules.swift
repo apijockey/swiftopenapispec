@@ -17,34 +17,45 @@
 //
 // A small starter pack of schema-level rules that work well with a large invalid-spec corpus.
 
-public protocol SchemaRule {
+public protocol SchemaRule : Sendable {
     var name: String { get }
-    func check(schema: OpenAPISchema, pointer: String) -> [Diagnostic]
+    func check(schemaType: any OpenAPIValidatableSchemaType, pointer: String) -> [Diagnostic]
 }
 
 /// Walk a schema tree and apply schema rules at each node.
-public struct SchemaRuleRunner {
+public struct SchemaRuleRunner  : Sendable{
     public var rules: [SchemaRule]
-    public var  ctx : ValidationContext
+    public var  ctx : ValidationContext 
     public init(rules: [SchemaRule], ctx: ValidationContext) {
         self.rules = rules
         self.ctx = ctx
     }
-
+  
     public func run(schema: OpenAPISchema, pointer: String) -> [Diagnostic] {
         var out: [Diagnostic] = []
-        out.append(contentsOf: rules.flatMap { $0.check(schema: schema, pointer: pointer) })
+        
 
         // Recurse into schemaType (if no $ref on wrapper)
         if schema.ref == nil, let t = schema.schemaType {
             out.append(contentsOf: run(schemaType: t, pointer: pointer))
+            
         }
         return out
     }
+    public static func defaultRunner(ctx: ValidationContext) -> SchemaRuleRunner  {
+        var rules : [SchemaRule] = [
+            StringMinMaxLengthRule(),
+            RequiredSubsetOfPropertiesRule()
 
+        ]
+        if ctx.dialect == .oas30 || ctx.version == .v30 {
+            rules.append(OAS30SupportedTypesRule())
+        }
+        return SchemaRuleRunner(rules: rules, ctx: ctx)
+    }
     private func run(schemaType: any OpenAPIValidatableSchemaType, pointer: String) -> [Diagnostic] {
         var out: [Diagnostic] = []
-
+        out.append(contentsOf: rules.flatMap { $0.check(schemaType: schemaType, pointer: pointer) })
         if let obj = schemaType as? OpenAPIObjectType {
             for prop in obj.properties {
                 if let key = prop.key,
@@ -77,7 +88,8 @@ public struct SchemaRuleRunner {
                 out.append(contentsOf: run(schemaType: item, pointer: JSONPointer.join(JSONPointer.join(pointer, "allOf"), "\(idx)")))
             }
         }
-
+        
+        
         return out
     }
 }
@@ -87,11 +99,11 @@ public struct NonEmptyCompositionRule: SchemaRule {
     public let name = "Schema.NonEmptyComposition"
     public init() {}
 
-    public func check(schema: OpenAPISchema, pointer: String) -> [Diagnostic] {
-        guard let t = schema.schemaType else { return [] }
+    public func check(schemaType: any OpenAPIValidatableSchemaType, pointer: String) -> [Diagnostic] {
+        
         var diags: [Diagnostic] = []
 
-        if let anyOf = t as? OpenAPIAnyOfType, (anyOf.items ?? []).isEmpty {
+        if let anyOf = schemaType as? OpenAPIAnyOfType, (anyOf.items ?? []).isEmpty {
             diags.append(.init(
                 severity: .error,
                 code: .schemaViolation,
@@ -101,7 +113,7 @@ public struct NonEmptyCompositionRule: SchemaRule {
             ))
         }
 
-        if let oneOf = t as? OpenAPIOneOfType, (oneOf.items ?? []).isEmpty {
+        if let oneOf = schemaType  as? OpenAPIOneOfType, (oneOf.items ?? []).isEmpty {
             diags.append(.init(
                 severity: .error,
                 code: .schemaViolation,
@@ -111,7 +123,7 @@ public struct NonEmptyCompositionRule: SchemaRule {
             ))
         }
 
-        if let allOf = t as? OpenAPIAllOfType, (allOf.items ?? []).isEmpty {
+        if let allOf = schemaType  as? OpenAPIAllOfType, (allOf.items ?? []).isEmpty {
             diags.append(.init(
                 severity: .error,
                 code: .schemaViolation,
@@ -130,8 +142,8 @@ public struct StringMinMaxLengthRule: SchemaRule {
     public let name = "Schema.StringMinMaxLength"
     public init() {}
 
-    public func check(schema: OpenAPISchema, pointer: String) -> [Diagnostic] {
-        guard let t = schema.schemaType as? OpenAPIStringType else { return [] }
+    public func check(schemaType: any OpenAPIValidatableSchemaType, pointer: String) -> [Diagnostic] {
+        guard let t = schemaType as? OpenAPIStringType else { return [] }
         guard let min = t.minLength, let max = t.maxLength else { return [] }
         if min > max {
             return [.init(
@@ -146,13 +158,36 @@ public struct StringMinMaxLengthRule: SchemaRule {
     }
 }
 
+public struct OAS30SupportedTypesRule: SchemaRule {
+    public let name = "Schema.SupportedTypes"
+    public init() {}
+
+    public func check(schemaType: any OpenAPIValidatableSchemaType, pointer: String) -> [Diagnostic] {
+        
+        if let t = (schemaType as? OpenAPIUnknownType) {
+            return [.init(severity: .error, code: .invalidType,
+                          message: "unknown type \(t.type ?? "")",
+                          pointer: "\(pointer)/\(t.type ?? "")",
+                          rule: "Schema.SupportedTypes")]
+        }
+        else if schemaType is OpenAPINullType {
+            return [.init(severity: .error, code: .invalidType,
+                          message: "Null type not supported in OpenAPI 3.0 (switch to nullable)",
+                          pointer: "\(pointer)",
+                          rule: "Schema.SupportedTypes")]
+        }
+       return []
+    }
+}
+
+
 /// Rule: for objects, every entry in required must exist as a property key.
 public struct RequiredSubsetOfPropertiesRule: SchemaRule {
     public let name = "Schema.RequiredSubsetOfProperties"
     public init() {}
 
-    public func check(schema: OpenAPISchema, pointer: String) -> [Diagnostic] {
-        guard let obj = schema.schemaType as? OpenAPIObjectType else { return [] }
+    public func check(schemaType: any OpenAPIValidatableSchemaType, pointer: String) -> [Diagnostic] {
+        guard let obj = schemaType as? OpenAPIObjectType else { return [] }
         let required = obj.required 
         if required.isEmpty { return [] }
 

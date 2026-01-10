@@ -74,7 +74,9 @@ public struct SwiftOpenAPICLIApp {
             if let opt = option {
                 switch opt {
                 case "--validate":
-                    let diagnostics = Validator.validate(spec: spec,baseURI: path)
+                    let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: url.absoluteString, operationIds: [])
+                    var diagnostics = Validator.validate(spec: spec, baseURI: url.absoluteString, ctx :  ctx)
+                    diagnostics.append(contentsOf: Validator.validateSchema(spec: spec, ctx: ctx, baseURI: url.absoluteString))
                     if diagnostics.isEmpty {
                         stdout.write("Validation: OK\n")
                         return 0

@@ -48,6 +48,7 @@ public struct Diagnostic: Equatable, CustomDebugStringConvertible, CustomStringC
         case missingRequired
         case missingResponses
         case invalidValue
+        case invalidType
     }
 
     public let severity: Severity

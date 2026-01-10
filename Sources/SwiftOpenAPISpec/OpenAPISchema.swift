@@ -57,6 +57,7 @@ public struct OpenAPISchema :  KeyedElement, PointerNavigable, Equatable {
         else if map[Self.ANYOF_KEY] is [Any] {
             self.schemaType = try OpenAPIAnyOfType(map)
         }
+       
         else if map[Self.ALLOF_KEY] is [Any] {
             self.schemaType = try OpenAPIAllOfType(map)
         }
@@ -77,7 +78,7 @@ public struct OpenAPISchema :  KeyedElement, PointerNavigable, Equatable {
         if let xmlMap = map[Self.XML_KEY] as? StringDictionary {
             xml = try? OpenAPIXMLObject(xmlMap)
         }
-        
+        self.format30 = map.readIfPresent(Self.FORMAT_KEY, String.self)
         extensions = try OpenAPIExtension.extensionElements(map)
         self.nullable = map.readIfPresent(Self.NULLABLE_KEY, Bool.self) ?? false
     }
@@ -86,7 +87,7 @@ public struct OpenAPISchema :  KeyedElement, PointerNavigable, Equatable {
     //https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-01  ("null", "boolean", "object", "array", "number", or "string"), or "integer"
     public var extensions : [OpenAPIExtension]?
     public var discriminator : OpenAPIDiscriminator?
-  
+    public var format30 : String? = nil
     public var ref : OpenAPISchemaReference? = nil
     public var xml : OpenAPIXMLObject? = nil
     public var nullable : Bool = false // 3.0
