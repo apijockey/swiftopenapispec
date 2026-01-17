@@ -29,6 +29,8 @@ jobs:
   linux:
     if: vars.RUN_LINUX_TESTS == 'true'
     runs-on: ubuntu-latest
+    container:
+      image: swift:6.0.3-jammy
     needs: [soundness]
     steps:
       - uses: actions/checkout@v4
