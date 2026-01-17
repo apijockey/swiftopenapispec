@@ -50,6 +50,7 @@ public struct ResolveRefsRule {
                         rule: name
                     ))
                 }
+                
             } catch {
                 diags.append(.init(
                     severity: .error,

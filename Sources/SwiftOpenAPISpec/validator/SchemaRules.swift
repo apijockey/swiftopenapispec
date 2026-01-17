@@ -31,13 +31,17 @@ public struct SchemaRuleRunner  : Sendable{
         self.ctx = ctx
     }
   
-    public func run(schema: OpenAPISchema, pointer: String) -> [Diagnostic] {
+    public func run(schema: OpenAPISchema, pointer: String,resolver: inout JSONPointerResolver) async throws -> [Diagnostic] {
         var out: [Diagnostic] = []
         
 
         // Recurse into schemaType (if no $ref on wrapper)
         if schema.ref == nil, let t = schema.schemaType {
             out.append(contentsOf: run(schemaType: t, pointer: pointer))
+            
+        }
+        else if let ref = schema.ref {
+            let anyType = try await resolver.resolve(ref: ref.refString)
             
         }
         return out

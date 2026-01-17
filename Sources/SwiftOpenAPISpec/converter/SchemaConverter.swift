@@ -43,19 +43,19 @@ public struct  SchemaConverter {
     }
     
     // Gemeinsame Hilfsfunktion: löst Referenzen in Items auf und liefert nur konkrete Schema-Typen zurück
-    private mutating func resolveItems(_ items: [any OpenAPIValidatableSchemaType]) async throws -> [any OpenAPIValidatableSchemaType] {
-        var resolvedItems = [any OpenAPIValidatableSchemaType]()
+    private mutating func resolveItems(_ items: [any OpenAPIValidatableSchemaType]) async throws -> [OpenAPISchemaNode] {
+        var resolvedItems = [OpenAPISchemaNode]()
         resolvedItems.reserveCapacity(items.count)
         for item in items {
             if let reference = item as? OpenAPISchemaReference {
                 let resolvedElement = try await resolve(reference)
                 if let schemaType = resolvedElement.schemaType {
-                    resolvedItems.append(schemaType)
+                    resolvedItems.append(OpenAPISchemaNode.initNode(schemaType))
                 } else {
                     throw SchemaConversionError.noSchemaForReference(reference.reference ?? "")
                 }
             } else {
-                resolvedItems.append(item)
+                resolvedItems.append(OpenAPISchemaNode.initNode(item))
             }
         }
         return resolvedItems

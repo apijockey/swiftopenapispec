@@ -16,6 +16,18 @@
 //  Created by Patric Dubois on 02.01.2026.
 //
 
+
+/*
+ public enum JSONValue: Equatable {
+     case object([String: JSONValue])
+     case array([JSONValue])
+     case string(String)
+     case number(Double)
+     case integer(Int)
+     case boolean(Bool)
+     case null
+ }
+ */
 public struct RefOccurrence: Equatable {
     public enum ExpectedTarget { case schemaObject }
 

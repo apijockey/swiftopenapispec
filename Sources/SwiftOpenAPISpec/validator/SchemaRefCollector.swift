@@ -48,6 +48,21 @@ public struct SchemaRefCollector {
 
         return out
     }
+    
+    public func collect(from ref : OpenAPISchemaReference?, pointer: String) -> [RefOccurrence] {
+        var out: [RefOccurrence] = []
+
+        // A) $ref on schema wrapper
+        if let ref = ref?.refString {
+            out.append(.init(
+                refString: ref,
+                pointerToDollarRef: JSONPointer.join(pointer, "$ref"),
+                expected: .schemaObject
+            ))
+            return out
+        }
+        return out
+    }
 
     public func collect(fromSchemaType schemaType: any OpenAPIValidatableSchemaType, pointer: String) -> [RefOccurrence] {
         var out: [RefOccurrence] = []
@@ -107,21 +122,16 @@ public struct SchemaRefCollector {
 }
 
 // Adapter helpers.
-// If OpenAPISchemaProperty is a wrapper that contains a schema, map it here.
-// If OpenAPISchemaProperty itself *is* OpenAPISchema, adjust accordingly.
 public extension OpenAPISchemaProperty {
     var schemaOrSelf: (any OpenAPIValidatableSchemaType)?{
-        // Choose ONE implementation:
-        // return self.schema
+       
         return self.type
     }
 }
 
-// Map OpenAPISchemaReference to the underlying ref string.
-// Adjust the property name once if needed.
 public extension OpenAPISchemaReference {
     var refString: String {
-        // Adjust if your property isn't named `ref`.
-        return self.ref?.refString ?? ""
+        
+        return self.reference ?? ""
     }
 }

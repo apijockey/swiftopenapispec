@@ -21,35 +21,35 @@ import Foundation
 
 public struct Validator {
    
-    public static func validate(spec: OpenAPISpecification, baseURI: String, ctx: ValidationContext) -> [Diagnostic] {
+    public static func validate(spec: OpenAPISpecification, baseURI: String, ctx: ValidationContext, resolver:  inout  JSONPointerResolver) async throws -> [Diagnostic] {
         let runner = RuleRunner.defaultRuleRunner
         return runner.run(spec: spec, ctx: ctx)
     }
-    public static func validateSchema(spec: OpenAPISpecification, ctx: ValidationContext,baseURI: String) -> [Diagnostic] {
+    public static func validateSchema(spec: OpenAPISpecification, ctx: ValidationContext,baseURI: String, resolver:  inout  JSONPointerResolver) async throws -> [Diagnostic] {
         var diagnostics: [Diagnostic] = []
        
         let schemaRuleRunner = SchemaRuleRunner.defaultRunner(ctx: ctx)
         if let schemas = spec.components?.schemas {
             for schema in schemas {
-                diagnostics.append(contentsOf:schemaRuleRunner.run(schema: schema, pointer: "/components/schema"))
+                try await diagnostics.append(contentsOf:schemaRuleRunner.run(schema: schema, pointer: "/components/schema", resolver: &resolver))
             }
         }
         // Validate requestBody content schemas in paths
-        spec.paths.forEach { path in
-            path.operations.forEach { op in
-                (op.requestBody?.contents ?? []).forEach { content in
+        for path in spec.paths{
+            for op in path.operations {
+                for content in (op.requestBody?.contents ?? []) {
                     if let schema = content.schema  {
-                        diagnostics.append(contentsOf:schemaRuleRunner.run(schema: schema, pointer: "/paths/schema/requestBody/content/\(content.key ?? "")"))
+                        try await diagnostics.append(contentsOf:schemaRuleRunner.run(schema: schema, pointer: "/paths/schema/requestBody/content/\(content.key ?? "")", resolver: &resolver))
                     }
                     
                 }
-                (op.responses ?? []).forEach( { response in
-                    response.content.forEach { content in
+                for response in (op.responses ?? []) {
+                    for content in response.content {
                         if let schema = content.schema  {
-                            diagnostics.append(contentsOf:schemaRuleRunner.run(schema: schema, pointer: "/paths/schema/responses/\(response.key ?? "")/content/\(content.key ?? "")"))
+                            try await diagnostics.append(contentsOf:schemaRuleRunner.run(schema: schema, pointer: "/paths/schema/responses/\(response.key ?? "")/content/\(content.key ?? "")", resolver: &resolver))
                         }
                     }
-                })
+                }
             }
         }
        

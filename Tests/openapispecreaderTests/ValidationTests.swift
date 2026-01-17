@@ -147,6 +147,50 @@ struct ValidationTests {
     }
     
     
+    @Test("DEBUG schema rules.")
+    func debug_schemarules() async throws {
+        let fixtureName = "06-refcomponentNotResolvable"
+        let subDirectory = "Resources/3_0/invalid"
+        let rule = "OAS.ReferencesMustHaveRef"
+        let bundle = Bundle.module
+        print("Bundle URL:", bundle.bundleURL.path)
+
+        let resourcesRoot = try #require(bundle.resourceURL)
+        print("Resources root:", resourcesRoot.path)
+        guard let resourceUrl = Bundle.module.url(forResource: fixtureName , withExtension: "yaml", subdirectory: subDirectory) else {
+            throw FixtureErrors.notFound(fixtureName )
+        }
+        let oasYaml = try Self.specString(resourceUrl)
+        let apiSpec = try OpenAPISpecification.read(
+            unflattened: oasYaml,
+            url: fixtureName ,
+            documentLoader: YamsDocumentLoader()
+        )
+        
+        let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: fixtureName, operationIds: [])
+        let objectLoader = YamsDocumentLoader()
+        var resolver = JSONPointerResolver(baseURL: resourceUrl) { url in
+            try await objectLoader.load(from: url)
+        }
+        let unfilteredDiags =  try await Validator.validateSchema(spec: apiSpec, ctx: ctx, baseURI: resourceUrl.absoluteString, resolver: &resolver)
+        let diags = unfilteredDiags.filter { diagnotics in
+            diagnotics.rule == rule
+        }
+        guard let fixture = Self.fixture(fixtureName: fixtureName, subDirectory: subDirectory) else {
+            throw FixtureErrors.notFound(fixtureName )
+        }
+        #expect(fixture.shouldPass == diags.isEmpty)
+        #expect(fixture.shouldPass || fixture.onlyThese == true ?  fixture.expected.count == diags.count : fixture.expected.count <= diags.count)
+        for (result,expected) in zip(diags,fixture.expected) {
+            #expect(result.code.rawValue == expected.code)
+            #expect(result.message.contains(expected.messageContains))
+            #expect(result.pointer.contains(expected.pointer))
+            #expect(result.rule == expected.rule)
+            #expect(result.severity.rawValue == expected.severity)
+        }
+    }
+    
+    
     @Test("Schema rules hit",arguments: [
         ("05-response-invalidType","Schema.SupportedTypes"),
         ("05-response-invalidPropertyType","Schema.SupportedTypes")
@@ -167,7 +211,9 @@ struct ValidationTests {
         )
         
         let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: resource, operationIds: [])
-        let diags = Validator.validateSchema(spec: apiSpec, ctx: ctx, baseURI: resource)
+        let objectLoader = YamsDocumentLoader()
+        var resolver = JSONPointerResolver(baseURL: resourceUrl, loadDocument:  objectLoader.load(from:))
+        let diags = try await Validator.validateSchema(spec: apiSpec, ctx: ctx, baseURI: resource, resolver: &resolver)
         #expect(diags.count >= 1)
         let expectedDiagnostic = try #require(diags.first(where: { $0.rule == rule }))
         #expect(expectedDiagnostic.message.contains("unknown type"))
@@ -251,32 +297,37 @@ struct ValidationTests {
    
 
     
-    /*
+    
      @Test("All schema $refs resolve")
-     func validateRefs() async throws {
-         let url = try fixtureURL("35-ext-components")
-         let loader = YamsDocumentLoader()
-
-         let yaml = try await loader.load(from: url)
-         let spec = try OpenAPISpecification.read(unflattened: yaml, url: url.absoluteString, documentLoader: loader)
-
-         var resolver = JSONPointerResolver(baseURL: url, loadDocument: { u in
-             try await loader.load(from: u)
-         })
-
-         var occurrences: [RefOccurrence] = []
-
-         // Beispiel: components.schemas
-         for (name, schema) in spec.components.schemas {
-             let p = "/components/schemas/\(JSONPointer.escape(name))"
-             occurrences += SchemaRefCollector.collect(from: schema, pointer: p)
-         }
-
-         let diags = await ResolveRefsRule().check(refs: occurrences, resolver: resolver)
-         #expect(diags.isEmpty)
-     }
-
-     */
-
+    func validateRefs() async throws {
+        let subDirectory = "Resources/3_1/valid"
+        let fixture = "35-ext-components"
+        guard let resourceUrl = Bundle.module.url(forResource: fixture , withExtension: "yaml", subdirectory: subDirectory) else {
+            throw FixtureErrors.notFound(fixture)
+        }
+        let loader = YamsDocumentLoader()
+        
+        let spec = try await OpenAPISpecification.read(url: resourceUrl,documentLoader: loader)
+        
+        var resolver = JSONPointerResolver(baseURL: resourceUrl, loadDocument: { u in
+            try await loader.load(from: u)
+        })
+        
+        var occurrences: [RefOccurrence] = []
+        
+        //Beispiel: components.schemas
+        for (schema) in (spec.components?.schemas ?? []){
+            let p = "/components/schemas/\(JSONPointer.escape(schema.key ?? ""))"
+            occurrences += SchemaRefCollector().collect(from: schema, pointer: p)
+        }
+        for path in spec.paths {
+            
+        }
+        let diags = await ResolveRefsRule().check(refs: occurrences, resolver: &resolver)
+        #expect(diags.isEmpty)
+        
+        
+        
+    }
 }
 

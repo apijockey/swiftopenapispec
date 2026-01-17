@@ -75,8 +75,10 @@ public struct SwiftOpenAPICLIApp {
                 switch opt {
                 case "--validate":
                     let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: url.absoluteString, operationIds: [])
-                    var diagnostics = Validator.validate(spec: spec, baseURI: url.absoluteString, ctx :  ctx)
-                    diagnostics.append(contentsOf: Validator.validateSchema(spec: spec, ctx: ctx, baseURI: url.absoluteString))
+                    let objectLoader = YamsDocumentLoader()
+                    var resolver = JSONPointerResolver(baseURL : url,loadDocument: objectLoader.load(from:))
+                    var diagnostics = try await Validator.validate(spec: spec, baseURI: url.absoluteString, ctx :  ctx, resolver: &resolver)
+                    try await diagnostics.append(contentsOf: Validator.validateSchema(spec: spec, ctx: ctx, baseURI: url.absoluteString, resolver: &resolver))
                     if diagnostics.isEmpty {
                         stdout.write("Validation: OK\n")
                         return 0

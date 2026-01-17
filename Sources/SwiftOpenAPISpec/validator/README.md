@@ -45,8 +45,8 @@
 ## Next extensions
 
 - Add spec-level walkers/rules for:
-  - required `info`, non-empty `paths`
-  - `responses` required per operation
+  - required `info`, non-empty `paths` DONE
+  - `responses` required per operation DONE 
   - path parameters must be required
   - unique `operationId`
 - Expand schema traversal for:

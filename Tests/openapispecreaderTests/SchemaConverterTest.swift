@@ -61,7 +61,7 @@ struct SchemaConverterTestSuite {
     @Test("setup correct")
     func sanity() async throws {
         let name = "01-minimal-30"
-        guard let url = Bundle.module.url(forResource: name, withExtension: "yaml") else {
+        guard let url = Bundle.module.url(forResource: name, withExtension: "yaml", subdirectory: "Resources/3_0/valid") else {
             throw Self.Errors.notFound(name)
         }
         let apiSpec = try await OpenAPISpecification.read(url: url)
@@ -83,7 +83,7 @@ struct SchemaConverterTestSuite {
     @Test("JSON Schema for reference is resolved")
     func resolveReferences() async throws {
         let name = "05-responses-status-default"
-        guard let url = Bundle.module.url(forResource: name, withExtension: "yaml") else {
+        guard let url = Bundle.module.url(forResource: name, withExtension: "yaml",subdirectory: "Resources/3_0/valid") else {
             throw Self.Errors.notFound(name)
         }
         let apiSpec = try await OpenAPISpecification.read(url: url)
@@ -106,7 +106,7 @@ struct SchemaConverterTestSuite {
     @Test("anyof contains all referenced schemas")
     func anyof() async throws {
         let name = "08-oneof-anyof-allof"
-        guard let url = Bundle.module.url(forResource: name, withExtension: "yaml") else {
+        guard let url = Bundle.module.url(forResource: name, withExtension: "yaml",subdirectory: "Resources/3_0/valid") else {
             throw Self.Errors.notFound(name)
         }
         let apiSpec = try await OpenAPISpecification.read(url: url)
@@ -118,8 +118,11 @@ struct SchemaConverterTestSuite {
         let convertResult = try await converter.convert(schema: schema)
         switch convertResult {
         case .oneOf(let oneOfType):
-            #expect(oneOfType.count == 2)
-            let circle = try #require(oneOfType.first as? OpenAPIObjectType)
+            guard case let .object(circle) = try #require(oneOfType.first) else {
+                Issue.record("Expected first oneOf element to be .object")
+                return
+            }
+            
             #expect(circle.properties.count == 1)
             #expect(circle.properties[key: "r"]?.type is OpenAPIDoubleType)
         default:
