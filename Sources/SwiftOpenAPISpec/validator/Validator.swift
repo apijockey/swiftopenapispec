@@ -19,11 +19,38 @@
 
 import Foundation
 
+
 public struct Validator {
    
     public static func validate(spec: OpenAPISpecification, baseURI: String, ctx: ValidationContext, resolver:  inout  JSONPointerResolver) async throws -> [Diagnostic] {
         let runner = RuleRunner.defaultRuleRunner
         return runner.run(spec: spec, ctx: ctx)
+    }
+    public static func validateRefs(spec: OpenAPISpecification, baseURI: String, ctx: ValidationContext, resolver:  inout  JSONPointerResolver) async throws -> [Diagnostic] {
+        var occurrences = [RefOccurrence]()
+        for (schema) in (spec.components?.schemas ?? []){
+            let p = "/components/schemas/\(JSONPointer.escape(schema.key ?? ""))"
+            occurrences += SchemaRefCollector().collect(from: schema, pointer: p)
+        }
+        for path in spec.paths {
+            for op in path.operations {
+                if let reqBody = op.requestBody {
+                    let path = "/paths/\(JSONPointer.escape(path.key ?? ""))/operations/\(op.key ?? "")" + "/requestBody"
+                    for content in (reqBody.contents) {
+                        occurrences += SchemaRefCollector().collect(from: content, pointer: path)
+                        
+                    }
+                }
+                if let response = op.responses {
+                    for response in response {
+                            let path = "/paths/\(JSONPointer.escape(path.key ?? ""))/operations/\(op.key ?? "")" + "/responses/\(response.key ?? "")"
+                            occurrences += SchemaRefCollector().collect(from: response, pointer: path)
+                    }
+                }
+            }
+        }
+        let diags = await ResolveRefsRule().check(refs: occurrences, resolver: &resolver)
+        return diags
     }
     public static func validateSchema(spec: OpenAPISpecification, ctx: ValidationContext,baseURI: String, resolver:  inout  JSONPointerResolver) async throws -> [Diagnostic] {
         var diagnostics: [Diagnostic] = []

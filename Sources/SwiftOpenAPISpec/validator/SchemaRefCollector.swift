@@ -28,6 +28,44 @@ public struct SchemaRefCollector {
 
     public init() {}
 
+    
+    public func collect(from content : OpenAPIMediaType, pointer : String)  -> [RefOccurrence] {
+        var out: [RefOccurrence] = []
+        if let r = content.ref?.refString {
+            out.append(.init(
+                refString: r,
+                pointerToDollarRef: JSONPointer.join(pointer, "$ref"),
+                expected: .schemaObject
+            ))
+        }
+        else if let schema = content.schema,
+                    let ref = schema.ref {
+            out.append(.init(
+                refString: ref.refString,
+                pointerToDollarRef: JSONPointer.join(pointer, "$ref"),
+                expected: .schemaObject
+            ))
+        }
+        return out
+    }
+    public func collect(from response : OpenAPIResponse, pointer : String)  -> [RefOccurrence] {
+        var out: [RefOccurrence] = []
+        if let r = response.ref?.refString {
+            out.append(.init(
+                refString: r,
+                pointerToDollarRef: JSONPointer.join(pointer, "$ref"),
+                expected: .schemaObject
+            ))
+        }
+        else
+        {
+            for content in response.content {
+                out.append(contentsOf: collect(from: content, pointer: JSONPointer.join(pointer, "$eref")))
+            }
+            
+        }
+        return out
+    }
     public func collect(from schema: OpenAPISchema, pointer: String) -> [RefOccurrence] {
         var out: [RefOccurrence] = []
 

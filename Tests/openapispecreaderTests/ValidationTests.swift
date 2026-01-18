@@ -301,7 +301,7 @@ struct ValidationTests {
      @Test("All schema $refs resolve")
     func validateRefs() async throws {
         let subDirectory = "Resources/3_1/valid"
-        let fixture = "35-ext-components"
+        let fixture = "openapi"
         guard let resourceUrl = Bundle.module.url(forResource: fixture , withExtension: "yaml", subdirectory: subDirectory) else {
             throw FixtureErrors.notFound(fixture)
         }
@@ -313,17 +313,13 @@ struct ValidationTests {
             try await loader.load(from: u)
         })
         
-        var occurrences: [RefOccurrence] = []
+        
         
         //Beispiel: components.schemas
-        for (schema) in (spec.components?.schemas ?? []){
-            let p = "/components/schemas/\(JSONPointer.escape(schema.key ?? ""))"
-            occurrences += SchemaRefCollector().collect(from: schema, pointer: p)
-        }
-        for path in spec.paths {
-            
-        }
-        let diags = await ResolveRefsRule().check(refs: occurrences, resolver: &resolver)
+        let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: resourceUrl.absoluteString, operationIds: [])
+        
+       
+        let diags = try await Validator.validateRefs(spec: spec, baseURI: resourceUrl.absoluteString, ctx: ctx, resolver: &resolver)
         #expect(diags.isEmpty)
         
         

@@ -140,7 +140,7 @@ public struct JSONPointerResolver : JSONPointerResolving {
                     
                 }
                 else {
-                    throw NSError(domain: "PointerHarness", code: 3, userInfo: [NSLocalizedDescriptionKey: "Segment \(seg)not found at \(current)"])
+                    throw NSError(domain: "PointerHarness", code: 3, userInfo: [NSLocalizedDescriptionKey: "Segment '\(seg)' not found at '\(current)'"])
                 }
             }
             //found the right element, now continue to resolve 
@@ -168,7 +168,7 @@ public struct JSONPointerResolver : JSONPointerResolving {
                     continue
                 }
                 // If resolved is a domain object that can yield "$ref", follow it
-                throw NSError(domain: "PointerHarness", code: 3, userInfo: [NSLocalizedDescriptionKey: "Segment \(seg)not found at \(current)"])
+                throw NSError(domain: "PointerHarness", code: 3, userInfo: [NSLocalizedDescriptionKey: "Segment '\(seg)' not found at '\(current)'"])
             }
         }
         return current
@@ -189,7 +189,7 @@ public struct JSONPointerResolver : JSONPointerResolving {
         let target = await parseRef(ref)
         currentURL = target.url
         if !visited.insert(target).inserted {
-            throw NSError(domain: "PointerHarness", code: 8, userInfo: [NSLocalizedDescriptionKey: "Circular $ref detected: \(ref)"])
+            throw NSError(domain: "PointerHarness", code: 8, userInfo: [NSLocalizedDescriptionKey: "Circular $ref detected: '\(ref)' "])
         }
         
         let doc = try await loadDocument(target.url)
