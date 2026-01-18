@@ -25,9 +25,9 @@ import Testing
 @Suite("SwiftOpenAPICLI Run() tests")
 struct CLIRunTests {
 
-    private func fixtureURL(_ resource: String, ext: String = "yaml") throws -> URL {
+    private func fixtureURL(_ resource: String, ext: String = "yaml", subdirectory: String? = nil) throws -> URL {
         let name = "\(resource).\(ext)"
-        guard let url = Bundle.module.url(forResource: resource, withExtension: ext) else {
+        guard let url = Bundle.module.url(forResource: resource, withExtension: ext, subdirectory: subdirectory) else {
             throw NSError(domain: "CLIRunTests", code: 1, userInfo: [NSLocalizedDescriptionKey: "Fixture not found: \(name)"])
         }
         return url
@@ -35,7 +35,7 @@ struct CLIRunTests {
 
     @Test("CLI prints version and title for a valid spec")
     func testCLIWithValidSpec() async throws {
-        let url = try fixtureURL("openapi", ext: "yaml")
+        let url = try fixtureURL("openapi", ext: "yaml", subdirectory: "Resources/3_1/valid")
         var out: (any TextOutputStream) = StringTextOutputStream()
         var err: (any TextOutputStream) = StringTextOutputStream()
         let app = SwiftOpenAPICLIApp()
@@ -82,7 +82,7 @@ struct CLIRunTests {
 
     @Test("CLI --validate returns OK for a valid spec")
     func testCLIValidateOK() async throws {
-        let url = try fixtureURL("openapi", ext: "yaml")
+        let url = try fixtureURL("openapi", ext: "yaml", subdirectory: "Resources/3_1/valid")
         var out: (any TextOutputStream) = StringTextOutputStream()
         var err: (any TextOutputStream) = StringTextOutputStream()
         let app = SwiftOpenAPICLIApp()
@@ -97,7 +97,7 @@ struct CLIRunTests {
 
     @Test("CLI with invalid option returns error")
     func testCLIInvalidOption() async throws {
-        let url = try fixtureURL("openapi", ext: "yaml")
+        let url = try fixtureURL("openapi", ext: "yaml", subdirectory: "Resources/3_1/valid")
         var out: (any TextOutputStream) = StringTextOutputStream()
         var err: (any TextOutputStream) = StringTextOutputStream()
         let app = SwiftOpenAPICLIApp()

@@ -36,10 +36,10 @@ struct APIWithExamplesTests {
             }
         }
     }
-    private func specString(_ resource: String, ext: String = "yaml") throws -> StringDictionary {
+    private func specString(_ resource: String, ext: String = "yaml", subDirectory: String? = nil) throws -> StringDictionary {
         let name = "\(resource).\(ext)"
 
-        guard let url = Bundle.module.url(forResource: resource, withExtension: ext) else {
+        guard let url = Bundle.module.url(forResource: resource, withExtension: ext, subdirectory: subDirectory) else {
             throw Self.Errors.notFound(name)
         }
 
@@ -56,7 +56,7 @@ struct APIWithExamplesTests {
     }
     @Test("Test OpanAPI Object")
     func minimal() async throws {
-        let yaml = try specString("01-minimal-30")
+        let yaml = try specString("01-minimal-30",subDirectory: "Resources/3_0/valid")
         
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml,url:"01-minimal-30", documentLoader: YamsDocumentLoader())
         #expect(apiSpec.version == "3.0.3")

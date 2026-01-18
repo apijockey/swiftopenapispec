@@ -23,7 +23,7 @@ struct OpenAPILegacyPortedTests {
 
     @Test
     func testBasics() async throws {
-        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
             #expect(Bool(false), "no openapi")
             return
         }
@@ -43,7 +43,7 @@ struct OpenAPILegacyPortedTests {
 
     @Test
     func testServers() async throws {
-        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
             #expect(Bool(false), "no openapi")
             return
         }
@@ -73,7 +73,7 @@ struct OpenAPILegacyPortedTests {
 
     @Test
     func testPathInfo() async throws {
-        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
                 #expect(Bool(false), "no openapi")
                 return
             }
@@ -101,7 +101,7 @@ struct OpenAPILegacyPortedTests {
 
     @Test
     func testOperations() async throws {
-        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
             #expect(Bool(false), "no openapi")
             return
         }
@@ -118,7 +118,7 @@ struct OpenAPILegacyPortedTests {
 
     @Test
     func testParameters() async throws {
-        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
             #expect(Bool(false), "no openapi")
             return
         }
@@ -143,7 +143,7 @@ struct OpenAPILegacyPortedTests {
 
     @Test
     func testResponses() async throws {
-        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
             #expect(Bool(false), "no openapi")
             return
         }
@@ -160,7 +160,7 @@ struct OpenAPILegacyPortedTests {
 
     @Test
     func testSchemaComponents() async throws {
-        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
             #expect(Bool(false), "no openapi")
             return
         }
@@ -185,7 +185,7 @@ struct OpenAPILegacyPortedTests {
 
     @Test
     func testParameterComponents() async throws {
-        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
            
                 #expect(Bool(false), "no openapi")
                 return
@@ -202,7 +202,7 @@ struct OpenAPILegacyPortedTests {
 
     @Test
     func testResponsesComponents() async throws {
-        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
            
                 #expect(Bool(false), "no openapi")
                 return
@@ -228,7 +228,7 @@ struct OpenAPILegacyPortedTests {
 
     @Test
     func testRequestBody() async throws {
-        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
             #expect(Bool(false), "no openapi")
             return
         }
@@ -243,7 +243,7 @@ struct OpenAPILegacyPortedTests {
 
     @Test
     func testOneOfSchema() async throws {
-        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
             #expect(Bool(false), "no openapi")
             return
         }
@@ -261,7 +261,7 @@ struct OpenAPILegacyPortedTests {
 
     @Test
     func testOperationSecurityScheme() async throws {
-        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
         
                 #expect(Bool(false), "no openapi")
                 return
@@ -281,7 +281,7 @@ struct OpenAPILegacyPortedTests {
 
     @Test
     func testSecurityComponents() async throws {
-        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
             
                 #expect(Bool(false), "no openapi")
                 return
@@ -328,7 +328,7 @@ struct OpenAPILegacyPortedTests {
 
     @Test
     func testExamples() async throws {
-        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
             
                 #expect(Bool(false), "no openapi")
                 return
@@ -353,7 +353,7 @@ struct OpenAPILegacyPortedTests {
 
     @Test
     func testExamplesRef() async throws {
-        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
             #expect(Bool(false), "no openapi")
             return
         }
@@ -370,7 +370,7 @@ struct OpenAPILegacyPortedTests {
 
     @Test
     func testLinks() async throws {
-        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml") else {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
             #expect(Bool(false), "no openapi")
             return
         }

@@ -39,9 +39,9 @@ struct ArrayComponentsTests {
         }
     }
 
-    private func fixtureMap(_ resource: String, ext: String = "yml") throws -> StringDictionary {
+    private func fixtureMap(_ resource: String, ext: String = "yml", subDirectory : String? = nil) throws -> StringDictionary {
         let name = "\(resource).\(ext)"
-        guard let url = Bundle.module.url(forResource: resource, withExtension: ext) else {
+        guard let url = Bundle.module.url(forResource: resource, withExtension: ext, subdirectory: subDirectory) else {
             throw Errors.notFound(name)
         }
         do {
@@ -58,7 +58,7 @@ struct ArrayComponentsTests {
 
     @Test("components.schemas.SimpleStringArray -> array<string>")
     func simpleStringArray() async throws {
-        let yaml = try fixtureMap("36-arrayComponents")
+        let yaml = try fixtureMap("36-arrayComponents", subDirectory: "Resources/3_1/valid")
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url: "36-arrayComponents", documentLoader: YamsDocumentLoader())
 
         let comp = try #require(apiSpec[schemacomponent: "SimpleStringArray"])
@@ -69,7 +69,7 @@ struct ArrayComponentsTests {
 
     @Test("IntArrayWithBounds -> min/maxItems")
     func intArrayWithBounds() async throws {
-        let yaml = try fixtureMap("36-arrayComponents")
+        let yaml = try fixtureMap("36-arrayComponents", subDirectory: "Resources/3_1/valid")
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url: "36-arrayComponents", documentLoader: YamsDocumentLoader())
 
         let comp = try #require(apiSpec[schemacomponent: "IntArrayWithBounds"])
@@ -81,7 +81,7 @@ struct ArrayComponentsTests {
 
     @Test("UniqueBooleanArray -> uniqueItems: true")
     func uniqueBooleanArray() async throws {
-        let yaml = try fixtureMap("36-arrayComponents")
+        let yaml = try fixtureMap("36-arrayComponents", subDirectory: "Resources/3_1/valid")
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url: "36-arrayComponents", documentLoader: YamsDocumentLoader())
 
         let comp = try #require(apiSpec[schemacomponent: "UniqueBooleanArray"])
@@ -94,7 +94,7 @@ struct ArrayComponentsTests {
 
     @Test("NestedStringArray -> array<array<string>>")
     func nestedStringArray() async throws {
-        let yaml = try fixtureMap("36-arrayComponents")
+        let yaml = try fixtureMap("36-arrayComponents", subDirectory: "Resources/3_1/valid")
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url: "36-arrayComponents", documentLoader: YamsDocumentLoader())
 
         let comp = try #require(apiSpec[schemacomponent: "NestedStringArray"])
@@ -105,7 +105,7 @@ struct ArrayComponentsTests {
 
     @Test("ObjectArray -> array<object{id:int,name:string}>")
     func objectArray() async throws {
-        let yaml = try fixtureMap("36-arrayComponents")
+        let yaml = try fixtureMap("36-arrayComponents", subDirectory: "Resources/3_1/valid")
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url: "36-arrayComponents", documentLoader: YamsDocumentLoader())
 
         let comp = try #require(apiSpec[schemacomponent: "ObjectArray"])
@@ -121,7 +121,7 @@ struct ArrayComponentsTests {
 
     @Test("NumberArrayWithContains -> minContains/maxContains")
     func numberArrayWithContains() async throws {
-        let yaml = try fixtureMap("36-arrayComponents")
+        let yaml = try fixtureMap("36-arrayComponents", subDirectory: "Resources/3_1/valid")
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url: "36-arrayComponents", documentLoader: YamsDocumentLoader())
 
         let comp = try #require(apiSpec[schemacomponent: "NumberArrayWithContains"])
@@ -135,7 +135,7 @@ struct ArrayComponentsTests {
 
     @Test("ItemsWithoutType -> items ohne type -> items == nil")
     func itemsWithoutType() async throws {
-        let yaml = try fixtureMap("36-arrayComponents")
+        let yaml = try fixtureMap("36-arrayComponents", subDirectory: "Resources/3_1/valid")
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url: "36-arrayComponents", documentLoader: YamsDocumentLoader())
 
         let comp = try #require(apiSpec[schemacomponent: "ItemsWithoutType"])
@@ -145,7 +145,7 @@ struct ArrayComponentsTests {
 
     @Test("ArrayWithoutItems -> items fehlt -> items == nil, minItems gesetzt")
     func arrayWithoutItems() async throws {
-        let yaml = try fixtureMap("36-arrayComponents")
+        let yaml = try fixtureMap("36-arrayComponents", subDirectory: "Resources/3_1/valid")
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url: "36-arrayComponents", documentLoader: YamsDocumentLoader())
 
         let comp = try #require(apiSpec[schemacomponent: "ArrayWithoutItems"])

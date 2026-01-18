@@ -36,9 +36,9 @@ struct ArrayMediaTypesTests {
         }
     }
 
-    private func fixtureMap(_ resource: String, ext: String = "yaml") throws -> StringDictionary {
+    private func fixtureMap(_ resource: String, ext: String = "yaml", subDirectory : String? = nil) throws -> StringDictionary {
         let name = "\(resource).\(ext)"
-        guard let url = Bundle.module.url(forResource: resource, withExtension: ext) else {
+        guard let url = Bundle.module.url(forResource: resource, withExtension: ext, subdirectory: subDirectory) else {
             throw Errors.notFound(name)
         }
         do {
@@ -55,7 +55,7 @@ struct ArrayMediaTypesTests {
 
     @Test("String array")
     func getTagsResponseArrayOfString() async throws {
-        let yaml = try fixtureMap("37-array-mediatypes")
+        let yaml = try fixtureMap("37-array-mediatypes", subDirectory: "Resources/3_1/valid")
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url: "37-array-mediatypes", documentLoader: YamsDocumentLoader())
 
         let path = try #require(apiSpec[path: "/tags"])
@@ -74,7 +74,7 @@ struct ArrayMediaTypesTests {
 
     @Test("Object array")
     func postTagsRequestArrayOfObject() async throws {
-        let yaml = try fixtureMap("37-array-mediatypes")
+        let yaml = try fixtureMap("37-array-mediatypes", subDirectory: "Resources/3_1/valid")
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url: "37-array-mediatypes", documentLoader: YamsDocumentLoader())
        
         let path = try #require(apiSpec[path: "/tags"])
