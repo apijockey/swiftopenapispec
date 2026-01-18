@@ -56,7 +56,7 @@ let package = Package(
 
         // Test-Target
         .testTarget(
-            name: "openapispecreaderTests",
+            name: "swiftopenapispecTests",
             dependencies: [
                 "SwiftOpenAPISpec",
                 "SwiftOpenAPICLI",

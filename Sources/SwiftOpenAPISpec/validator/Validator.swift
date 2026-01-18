@@ -22,6 +22,9 @@ import Foundation
 
 public struct Validator {
    
+    enum Errors : LocalizedError {
+        case invalidPointer(String), maxRecursion(String,Int), resolveError(String)
+    }
     public static func validate(spec: OpenAPISpecification, baseURI: String, ctx: ValidationContext, resolver:  inout  JSONPointerResolver) async throws -> [Diagnostic] {
         let runner = RuleRunner.defaultRuleRunner
         return runner.run(spec: spec, ctx: ctx)
@@ -41,8 +44,8 @@ public struct Validator {
                         
                     }
                 }
-                if let response = op.responses {
-                    for response in response {
+                if let responses = op.responses {
+                    for response in responses {
                             let path = "/paths/\(JSONPointer.escape(path.key ?? ""))/operations/\(op.key ?? "")" + "/responses/\(response.key ?? "")"
                             occurrences += SchemaRefCollector().collect(from: response, pointer: path)
                     }

@@ -51,11 +51,21 @@ public struct ResolveRefsRule {
                     ))
                 }
                 
+            } catch let Validator.Errors.invalidPointer(errorMessage) {
+                
+                    diags.append(.init(
+                        severity: .error,
+                        code: .invalidRef,
+                        message: "Cannot resolve $ref '\(ref)': \(errorMessage)",
+                        pointer: occ.pointerToDollarRef,
+                        rule: name
+                    ))
+                
             } catch {
                 diags.append(.init(
                     severity: .error,
                     code: .invalidRef,
-                    message: "Cannot resolve $ref '\(ref)': \(error)",
+                    message: "Cannot resolve $ref '\(ref)': \(error.localizedDescription)",
                     pointer: occ.pointerToDollarRef,
                     rule: name
                 ))

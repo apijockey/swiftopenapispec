@@ -140,7 +140,8 @@ public struct JSONPointerResolver : JSONPointerResolving {
                     
                 }
                 else {
-                    throw NSError(domain: "PointerHarness", code: 3, userInfo: [NSLocalizedDescriptionKey: "Segment '\(seg)' not found at '\(current)'"])
+                    throw Validator.Errors.invalidPointer( "Segment '\(seg)' not found at '\(fragment)'")
+                    
                 }
             }
             //found the right element, now continue to resolve 
@@ -168,7 +169,8 @@ public struct JSONPointerResolver : JSONPointerResolving {
                     continue
                 }
                 // If resolved is a domain object that can yield "$ref", follow it
-                throw NSError(domain: "PointerHarness", code: 3, userInfo: [NSLocalizedDescriptionKey: "Segment '\(seg)' not found at '\(current)'"])
+                throw Validator.Errors.invalidPointer( "Segment '\(seg)' not found at '\(fragment)'")
+                
             }
         }
         return current
@@ -183,13 +185,15 @@ public struct JSONPointerResolver : JSONPointerResolving {
         depth: Int
     ) async throws -> Any {
         if depth > maxDepth {
-            throw NSError(domain: "PointerHarness", code: 7, userInfo: [NSLocalizedDescriptionKey: "Max $ref depth exceeded"])
+            throw Validator.Errors.maxRecursion("Max $ref depths exceeded for 'ref'", depth)
+            
         }
         
         let target = await parseRef(ref)
         currentURL = target.url
         if !visited.insert(target).inserted {
-            throw NSError(domain: "PointerHarness", code: 8, userInfo: [NSLocalizedDescriptionKey: "Circular $ref detected: '\(ref)' "])
+            throw Validator.Errors.invalidPointer("Circular $ref detected: '\(ref)' ")
+            
         }
         
         let doc = try await loadDocument(target.url)

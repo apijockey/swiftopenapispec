@@ -151,12 +151,12 @@ public struct RelativeReferenceResolver {
             var current: Any = root
             for key in keys {
                 guard let dict = current as? [String: Any] else {
-                    throw NSError(domain: "RefResolver", code: 1,
-                                  userInfo: [NSLocalizedDescriptionKey: "Expected dict at \(key)"])
+                    throw Validator.Errors.resolveError("Expected dict at \(key)")
+                    
                 }
                 guard let next = dict[key] else {
-                    throw NSError(domain: "RefResolver", code: 2,
-                                  userInfo: [NSLocalizedDescriptionKey: "Key \(key) not found"])
+                    throw Validator.Errors.resolveError("Key \(key) not found")
+                    
                 }
                 current = next
             }
