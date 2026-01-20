@@ -17,7 +17,7 @@
 //
 
 import Foundation
-public struct OpenAPICallBack : KeyedElement,PointerNavigable{
+public struct OpenAPICallBack : KeyedElement,PointerNavigable,OpenAPISchemaReferenceable{
     
     //TODO: Call
     public func element(for segmentName: String) throws -> Any? {
@@ -41,6 +41,10 @@ public struct OpenAPICallBack : KeyedElement,PointerNavigable{
     
     public init(_ map : StringDictionary) throws {
         
+        if let ref = try OpenAPISchemaReference.initReference(from: map) {
+            self.ref = ref
+            return
+        }
         extensions = try OpenAPIExtension.extensionElements(map)
         if map.count > 0 {
             pathItems = []

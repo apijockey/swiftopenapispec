@@ -77,11 +77,6 @@ public struct JSONPointerResolver : JSONPointerResolving {
             .replacingOccurrences(of: "~1", with: "/")
             .replacingOccurrences(of: "~0", with: "~")
     }
-//    static func encodePointerSegment(_ segment: String) -> String {
-//        segment
-//            .replacingOccurrences(of: "/", with: "~1")
-//            .replacingOccurrences(of: "~", with: "~0")
-//    }
     
     /// Parse a ref string like:
     ///  - "#/components/schemas/X"
@@ -125,8 +120,9 @@ public struct JSONPointerResolver : JSONPointerResolving {
         
         var current: Any = root
         var traversed = ""
-        
+         
         for seg in segments {
+            
             traversed += "/\(seg)"
             if let stringValue = current as? String{
                 return stringValue
@@ -162,7 +158,7 @@ public struct JSONPointerResolver : JSONPointerResolving {
             if traversed == pointer {
                 return current
             }
-
+            
             if let currentNavigatable = current as? PointerNavigable{
                 if let next = try currentNavigatable.element(for: seg) {
                     current = next

@@ -33,6 +33,7 @@ public struct ResolveRefsRule {
                     code: .invalidRef,
                     message: "Empty $ref string.",
                     pointer: occ.pointerToDollarRef,
+                    
                     rule: name
                 ))
                 continue
@@ -46,9 +47,12 @@ public struct ResolveRefsRule {
                         severity: .error,
                         code: .invalidRefTargetType,
                         message: "Resolved $ref does not point to a schema-like object.",
-                        pointer: occ.pointerToDollarRef,
+                        pointer: occ.refString,
                         rule: name
                     ))
+                }
+                else {
+                    
                 }
                 
             } catch let Validator.Errors.invalidPointer(errorMessage) {
@@ -57,7 +61,7 @@ public struct ResolveRefsRule {
                         severity: .error,
                         code: .invalidRef,
                         message: "Cannot resolve $ref '\(ref)': \(errorMessage)",
-                        pointer: occ.pointerToDollarRef,
+                        pointer:  occ.pointerToDollarRef,
                         rule: name
                     ))
                 
@@ -66,7 +70,7 @@ public struct ResolveRefsRule {
                     severity: .error,
                     code: .invalidRef,
                     message: "Cannot resolve $ref '\(ref)': \(error.localizedDescription)",
-                    pointer: occ.pointerToDollarRef,
+                    pointer:  occ.pointerToDollarRef,
                     rule: name
                 ))
             }

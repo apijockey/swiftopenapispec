@@ -18,6 +18,8 @@
 
 import Foundation
 public struct OpenAPIInfo : KeyedElement, PointerNavigable {
+  
+    
     
     
     static let CONTACT_KEY = "contact"

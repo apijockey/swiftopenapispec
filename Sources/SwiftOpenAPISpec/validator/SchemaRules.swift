@@ -34,9 +34,10 @@ public struct SchemaRuleRunner  : Sendable{
     public func run(schema: OpenAPISchema, pointer: String,resolver: inout JSONPointerResolver) async throws -> [Diagnostic] {
         var out: [Diagnostic] = []
         
-
+        let pointer = pointer + "/schema"
         // Recurse into schemaType (if no $ref on wrapper)
         if schema.ref == nil, let t = schema.schemaType {
+            
             out.append(contentsOf: run(schemaType: t, pointer: pointer))
             
         }

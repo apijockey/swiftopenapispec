@@ -39,7 +39,7 @@
 
 import Foundation
 
-public struct OpenAPISecurityScheme : KeyedElement , PointerNavigable {
+public struct OpenAPISecurityScheme : KeyedElement , PointerNavigable,OpenAPISchemaReferenceable {
    
     public static let BEARER_FORMAT_KEY = "bearerFormat"
     public static let DESCRIPTION_KEY = "description"
@@ -68,12 +68,10 @@ public struct OpenAPISecurityScheme : KeyedElement , PointerNavigable {
     }
     public init(_ map: [String : Any]) throws {
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
-        if let refMap = map[OpenAPISchemaReference.REF_KEY] as? StringDictionary {
-                   self.ref = try OpenAPISchemaReference(refMap)
-               }
-        if let ref = map[OpenAPISchemaReference.REF_KEY] as? String {
-                    self.ref = OpenAPISchemaReference(ref: ref)
-                       }
+        if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
+            self.ref = ref
+            return
+        }
         if let securityRawType = map.readIfPresent(Self.TYPE_KEY, String.self),
            let securityType =  SecurityType(rawValue: securityRawType) {
             self.securityType = securityType

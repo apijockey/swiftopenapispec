@@ -32,6 +32,7 @@ public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
     public  static let MEDIATYPES_KEY = "mediaTypes"
     public static let PATHSITEMS_KEY = "pathItems"
     public static let PARAMETERS_KEY = "parameters"
+    public static let ENCODINGS_KEY = "encodings"
     public static let REQUEST_BODIES_KEY = "requestBodies"
     public static let RESPONSES_KEY = "responses"
     public static let SCHEMAS_KEY = "schemas"
@@ -61,6 +62,7 @@ public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
             return schemas
         case Self.SECURITY_SCHEMES_KEY:
             return self.securitySchemas
+        
         default :
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIComponent", segmentName)
         }
@@ -73,6 +75,9 @@ public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
         
         if let map = map[Self.CALLBACKS_KEY] as? StringDictionary{
             self.callbacks = try KeyedElementList<OpenAPICallBack>.map(map)
+        }
+        if let map = map[Self.ENCODINGS_KEY] as? StringDictionary{
+            self.mediaTypes = try KeyedElementList<OpenAPIMediaType>.map(map)
         }
         if let map = map[Self.EXAMPLES_KEY] as? StringDictionary{
             self.examples = try KeyedElementList<OpenAPIExample>.map(map)

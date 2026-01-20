@@ -65,10 +65,10 @@ enum FixtureErrors: LocalizedError, CustomStringConvertible {
 struct OpenAPIJSONPointerTests {
    
     
-    private func fixtureURL(_ resource: String, ext: String = "yaml") throws -> URL {
+    private func fixtureURL(_ resource: String, ext: String = "yaml", subDirectory : String) throws -> URL {
         let name = "\(resource).\(ext)"
 
-        guard let url = Bundle.module.url(forResource: resource, withExtension: ext) else {
+        guard let url = Bundle.module.url(forResource: resource, withExtension: ext, subdirectory: subDirectory) else {
             throw FixtureErrors.notFound(name)
         }
         return url
@@ -81,7 +81,7 @@ struct OpenAPIJSONPointerTests {
         ("#/info/title",String.self,"JSON Pointer Main")
     ])
     func resolveLocalJSONPointers(arg: (pointer : String, expectedType : Any.Type, expectedValue : String)) async throws {
-        let mainURL = try fixtureURL("35-main")
+        let mainURL = try fixtureURL("35-main", subDirectory: "Resources/3_1/valid")
         let objectLoader = YamsDocumentLoader()
         var resolver = JSONPointerResolver(baseURL : mainURL,loadDocument: objectLoader.load(from:))
         let result = try await resolver.resolve(
@@ -98,7 +98,7 @@ struct OpenAPIJSONPointerTests {
     
     @Test("application/json segment uses ~1 (application~1json)", .tags(.externalJsonPointer,.jsonpointer))
     func testMediaTypeSlashEscaping() async throws {
-        let mainURL = try fixtureURL("35-main")
+        let mainURL = try fixtureURL("35-main", subDirectory: "Resources/3_1/valid")
         let objectLoader = YamsDocumentLoader()
         var resolver = JSONPointerResolver(baseURL : mainURL,loadDocument: { url in
             try await objectLoader.load(from: url)
@@ -113,7 +113,7 @@ struct OpenAPIJSONPointerTests {
 
     @Test
     func testOneOfIndexPointer() async throws {
-        let mainURL = try fixtureURL("35-main")
+        let mainURL = try fixtureURL("35-main", subDirectory: "Resources/3_1/valid")
         let objectLoader = YamsDocumentLoader()
         // resolver will call the async loader closure
         var resolver = JSONPointerResolver(baseURL : mainURL,loadDocument: { url in
@@ -128,7 +128,7 @@ struct OpenAPIJSONPointerTests {
     
     @Test("Resolve external schema via $ref chain (main -> ext)")
     func testMainToExternalSchema() async throws {
-        let mainURL = try fixtureURL("35-main")
+        let mainURL = try fixtureURL("35-main", subDirectory: "Resources/3_1/valid")
         let objectLoader = YamsDocumentLoader()
         var resolver = JSONPointerResolver(baseURL : mainURL,loadDocument: { url in
             try await objectLoader.load(from: url)
@@ -150,7 +150,7 @@ struct OpenAPIJSONPointerTests {
 
     @Test("oneOf array indexing: /oneOf/0 and /oneOf/1")
     func testOneOfIndexPointers() async throws {
-        let mainURL = try fixtureURL("35-main")
+        let mainURL = try fixtureURL("35-main", subDirectory: "Resources/3_1/valid")
         let objectLoader = YamsDocumentLoader()
         var resolver = JSONPointerResolver(baseURL : mainURL,loadDocument: { url in
             try await objectLoader.load(from: url)
@@ -169,7 +169,7 @@ struct OpenAPIJSONPointerTests {
 
     @Test("~0/~1 decoding in component name (user~1admin~0meta)")
     func testWeirdComponentNameEscaping() async throws {
-        let extURL = try fixtureURL("35-ext-components")
+        let extURL = try fixtureURL("35-ext-components", subDirectory: "Resources/3_1/valid")
         let objectLoader = YamsDocumentLoader()
         var resolver = JSONPointerResolver(baseURL : extURL,loadDocument: { url in
             try await objectLoader.load(from: url)
@@ -185,7 +185,7 @@ struct OpenAPIJSONPointerTests {
 
     @Test("Encoding map key contains '/', must use ~1 (event~1payload)")
     func testEncodingKeySlashEscaping() async throws {
-        let extURL = try fixtureURL("35-ext-components")
+        let extURL = try fixtureURL("35-ext-components", subDirectory: "Resources/3_1/valid")
         let objectLoader = YamsDocumentLoader()
         var resolver = JSONPointerResolver(baseURL : extURL,loadDocument: { url in
             try await objectLoader.load(from: url)
@@ -206,7 +206,7 @@ struct OpenAPIJSONPointerTests {
 
     @Test("Callback key contains '/callbackUrl' inside segment, so segment uses ~1: {$request.body#~1callbackUrl}")
     func testCallbackKeySegmentEscaping() async throws {
-        let extURL = try fixtureURL("35-ext-components")
+        let extURL = try fixtureURL("35-ext-components", subDirectory: "Resources/3_1/valid")
         let objectLoader = YamsDocumentLoader()
         var resolver = JSONPointerResolver(baseURL : extURL,loadDocument: { url in
             try await objectLoader.load(from: url)
@@ -221,7 +221,7 @@ struct OpenAPIJSONPointerTests {
 
     @Test("Cross-file ref inside ext schema back to main (UserCreated.errorShape -> main CommonError)")
     func testCrossFileBackRef() async throws {
-        let extURL = try fixtureURL("35-ext-components")
+        let extURL = try fixtureURL("35-ext-components", subDirectory: "Resources/3_1/valid")
         let objectLoader = YamsDocumentLoader()
         var resolver = JSONPointerResolver(baseURL : extURL,loadDocument: { url in
             try await objectLoader.load(from: url)

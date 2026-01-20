@@ -20,7 +20,7 @@
 
 import Foundation
 
-public struct OpenAPISchema :  KeyedElement, PointerNavigable, Equatable {
+public struct OpenAPISchema :  KeyedElement, PointerNavigable, OpenAPISchemaReferenceable,Equatable {
     public static func == (lhs: OpenAPISchema, rhs: OpenAPISchema) -> Bool {
         return false
     }
@@ -49,7 +49,10 @@ public struct OpenAPISchema :  KeyedElement, PointerNavigable, Equatable {
         return newSchema
     }
     public init(_ map: [String : Any]) throws {
-        
+        if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
+            self.ref = ref
+            return
+        }
         if let type = map[Self.TYPE_KEY] as? String,
             let validatableType = OpenAPISchemaType.validatableType(type) {
             self.schemaType = try validatableType.init(map)
@@ -69,12 +72,7 @@ public struct OpenAPISchema :  KeyedElement, PointerNavigable, Equatable {
         else if map[Self.ONEOF_KEY] is [Any] {
             self.schemaType = try OpenAPIOneOfType(map)
         }
-        if let refMap = map[OpenAPISchemaReference.REF_KEY] as? StringDictionary {
-                   self.ref = try OpenAPISchemaReference(refMap)
-               }
-        if let ref = map[OpenAPISchemaReference.REF_KEY] as? String {
-            self.ref = OpenAPISchemaReference(ref: ref)
-        }
+       
         if let xmlMap = map[Self.XML_KEY] as? StringDictionary {
             xml = try? OpenAPIXMLObject(xmlMap)
         }

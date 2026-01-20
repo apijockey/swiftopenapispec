@@ -26,7 +26,7 @@ import Foundation
   A unique parameter is defined by a combination of a name and location.
   */
  */
-public struct OpenAPIParameter :  KeyedElement, PointerNavigable {
+public struct OpenAPIParameter :  KeyedElement, PointerNavigable,  OpenAPISchemaReferenceable {
     
     
     public enum ParameterLocation : String, Codable, CaseIterable, Sendable {
@@ -52,7 +52,10 @@ public struct OpenAPIParameter :  KeyedElement, PointerNavigable {
     public static let CONTENT_KEY = "content"
     public init(_ map: [String: Any]) throws {
         
-      
+        if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
+            self.ref = ref
+            return
+        }
         guard let location = map[Self.IN_KEY] as? String  else {
             throw OpenAPISpecification.Errors.invalidSpecification(OpenAPIOperation.PARAMETERS_KEY, Self.IN_KEY)
         }
@@ -72,12 +75,8 @@ public struct OpenAPIParameter :  KeyedElement, PointerNavigable {
         }
         extensions = try OpenAPIExtension.extensionElements(map)
         self.location = ParameterLocation(rawValue: location)
-        if let refMap = map[OpenAPISchemaReference.REF_KEY] as? StringDictionary {
-                    self.ref = try OpenAPISchemaReference(refMap)
-        }
-        if let ref = map[OpenAPISchemaReference.REF_KEY] as? String {
-                    self.ref = OpenAPISchemaReference(ref: ref)
-        } 
+      
+       
         let required = map[Self.REQUIRED_KEY] as? Bool
         self.required = required ?? false
         self.schema = try map.MapIfPresent(Self.SCHEMA_KEY, OpenAPISchema.self)
@@ -116,8 +115,8 @@ public struct OpenAPIParameter :  KeyedElement, PointerNavigable {
     }
     public var key: String?
     public var ref : OpenAPISchemaReference? = nil
-    public let location : ParameterLocation?
-    public let required : Bool
+    public var location : ParameterLocation?
+    public var required : Bool? 
     public var description : String? = nil
     public var deprecated : Bool? = nil
     public var allowEmptyValue : Bool? = nil

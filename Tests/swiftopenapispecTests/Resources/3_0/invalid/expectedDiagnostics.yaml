@@ -84,5 +84,13 @@ cases:
         rule: "OAS.ReferencesMustHaveRef"
         severity: "error"
         messageContains: "Response needs a ref or a response object with 'description'"
+  - fixture: "06-refcomponentNotResolvable"
+    shouldPass: false
+    expected:
+      - code: "missingRequired"
+        pointer: "/"
+        rule: "OAS.ReferencesMustHaveRef"
+        severity: "error"
+        messageContains: "Response needs a ref or a response object with 'description'"
  
 

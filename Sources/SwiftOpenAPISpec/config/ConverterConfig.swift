@@ -9,7 +9,9 @@ import Foundation
 
 /// provides configuration information for the ``SchemaConverter``,
 public struct ConverterConfig: Sendable {
-    public enum Dialect: Sendable { case oas30, jsonSchema2020_12 }
+    public enum Dialect: Sendable { case oas30, jsonSchema2020_12
+            
+    }
 
     public var dialect: Dialect
     public var maxMergeDepth: Int = 8

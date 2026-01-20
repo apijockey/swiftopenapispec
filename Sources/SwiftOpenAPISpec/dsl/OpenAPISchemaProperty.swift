@@ -20,7 +20,7 @@
 import Foundation
 
 
-public struct OpenAPISchemaProperty: KeyedElement , PointerNavigable, Equatable {
+public struct OpenAPISchemaProperty: KeyedElement , PointerNavigable, OpenAPISchemaReferenceable, Equatable {
     public static func == (lhs: OpenAPISchemaProperty, rhs: OpenAPISchemaProperty) -> Bool {
         // Compare type via existential-safe isEqual(to:)
         let typesEqual: Bool = {
@@ -48,16 +48,11 @@ public struct OpenAPISchemaProperty: KeyedElement , PointerNavigable, Equatable 
             let validatableType = OpenAPISchemaType.validatableType(type) {
             self.type = try validatableType.init(map)
         }
-        else if let refMap = map[OpenAPISchemaReference.REF_KEY] as? StringDictionary {
-            self.ref = try OpenAPISchemaReference(refMap)
-            
-           
+        if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
+            self.ref = ref
+            return
         }
-        
-        else if let ref = map[OpenAPISchemaReference.REF_KEY] as? String {
-                    self.ref = OpenAPISchemaReference(ref: ref)
-        }
-        else if map[OpenAPISchema.ONEOF_KEY] is [Any] {
+        if map[OpenAPISchema.ONEOF_KEY] is [Any] {
             self.type = try OpenAPIOneOfType(map)
         }
         else if map[OpenAPISchema.ANYOF_KEY] is [Any] {

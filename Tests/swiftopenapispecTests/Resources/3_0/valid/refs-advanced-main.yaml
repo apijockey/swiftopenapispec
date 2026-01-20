@@ -1,0 +1,149 @@
+# Copyright 2025 CgSe Computergrafik und Softwareentwicklung GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+openapi: 3.0.3
+info:
+  title: Ref Coverage Demo
+  version: 1.0.0
+
+servers:
+  - url: https://api.example.com
+
+paths:
+  /pets:
+    get:
+      operationId: listPets
+      security:
+        - OAuth2: [read:pets]
+      parameters:
+        - $ref: './refs-advanced-components#/components/parameters/RequestIdHeader'
+      responses:
+        '200':
+          $ref: './refs-advanced-components#/components/responses/PetsListResponse'
+        '400':
+          description: Bad request
+          headers:
+            X-Error-Code:
+              $ref: './refs-advanced-components#/components/headers/XErrorCode'
+          content:
+            application/json:
+              schema:
+                $ref: './refs-advanced-components#/components/schemas/Error'
+              examples:
+                badRequestExample:
+                  $ref: './refs-advanced-components#/components/examples/BadRequestExample'
+          links:
+            getFirstPet:
+              $ref: './refs-advanced-components#/components/links/GetFirstPet'
+      callbacks:
+        onPetEvent:
+          $ref: './refs-advanced-components#/components/callbacks/PetEventCallback'
+
+    post:
+      operationId: createPet
+      requestBody:
+        $ref: './refs-advanced-components#/components/requestBodies/CreatePetBody'
+      responses:
+        '201':
+          description: created
+          content:
+            application/json:
+              schema:
+                $ref: './refs-advanced-components#/components/schemas/Pet'
+              examples:
+                createdExample:
+                  $ref: './refs-advanced-components#/components/examples/PetCreatedExample'
+      security:
+        - ApiKeyAuth: []
+
+  /pets/{petId}:
+    parameters:
+      - name: petId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: getPet
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: './refs-advanced-components#/components/schemas/Pet'
+              encoding:
+                photo:
+                  $ref: './refs-advanced-components#/components/encodings/PhotoEncoding'
+      security:
+        - OAuth2: [read:pets]
+
+components:
+  # Alle Component-Typen sind vorhanden, aber jedes Element ist ein $ref in die zweite Datei:
+  securitySchemes:
+    OAuth2:
+      $ref: './refs-advanced-components#/components/securitySchemes/OAuth2'
+    ApiKeyAuth:
+      $ref: './refs-advanced-components#/components/securitySchemes/ApiKeyAuth'
+
+  schemas:
+    Pet:
+      $ref: './refs-advanced-components#/components/schemas/Pet'
+    Owner:
+      $ref: './refs-advanced-components#/components/schemas/Owner'
+    Tag:
+      $ref: './refs-advanced-components#/components/schemas/Tag'
+    Error:
+      $ref: './refs-advanced-components#/components/schemas/Error'
+    PetEvent:
+      $ref: './refs-advanced-components#/components/schemas/PetEvent'
+
+  parameters:
+    RequestIdHeader:
+      $ref: './refs-advanced-components#/components/parameters/RequestIdHeader'
+
+  requestBodies:
+    CreatePetBody:
+      $ref: './refs-advanced-components#/components/requestBodies/CreatePetBody'
+
+  responses:
+    PetsListResponse:
+      $ref: './refs-advanced-components#/components/responses/PetsListResponse'
+
+  headers:
+    XErrorCode:
+      $ref: './refs-advanced-components#/components/headers/XErrorCode'
+    XImageSource:
+      $ref: './refs-advanced-components#/components/headers/XImageSource'
+    RequestId:
+      $ref: './refs-advanced-components#/components/headers/RequestId'
+
+  examples:
+    BadRequestExample:
+      $ref: './refs-advanced-components#/components/examples/BadRequestExample'
+    PetCreatedExample:
+      $ref: './refs-advanced-components#/components/examples/PetCreatedExample'
+
+  links:
+    GetFirstPet:
+      $ref: './refs-advanced-components#/components/links/GetFirstPet'
+
+  callbacks:
+    PetEventCallback:
+      $ref: './refs-advanced-components#/components/callbacks/PetEventCallback'
+
+  # Optional: encodings als Komponenten (wird häufig in content.encoding direkt definiert;
+  # hier zusätzlich als Komponenten-Typ, damit euer Ref-Collector das auch findet)
+  encodings:
+    PhotoEncoding:
+      $ref: './refs-advanced-components#/components/encodings/PhotoEncoding'

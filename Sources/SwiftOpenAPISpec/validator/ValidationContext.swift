@@ -16,9 +16,35 @@
 //  Created by Patric Dubois on 02.01.2026.
 //
 
+import Foundation
 
 public struct ValidationContext : Sendable {
-    public enum OASVersion : Sendable{ case v30, v31, v32 }
+    enum ValidationContextError : LocalizedError {
+        case unsupportedVersion(String)
+    }
+    public enum OASVersion : Sendable{ case v30, v31, v32
+        public static func fromString(_ s: String) throws -> OASVersion {
+            let version = s.split(separator: ".")
+            if version.count != 3 { throw ValidationContextError.unsupportedVersion(s)}
+            let major = version[0]
+            let minor = version[1]
+            let oasversion = "v\(major)\(minor)"
+            switch oasversion {
+                case "v30": return .v30
+                case "v31": return .v31
+                case "v32": return .v32
+                default: throw ValidationContextError.unsupportedVersion(s)
+            }
+        }
+        public var dialect : ConverterConfig.Dialect {
+            switch self {
+            case .v30: return .oas30
+            case .v31: return .jsonSchema2020_12
+            case .v32: return .jsonSchema2020_12
+            }
+        }
+    }
+    
     public let version: OASVersion
     public let dialect: ConverterConfig.Dialect
     public let baseURI: String?

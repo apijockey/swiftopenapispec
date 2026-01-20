@@ -39,7 +39,7 @@
 
 import Foundation
 
-public struct OpenAPIMediaType :  KeyedElement , PointerNavigable {
+public struct OpenAPIMediaType :  KeyedElement , PointerNavigable,OpenAPISchemaReferenceable {
     public static let SCHEMA_KEY = "schema"
     public static let ITEM_SCHEMA_KEY = "itemSchema"
     public static let EXAMPLES_KEY = "examples"
@@ -50,7 +50,10 @@ public struct OpenAPIMediaType :  KeyedElement , PointerNavigable {
     public static let EXTENSIONS_KEY = "extensions"
     public var key : String?
     public init(_ map: [String : Any]) throws {
-        
+        if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
+            self.ref = ref
+            return
+        }
             if let schemaMap = map[Self.SCHEMA_KEY] as? StringDictionary {
                 self.schema  = try OpenAPISchema(schemaMap)
             }
@@ -71,14 +74,7 @@ public struct OpenAPIMediaType :  KeyedElement , PointerNavigable {
             if let subMap = map[Self.PREFIX_ENCODING_KEY] as? StringDictionary {
                 itemEncoding = try KeyedElementList<OpenAPIEncoding>.map(subMap)
             }
-        if let refMap = map[OpenAPISchemaReference.REF_KEY] as? StringDictionary {
-                    self.ref = try OpenAPISchemaReference(refMap)
-                }
-        if let ref = map[OpenAPISchemaReference.REF_KEY] as? String {
-                    self.ref = OpenAPISchemaReference(ref: ref)
-            }
-            
-        
+       
     }
     
     public func element(for segmentName: String) throws -> Any? {

@@ -18,7 +18,7 @@
 
 import Foundation
 
-public struct OpenAPIExample : KeyedElement, PointerNavigable {
+public struct OpenAPIExample : KeyedElement, PointerNavigable,OpenAPISchemaReferenceable {
     public static let SUMMARY_KEY = "summary"
     public static let DESCRIPTION_KEY = "description"
     public static let VALUE_KEY = "value"
@@ -26,17 +26,17 @@ public struct OpenAPIExample : KeyedElement, PointerNavigable {
     public static let EXTERNAL_VALUE_KEY = "externalValue"
     public static let SERIALIZED_VALUE_KEY = "serializedValue"
     public init(_ map: [String : Any]) throws {
+        if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
+            self.ref = ref
+            return
+        }
         self.summary = map.readIfPresent(Self.SUMMARY_KEY, String.self)
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
         self.value = map[Self.VALUE_KEY].stringifyValue
         self.externalValue = map.readIfPresent(Self.EXTERNAL_VALUE_KEY, String.self)
        
-        if let refMap = map[OpenAPISchemaReference.REF_KEY] as? StringDictionary {
-                    self.ref = try OpenAPISchemaReference(refMap)
-        }
-        if let ref = map[OpenAPISchemaReference.REF_KEY] as? String {
-                    self.ref =  OpenAPISchemaReference(ref: ref)
-        }
+       
+       
         self.serializedValue = map[Self.SERIALIZED_VALUE_KEY].stringifyValue
     }
     public func element(for segmentName: String) throws -> Any? {

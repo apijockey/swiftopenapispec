@@ -38,7 +38,7 @@
 //
 
 
-public struct OpenAPIAllOfType : OpenAPIValidatableSchemaType, PointerNavigable {
+public struct OpenAPIAllOfType : OpenAPIValidatableSchemaType, PointerNavigable, OpenAPISchemaReferenceable {
     public static func == (lhs: OpenAPIAllOfType, rhs: OpenAPIAllOfType) -> Bool {
         // 1) einfache Felder
         guard lhs.type == rhs.type else { return false }

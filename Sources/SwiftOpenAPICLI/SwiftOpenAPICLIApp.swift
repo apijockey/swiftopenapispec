@@ -74,7 +74,9 @@ public struct SwiftOpenAPICLIApp {
             if let opt = option {
                 switch opt {
                 case "--validate":
-                    let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: url.absoluteString, operationIds: [])
+                    let version = try ValidationContext.OASVersion.fromString(spec.version ?? "")
+                    
+                    let ctx = ValidationContext(version: version , dialect: version.dialect, baseURI: url.absoluteString, operationIds: [])
                     let objectLoader = YamsDocumentLoader()
                     var resolver = JSONPointerResolver(baseURL : url,loadDocument: objectLoader.load(from:))
                     var diagnostics = try await Validator.validate(spec: spec, baseURI: url.absoluteString, ctx :  ctx, resolver: &resolver)

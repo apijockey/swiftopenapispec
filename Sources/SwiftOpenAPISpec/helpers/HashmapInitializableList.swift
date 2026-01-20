@@ -79,19 +79,25 @@ public struct KeyedElementList<T> where T :  KeyedElement {
         }
         return types
     }
-    static func map(list : [StringDictionary], yamlKeyName : String) throws -> [T] {
+    static func map(list : [StringDictionary], yamlKeyName : String, mayHaveRef : Bool) throws -> [T] {
         var types = [T]()
         for listElement in list {
                 var element = try T(listElement)
                 if let key = listElement[yamlKeyName] as? String{
                     element.key = key
                     types.append(element)
-            }
-            else {
-                throw OpenAPISpecification.Errors.invalidYaml("Could not find a entry in \(list.debugDescription) for \(yamlKeyName)")
-            }
-            
-            
+                }
+                else if mayHaveRef == true {
+                    if let reference = listElement["$ref"] as? StringDictionary {
+                        var schemaReferenceable = reference as? OpenAPISchemaReferenceable
+                        if schemaReferenceable != nil {
+                            schemaReferenceable?.ref = try OpenAPISchemaReference(reference)
+                        }
+                    }
+                }
+                else {
+                    throw OpenAPISpecification.Errors.invalidYaml("Could not find a entry in \(list.debugDescription) for \(yamlKeyName)")
+                }
         }
         return types
         

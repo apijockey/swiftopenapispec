@@ -19,7 +19,7 @@
 
 import Foundation
 
-public struct OpenAPILink : KeyedElement , PointerNavigable {
+public struct OpenAPILink : KeyedElement , PointerNavigable,OpenAPISchemaReferenceable {
     public static let OPERATIION_REF_KEY = "operationRef"
     public static let OPERATIION_ID_KEY = "operationId"
     public static let PARAMETERS_KEY = "parameters"
@@ -27,18 +27,16 @@ public struct OpenAPILink : KeyedElement , PointerNavigable {
     public static let DESCRIPTION_KEY = "description"
     public static let SERVER_KEY = "server"
     public init(_ map: [String : Any]) throws {
+        if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
+            self.ref = ref
+            return
+        }
         description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
         extensions = try OpenAPIExtension.extensionElements(map)
         operationRef = map.readIfPresent(Self.OPERATIION_REF_KEY, String.self)
         operationId = map.readIfPresent(Self.OPERATIION_ID_KEY, String.self)
         server = try map.mapIfPresent(Self.SERVER_KEY, OpenAPIServer.self)
         requestBody = map.readIfPresent(Self.REQUEST_BODY_KEY, String.self)
-        if let refMap = map[OpenAPISchemaReference.REF_KEY] as? StringDictionary {
-                   self.ref = try OpenAPISchemaReference(refMap)
-               }
-        if let ref = map[OpenAPISchemaReference.REF_KEY] as? String {
-            self.ref =  OpenAPISchemaReference(ref: ref)
-        }
         parameters = map.readIfPresent(Self.PARAMETERS_KEY, [String:String].self) ?? [:]
       
     }

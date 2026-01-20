@@ -27,7 +27,7 @@ import Foundation
  
    
  */
-public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
+public struct OpenAPIPathItem: KeyedElement , PointerNavigable, OpenAPISchemaReferenceable {
    
     
     public enum Operations: String, Codable {
@@ -49,6 +49,10 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
     /// - Parameter map: Swift dictionary with a Path key and  value elements representing HTTP methods like **GET**, **POST** and **PUT**
     public init(_ map: [String: Any]) throws {
         // one resource may foresee several httpOperations
+        if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
+            self.ref = ref
+            return
+        }
         for (key, httpOperation) in map {
                if let httpOperationMap = httpOperation as? [String: Any] {
                 var operation = try OpenAPIOperation(httpOperationMap)
@@ -57,12 +61,7 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
             }
             
         }
-        if let refMap = map[OpenAPISchemaReference.REF_KEY] as? StringDictionary {
-                    self.ref = try OpenAPISchemaReference(refMap)
-                }
-        if let ref = map[OpenAPISchemaReference.REF_KEY] as? String {
-                    self.ref = OpenAPISchemaReference(ref: ref)
-        }
+       
         self.summary  = map.readIfPresent(Self.SUMMARY_KEY, String.self)
         self.description  = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
         let servers = try map.tryListIfPresent(OpenAPISpecification.SERVERS_KEY, root: "OpenAPIPath", OpenAPIServer.self)

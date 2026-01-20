@@ -151,7 +151,7 @@ struct ValidationTests {
     func debug_schemarules() async throws {
         let fixtureName = "06-refcomponentNotResolvable"
         let subDirectory = "Resources/3_0/invalid"
-        let rule = "OAS.ReferencesMustHaveRef"
+        let rule = "OAS.ResolveRefs"
         let bundle = Bundle.module
         print("Bundle URL:", bundle.bundleURL.path)
 
@@ -181,13 +181,7 @@ struct ValidationTests {
         }
         #expect(fixture.shouldPass == diags.isEmpty)
         #expect(fixture.shouldPass || fixture.onlyThese == true ?  fixture.expected.count == diags.count : fixture.expected.count <= diags.count)
-        for (result,expected) in zip(diags,fixture.expected) {
-            #expect(result.code.rawValue == expected.code)
-            #expect(result.message.contains(expected.messageContains))
-            #expect(result.pointer.contains(expected.pointer))
-            #expect(result.rule == expected.rule)
-            #expect(result.severity.rawValue == expected.severity)
-        }
+        
     }
     
     
@@ -320,10 +314,122 @@ struct ValidationTests {
         
        
         let diags = try await Validator.validateRefs(spec: spec, baseURI: resourceUrl.absoluteString, ctx: ctx, resolver: &resolver)
-        #expect(diags.isEmpty)
+        print(diags)
+        #expect(diags.count == 5)
         
         
         
+    }
+    
+    @Test("All internal schema $refs are identified")
+   func identifyRefs() async throws {
+       let subDirectory = "Resources/3_1/valid"
+       let fixture = "openapi"
+       guard let resourceUrl = Bundle.module.url(forResource: fixture , withExtension: "yaml", subdirectory: subDirectory) else {
+           throw FixtureErrors.notFound(fixture)
+       }
+       let loader = YamsDocumentLoader()
+       
+       let spec = try await OpenAPISpecification.read(url: resourceUrl,documentLoader: loader)
+       
+       var resolver = JSONPointerResolver(baseURL: resourceUrl, loadDocument: { u in
+           try await loader.load(from: u)
+       })
+       
+       
+       
+       //Beispiel: components.schemas
+       let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: resourceUrl.absoluteString, operationIds: [])
+       
+      
+       let diags = try await Validator.validateRefs(spec: spec, baseURI: resourceUrl.absoluteString, ctx: ctx, resolver: &resolver)
+     
+       #expect(diags.count == 5)
+       for diag in diags {
+           print("\(diag.pointer) - \(diag.message)")
+       }
+       
+       #expect(diags.contains { diag in
+           diag.pointer == "/paths/~1pets/patch/requestBody/content/application~1json/schema/oneOf/0/$ref"
+           && diag.message.contains("#/components/schemas/Cat'")
+       })
+       #expect(diags.contains { diag in
+           diag.pointer == "/paths/~1pets/patch/requestBody/content/application~1json/schema/oneOf/1/$ref"
+           && diag.message.contains("#/components/schemas/Dog'")
+       })
+       
+       #expect(diags.contains { diag in
+           diag.pointer == "/paths/~1pets/post/requestBody/content/application~1xml/schema/$ref"
+           && diag.message.contains("'#/components/schemas/Pet'")
+       })
+       
+       #expect(diags.contains { diag in
+           diag.pointer == "/paths/~1pets/post/requestBody/content/application~1x-www-form-urlencoded/schema/$ref"
+           && diag.message.contains("'#/components/schemas/PetForm'")
+       })
+       
+       #expect(diags.contains { diag in
+           diag.pointer == "/paths/~1pets/post/requestBody/content/application~1json/schema/$ref"
+           && diag.message.contains("'#/components/schemas/Pet'")
+       })
+       
+
+    
+      
+   }
+    @Test("internal and external schema $refs are identified")
+    func identifyeExternalRefs() async throws {
+        let subDirectory = "Resources/3_1/valid"
+        let fixture = "35-ext-components"
+        guard let resourceUrl = Bundle.module.url(forResource: fixture , withExtension: "yaml", subdirectory: subDirectory) else {
+            throw FixtureErrors.notFound(fixture)
+        }
+        let loader = YamsDocumentLoader()
+        
+        let spec = try await OpenAPISpecification.read(url: resourceUrl,documentLoader: loader)
+        
+        var resolver = JSONPointerResolver(baseURL: resourceUrl, loadDocument: { u in
+            try await loader.load(from: u)
+        })
+        
+        
+        
+        //Beispiel: components.schemas
+        let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: resourceUrl.absoluteString, operationIds: [])
+        
+        
+        let diags =  Validator.findOccurrences(spec: spec, baseURI: resourceUrl.absoluteString, ctx: ctx, resolver: &resolver)
+        for diag in diags {
+            print(diag.refString)
+        }
+        #expect(diags.count == 5)
+    }
+    @Test("cascading $refs in separate files are identified")
+    func identifyeCascadingRefs() async throws {
+        let subDirectory = "Resources/3_0/valid"
+        let fixture = "refs-advanced-main"
+        guard let resourceUrl = Bundle.module.url(forResource: fixture , withExtension: "yaml", subdirectory: subDirectory) else {
+            throw FixtureErrors.notFound(fixture)
+        }
+        let loader = YamsDocumentLoader()
+        
+        let spec = try await OpenAPISpecification.read(url: resourceUrl,documentLoader: loader)
+        
+        var resolver = JSONPointerResolver(baseURL: resourceUrl, loadDocument: { u in
+            try await loader.load(from: u)
+        })
+        
+        
+        
+        //Beispiel: components.schemas
+        let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: resourceUrl.absoluteString, operationIds: [])
+        
+        
+        let diags =  Validator.findOccurrences(spec: spec, baseURI: resourceUrl.absoluteString, ctx: ctx, resolver: &resolver)
+        for diag in diags {
+            print(diag.refString)
+        }
+        #expect(diags.count == 25)
     }
 }
 

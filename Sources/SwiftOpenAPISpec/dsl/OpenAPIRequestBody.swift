@@ -19,23 +19,21 @@
 //
 
 import Foundation
-public struct OpenAPIRequestBody : KeyedElement , PointerNavigable {
+public struct OpenAPIRequestBody : KeyedElement , PointerNavigable,OpenAPISchemaReferenceable {
     public static let DESCRIPTION_KEY = "description"
     public static let REQUIRED_KEY = "required"
     public static let CONTENTS_KEY = "content"
     public init(_ map: [String : Any]) throws {
-       
+        if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
+            self.ref = ref
+            return
+        }
        
         if let contentsMap = map[Self.CONTENTS_KEY] as? [String : Any]{
             self.contents = try KeyedElementList.map(contentsMap )
         }
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
-        if let refMap = map[OpenAPISchemaReference.REF_KEY] as? StringDictionary {
-                    self.ref = try OpenAPISchemaReference(refMap)
-        }
-        if let ref = map[OpenAPISchemaReference.REF_KEY] as? String {
-                    self.ref = OpenAPISchemaReference(ref: ref)
-        }
+        self.ref =  try OpenAPISchemaReference.initReference(from: (map))
         self.required = map.readIfPresent(Self.REQUIRED_KEY, Bool.self) ?? false
         
     }

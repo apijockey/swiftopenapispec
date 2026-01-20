@@ -19,7 +19,7 @@
 
 import Foundation
 
-public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
+public struct OpenAPIHeader :  KeyedElement, PointerNavigable,OpenAPISchemaReferenceable {
 
     public static let ALLOW_EMPTYVALUE_KEY = "allowEmptyValue"
     public static let ALLOW_RESERVED_KEY = "allowReserved"
@@ -35,7 +35,10 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
     public static let STYLE_KEY = "style"
    
     public init(_ map: [String : Any]) throws {
-        
+        if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
+            self.ref = ref
+            return
+        }
         
         self.description =  map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
         self.deprecated =  map.readIfPresent(Self.DEPRECATED_KEY, Bool.self)
@@ -50,12 +53,8 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
         }
         self.content = map.readIfPresent(Self.CONTENT_KEY, OpenAPIMediaType.self)
         extensions = try OpenAPIExtension.extensionElements(map)
-        if let refMap = map[OpenAPISchemaReference.REF_KEY] as? StringDictionary {
-                   self.ref = try OpenAPISchemaReference(refMap)
-               }
-        if let ref = map[OpenAPISchemaReference.REF_KEY] as? String {
-                    self.ref = OpenAPISchemaReference(ref: ref)
-                       }
+     
+       
         self.required = map.readIfPresent(Self.REQUIRED_KEY, Bool.self) ?? false
         self.schema = try map.MapIfPresent(Self.SCHEMA_KEY, OpenAPISchema.self)
         self.style = map.readIfPresent(Self.STYLE_KEY, String.self)
@@ -91,7 +90,7 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
         }
     }
     public var key: String?
-    public let required : Bool
+    public var required : Bool? = nil
     public var description : String? = nil
     public var deprecated : Bool? = nil
     public var allowEmptyValue : Bool? = nil

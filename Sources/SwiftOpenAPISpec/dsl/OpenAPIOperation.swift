@@ -29,10 +29,12 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
         self.externalDocs = try map.mapIfPresent(Self.EXTERNAL_DOCS_KEY, OpenAPIExternalDocumentation.self)
         self.operationId = map.readIfPresent(Self.OP_ID_KEY, String.self)
         if let parameterlist = map[Self.PARAMETERS_KEY] as? [StringDictionary] {
-            parameters =   try KeyedElementList<OpenAPIParameter>.map(list:parameterlist,yamlKeyName: "name")
+            
+            parameters =   try KeyedElementList<OpenAPIParameter>.map(list:parameterlist,yamlKeyName: "name", mayHaveRef: true)
         }
-        self.requestBody = try map.MapIfPresent(Self.REQUEST_BODIES_KEY, OpenAPIRequestBody.self)
-        
+        if map[Self.REQUEST_BODIES_KEY] as? StringDictionary != nil {
+            self.requestBody = try map.MapIfPresent(Self.REQUEST_BODIES_KEY, OpenAPIRequestBody.self)
+        }
         if let responseMap = map[Self.RESPONSES_KEY] as? StringDictionary {
             self.responses = try KeyedElementList<OpenAPIResponse>.map(responseMap)
         }
@@ -95,6 +97,7 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
     //https://swagger.io/docs/specification/paths-and-operations/
     public static let SUMMARY_KEY = "summary"
     public static let TAGS_KEY = "tags"
+    
     public static let REQUEST_BODIES_KEY = "requestBody"
     public static let SECURITY_KEY = "security"
     

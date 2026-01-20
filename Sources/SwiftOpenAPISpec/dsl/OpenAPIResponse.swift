@@ -20,13 +20,17 @@ import Foundation
 
 
 /// An OpenAPIResponse is a child of ``OpenAPIOperation`` and can be identified by its unique ``key``, being an HTTP status, like '200'
-public struct OpenAPIResponse : KeyedElement, PointerNavigable {
+public struct OpenAPIResponse : KeyedElement, PointerNavigable,OpenAPISchemaReferenceable {
     public static let DESCRIPTION_KEY = "description"
     public static let SUMMARY_KEY = "summary"
     public static let CONTENT_KEY = "content"
     public static let HEADERS_KEY = "headers"
     public static let LINKS_KEY = "links"
     public init(_ map: [String : Any]) throws {
+        if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
+            self.ref = ref
+            return
+        }
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
         self.summary = map.readIfPresent(Self.SUMMARY_KEY, String.self)
         if let contentMap = map.readIfPresent(Self.CONTENT_KEY, StringDictionary .self) {
@@ -38,12 +42,9 @@ public struct OpenAPIResponse : KeyedElement, PointerNavigable {
         if let linkMap = map.readIfPresent(Self.LINKS_KEY, StringDictionary .self) {
             self.links = try KeyedElementList<OpenAPILink>.map(linkMap)
         }
-        if let refMap = map[OpenAPISchemaReference.REF_KEY] as? StringDictionary {
-            self.ref = try OpenAPISchemaReference(refMap)
-        }
-        if let ref = map[OpenAPISchemaReference.REF_KEY] as? String {
-                    self.ref = OpenAPISchemaReference(ref: ref)
-        }
+      
+      
+      
     }
     public var summary : String?
     public var description : String?

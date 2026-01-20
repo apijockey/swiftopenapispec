@@ -61,10 +61,10 @@ public actor YamsDocumentLoader : DocumentLoadable {
             guard let string = String(data: data, encoding: .utf8) else {
                 throw Self.Errors.notUTF8(url.absoluteString)
             }
-            guard let unflattened = try Yams.load(yaml: string) as? StringDictionary else {
+            let unflattened = try Yams.load(yaml: string) as? StringDictionary
+            guard let unflattened = unflattened else {
                 throw OpenAPISpecification.Errors.invalidYaml("text cannot be interpreted as a Key/Value List")
             }
-            
             var apiSpec = try OpenAPISpecification(unflattened)
             apiSpec.documentLoader = self
             objectCash[url] = apiSpec

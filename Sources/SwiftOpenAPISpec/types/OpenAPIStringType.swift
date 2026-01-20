@@ -23,7 +23,7 @@
 //
 
 
-public struct OpenAPINullType :  OpenAPIValidatableSchemaType, ThrowingHashMapInitiable , PointerNavigable {
+public struct OpenAPINullType :  OpenAPIValidatableSchemaType, ThrowingHashMapInitiable , PointerNavigable,OpenAPISchemaReferenceable {
     public func validate() throws {
         
     }
