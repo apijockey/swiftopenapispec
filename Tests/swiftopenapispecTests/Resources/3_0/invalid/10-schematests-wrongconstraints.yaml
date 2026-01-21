@@ -1,0 +1,14 @@
+openapi: 3.0.3
+info:
+  title: Falsche Constraints
+  version: 1.0.0
+components:
+  schemas:
+    Password:
+      type: string
+      minLength: 10
+      maxLength: 5
+    Age:
+      type: integer
+      minimum: 18
+      maximum: 10

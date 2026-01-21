@@ -1,0 +1,21 @@
+openapi: 3.0.3
+info:
+  title: Falsche nullable-Nutzung
+  version: 1.0.0
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: "yes"
+        age:
+          type: integer
+          nullable: true
+          example: null
+        email:
+          type: string
+          format: email
+          nullable: true
+          example: null

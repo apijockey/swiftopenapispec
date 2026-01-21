@@ -1,0 +1,20 @@
+openapi: 3.0.3
+info:
+  title: Falsche allOf/anyOf/oneOf-Nutzung
+  version: 1.0.0
+components:
+  schemas:
+    Pet:
+      allOf:
+        - type: object
+          properties:
+            name:
+              type: string
+        - type: string
+    Vehicle:
+      anyOf:
+        - type: object
+          properties:
+            wheels:
+              type: integer
+        - type: array

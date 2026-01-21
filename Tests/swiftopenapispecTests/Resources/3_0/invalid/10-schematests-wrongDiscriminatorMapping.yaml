@@ -1,0 +1,28 @@
+openapi: 3.0.3
+info:
+  title: Falsches Discriminator-Mapping
+  version: 1.0.0
+components:
+  schemas:
+    Vehicle:
+      type: object
+      discriminator:
+        propertyName: vehicleType
+        mapping:
+          car: "#/components/schemas/Car"
+          bike: Bike
+      oneOf:
+        - $ref: "#/components/schemas/Car"
+        - $ref: "#/components/schemas/Bike"
+    Car:
+      type: object
+      properties:
+        vehicleType:
+          type: string
+          enum: [car]
+    Bike:
+      type: object
+      properties:
+        vehicleType:
+          type: string
+          enum: [bike]

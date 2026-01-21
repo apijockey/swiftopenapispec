@@ -1,0 +1,18 @@
+openapi: 3.0.3
+info:
+  title: Ungültige Pattern Properties
+  version: 1.0.0
+components:
+  schemas:
+    Config:
+      type: object
+      patternProperties:
+        "^[a-z]+$":
+          type: string
+        "^[0-9]+$":
+          type: integer
+          minimum: 0
+      additionalProperties: false
+      properties:
+        name:
+          type: string

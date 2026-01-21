@@ -1,0 +1,21 @@
+openapi: 3.0.3
+info:
+  title: Falsches Format
+  version: 1.0.0
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: "keine@email"
+        birthday:
+          type: string
+          format: date-time
+          example: "2026-01-32"
+        uuid:
+          type: string
+          format: uuid
+          example: "kein-uuid"

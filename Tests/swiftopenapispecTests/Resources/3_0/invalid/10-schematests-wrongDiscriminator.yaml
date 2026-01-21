@@ -1,0 +1,26 @@
+openapi: 3.0.3
+info:
+  title: Falscher Discriminator
+  version: 1.0.0
+components:
+  schemas:
+    Animal:
+      type: object
+      discriminator:
+        propertyName: type
+        mapping:
+          dog: Dog
+          cat: Cat
+      oneOf:
+        - $ref: "#/components/schemas/Dog"
+        - $ref: "#/components/schemas/Cat"
+    Dog:
+      type: object
+      properties:
+        bark:
+          type: boolean
+    Cat:
+      type: object
+      properties:
+        meow:
+          type: boolean

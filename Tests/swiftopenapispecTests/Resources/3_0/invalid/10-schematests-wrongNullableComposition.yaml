@@ -1,0 +1,22 @@
+openapi: 3.0.3
+info:
+  title: Falsche nullable-Komposition
+  version: 1.0.0
+components:
+  schemas:
+    Pet:
+      oneOf:
+        - type: object
+          properties:
+            name:
+              type: string
+        - type: "null"
+    Address:
+      type: object
+      properties:
+        street:
+          type: string
+          nullable: true
+        city:
+          type: string
+          nullable: "ja"

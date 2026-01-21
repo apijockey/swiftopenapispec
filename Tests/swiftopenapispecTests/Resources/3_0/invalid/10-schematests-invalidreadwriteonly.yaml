@@ -1,0 +1,21 @@
+openapi: 3.0.3
+info:
+  title: Falsche readOnly/writeOnly-Nutzung
+  version: 1.0.0
+components:
+  schemas:
+    Account:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+          required: true
+        balance:
+          type: number
+          readOnly: true
+          required: true

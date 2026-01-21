@@ -1,0 +1,15 @@
+openapi: 3.0.3
+info:
+  title: Inkonsistente Type/Format-Kombination
+  version: 1.0.0
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        price:
+          type: string
+          format: float
+        weight:
+          type: number
+          format: binary
