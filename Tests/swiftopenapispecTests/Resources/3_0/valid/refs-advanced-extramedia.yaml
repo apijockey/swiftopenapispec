@@ -11,10 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.components:
-  mediaTypes:
-    JsonPet:
-      schema:
-        $ref: './components.yaml#/components/schemas/Pet'
-      examples:
-        sample:
-          $ref: './components.yaml#/components/examples/PetCreatedExample'
+mediaTypes:
+  JsonPet:
+    schema:
+      $ref: './components.yaml#/components/schemas/Pet'
+    examples:
+      sample:
+        $ref: './components.yaml#/components/examples/PetCreatedExample'

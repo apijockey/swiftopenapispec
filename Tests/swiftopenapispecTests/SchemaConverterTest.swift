@@ -59,7 +59,7 @@ struct SchemaConverterTestSuite {
         }
     }
     @Test("setup correct")
-    func sanity() async throws {
+    func setup() async throws {
         let name = "01-minimal-30"
         guard let url = Bundle.module.url(forResource: name, withExtension: "yaml", subdirectory: "Resources/3_0/valid") else {
             throw Self.Errors.notFound(name)
