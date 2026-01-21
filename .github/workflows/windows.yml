@@ -1,6 +1,6 @@
 name: Swift on Windows
 on: 
-  push
+  push:
     branches:
       - main
 concurrency:
