@@ -183,37 +183,6 @@ struct ValidationTests {
         #expect(fixture.shouldPass || fixture.onlyThese == true ?  fixture.expected.count == diags.count : fixture.expected.count <= diags.count)
         
     }
-    
-    
-    @Test("Schema rules hit",arguments: [
-        ("05-response-invalidType","Schema.SupportedTypes"),
-        ("05-response-invalidPropertyType","Schema.SupportedTypes")
-    ])
-    func schemaRulesHit(resource : String, rule : String) async throws {
-        
-        let subDirectory = "Resources/3_0/invalid"
-       guard let resourceUrl = Bundle.module.url(forResource: resource , withExtension: "yaml", subdirectory: subDirectory) else {
-            throw FixtureErrors.notFound(resource )
-        }
-        
-        
-        let oasYaml = try Self.specString(resourceUrl)
-        let apiSpec = try OpenAPISpecification.read(
-            unflattened: oasYaml,
-            url:resource ,
-            documentLoader: YamsDocumentLoader()
-        )
-        
-        let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: resource, operationIds: [])
-        let objectLoader = YamsDocumentLoader()
-        var resolver = JSONPointerResolver(baseURL: resourceUrl, loadDocument:  objectLoader.load(from:))
-        let diags = try await Validator.validateSchema(spec: apiSpec, ctx: ctx, baseURI: resource, resolver: &resolver)
-        #expect(diags.count >= 1)
-        let expectedDiagnostic = try #require(diags.first(where: { $0.rule == rule }))
-        #expect(expectedDiagnostic.message.contains("unknown type"))
-    
-    }
-     
     @Test("spec rules do not hit.", arguments: [
         "01-minimal-30",
          "03-minimal-30-noContent"

@@ -709,6 +709,22 @@ extension String {
             }
         }
     }
+    func isValidRegex() -> Bool {
+        
+        if #available(macOS 13.0, *) {
+            guard let regex = try? Regex(self) else { return false }
+            return true
+        }
+        else {
+            do {
+                let regex = try NSRegularExpression(pattern: "^\(self)$")
+                let range = NSRange(self.startIndex..<self.endIndex, in: self)
+                return regex.firstMatch(in: self, options: [], range: range) != nil
+            } catch {
+                return false
+            }
+        }
+    }
 }
 
 

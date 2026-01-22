@@ -96,6 +96,22 @@ cases:
         rule: "OAS.ReferencesMustHaveRef"
         severity: "error"
         messageContains: "Response needs a ref or a response object with 'description'"
+  - fixture: "05-response-invalidType"
+    shouldPass: false
+    expected:
+      - code: "invalidType"
+        pointer: "/paths//create/operations/responses/201/content/application/json/schema/double"
+        rule: "Schema.SupportedTypes"
+        severity: "error"
+        messageContains: "unknown type double"
+  - fixture: "05-response-invalidPropertyType"
+    shouldPass: false
+    expected:
+      - code: "invalidType"
+        pointer: "/paths//create/operations/responses/201/content/application/json/schema/properties/id/double"
+        rule: "Schema.SupportedTypes"
+        severity: "error"
+        messageContains: "unknown type double"
   - fixture: "06-refcomponentNotResolvable"
     shouldPass: false
     expected:
@@ -104,3 +120,19 @@ cases:
         rule: "OAS.ReferencesMustHaveRef"
         severity: "error"
         messageContains: "Response needs a ref or a response object with 'description'"
+  - fixture: "10-schematests-inconsistentformat"
+    shouldPass: false
+    expected:
+      - code: "invalidValue"
+        pointer: "/components/schema/schema/properties/price"
+        rule: "Schema.SupportedFormat"
+        severity: "warning"
+        messageContains: "format not predefined for 'string'"
+  - fixture: "10-schematests-invalidAllOfAnyOf"
+    shouldPass: false
+    expected:
+      - code: "invalidValue"
+        pointer: "/components/schema/schema/properties/price"
+        rule: "Schema.SupportedFormat"
+        severity: "warning"
+        messageContains: "format not predefined for 'string'"

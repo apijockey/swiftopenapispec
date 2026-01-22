@@ -16,6 +16,24 @@ openapi: 3.0.3
 info:
   title: wrong Constraints
   version: "1.0.0"
+paths:
+  /ping:
+    get:
+      operationId: ping
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: {
+                type: object,
+                properties: {
+                  ok: {
+                    type: boolean
+                  }
+                },
+                required: [ok]
+              }
 components:
   schemas:
     Password:

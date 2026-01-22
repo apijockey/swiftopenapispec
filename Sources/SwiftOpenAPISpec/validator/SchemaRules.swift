@@ -41,22 +41,25 @@ public struct SchemaRuleRunner  : Sendable{
             out.append(contentsOf: run(schemaType: t, pointer: pointer))
             
         }
-        else if let ref = schema.ref {
-            let anyType = try await resolver.resolve(ref: ref.refString)
-            
+        else if let ref = schema.ref,
+                let anyType = try await resolver.resolve(ref: ref.refString) as? (any OpenAPIValidatableSchemaType) {
+            out.append(contentsOf:  run(schemaType: anyType, pointer: pointer))
         }
         return out
     }
     public static func defaultRunner(ctx: ValidationContext) -> SchemaRuleRunner  {
-        var rules : [SchemaRule] = [
-            StringMinMaxLengthRule(),
-            RequiredSubsetOfPropertiesRule()
-
-        ]
-        if ctx.dialect == .oas30 || ctx.version == .v30 {
-            rules.append(OAS30SupportedTypesRule())
+        var rules = [SchemaRule]()
+        if ctx.dialect == .oas30  {
+            rules.append(SupportedFormatsRule())
+            //rules.append(OAS30SupportedTypesRule())
         }
-        return SchemaRuleRunner(rules: rules, ctx: ctx)
+        else {
+            rules.append(StringMinMaxLengthRule())
+            rules.append(RequiredSubsetOfPropertiesRule())
+        }
+         return SchemaRuleRunner(rules: rules, ctx: ctx)
+       
+       
     }
     private func run(schemaType: any OpenAPIValidatableSchemaType, pointer: String) -> [Diagnostic] {
         var out: [Diagnostic] = []
@@ -163,7 +166,17 @@ public struct StringMinMaxLengthRule: SchemaRule {
     }
 }
 
-public struct OAS30SupportedTypesRule: SchemaRule {
+public struct OAS30SupportedRegexRule: SchemaRule {
+    public let name = "Schema.SupportedTypes"
+    public init() {}
+
+    public func check(schemaType: any OpenAPIValidatableSchemaType, pointer: String) -> [Diagnostic] {
+        
+       return []
+    }
+}
+
+public struct OAS30NumericValueRule: SchemaRule {
     public let name = "Schema.SupportedTypes"
     public init() {}
 
@@ -171,7 +184,7 @@ public struct OAS30SupportedTypesRule: SchemaRule {
         
         if let t = (schemaType as? OpenAPIUnknownType) {
             return [.init(severity: .error, code: .invalidType,
-                          message: "unknown type \(t.type ?? "")",
+                          message: "unknown type '\(t.type ?? "")'",
                           pointer: "\(pointer)/\(t.type ?? "")",
                           rule: "Schema.SupportedTypes")]
         }
@@ -206,6 +219,42 @@ public struct RequiredSubsetOfPropertiesRule: SchemaRule {
                 pointer: JSONPointer.join(pointer, "required"),
                 rule: name
             ))
+        }
+        return diags
+    }
+}
+
+/// Rule: for objects, every entry in required must exist as a property key.
+public struct SupportedFormatsRule: SchemaRule {
+    public let name = "Schema.SupportedFormat"
+    public init() {}
+
+    public func check(schemaType: any OpenAPIValidatableSchemaType, pointer: String) -> [Diagnostic] {
+        var diags: [Diagnostic] = []
+        switch schemaType {
+            case let stringType as OpenAPIStringType:
+            if ["byte","binary","", "date","date-time","password"].contains(stringType.format)  || stringType.format == nil { return [] }
+            else {
+                diags.append(Diagnostic(severity: .warning, code: .invalidValue, message: "format not predefined for 'string'", pointer: pointer, rule: name))
+            }
+            case is OpenAPIArrayType:
+             return []
+            case let integerType as OpenAPIIntegerType:
+            if  ["int32","int64"].contains(integerType.format) || (integerType.format ?? "").isEmpty {
+                return []
+            }
+            else {
+                diags.append(Diagnostic(severity: .warning, code: .invalidValue, message: "format '\(integerType.format ?? "")' not predefined for 'integer'", pointer: pointer, rule: name))
+            }
+        case let numberType as OpenAPIDoubleType:
+        if  ["float","double"].contains(numberType.format) || (numberType.format ?? "").isEmpty {
+            return []
+        }
+        else {
+            diags.append(Diagnostic(severity: .warning, code: .invalidValue, message: "format '\(numberType.format ?? "")' not predefined for 'String'", pointer: pointer, rule: name))
+        }
+        default:
+            return []
         }
         return diags
     }

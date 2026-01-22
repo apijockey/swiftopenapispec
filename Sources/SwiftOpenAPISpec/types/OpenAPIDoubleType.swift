@@ -77,7 +77,7 @@ public struct OpenAPIDoubleType :  OpenAPIValidatableSchemaType, ThrowingHashMap
         self.minimum =  map[Self.MINIMUM_KEY]  as? Double
         self.exclusiveMinimum =  map[Self.EXCLUSIVEMINIMUM_KEY]  as? Double
     }
-    public let type : String?
+  
     public var format : String?
     public let multipleOf : Double?
     public let defaultValue : Double?
@@ -85,7 +85,7 @@ public struct OpenAPIDoubleType :  OpenAPIValidatableSchemaType, ThrowingHashMap
     public let exclusiveMaximum :Double?
     public let minimum : Double?
     public let exclusiveMinimum : Double?
-   
+    public let type : String?
     public var ref: OpenAPISchemaReference? { nil}
     
 }

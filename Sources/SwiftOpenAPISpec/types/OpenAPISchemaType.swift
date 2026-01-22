@@ -55,6 +55,7 @@ public struct OpenAPISchemaType : OpenAPIValidatableSchemaType {
             case "string" : return OpenAPIStringType.self
             case "object" : return OpenAPIObjectType.self
             case "null": return OpenAPINullType.self
+            case "boolean" : return OpenAPIBooleanType.self
             
             case OpenAPISchemaReference.REF_KEY  : return OpenAPISchemaReference.self
             default:
