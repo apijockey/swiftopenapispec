@@ -70,22 +70,23 @@ public struct OpenAPIDoubleType :  OpenAPIValidatableSchemaType, ThrowingHashMap
    
     public init(_ map: [String : Any]) throws {
         self.type = map[Self.TYPE_KEY] as? String
+        
         self.defaultValue = map[Self.DEFAULT_KEY] as? Double
         self.multipleOf =  map[Self.MULTIPLEOF_KEY] as? Double
-        self.maximum =  map[Self.MAXIMUM_KEY]  as? Double
-        self.exclusiveMaximum =  map[Self.EXCLUSIVEMAXIMUM_KEY]  as? Double
-        self.minimum =  map[Self.MINIMUM_KEY]  as? Double
-        self.exclusiveMinimum =  map[Self.EXCLUSIVEMINIMUM_KEY]  as? Double
+        self.maximum =  map[Self.MAXIMUM_KEY] as? Double
+        self.exclusiveMaximum =  map[Self.EXCLUSIVEMAXIMUM_KEY] as? Double
+        self.minimum =  map[Self.MINIMUM_KEY] as? Double
+        self.exclusiveMinimum =  map[Self.EXCLUSIVEMINIMUM_KEY] as? Double
     }
   
     public var format : String?
-    public let multipleOf : Double?
-    public let defaultValue : Double?
-    public let maximum : Double?
-    public let exclusiveMaximum :Double?
-    public let minimum : Double?
-    public let exclusiveMinimum : Double?
-    public let type : String?
+    public var multipleOf :Double?
+    public var defaultValue : Double?
+    public var maximum : Double?
+    public var exclusiveMaximum :Double?
+    public var minimum : Double?
+    public var exclusiveMinimum :Double?
+    public var type : String?
     public var ref: OpenAPISchemaReference? { nil}
     
 }

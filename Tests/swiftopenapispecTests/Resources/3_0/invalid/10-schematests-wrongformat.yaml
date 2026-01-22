@@ -51,3 +51,7 @@ components:
           type: string
           format: uuid
           example: "no-uuid"
+        credit:
+          type: number
+          format: float
+          multipleOf: 0

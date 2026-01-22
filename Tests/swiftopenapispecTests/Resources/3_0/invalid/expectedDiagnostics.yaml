@@ -100,18 +100,18 @@ cases:
     shouldPass: false
     expected:
       - code: "invalidType"
-        pointer: "/paths//create/operations/responses/201/content/application/json/schema/double"
+        pointer: "/paths/~1create/operations/responses/201/content/application~1json/schema/type"
         rule: "Schema.SupportedTypes"
         severity: "error"
-        messageContains: "unknown type double"
+        messageContains: "unknown type 'double'"
   - fixture: "05-response-invalidPropertyType"
     shouldPass: false
     expected:
       - code: "invalidType"
-        pointer: "/paths//create/operations/responses/201/content/application/json/schema/properties/id/double"
+        pointer: "/paths/~1create/operations/responses/201/content/application~1json/schema/properties/id/type"
         rule: "Schema.SupportedTypes"
         severity: "error"
-        messageContains: "unknown type double"
+        messageContains: "unknown type 'double'"
   - fixture: "06-refcomponentNotResolvable"
     shouldPass: false
     expected:
@@ -124,7 +124,7 @@ cases:
     shouldPass: false
     expected:
       - code: "invalidValue"
-        pointer: "/components/schema/schema/properties/price"
+        pointer: "/components/schema/Credit/properties/price"
         rule: "Schema.SupportedFormat"
         severity: "warning"
         messageContains: "format not predefined for 'string'"
@@ -132,7 +132,15 @@ cases:
     shouldPass: false
     expected:
       - code: "invalidValue"
-        pointer: "/components/schema/schema/properties/price"
+        pointer: "/components/schema/Credit/properties/price"
         rule: "Schema.SupportedFormat"
         severity: "warning"
         messageContains: "format not predefined for 'string'"
+  - fixture: "10-schematests-wrongformat"
+    shouldPass: false
+    expected:
+      - code: "invalidValue"
+        pointer: "/components/schema/User/properties/credit"
+        rule: "Schema.MultipleOf"
+        severity: "error"
+        messageContains: "The value of 'multipleOf' MUST be strictly greater than 0"

@@ -97,7 +97,7 @@ public struct Validator {
         let schemaRuleRunner = SchemaRuleRunner.defaultRunner(ctx: ctx)
         if let schemas = spec.components?.schemas {
             for schema in schemas {
-                try await diagnostics.append(contentsOf:schemaRuleRunner.run(schema: schema, pointer: "/components/schema", resolver: &resolver))
+                try await diagnostics.append(contentsOf:schemaRuleRunner.run(schema: schema, pointer: "/components/schema/\(schema.key ?? "")", resolver: &resolver))
             }
         }
         // Validate requestBody content schemas in paths
@@ -105,14 +105,14 @@ public struct Validator {
             for op in path.operations {
                 for content in (op.requestBody?.contents ?? []) {
                     if let schema = content.schema  {
-                        try await diagnostics.append(contentsOf:schemaRuleRunner.run(schema: schema, pointer: "/paths/\(path.key ?? "")/\(op.key ?? op.operationId ?? "")/requestBody/content/\(content.key ?? "")", resolver: &resolver))
+                        try await diagnostics.append(contentsOf:schemaRuleRunner.run(schema: schema, pointer: "/paths/\(JSONPointer.escape(path.key ?? ""))/\(op.key ?? op.operationId ?? "")/requestBody/content/\(JSONPointer.escape(content.key ?? ""))", resolver: &resolver))
                     }
                     
                 }
                 for response in (op.responses ?? []) {
                     for content in response.content {
                         if let schema = content.schema  {
-                            try await diagnostics.append(contentsOf:schemaRuleRunner.run(schema: schema, pointer: "/paths/\(path.key ?? "")/operations/responses/\(response.key ?? "")/content/\(content.key ?? "")", resolver: &resolver))
+                            try await diagnostics.append(contentsOf:schemaRuleRunner.run(schema: schema, pointer: "/paths/\(JSONPointer.escape(path.key ?? ""))/operations/responses/\(response.key ?? "")/content/\(JSONPointer.escape(content.key ?? ""))", resolver: &resolver))
                         }
                     }
                 }

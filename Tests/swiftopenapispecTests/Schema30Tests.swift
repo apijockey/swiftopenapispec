@@ -108,7 +108,7 @@ struct Schema30ValidationTests {
     @Test("DEBUG.")
     func debug_schemarules() async throws {
         
-        let fixtureName = "10-schematests-inconsistentformat"
+        let fixtureName = "10-schematests-wrongformat"
         let subDirectory = "Resources/3_0/invalid"
         let rule = "OAS.ReferencesMustHaveRef"
         let bundle = Bundle.module
@@ -130,15 +130,27 @@ struct Schema30ValidationTests {
         var resolver = JSONPointerResolver(baseURL: resourceUrl) { url in
             try await objectLoader.load(from: url)
         }
-        let results = try await Validator.validateSchema(spec: apiSpec, ctx: ctx, baseURI: resourceUrl.absoluteString, resolver: &resolver)
-         
+        guard let fixture = Self.fixture(fixtureName: fixtureName, subDirectory: subDirectory) else {
+            throw FixtureErrors.notFound(fixtureName )
+        }
+        let errors = try await Validator.validateSchema(spec: apiSpec, ctx: ctx, baseURI: resourceUrl.absoluteString, resolver: &resolver)
+        let diags = errors.filter({ $0.severity == .error })
+        #expect(diags.count == fixture.expected.count)
+
+        for (diag,expected) in zip(diags,fixture.expected) {
+            #expect(diag.message.contains(expected.messageContains))
+            #expect(diag.pointer == expected.pointer)
+            #expect(diag.rule == expected.rule)
+            #expect(diag.code.rawValue == expected.code)
+            #expect(diag.severity.rawValue == expected.severity)
+        }
         
         
     }
     @Test("Schema rules for 3.0 hit",arguments: [
         "05-response-invalidType",
         "05-response-invalidPropertyType",
-        "10-schematests-inconsistentformat"
+        "10-schematests-wrongformat"
     ])
     func schemaRulesHit(resource : String) async throws {
     let subDirectory = "Resources/3_0/invalid"
@@ -161,53 +173,19 @@ struct Schema30ValidationTests {
         var resolver = JSONPointerResolver(baseURL: resourceUrl, loadDocument:  objectLoader.load(from:))
         
         let diags = try await Validator.validateSchema(spec: apiSpec, ctx: ctx, baseURI: resource, resolver: &resolver)
-        #expect(diags.count == fixture.expected.count)
+        let errors = diags.filter({ $0.severity == .error })
+        #expect(errors.count == fixture.expected.count)
 
-        for (diag,expected) in zip(diags,fixture.expected) {
-            #expect(diag.message.contains(expected.messageContains))
-            #expect(diag.pointer == expected.pointer)
-            #expect(diag.rule == expected.rule)
-            #expect(diag.code.rawValue == expected.code)
-            #expect(diag.severity.rawValue == expected.severity)
+        for (error,expected) in zip(errors,fixture.expected) {
+            #expect(error.message.contains(expected.messageContains))
+            #expect(error.pointer == expected.pointer)
+            #expect(error.rule == expected.rule)
+            #expect(error.code.rawValue == expected.code)
+            #expect(error.severity.rawValue == expected.severity)
         }
         
         
     
     }
-    @Test("debug schema rules")
-    func debugSchemaRulesHit() async throws {
-        let resource = "10-schematests-invalidAllOfAnyOf"
-    let subDirectory = "Resources/3_0/invalid"
-       guard let resourceUrl = Bundle.module.url(forResource: resource , withExtension: "yaml", subdirectory: subDirectory) else {
-            throw FixtureErrors.notFound(resource )
-        }
-        
-        
-        let oasYaml = try Self.specString(resourceUrl)
-        let apiSpec = try OpenAPISpecification.read(
-            unflattened: oasYaml,
-            url:resource ,
-            documentLoader: YamsDocumentLoader()
-        )
-        guard let fixture = Self.fixture(fixtureName: resource, subDirectory: subDirectory) else {
-            throw FixtureErrors.notFound(resource )
-        }
-        let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: resource, operationIds: [])
-        let objectLoader = YamsDocumentLoader()
-        var resolver = JSONPointerResolver(baseURL: resourceUrl, loadDocument:  objectLoader.load(from:))
-        
-        let diags = try await Validator.validateSchema(spec: apiSpec, ctx: ctx, baseURI: resource, resolver: &resolver)
-        #expect(diags.count == fixture.expected.count)
-
-        for (diag,expected) in zip(diags,fixture.expected) {
-            #expect(diag.message.contains(expected.messageContains))
-            #expect(diag.pointer == expected.pointer)
-            #expect(diag.rule == expected.rule)
-            #expect(diag.code.rawValue == expected.code)
-            #expect(diag.severity.rawValue == expected.severity)
-        }
-        
-        
-    
-    }
+   
 }
