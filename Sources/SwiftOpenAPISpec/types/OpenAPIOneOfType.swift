@@ -38,7 +38,7 @@
 //
 
 
-public struct OpenAPIOneOfType : ThrowingHashMapInitiable, PointerNavigable {
+public struct OpenAPIOneOfType : OpenAPISchema,ThrowingHashMapInitiable, PointerNavigable {
    
     
     public func element(for segmentName: String) throws -> Any? {
@@ -66,12 +66,12 @@ public struct OpenAPIOneOfType : ThrowingHashMapInitiable, PointerNavigable {
         guard let list = (map["oneOf"] as? [Any]) else {
             return
         }
-        self.items = try HashmapInitializableList<OpenAPISchema>.map(list).value
+        self.items = try HashmapInitializableList<OpenAPIType>.map(list).value
     }
     public func validate() throws {
     }
     public let type : String?
-    public var items: [OpenAPISchema]?
+    public var items: [OpenAPIType]?
   
     public var ref: OpenAPISchemaReference? { nil}
 }

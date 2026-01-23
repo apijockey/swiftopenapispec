@@ -38,14 +38,14 @@
 //
 
 
-public struct OpenAPIAnyOfType : PointerNavigable {
+public struct OpenAPIAnyOfType : OpenAPISchema, PointerNavigable {
    
     
     public var ref: OpenAPISchemaReference? { nil}
     
     public static let TYPE_KEY = "anyOf"
    
-    public init(types :[OpenAPISchema]) {
+    public init(types :[OpenAPIType]) {
         self.items = types
         self.type = "anyOf"
     }
@@ -76,6 +76,6 @@ public struct OpenAPIAnyOfType : PointerNavigable {
         throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIAnyOfType",segmentName)
     }
     public let type : String?
-    public var items: [OpenAPISchema]?
+    public var items: [OpenAPIType]?
     
 }

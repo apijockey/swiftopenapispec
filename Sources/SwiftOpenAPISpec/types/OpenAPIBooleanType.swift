@@ -6,7 +6,7 @@
 //
 
 
-public struct OpenAPIBooleanType :  ThrowingHashMapInitiable, PointerNavigable  {
+public struct OpenAPIBooleanType : OpenAPISchema, ThrowingHashMapInitiable, PointerNavigable  {
     public static let TYPE_KEY = "type"
     public init(load map: StringDictionary) throws {
         self.type = map[Self.TYPE_KEY] as? String

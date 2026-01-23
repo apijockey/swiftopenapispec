@@ -38,7 +38,7 @@
 //
 
 
-public struct OpenAPIStringType :  ThrowingHashMapInitiable , PointerNavigable {
+public struct OpenAPIStringType :  OpenAPISchema,ThrowingHashMapInitiable , PointerNavigable {
     public func element(for segmentName: String) throws -> Any? {
         switch segmentName {
             case Self.FORMAT_KEY : return format

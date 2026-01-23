@@ -172,7 +172,7 @@ struct FixtureTests {
         #expect(objectType.properties.contains(where:{$0.key == "productName"}))
         #expect(objectType.properties.contains(where:{$0.key == "productPrice"}))
         #expect(objectType.properties[key: "productName"]?.type is OpenAPIStringType)
-        #expect(objectType.properties[key: "productPrice"]?.type is  OpenAPIDoubleType)
+        #expect(objectType.properties[key: "productPrice"]?.type is  OpenAPINumberType)
         
         
     }

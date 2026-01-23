@@ -52,6 +52,20 @@ public struct SchemaRefCollector {
         
         return out
     }
+    
+    public func collect(from namedSchema :OpenAPINamedSchema, pointer : String) -> [RefOccurrence] {
+        var out: [RefOccurrence] = []
+        if let type = namedSchema.type {
+            out.append(contentsOf:collect(from : type, pointer: pointer))
+            return out
+        }
+        if let type = namedSchema.type {
+            out.append(contentsOf: collect(from: type, pointer: pointer))
+        }
+        
+        return out
+    }
+       
     public func collect(from op : OpenAPIOperation , pointer : String)  -> [RefOccurrence] {
         var out: [RefOccurrence] = []
         if let r = op.ref?.refString {
@@ -199,7 +213,7 @@ public struct SchemaRefCollector {
     
     public func collect(from parameter : OpenAPIParameter, pointer : String)  -> [RefOccurrence] {
         var out: [RefOccurrence] = []
-        if let r = parameter.ref?.refString {
+        if let r = parameter.ref?.reference {
             out.append(.init(
                 refString: r,
                 pointerToDollarRef: JSONPointer.join(pointer, "$ref"),
@@ -216,7 +230,7 @@ public struct SchemaRefCollector {
     }
     public func collect(from header : OpenAPIHeader, pointer : String)  -> [RefOccurrence] {
         var out: [RefOccurrence] = []
-        if let r = header.ref?.refString {
+        if let r = header.ref?.reference {
             out.append(.init(
                 refString: r,
                 pointerToDollarRef: JSONPointer.join(pointer, "$ref"),
@@ -233,7 +247,7 @@ public struct SchemaRefCollector {
     }
     public func collect(from request: OpenAPIRequestBody, pointer : String)  -> [RefOccurrence] {
         var out: [RefOccurrence] = []
-        if let r = request.ref?.refString {
+        if let r = request.ref?.reference {
             out.append(.init(
                 refString: r,
                 pointerToDollarRef: JSONPointer.join(pointer, "$ref"),
@@ -251,6 +265,74 @@ public struct SchemaRefCollector {
         }
         return out
     }
+    public func collect(from obj: OpenAPIArrayType, pointer: String) -> [RefOccurrence] {
+        var out: [RefOccurrence] = []
+        if let ref = obj.ref {
+            out.append(.init(
+                refString: ref.reference ?? "",
+                pointerToDollarRef: JSONPointer.join(pointer, "/$ref"),
+                expected: .schemaObject
+            ))
+            return out
+        }
+        if let items = obj.items {
+            
+                let itemPtr = JSONPointer.join(pointer, "items")
+                out.append(contentsOf: collect(from: items, pointer: itemPtr))
+            
+        }
+    }
+    public func collect(from obj: OpenAPIAnyOfType, pointer: String) -> [RefOccurrence] {
+        var out: [RefOccurrence] = []
+        if let ref = obj.ref {
+            out.append(.init(
+                refString: ref.reference ?? "",
+                pointerToDollarRef: JSONPointer.join(pointer, "/$ref"),
+                expected: .schemaObject
+            ))
+            return out
+        }
+        if let items = obj.items {
+            for (idx, item) in (items.enumerated()) {
+                let itemPtr = JSONPointer.join(JSONPointer.join(pointer, "allOf"), "\(idx)")
+                out.append(contentsOf: collect(from: item, pointer: itemPtr))
+            }
+        }
+    }
+    public func collect(from obj: OpenAPIOneOfType, pointer: String) -> [RefOccurrence] {
+        var out: [RefOccurrence] = []
+        if let ref = obj.ref {
+            out.append(.init(
+                refString: ref.reference ?? "",
+                pointerToDollarRef: JSONPointer.join(pointer, "/$ref"),
+                expected: .schemaObject
+            ))
+            return out
+        }
+        if let items = obj.items {
+            for (idx, item) in (items.enumerated()) {
+                let itemPtr = JSONPointer.join(JSONPointer.join(pointer, "allOf"), "\(idx)")
+                out.append(contentsOf: collect(from: item, pointer: itemPtr))
+            }
+        }
+    }
+    public func collect(from obj: OpenAPIAllOfType, pointer: String) -> [RefOccurrence] {
+        var out: [RefOccurrence] = []
+        if let ref = obj.ref {
+            out.append(.init(
+                refString: ref.reference ?? "",
+                pointerToDollarRef: JSONPointer.join(pointer, "/$ref"),
+                expected: .schemaObject
+            ))
+            return out
+        }
+        if let items = obj.items {
+            for (idx, item) in (items.enumerated()) {
+                let itemPtr = JSONPointer.join(JSONPointer.join(pointer, "allOf"), "\(idx)")
+                out.append(contentsOf: collect(from: item, pointer: itemPtr))
+            }
+        }
+    }
     public func collect(from obj: OpenAPIObjectType, pointer: String) -> [RefOccurrence] {
         var out: [RefOccurrence] = []
         for prop in obj.properties {
@@ -258,7 +340,7 @@ public struct SchemaRefCollector {
                let ref = prop.ref {
                 let propPtr = JSONPointer.join(JSONPointer.join(pointer, "properties"), key)
                 out.append(.init(
-                    refString: ref.refString,
+                    refString: ref.reference ?? "",
                     pointerToDollarRef: JSONPointer.join(propPtr, "\(key)/$ref"),
                     expected: .schemaObject
                 ))
@@ -272,79 +354,37 @@ public struct SchemaRefCollector {
         }
         return out
     }
-    public func collect(from schema: OpenAPISchema, pointer: String) -> [RefOccurrence] {
+    public func collect(from schema: OpenAPIType, pointer: String) -> [RefOccurrence] {
         var out: [RefOccurrence] = []
-
-        // A) $ref on schema wrapper
-        if let r = schema.ref?.refString {
+        switch schema {
+        case .allOf(let openAPIAllOfType):
+            out.append(contentsOf: collect(from: openAPIAllOfType, pointer: JSONPointer.join(pointer, "allOf")))
+        case .anyOf(let openAPIAnyOfType):
+            out.append(contentsOf: collect(from: openAPIAnyOfType, pointer: JSONPointer.join(pointer, "allOf")))
+        case .array(let openAPIArrayType):
+            out.append(contentsOf: collect(from: openAPIArrayType, pointer: JSONPointer.join(pointer, "array")))
+        case .bool(let openAPIBooleanType):
+            return out
+        case .integer(let openAPIIntegerType):
+            return out
+        case .number(let openAPINumberType):
+            return out
+        case .object(let openAPIObjectType):
+            out.append(contentsOf: collect(from: openAPIObjectType, pointer: pointer))
+        case .oneOf(let openAPIOneOfType):
+            out.append(contentsOf: collect(from: openAPIOneOfType, pointer: JSONPointer.join(pointer, "array")))
+        case .string(let openAPIStringType):
+            return out
+        case .ref(let openAPISchemaReference):
             out.append(.init(
-                refString: r,
+                refString: openAPISchemaReference.refString,
                 pointerToDollarRef: JSONPointer.join(pointer, "$ref"),
                 expected: .schemaObject
             ))
             return out
+        case .null(let openAPINullType):
+            return []
         }
-
-        // B) walk into schemaType
-        if schema.stringType != nil {
-            
-        }
-        else if schema.numberType != nil {
-            
-        }
-        else if schema.booleanType != nil {
-            
-        }
-        else if schema.nullable == false {
-            
-        }
-        else if schema.xml != nil {
-            
-        }
-        else if schema.allOf != nil {
-            
-        }
-        else if schema.oneOf != nil {
-            
-        }
-        
-        else if let obj = schema.objectType {
-            
-            out.append(contentsOf: collect(from: obj, pointer: pointer))
-           
-
-        }
-        else if let  arr = schema.arrayType, let items = arr.items {
-            for item in items {
-                out.append(contentsOf: collect(from: item, pointer: JSONPointer.join(pointer, "items")))
-            }
-                
-        }
-  
-        else if let anyOf = schema.anyOf,
-                    let items = anyOf.items {
-            for (idx, item) in items.enumerated() {
-                let itemPtr = JSONPointer.join(JSONPointer.join(pointer, "anyOf"), "\(idx)")
-                out.append(contentsOf: collect(from: item, pointer: itemPtr))
-            }
-        }
-
-        // 5) oneOf
-        if let oneOf = schema.oneOf, let items = oneOf.items {
-            for (idx, item) in items.enumerated() {
-                let itemPtr = JSONPointer.join(JSONPointer.join(pointer, "oneOf"), "\(idx)")
-                out.append(contentsOf: collect(from: item, pointer: itemPtr))
-            }
-        }
-
-        // 6) allOf
-        if let allOf = schema.allOf, let items = allOf.items {
-            for (idx, item) in items.enumerated() {
-                let itemPtr = JSONPointer.join(JSONPointer.join(pointer, "allOf"), "\(idx)")
-                out.append(contentsOf: collect(from: item, pointer: itemPtr))
-            }
-        }
-
         return out
     }
     

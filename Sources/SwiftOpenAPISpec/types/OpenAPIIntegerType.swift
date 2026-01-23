@@ -38,10 +38,10 @@
 //
 
 
-public struct OpenAPIIntegerType :   ThrowingHashMapInitiable, PointerNavigable  {
+public struct OpenAPIIntegerType :  OpenAPISchema, ThrowingHashMapInitiable, PointerNavigable  {
     public func element(for segmentName: String) throws -> Any? {
         switch segmentName {
-            case Self.TYPE_KEY : return type
+           
             case Self.FORMAT_KEY : return format
             case Self.DEFAULT_KEY :return defaultValue
             case Self.MULTIPLEOF_KEY :return multipleOf
@@ -71,7 +71,7 @@ public struct OpenAPIIntegerType :   ThrowingHashMapInitiable, PointerNavigable 
        }
 
     public init(load map: [String : Any]) throws {
-        self.type = map[Self.TYPE_KEY] as? String ?? DataType.integer.rawValue
+        
         self.defaultValue = map[Self.DEFAULT_KEY] as? Int
         self.multipleOf =  map[Self.MULTIPLEOF_KEY] as? Int
         self.maximum =  map[Self.MAXIMUM_KEY]  as? Int
@@ -80,7 +80,7 @@ public struct OpenAPIIntegerType :   ThrowingHashMapInitiable, PointerNavigable 
         self.exclusiveMinimum =  map[Self.EXCLUSIVEMINIMUM_KEY]  as? Int
         self.format = map.readIfPresent(Self.FORMAT_KEY, String.self)
     }
-    public let type :String
+   
     public let multipleOf : Int?
     public let defaultValue : Int?
     public let maximum : Int?

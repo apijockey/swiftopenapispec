@@ -38,12 +38,12 @@
 //
 
 
-public struct OpenAPIAllOfType : ThrowingHashMapInitiable, PointerNavigable, OpenAPISchemaReferenceable {
+public struct OpenAPIAllOfType : OpenAPISchema, ThrowingHashMapInitiable, PointerNavigable, OpenAPISchemaReferenceable {
   
     
     public func element(for segmentName: String) throws -> Any? {
         if let index = Int(segmentName) {
-            return self.items?[index]
+            //return self.items?[index]
         }
         if segmentName ==  OpenAPISchemaReference.REF_KEY {
             return ref
@@ -64,7 +64,7 @@ public struct OpenAPIAllOfType : ThrowingHashMapInitiable, PointerNavigable, Ope
         guard let list = (map["allOf"] as? [Any]) else {
             return
         }
-        self.items = try HashmapInitializableList<OpenAPISchema>.map( list).value
+        self.items = try HashmapInitializableList<OpenAPIType>.map( list).value
     }
     
     public func validate() throws {
@@ -72,6 +72,6 @@ public struct OpenAPIAllOfType : ThrowingHashMapInitiable, PointerNavigable, Ope
     }
 
     public let type : String?
-    public var items: [OpenAPISchema]?
+    public var items: [OpenAPIType]?
   
 }

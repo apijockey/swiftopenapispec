@@ -55,10 +55,10 @@ public struct OpenAPIMediaType :  KeyedElement , PointerNavigable,OpenAPISchemaR
             return
         }
             if let schemaMap = map[Self.SCHEMA_KEY] as? StringDictionary {
-                self.schema  = try OpenAPISchema(load: schemaMap)
+                self.schema  = try OpenAPIType.initialize( schemaMap).value
             }
             if let schemaMap = map[Self.ITEM_SCHEMA_KEY] as? StringDictionary {
-                self.schema  = try OpenAPISchema(load: schemaMap)
+                self.schema  = try OpenAPIType.initialize( schemaMap).value
             }
              
             
@@ -96,8 +96,8 @@ public struct OpenAPIMediaType :  KeyedElement , PointerNavigable,OpenAPISchemaR
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIMediaType", segmentName)
         }
     }
-    public var schema : OpenAPISchema? = nil
-    public var itemSchema : OpenAPISchema? = nil
+    public var schema : OpenAPIType? = nil
+    public var itemSchema : OpenAPIType? = nil
     public var examples : [OpenAPIExample] = []
    
     public var encoding :[OpenAPIEncoding]? = nil

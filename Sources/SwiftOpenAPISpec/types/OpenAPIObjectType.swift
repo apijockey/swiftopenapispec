@@ -38,7 +38,7 @@
 //
 
 
-public struct OpenAPIObjectType : ThrowingHashMapInitiable, PointerNavigable{
+public struct OpenAPIObjectType : OpenAPISchema,ThrowingHashMapInitiable, PointerNavigable{
    
     
     public func element(for segmentName: String) throws -> Any? {
@@ -87,7 +87,7 @@ public struct OpenAPIObjectType : ThrowingHashMapInitiable, PointerNavigable{
     public var dependentRequired : String?
     public var maxProperties : Int?
     public var minProperties : Int?
-    public var properties : [OpenAPISchemaProperty] = []
+    public var properties : [OpenAPINamedSchema] = []
     public var required : [String] = []
     public var unevaluatedProperties : Bool = false
   

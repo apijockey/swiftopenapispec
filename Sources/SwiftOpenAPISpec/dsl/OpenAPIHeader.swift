@@ -56,7 +56,10 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable,OpenAPISchemaRefer
      
        
         self.required = map.readIfPresent(Self.REQUIRED_KEY, Bool.self) ?? false
-        self.schema = try map.MapIfPresent(Self.SCHEMA_KEY, OpenAPISchema.self)
+        if let schemaMap = map[Self.SCHEMA_KEY] as? StringDictionary{
+            self.schema = try OpenAPIType.initialize(schemaMap).value
+        }
+       
         self.style = map.readIfPresent(Self.STYLE_KEY, String.self)
        
     }
@@ -99,7 +102,7 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable,OpenAPISchemaRefer
     public var description : String? = nil
     public var deprecated : Bool? = nil
     public var allowEmptyValue : Bool? = nil
-    public var schema : OpenAPISchema? = nil
+    public var schema : OpenAPIType? = nil
     public var style : String? = nil
     public var explode : Bool? = nil
     public var ref : OpenAPISchemaReference? = nil

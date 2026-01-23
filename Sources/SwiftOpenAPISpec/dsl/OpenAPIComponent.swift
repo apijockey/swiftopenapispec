@@ -115,7 +115,7 @@ public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
             responses = try KeyedElementList<OpenAPIResponse>.map(responsesMap).value
         }
         if let schemasMap = map[Self.SCHEMAS_KEY] as? StringDictionary{
-            schemas = try KeyedElementList<OpenAPISchema>.map(schemasMap).value
+            schemas = try KeyedElementList<OpenAPINamedSchema>.map(schemasMap).value
         }
         if let securitySchemaMap = map[Self.SECURITY_SCHEMES_KEY] as? StringDictionary{
             self.securitySchemas = try KeyedElementList<OpenAPISecurityScheme>.map(securitySchemaMap).value
@@ -138,7 +138,7 @@ public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
     public var requestBodies : [OpenAPIRequestBody]?
     public var responses : [OpenAPIResponse]?
     public var securitySchemas : [OpenAPISecurityScheme]?
-    public var schemas : [OpenAPISchema]?
+    public var schemas : [OpenAPINamedSchema]?
    
     public var ref : OpenAPISchemaReference? { nil}
     

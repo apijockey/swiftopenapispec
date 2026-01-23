@@ -19,7 +19,7 @@
 
 public protocol SchemaRule : Sendable {
     var name: String { get }
-    func check(schemaType: OpenAPISchema, pointer: String) -> [Diagnostic]
+    func check(schemaType: OpenAPIType, pointer: String) -> [Diagnostic]
 
 }
 
@@ -32,13 +32,13 @@ public struct SchemaRuleRunner  : Sendable{
         self.ctx = ctx
     }
     
-    public func run(schema: OpenAPISchema, pointer: String,resolver: inout JSONPointerResolver) async throws -> [Diagnostic] {
+    public func run(schema: OpenAPIType, pointer: String,resolver: inout JSONPointerResolver) async throws -> [Diagnostic] {
         var out: [Diagnostic] = []
         out.append(contentsOf: rules.flatMap { $0.check(schemaType: schema, pointer: JSONPointer.join(pointer,"type")) })
         
         // Recurse into schemaType (if no $ref on wrapper)
-        if schema.ref == nil {
-            if let obj = schema.objectType {
+        
+            if case let .object(obj) = schema {
                 for prop in obj.properties {
                     if let key = prop.key,
                        let schemaType = prop.type{
@@ -49,40 +49,40 @@ public struct SchemaRuleRunner  : Sendable{
                 }
             }
             
-            if let arr = schema.arrayType, let items = arr.items {
+        if case let .array(arr) = schema,
+            let items = arr.items {
+                    try await out.append(contentsOf: run(schema: items, pointer: JSONPointer.join(JSONPointer.join(pointer, "items"), ""),resolver: &resolver))
+    
+            }
+            
+        if case let .anyOf(openAPIAnyOfType) = schema,
+           let items = openAPIAnyOfType.items {
                 for (idx, item) in items.enumerated() {
                     try await out.append(contentsOf: run(schema: item, pointer: JSONPointer.join(JSONPointer.join(pointer, "items"), "\(idx)"),resolver: &resolver))
                 }
                 
             }
             
-            if let arr = schema.anyOf, let items = arr.items {
+        if case let .oneOf(openAPIAnyOfType) = schema,
+           let items = openAPIAnyOfType.items {
                 for (idx, item) in items.enumerated() {
                     try await out.append(contentsOf: run(schema: item, pointer: JSONPointer.join(JSONPointer.join(pointer, "items"), "\(idx)"),resolver: &resolver))
                 }
                 
             }
             
-            if let arr = schema.oneOf, let items = arr.items {
+        if case let .allOf(openAPIAnyOfType) = schema,
+           let items = openAPIAnyOfType.items {
                 for (idx, item) in items.enumerated() {
                     try await out.append(contentsOf: run(schema: item, pointer: JSONPointer.join(JSONPointer.join(pointer, "items"), "\(idx)"),resolver: &resolver))
                 }
                 
             }
             
-            if let arr = schema.allOf, let items = arr.items {
-                for (idx, item) in items.enumerated() {
-                    try await out.append(contentsOf: run(schema: item, pointer: JSONPointer.join(JSONPointer.join(pointer, "items"), "\(idx)"),resolver: &resolver))
-                }
-                
-            }
             
-            
-            return out
-            
-        }
-        else if let ref = schema.ref,
-                let anyType = try await resolver.resolve(ref: ref.refString) as? OpenAPISchema {
+        
+        if case let .ref(reference) = schema,
+           let anyType = try await resolver.resolve(ref: reference.refString) as? OpenAPIType {
             let results = try await run(schema: anyType, pointer: pointer,resolver: &resolver)
             out.append(contentsOf:  results)
         }
@@ -113,7 +113,7 @@ public struct NonEmptyCompositionRule: SchemaRule {
     public let name = "Schema.NonEmptyComposition"
     public init() {}
     
-    public func check(schemaType: OpenAPISchema, pointer: String) -> [Diagnostic] {
+    public func check(schemaType: OpenAPIType, pointer: String) -> [Diagnostic] {
         
         var diags: [Diagnostic] = []
         

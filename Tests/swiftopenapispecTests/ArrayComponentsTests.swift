@@ -63,8 +63,9 @@ struct ArrayComponentsTests {
 
         let comp = try #require(apiSpec[schemacomponent: "SimpleStringArray"])
         let arrayType = try #require(comp.arrayType)
-        #expect(arrayType.type == "array" || arrayType.type == nil) // abhängig von TYPE_KEY-Fix
-        #expect((arrayType.items as? OpenAPIStringType)?.type == "string")
+        #expect(arrayType.type == "array" || arrayType.type == nil)
+        let items = try #require(arrayType.items)
+        #expect(items.)
     }
 
     @Test("IntArrayWithBounds -> min/maxItems")
@@ -129,9 +130,9 @@ struct ArrayComponentsTests {
         let arrayType = try #require(comp.arrayType)
         #expect(arrayType.minContains == 1)
         #expect(arrayType.maxContains == 2)
-        #expect(arrayType.items is OpenAPIDoubleType || arrayType.items is OpenAPIIntegerType || arrayType.items is OpenAPIStringType)
+        #expect(arrayType.items is OpenAPINumberType || arrayType.items is OpenAPIIntegerType || arrayType.items is OpenAPIStringType)
         // Deine Fabrik mappt "number" auf OpenAPIDoubleType – sollte also Double sein:
-        #expect(arrayType.items is OpenAPIDoubleType)
+        #expect(arrayType.items is OpenAPINumberType)
     }
 
     @Test("ItemsWithoutType -> items ohne type -> items == nil")

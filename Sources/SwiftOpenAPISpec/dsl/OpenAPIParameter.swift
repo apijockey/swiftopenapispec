@@ -79,7 +79,7 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable, KeyedElement, Pointe
        
         let required = map[Self.REQUIRED_KEY] as? Bool
         self.required = required ?? false
-        self.schema = try map.MapIfPresent(Self.SCHEMA_KEY, OpenAPISchema.self)
+        self.schema = try map.MapIfPresent(Self.SCHEMA_KEY, OpenAPIType.self)
         if let style = map.readIfPresent(Self.STYLE_KEY, String.self) {
             self.style = ParameterStyle(rawValue: style)
         }
@@ -125,7 +125,7 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable, KeyedElement, Pointe
     public var description : String? = nil
     public var deprecated : Bool? = nil
     public var allowEmptyValue : Bool? = nil
-    public var schema : OpenAPISchema? = nil
+    public var schema : OpenAPIType? = nil
     //https://learn.openapis.org/specification/parameters.html
     public var style : ParameterStyle? = nil
     public var explode : Bool? = nil

@@ -20,162 +20,124 @@
 
 import Foundation
 
-public struct OpenAPISchema :  KeyedElement, PointerNavigable, OpenAPISchemaReferenceable,Equatable {
-    public static func == (lhs: OpenAPISchema, rhs: OpenAPISchema) -> Bool {
-        return false
-    }
+
+public protocol OpenAPISchema where Self : Sendable {}
+
+
+public indirect enum OpenAPIType: OpenAPISchema, ThrowingHashMapInitiable {
+  
     
-   
+    
+    case allOf(OpenAPIAllOfType)
+    case anyOf(OpenAPIAnyOfType)
+    case array(OpenAPIArrayType)
+    case bool(OpenAPIBooleanType)
+    case integer(OpenAPIIntegerType)
+    case number(OpenAPINumberType)
+    case object(OpenAPIObjectType)
+    case oneOf(OpenAPIOneOfType)
+    case string(OpenAPIStringType)
+    case ref(OpenAPISchemaReference)
+    case null(OpenAPINullType)
+    
     static let NULLABLE_KEY = "nullable"
     public static let TYPE_KEY = "type"
-    
     public static let ONEOF_KEY = "oneOf"
     public static let ANYOF_KEY = "anyOf"
     public static let XML_KEY = "xml"
     public static let ALLOF_KEY = "allOf"
-   
     public static let DISCRIMINATOR_KEY = "discriminator"
-    
     public static let FORMAT_KEY = "format"
-    
     public init() {
-        
+        self = .null(OpenAPINullType())
     }
-    public func clone() -> OpenAPISchema {
-        var newSchema = OpenAPISchema()
-        newSchema.ref = self.ref
-       
-        newSchema.extensions = self.extensions
-        newSchema.discriminator = self.discriminator
-        newSchema.ref = self.ref
-        newSchema.nullable = self.nullable
-        newSchema.xml = self.xml
-        return newSchema
-    }
-    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
-           let element = try Self(load: map)
-           return InitializationResult(value: element, diagnostics: [])
+    public static func initialize(_ map: StringDictionary) throws -> InitializationResult<OpenAPIType> {
+        if let reference = try OpenAPISchemaReference.initReference(from: (map)) {
+            let ref  =  OpenAPIType.ref(reference)
+            return InitializationResult(value: ref, diagnostics: [])
+        }
+       if let discriminatorMap = map[Self.DISCRIMINATOR_KEY] as? StringDictionary {
+           //self.discriminator = try OpenAPIDiscriminator(load: discriminatorMap)
        }
+        //self.format30 = map.readIfPresent(Self.FORMAT_KEY, String.self)
+        //extensions = try OpenAPIExtension.extensionElements(map)
+        let type = map.readIfPresent(Self.TYPE_KEY, String.self)
+        switch type {
+                case "string":
+                    let type = try OpenAPIType.string(OpenAPIStringType(load: map))
+                    return  InitializationResult(value:type, diagnostics: [])
 
-    public init(load map: [String : Any]) throws {
-        if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
-            self.ref = ref
-            return
-        }
-        
-           
-        
-        
-        if let discriminatorMap = map[Self.DISCRIMINATOR_KEY] as? StringDictionary {
-            self.discriminator = try OpenAPIDiscriminator(load: discriminatorMap)
-        }
-        
-        
-        
-        self.format30 = map.readIfPresent(Self.FORMAT_KEY, String.self)
-        extensions = try OpenAPIExtension.extensionElements(map)
-        self.nullable = map.readIfPresent(Self.NULLABLE_KEY, Bool.self) ?? false
-    }
-    
-   
-    //https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-01  ("null", "boolean", "object", "array", "number", or "string"), or "integer"
-    public var extensions : [OpenAPIExtension]?
-    public var discriminator : OpenAPIDiscriminator?
-    public var format30 : String? = nil
-    public var key: String?
-    public var arrayType: OpenAPIArrayType?
-    public var objectType: OpenAPIObjectType?
-    public var stringType: OpenAPIStringType?
-    public var integerType: OpenAPIIntegerType?
-    public var unknownType: OpenAPIUnknownType?
-    public var numberType: OpenAPIDoubleType?
-    public var booleanType: OpenAPIBooleanType?
-    public var allOf: OpenAPIAllOfType?
-    public var oneOf: OpenAPIOneOfType?
-    public var anyOf: OpenAPIAnyOfType?
-    public var ref : OpenAPISchemaReference?
-    public var xml : OpenAPIXMLObject? = nil
-    public var nullable : Bool = false // 3.0
-    
-    public var hasTypeInfo : Bool {
-        return self.ref != nil || self.allOf != nil || self.oneOf != nil || self.anyOf != nil || self.booleanType != nil || self.integerType != nil || self.objectType != nil || self.stringType != nil || self.numberType != nil
+                    case "number":
+                        let type = try OpenAPIType.number(OpenAPINumberType(load: map))
+                        return  InitializationResult(value:type, diagnostics: [])
+
+                    case "integer":
+                        let type = try OpenAPIType.integer(OpenAPIIntegerType(load: map))
+                        return  InitializationResult(value:type, diagnostics: [])
+
+                    case "array":
+                        let type = try OpenAPIType.array(OpenAPIArrayType(load: map))
+                        return  InitializationResult(value:type, diagnostics: [])
+
+                    case "object":
+                        let type = try OpenAPIType.object(OpenAPIObjectType(load: map))
+                        return  InitializationResult(value:type, diagnostics: [])
+
+                    case "boolean":
+                        let type = try OpenAPIType.bool(OpenAPIBooleanType(load: map))
+                        return  InitializationResult(value:type, diagnostics: [])
+
+                    case "null":
+                        let type = try OpenAPIType.null(OpenAPINullType(load: map))
+                        return  InitializationResult(value:type, diagnostics: [])
+
+                    case .none:
+                    let diagnostic = Diagnostic(severity: .error, code: .missingRequired, message: "no type info", pointer: "", rule: "Initialization.OpenAPIType")
+                    let nullType = try OpenAPINullType(load: map)
+                    let type = OpenAPIType.null(nullType)
+                    return  InitializationResult(value:type, diagnostics: [diagnostic])
+
+                    default:
+                    let diagnostic = Diagnostic(severity: .error, code: .missingRequired, message: "no type info", pointer: "", rule: "Initialization.OpenAPIType")
+                    let nullType = try OpenAPINullType(load: map)
+                    let type = OpenAPIType.null(nullType)
+                    return  InitializationResult(value:type, diagnostics: [diagnostic])
+                    }
+         
+
     }
     public func element(for segmentName : String) throws -> Any? {
-       // switch segmentName {
-            
-       
-//        case Self.TYPE_KEY : return self.schemaType
-//            case Self.ONEOF_KEY: return schemaType
-//            case Self.ALLOF_KEY : return schemaType
-//        
-//            case OpenAPISchemaReference.REF_KEY: return ref
-//        default:
-//            if let object = schemaType as? OpenAPIObjectType{
-//                    return try object.element(for: segmentName)
-//                
-//            }
-//            else if let integer = schemaType as? OpenAPIIntegerType{
-//                return try integer.element(for: segmentName)
-//            }
-//            else if let oneOf = schemaType as? OpenAPIOneOfType{
-//                return try oneOf.element(for: segmentName)
-//            }
-//            else if let anyOf = schemaType as? OpenAPIAnyOfType{
-//                return try anyOf.element(for: segmentName)
-//            }
-//            else if let allOf = schemaType as? OpenAPIAllOfType{
-//                return try allOf.element(for: segmentName)
-//            }
-//            else if let string  = schemaType as? OpenAPIStringType{
-//                return try string.element(for: segmentName)
-//            }
-//            else if let double  = schemaType as? OpenAPIDoubleType{
-//                return try double.element(for: segmentName)
-//            }
-//            else if let array  = schemaType as? OpenAPIArrayType{
-//                return try array.element(for: segmentName)
-//            }
-//            //must lead to resolution of ref in the next traversal
-//            else if let ref = self.ref{
-//                return ref
-//            }
-            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPISchema", segmentName)
+        // switch segmentName {
+        
+        switch self {
+        case .allOf(let openAPIAllOfType):
+            return openAPIAllOfType
+        case .anyOf(let openAPIAnyOfType):
+            return openAPIAnyOfType
+        case .array(let openAPIArrayType):
+            return try openAPIArrayType.element(for: segmentName)
+        case .bool(let openAPIBooleanType):
+            return try openAPIBooleanType.element(for: segmentName)
+        case .integer(let openAPIIntegerType):
+            return try openAPIIntegerType.element(for: segmentName)
+        case .number(let openAPINumberType):
+            return try openAPINumberType.element(for: segmentName)
+        case .object(let openAPIObjectType):
+            return try openAPIObjectType.element(for: segmentName)
+        case .oneOf(let openAPIOneOfType):
+            return openAPIOneOfType
+        case .string(let openAPIStringType):
+            return try openAPIStringType.element(for: segmentName)
+        case .ref(let openAPISchemaReference):
+            return openAPISchemaReference
+        case .null(let openAPINullType):
+            return openAPINullType
         }
+        
+        
+    }
+          
+       
 
 }
 
-/*
- self.type = map[Self.TYPE_KEY] as? String
- if let refMap = map["$ref"] as? StringDictionary {
-     ref = try OpenAPISchemaReference(load:refMap)
- }
- if map[Self.ONEOF_KEY] is [Any] {
-     oneOf = try OpenAPIOneOfType(load: map)
- }
- else if map[Self.ANYOF_KEY] is [Any] {
-     anyOf = try OpenAPIAnyOfType(load: map)
- }
-
- else if map[Self.ALLOF_KEY] is [Any] {
-     allOf = try OpenAPIAllOfType(load: map)
- }
- if let xmlMap = map[Self.XML_KEY] as? StringDictionary {
-     xml = try OpenAPIXMLObject(xmlMap)
- }
- switch type {
- case "array":
-     arrayType = try OpenAPIArrayType(load: map)
- case "object":
-     objectType = try OpenAPIObjectType(load: map)
- case "string":
-     stringType = try OpenAPIStringType(load: map)
- case "integer":
-     integerType = try OpenAPIIntegerType(load: map)
- case "number":
-     numberType = try OpenAPIDoubleType(load: map)
- case "boolean":
-     booleanType = try OpenAPIBooleanType(load: map)
- default:
-     break
- }
- */

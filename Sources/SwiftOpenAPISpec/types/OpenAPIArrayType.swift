@@ -38,7 +38,7 @@
 //
 
 
-public struct OpenAPIArrayType : PointerNavigable{
+public struct OpenAPIArrayType : OpenAPISchema, PointerNavigable{
     
     
     public func element(for segmentName: String) throws -> Any? {
@@ -74,7 +74,7 @@ public struct OpenAPIArrayType : PointerNavigable{
         self.uniqueItems = map[Self.UNIQE_ITEMS_KEY] as? Bool
          if let list = (map[Self.ITEMS_KEY] as? StringDictionary),
             let type = list[Self.TYPE_KEY] as? String{
-             self.items = try KeyedElementList<OpenAPISchema>.map(list).value
+             self.items = try OpenAPIType.initialize(list).value
              }
     }
     public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
@@ -91,7 +91,7 @@ public struct OpenAPIArrayType : PointerNavigable{
     public var uniqueItems : Bool?
     public var maxContains : Int?
     public var minContains : Int?
-    public var items: [OpenAPISchema]?
+    public var items: OpenAPIType?
     
     public var ref: OpenAPISchemaReference? { nil}
 }
