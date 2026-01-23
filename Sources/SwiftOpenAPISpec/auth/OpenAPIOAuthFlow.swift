@@ -52,14 +52,17 @@ public struct OpenAPIOAuthFlow : ThrowingHashMapInitiable, PointerNavigable {
         }
     }
     
-   
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+        let element = try Self(load: map)
+        return InitializationResult(value: element, diagnostics: [])
+    }
     
     public static let AUTHORIZATIONURL_KEY = "authorizationUrl"
     public static let DEVICE_AUTHORIZATIONURL_KEY = "deviceAuthorizationUrl"
     public static let TOKENURL_KEY = "tokenUrl"
     public static let REFRESHURL_KEY = "refreshUrl"
     public static let SCOPES_KEY = "scopes"
-    public init(_ map: [String : Any]) throws {
+    public init(load map: [String : Any]) throws {
         authorizationUrl = map.readIfPresent(Self.AUTHORIZATIONURL_KEY, String.self)
         tokenUrl = map.readIfPresent(Self.TOKENURL_KEY, String.self)
         refreshUrl = map.readIfPresent(Self.REFRESHURL_KEY, String.self)

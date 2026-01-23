@@ -20,49 +20,37 @@
 import Foundation
 
 
-public struct OpenAPISchemaProperty: KeyedElement , PointerNavigable, OpenAPISchemaReferenceable, Equatable {
-    public static func == (lhs: OpenAPISchemaProperty, rhs: OpenAPISchemaProperty) -> Bool {
-        // Compare type via existential-safe isEqual(to:)
-        let typesEqual: Bool = {
-            switch (lhs.type, rhs.type) {
-            case (nil, nil):
-                return true
-            case let (l?, r?):
-                return l.isEqual(to: r)
-            default:
-                return false
-            }
-        }()
-
-        return typesEqual &&
-        lhs.ref == rhs.ref &&
-        lhs.key == rhs.key
-    }
+public struct OpenAPISchemaProperty: KeyedElement , PointerNavigable, OpenAPISchemaReferenceable {
+  
     
     
    
     static let TYPE_KEY = "type"
     
-    public init(_ map: [String : Any]) throws {
-        if let type = map[Self.TYPE_KEY] as? String,
-            let validatableType = OpenAPISchemaType.validatableType(type) {
-            self.type = try validatableType.init(map)
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+           let element = try Self(load: map)
+           return InitializationResult(value: element, diagnostics: [])
+       }
+
+    public init(load map: [String : Any]) throws {
+        if let type = map[Self.TYPE_KEY] as? String {
+            self.type = try OpenAPISchema.initialize(map).value
         }
         if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
             self.ref = ref
             return
         }
         if map[OpenAPISchema.ONEOF_KEY] is [Any] {
-            self.type = try OpenAPIOneOfType(map)
+            self.type = try OpenAPISchema(load: map)
         }
         else if map[OpenAPISchema.ANYOF_KEY] is [Any] {
-            self.type = try OpenAPIAnyOfType(map)
+            self.type = try OpenAPISchema(load: map)
         }
         else if map[OpenAPISchema.ALLOF_KEY] is [Any] {
-            self.type = try OpenAPIAllOfType(map)
+            self.type = try OpenAPISchema(load: map)
         }
         if let discriminatorMap = map[OpenAPISchema.DISCRIMINATOR_KEY] as? [String : Any] {
-            self.discriminator = try OpenAPIDiscriminator(discriminatorMap)
+            self.discriminator = try OpenAPIDiscriminator(load: discriminatorMap)
         }
       
    
@@ -71,7 +59,7 @@ public struct OpenAPISchemaProperty: KeyedElement , PointerNavigable, OpenAPISch
     public  var key : String? = nil
   
     public var ref : OpenAPISchemaReference?
-    public var type : (any OpenAPIValidatableSchemaType)?
+    public var type : OpenAPISchema?
     public var discriminator : OpenAPIDiscriminator?
     
     public func element(for segmentName : String) throws -> Any? {

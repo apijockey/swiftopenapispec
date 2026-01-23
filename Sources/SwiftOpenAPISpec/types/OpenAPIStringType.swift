@@ -23,12 +23,15 @@
 //
 
 
-public struct OpenAPINullType :  OpenAPIValidatableSchemaType, ThrowingHashMapInitiable , PointerNavigable,OpenAPISchemaReferenceable {
+public struct OpenAPINullType :  ThrowingHashMapInitiable , PointerNavigable,OpenAPISchemaReferenceable {
     public func validate() throws {
         
     }
-    
-    public init(_ map: StringDictionary) throws {
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+           let element = try Self(load: map)
+           return InitializationResult(value: element, diagnostics: [])
+       }
+    public init(load map: StringDictionary) throws {
         
     }
     public init () {

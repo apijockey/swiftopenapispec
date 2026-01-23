@@ -140,7 +140,7 @@ cases:
     shouldPass: false
     expected:
       - code: "invalidValue"
-        pointer: "/components/schema/User/properties/credit"
+        pointer: "/components/schema/User/properties/credit/multipleOf"
         rule: "Schema.MultipleOf"
         severity: "error"
         messageContains: "The value of 'multipleOf' MUST be strictly greater than 0"

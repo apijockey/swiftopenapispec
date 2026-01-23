@@ -23,20 +23,25 @@ public struct OpenAPIRequestBody : KeyedElement , PointerNavigable,OpenAPISchema
     public static let DESCRIPTION_KEY = "description"
     public static let REQUIRED_KEY = "required"
     public static let CONTENTS_KEY = "content"
-    public init(_ map: [String : Any]) throws {
+    public init(load map: [String : Any]) throws {
         if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
             self.ref = ref
             return
         }
        
         if let contentsMap = map[Self.CONTENTS_KEY] as? [String : Any]{
-            self.contents = try KeyedElementList.map(contentsMap )
+            self.contents = try KeyedElementList.map(contentsMap ).value
         }
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
         self.ref =  try OpenAPISchemaReference.initReference(from: (map))
         self.required = map.readIfPresent(Self.REQUIRED_KEY, Bool.self) ?? false
         
     }
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+           let element = try Self(load: map)
+           return InitializationResult(value: element, diagnostics: [])
+       }
+
     public var key : String?
     
     public var description : String? = nil

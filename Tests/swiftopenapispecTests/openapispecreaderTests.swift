@@ -137,7 +137,7 @@ struct OpenAPILegacyPortedTests {
         #expect(greetPathParameter.required == false)
         #expect(greetPathParameter.location == OpenAPIParameter.ParameterLocation.query)
         #expect(greetPathParameter.description == "The name used in the returned greeting.")
-        #expect(greetPathParameter.schema?.schemaType is OpenAPIStringType)
+        #expect(greetPathParameter.schema?.stringType != nil)
         #expect(greetPathParameter.allowEmptyValue == nil)
     }
 
@@ -167,14 +167,14 @@ struct OpenAPILegacyPortedTests {
         let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
         #expect(apiSpec.components?.schemas?.count == 4)
         let greetingComponent = try #require(apiSpec.components?.schemas?.first { $0.key == "Greeting" })
-        let greetingObject = try #require(greetingComponent.schemaType as? OpenAPIObjectType)
+        let greetingObject = try #require(greetingComponent.objectType)
         #expect(greetingObject.properties.count == 1)
         let messageProperty = try #require(greetingObject.properties.first)
-        #expect(messageProperty.type is OpenAPIStringType)
+        #expect(messageProperty.type?.objectType != nil)
         #expect(greetingObject.required == ["message"])
 
         let generalErrorComponent = try #require(apiSpec[schemacomponent: "GeneralError"])
-        let errorObject = try #require(generalErrorComponent.schemaType as? OpenAPIObjectType)
+        let errorObject = try #require(generalErrorComponent.objectType)
         #expect(errorObject.properties.count == 2)
         let errorMessageCodeProperty = errorObject.properties[key: "code"]
         #expect(errorMessageCodeProperty?.type is OpenAPIIntegerType)
@@ -197,7 +197,7 @@ struct OpenAPILegacyPortedTests {
         #expect(skipParamComponent.location == OpenAPIParameter.ParameterLocation.query)
         #expect(skipParamComponent.description == "number of items to skip")
         #expect(skipParamComponent.required == true)
-        #expect(skipParamComponent.schema?.schemaType is OpenAPIIntegerType)
+        #expect(skipParamComponent.schema?.integerType != nil)
     }
 
     @Test
@@ -255,7 +255,7 @@ struct OpenAPILegacyPortedTests {
         let patchOperation = try #require(getPetsPath.operations.first { $0.key == "patch" })
         #expect(patchOperation.requestBody?.required == false)
         let jsonContent = try #require(patchOperation.requestBody?.contents.first(where: { $0.key == "application/json" }))
-        let oneOfSchemas = try #require(jsonContent.schema?.schemaType as? OpenAPIOneOfType)
+        let oneOfSchemas = try #require(jsonContent.schema?.oneOf)
         #expect(oneOfSchemas.items?.count == 2)
     }
 

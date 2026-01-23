@@ -22,19 +22,23 @@
 //
 
 
-public struct OpenAPIUnknownType :  OpenAPIValidatableSchemaType, ThrowingHashMapInitiable  {
+public struct OpenAPIUnknownType : ThrowingHashMapInitiable  {
     public func validate() throws {
         
     }
     public var type: String?
     public static let TYPE_KEY : String = "type"
-    public init(_ map: StringDictionary) throws {
+    public init(load map: StringDictionary) throws {
         self.type = map[Self.TYPE_KEY] as? String
     }
     public init () {
         
     }
- 
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+           let element = try Self(load: map)
+           return InitializationResult(value: element, diagnostics: [])
+       }
+
     
     public func element(for segmentName: String) throws -> Any? {
       

@@ -46,15 +46,17 @@ public struct HashmapInitializableList<T> where T : ThrowingHashMapInitiable {
     /// Creates a list of elements from a Yaml-List / JSON-Array 
     /// - Parameter a Yaml-List / JSON-Array
     /// - Returns: a Swift Array or  throws an error if any element  of type `T` cannot be created
-    static func map(_ list:  [Any]) throws -> [T] {
+    static func map(_ list:  [Any]) throws -> InitializationResult<[T]> {
+        var diagnostics: [Diagnostic] = []
         var types = [T]()
         for element in list {
             if let elementMap = element as? StringDictionary {
-                let element = try T(elementMap)
-                types.append(element)
+                let element = try T.initialize(elementMap)
+                diagnostics.append(contentsOf: element.diagnostics)
+                types.append(element.value)
             }
         }
-        return types
+        return InitializationResult(value: types, diagnostics: diagnostics)
     }
     
 }
@@ -67,31 +69,35 @@ public struct KeyedElementList<T> where T :  KeyedElement {
     /// Creates a list of elements with a unique `key` element from the keys in the dictinary with elements that hold  the `values`contents in its properties
     /// - Parameter elements: an ordinary Dictionary<String,Any>
     /// - Returns: a list of elements or throws an error if any element  of type `T` cannot be created
-    static func map(_ elements : StringDictionary) throws -> [T] {
+    static func map(_ elements : StringDictionary) throws -> InitializationResult<[T]> {
         var types = [T]()
+        var diagnostics: [Diagnostic] = []
         for element in elements {
             let value = element.value
             if let valueMap = value as? StringDictionary{
-                var type = try T(valueMap)
-                type.key = element.key
-                types.append(type)
+                var type = try T.initialize(valueMap)
+                type.value.key = element.key
+                diagnostics.append(contentsOf:type.diagnostics)
+                types.append(type.value)
             }
         }
-        return types
+        return InitializationResult(value: types, diagnostics: diagnostics)
     }
-    static func map(list : [StringDictionary], yamlKeyName : String, mayHaveRef : Bool) throws -> [T] {
+    static func map(list : [StringDictionary], yamlKeyName : String, mayHaveRef : Bool) throws -> InitializationResult<[T]> {
         var types = [T]()
+        var diagnostics: [Diagnostic] = []
         for listElement in list {
-                var element = try T(listElement)
+            var element = try T.initialize(listElement)
+            diagnostics.append(contentsOf:element.diagnostics)
                 if let key = listElement[yamlKeyName] as? String{
-                    element.key = key
-                    types.append(element)
+                    element.value.key = key
+                    types.append(element.value)
                 }
                 else if mayHaveRef == true {
                     if let reference = listElement["$ref"] as? StringDictionary {
                         var schemaReferenceable = reference as? OpenAPISchemaReferenceable
                         if schemaReferenceable != nil {
-                            schemaReferenceable?.ref = try OpenAPISchemaReference(reference)
+                            schemaReferenceable?.ref = try OpenAPISchemaReference(load: reference)
                         }
                     }
                 }
@@ -99,7 +105,7 @@ public struct KeyedElementList<T> where T :  KeyedElement {
                     throw OpenAPISpecification.Errors.invalidYaml("Could not find a entry in \(list.debugDescription) for \(yamlKeyName)")
                 }
         }
-        return types
+        return  InitializationResult(value: types, diagnostics: diagnostics)
         
     }
     
@@ -109,8 +115,12 @@ public protocol JSONPointerResolvable {
     func resolveSubscript(key : String) -> String?
 }
 
+public struct InitializationResult<T> {
+    public var value: T
+    public let diagnostics: [Diagnostic]
+}
 public protocol ThrowingHashMapInitiable : Sendable {
-    init(_ map : StringDictionary) throws
+    static func initialize(_ map : StringDictionary) throws -> InitializationResult<Self>
    
    
 }

@@ -66,7 +66,12 @@ public struct OpenAPISecurityScheme : KeyedElement , PointerNavigable,OpenAPISch
             }
         }
     }
-    public init(_ map: [String : Any]) throws {
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+        let element = try Self(load: map)
+        return InitializationResult(value: element, diagnostics: [])
+
+    }
+    public init(load map: [String : Any]) throws {
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
         if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
             self.ref = ref
@@ -87,7 +92,7 @@ public struct OpenAPISecurityScheme : KeyedElement , PointerNavigable,OpenAPISch
                 self.httpBearerFormat = map.readIfPresent(Self.BEARER_FORMAT_KEY, String.self)
             case .oauth2:
                 if let flowsMap = map.readIfPresent(Self.FLOWS_KEY, StringDictionary.self) {
-                    self.flows = try OpenAPIOAuthFlows(flowsMap)
+                    self.flows = try OpenAPIOAuthFlows(load: flowsMap)
                 }
                 self.oauth2MetadataURL = map.readIfPresent(Self.OAUTH2_METADATA_URL_KEY, String.self)
             case .openIdConnect:

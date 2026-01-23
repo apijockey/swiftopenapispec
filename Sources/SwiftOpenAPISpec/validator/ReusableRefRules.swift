@@ -217,7 +217,7 @@ struct ReusableSchemaRefRule {
         var diags: [Diagnostic] = []
         let pointer =  "\(pointer)/\(schema.key ?? "")"
         
-        if schema.ref == nil && schema.schemaType == nil {
+        if  schema.hasTypeInfo  {
             let diagnotics = Diagnostic( severity: .error,
                                          code: .missingRequired,
                                          message: "schema needs a ref or a schema type",

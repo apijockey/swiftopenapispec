@@ -38,25 +38,8 @@
 //
 
 
-public struct OpenAPIAllOfType : OpenAPIValidatableSchemaType, PointerNavigable, OpenAPISchemaReferenceable {
-    public static func == (lhs: OpenAPIAllOfType, rhs: OpenAPIAllOfType) -> Bool {
-        // 1) einfache Felder
-        guard lhs.type == rhs.type else { return false }
-
-        // 2) items per isEqual(to:) vergleichen (existential-sicher)
-        switch (lhs.items, rhs.items) {
-        case (nil, nil):
-            return true
-        case let (l?, r?):
-            guard l.count == r.count else { return false }
-            for (le, re) in zip(l, r) {
-                if !le.isEqual(to: re) { return false }
-            }
-            return true
-        default:
-            return false
-        }
-    }
+public struct OpenAPIAllOfType : ThrowingHashMapInitiable, PointerNavigable, OpenAPISchemaReferenceable {
+  
     
     public func element(for segmentName: String) throws -> Any? {
         if let index = Int(segmentName) {
@@ -71,12 +54,17 @@ public struct OpenAPIAllOfType : OpenAPIValidatableSchemaType, PointerNavigable,
     public var ref: OpenAPISchemaReference?
    
     public static let TYPE_KEY = "allOf"
-    public init(_ map: [String : Any]) throws {
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+           let element = try Self(load: map)
+           return InitializationResult(value: element, diagnostics: [])
+       }
+
+    public init(load map: [String : Any]) throws {
         self.type = map[Self.TYPE_KEY] as? String
         guard let list = (map["allOf"] as? [Any]) else {
             return
         }
-        self.items = try list.asValidatableSchemaType()
+        self.items = try HashmapInitializableList<OpenAPISchema>.map( list).value
     }
     
     public func validate() throws {
@@ -84,6 +72,6 @@ public struct OpenAPIAllOfType : OpenAPIValidatableSchemaType, PointerNavigable,
     }
 
     public let type : String?
-    public var items: [any OpenAPIValidatableSchemaType]?
+    public var items: [OpenAPISchema]?
   
 }

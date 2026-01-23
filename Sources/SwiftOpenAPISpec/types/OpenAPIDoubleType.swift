@@ -38,7 +38,7 @@
 //
 
 
-public struct OpenAPIDoubleType :  OpenAPIValidatableSchemaType, ThrowingHashMapInitiable, PointerNavigable  {
+public struct OpenAPIDoubleType : ThrowingHashMapInitiable, PointerNavigable  {
     public func element(for segmentName: String) throws -> Any? {
         switch segmentName {
         case Self.FORMAT_KEY : return format
@@ -56,9 +56,7 @@ public struct OpenAPIDoubleType :  OpenAPIValidatableSchemaType, ThrowingHashMap
     
   
     
-    public func validate() throws {
-        
-    }
+    
     public static let FORMAT_KEY : String = "format"
     public static let TYPE_KEY = "type"
     public static let DEFAULT_KEY = "default"
@@ -68,7 +66,7 @@ public struct OpenAPIDoubleType :  OpenAPIValidatableSchemaType, ThrowingHashMap
     public static let EXCLUSIVEMINIMUM_KEY = "exclusiveMinimum"
     public static let EXCLUSIVEMAXIMUM_KEY = "exclusiveMaximum"
    
-    public init(_ map: [String : Any]) throws {
+    public init(load map: [String : Any]) throws {
         self.type = map[Self.TYPE_KEY] as? String
         
         self.defaultValue = map[Self.DEFAULT_KEY] as? Double
@@ -78,7 +76,11 @@ public struct OpenAPIDoubleType :  OpenAPIValidatableSchemaType, ThrowingHashMap
         self.minimum =  map[Self.MINIMUM_KEY] as? Double
         self.exclusiveMinimum =  map[Self.EXCLUSIVEMINIMUM_KEY] as? Double
     }
-  
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+           let element = try Self(load: map)
+           return InitializationResult(value: element, diagnostics: [])
+       }
+
     public var format : String?
     public var multipleOf :Double?
     public var defaultValue : Double?

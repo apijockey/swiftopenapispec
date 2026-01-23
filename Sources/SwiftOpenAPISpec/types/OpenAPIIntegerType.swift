@@ -38,7 +38,7 @@
 //
 
 
-public struct OpenAPIIntegerType :  OpenAPIValidatableSchemaType, ThrowingHashMapInitiable, PointerNavigable  {
+public struct OpenAPIIntegerType :   ThrowingHashMapInitiable, PointerNavigable  {
     public func element(for segmentName: String) throws -> Any? {
         switch segmentName {
             case Self.TYPE_KEY : return type
@@ -56,9 +56,7 @@ public struct OpenAPIIntegerType :  OpenAPIValidatableSchemaType, ThrowingHashMa
     
     public var ref: OpenAPISchemaReference? { nil}
     
-    public func validate() throws {
-        
-    }
+   
     public static let FORMAT_KEY : String = "format"
     public static let TYPE_KEY = "type"
     public static let DEFAULT_KEY = "default"
@@ -67,8 +65,12 @@ public struct OpenAPIIntegerType :  OpenAPIValidatableSchemaType, ThrowingHashMa
     public static let MAXIMUM_KEY = "maximum"
     public static let EXCLUSIVEMINIMUM_KEY = "exclusiveMinimum"
     public static let EXCLUSIVEMAXIMUM_KEY = "exclusiveMaximum"
-   
-    public init(_ map: [String : Any]) throws {
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+           let element = try Self(load: map)
+           return InitializationResult(value: element, diagnostics: [])
+       }
+
+    public init(load map: [String : Any]) throws {
         self.type = map[Self.TYPE_KEY] as? String ?? DataType.integer.rawValue
         self.defaultValue = map[Self.DEFAULT_KEY] as? Int
         self.multipleOf =  map[Self.MULTIPLEOF_KEY] as? Int

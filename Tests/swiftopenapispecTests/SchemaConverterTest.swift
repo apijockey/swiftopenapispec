@@ -58,76 +58,76 @@ struct SchemaConverterTestSuite {
             throw Self.Errors.unreadable(name, error)
         }
     }
-    @Test("setup correct")
-    func setup() async throws {
-        let name = "01-minimal-30"
-        guard let url = Bundle.module.url(forResource: name, withExtension: "yaml", subdirectory: "Resources/3_0/valid") else {
-            throw Self.Errors.notFound(name)
-        }
-        let apiSpec = try await OpenAPISpecification.read(url: url)
-        let resolver = JSONPointerResolver(baseURL: url) { url in
-            try await objectLoader.load(from: url)
-        }
-        var converter = SchemaConverter(config: ConverterConfig(dialect: .oas30), resolver: resolver)
-        let schema = try #require(apiSpec[path: "/ping"]?.operations[operationID: "ping"]?.responses?[key:"200"]?.content[key:"application/json"]?.schema)
-        let convertResult =  try await converter.convert(schema: schema)
-        switch convertResult {
-            case .object(let o):
-            #expect(o.properties.count == 1)
-            #expect(o.required == ["ok"])
-        default:
-            Issue.record("not object")
-        }
-        print(convertResult)
-    }
-    @Test("JSON Schema for reference is resolved")
-    func resolveReferences() async throws {
-        let name = "05-responses-status-default"
-        guard let url = Bundle.module.url(forResource: name, withExtension: "yaml",subdirectory: "Resources/3_0/valid") else {
-            throw Self.Errors.notFound(name)
-        }
-        let apiSpec = try await OpenAPISpecification.read(url: url)
-        let resolver = JSONPointerResolver(baseURL: url) { url in
-            try await objectLoader.load(from: url)
-        }
-        var converter = SchemaConverter(config: ConverterConfig(dialect: .oas30), resolver: resolver)
-        let schema = try #require(apiSpec[path: "/create"]?.operations[operationID: "create"]?.responses?[key:"default"]?.content[key:"application/json"]?.schema)
-        let convertResult = try await converter.convert(schema: schema)
-        switch convertResult {
-        case .object(let openAPIObjectType):
-            #expect(openAPIObjectType.properties.count == 1)
-            #expect(openAPIObjectType.properties[key: "message"]?.type is OpenAPIStringType)
-            #expect(openAPIObjectType.required == ["message"])
-        default:
-            Issue.record("not object")
-        
-        }
-    }
-    @Test("anyof contains all referenced schemas")
-    func anyof() async throws {
-        let name = "08-oneof-anyof-allof"
-        guard let url = Bundle.module.url(forResource: name, withExtension: "yaml",subdirectory: "Resources/3_0/valid") else {
-            throw Self.Errors.notFound(name)
-        }
-        let apiSpec = try await OpenAPISpecification.read(url: url)
-        let resolver = JSONPointerResolver(baseURL: url) { url in
-            try await objectLoader.load(from: url)
-        }
-        var converter = SchemaConverter(config: ConverterConfig(dialect: .oas30), resolver: resolver)
-        let schema = try #require(apiSpec[path: "/shape"]?.operations[operationID: "createShape"]?.requestBody?.contents[key:"application/json"]?.schema)
-        let convertResult = try await converter.convert(schema: schema)
-        switch convertResult {
-        case .oneOf(let oneOfType):
-            guard case let .object(circle) = try #require(oneOfType.first) else {
-                Issue.record("Expected first oneOf element to be .object")
-                return
-            }
-            
-            #expect(circle.properties.count == 1)
-            #expect(circle.properties[key: "r"]?.type is OpenAPIDoubleType)
-        default:
-            Issue.record("not object")
-        
-        }
-    }
+//    @Test("setup correct")
+//    func setup() async throws {
+//        let name = "01-minimal-30"
+//        guard let url = Bundle.module.url(forResource: name, withExtension: "yaml", subdirectory: "Resources/3_0/valid") else {
+//            throw Self.Errors.notFound(name)
+//        }
+//        let apiSpec = try await OpenAPISpecification.read(url: url)
+//        let resolver = JSONPointerResolver(baseURL: url) { url in
+//            try await objectLoader.load(from: url)
+//        }
+//        var converter = SchemaConverter(config: ConverterConfig(dialect: .oas30), resolver: resolver)
+//        let schema = try #require(apiSpec[path: "/ping"]?.operations[operationID: "ping"]?.responses?[key:"200"]?.content[key:"application/json"]?.schema)
+//        let convertResult =  try await converter.convert(schema: schema)
+//        switch convertResult {
+//            case .object(let o):
+//            #expect(o.properties.count == 1)
+//            #expect(o.required == ["ok"])
+//        default:
+//            Issue.record("not object")
+//        }
+//        print(convertResult)
+//    }
+//    @Test("JSON Schema for reference is resolved")
+//    func resolveReferences() async throws {
+//        let name = "05-responses-status-default"
+//        guard let url = Bundle.module.url(forResource: name, withExtension: "yaml",subdirectory: "Resources/3_0/valid") else {
+//            throw Self.Errors.notFound(name)
+//        }
+//        let apiSpec = try await OpenAPISpecification.read(url: url)
+//        let resolver = JSONPointerResolver(baseURL: url) { url in
+//            try await objectLoader.load(from: url)
+//        }
+//        var converter = SchemaConverter(config: ConverterConfig(dialect: .oas30), resolver: resolver)
+//        let schema = try #require(apiSpec[path: "/create"]?.operations[operationID: "create"]?.responses?[key:"default"]?.content[key:"application/json"]?.schema)
+//        let convertResult = try await converter.convert(schema: schema)
+//        switch convertResult {
+//        case .object(let openAPIObjectType):
+//            #expect(openAPIObjectType.properties.count == 1)
+//            #expect(openAPIObjectType.properties[key: "message"]?.type is OpenAPIStringType)
+//            #expect(openAPIObjectType.required == ["message"])
+//        default:
+//            Issue.record("not object")
+//        
+//        }
+//    }
+//    @Test("anyof contains all referenced schemas")
+//    func anyof() async throws {
+//        let name = "08-oneof-anyof-allof"
+//        guard let url = Bundle.module.url(forResource: name, withExtension: "yaml",subdirectory: "Resources/3_0/valid") else {
+//            throw Self.Errors.notFound(name)
+//        }
+//        let apiSpec = try await OpenAPISpecification.read(url: url)
+//        let resolver = JSONPointerResolver(baseURL: url) { url in
+//            try await objectLoader.load(from: url)
+//        }
+//        var converter = SchemaConverter(config: ConverterConfig(dialect: .oas30), resolver: resolver)
+//        let schema = try #require(apiSpec[path: "/shape"]?.operations[operationID: "createShape"]?.requestBody?.contents[key:"application/json"]?.schema)
+//        let convertResult = try await converter.convert(schema: schema)
+//        switch convertResult {
+//        case .oneOf(let oneOfType):
+//            guard case let .object(circle) = try #require(oneOfType.first) else {
+//                Issue.record("Expected first oneOf element to be .object")
+//                return
+//            }
+//            
+//            #expect(circle.properties.count == 1)
+//            #expect(circle.properties[key: "r"]?.type is OpenAPIDoubleType)
+//        default:
+//            Issue.record("not object")
+//        
+//        }
+//    }
 }

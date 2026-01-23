@@ -47,7 +47,7 @@ public struct OpenAPIExtension : PointerNavigable  {
                
                 if let map = value as? StringDictionary {
                     var extensionElement = OpenAPIExtension(key: key)
-                    extensionElement.structuredExtension = try OpenAPIStructuredExtensionValues(map)
+                    extensionElement.structuredExtension = try OpenAPIStructuredExtensionValues(load: map)
                     extensionList.append(extensionElement)
                 }
                 else if let stringValue = value as? String {
@@ -83,7 +83,7 @@ public struct OpenAPIExtension : PointerNavigable  {
     }
 }
 public struct OpenAPISimpleExtensionValues : KeyedElement, PointerNavigable {
-    public init(_ map: StringDictionary) throws {
+    public init(load map: StringDictionary) throws {
         self.key = map.keys.first
         self.value = map.values.first as? String ?? ""
     }
@@ -96,7 +96,11 @@ public struct OpenAPISimpleExtensionValues : KeyedElement, PointerNavigable {
         }
     }
     
-    
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+           let element = try Self(load: map)
+           return InitializationResult(value: element, diagnostics: [])
+       }
+
     
     public var key: String?
     public var value : String?
@@ -117,8 +121,12 @@ public struct OpenAPIStructuredExtensionValues : ThrowingHashMapInitiable, Point
     public var ref: OpenAPISchemaReference? { nil}
     
   
-        
-    public init(_ map: StringDictionary) throws {
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+           let element = try Self(load: map)
+           return InitializationResult(value: element, diagnostics: [])
+       }
+
+    public init(load map: StringDictionary) throws {
         self.properties = map.mapValues({ value in
             if let stringValue = value as? String {
                 return stringValue

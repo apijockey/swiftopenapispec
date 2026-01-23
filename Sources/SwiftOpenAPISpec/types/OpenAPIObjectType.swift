@@ -38,16 +38,8 @@
 //
 
 
-public struct OpenAPIObjectType : OpenAPIValidatableSchemaType, PointerNavigable, Equatable{
-    public static func == (lhs: OpenAPIObjectType, rhs: OpenAPIObjectType) -> Bool {
-        lhs.type == rhs.type &&
-        lhs.dependentRequired == rhs.dependentRequired &&
-        lhs.minProperties == rhs.minProperties &&
-        lhs.maxProperties == rhs.maxProperties &&
-        lhs.unevaluatedProperties == rhs.unevaluatedProperties &&
-        lhs.required == rhs.required &&
-        lhs.properties == rhs.properties
-    }
+public struct OpenAPIObjectType : ThrowingHashMapInitiable, PointerNavigable{
+   
     
     public func element(for segmentName: String) throws -> Any? {
         switch segmentName {
@@ -73,17 +65,20 @@ public struct OpenAPIObjectType : OpenAPIValidatableSchemaType, PointerNavigable
     public static let MIN_PROPERTIES_KEY = "minProperties"
     public static let UNEVALUATEDPROPERTIES_KEY = "unevaluatedProperties"
     public static let REQUIRED_KEY = "required"
-    public init(_ map: [String : Any]) throws {
+    public init(load map: [String : Any]) throws {
         self.type = map[Self.TYPE_KEY] as? String
         if let propertiesMap = map[Self.PROPERTIES_KEY] as? StringDictionary{
-            self.properties = try KeyedElementList.map(propertiesMap )
+            self.properties = try KeyedElementList.map(propertiesMap ).value
         }
         self.required = map[Self.REQUIRED_KEY] as? [String] ?? []
         self.minProperties = map.readIfPresent(Self.MIN_PROPERTIES_KEY, Int.self)
         self.maxProperties = map.readIfPresent(Self.MAX_PROPERTIES_KEY, Int.self)
         self.dependentRequired = map.readIfPresent(Self.DEPENDENT_REQUIRED_KEY, String.self)
     }
-    
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+        let element = try Self(load: map)
+        return InitializationResult(value: element, diagnostics: [])
+    }
     public func validate() throws {
         
     }

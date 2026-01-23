@@ -26,25 +26,29 @@ public struct OpenAPIEncoding : KeyedElement, PointerNavigable {
     static let PREFIX_ENCODING_KEY = "prefixEncoding"
     static let ITEM_ENCODING_KEY = "itemEncoding"
     static let EXTENSIONS_KEY = "extensions"
-    public init(_ map: [String : Any]) throws {
+    public init(load map: [String : Any]) throws {
         extensions = try OpenAPIExtension.extensionElements(map)
         self.contentType = map.readIfPresent(Self.CONTENT_TYPE_KEY, String.self)
         if let  subMap  = map[Self.HEADERS_KEY] as? StringDictionary {
-            headers = try KeyedElementList<OpenAPIHeader>.map(subMap)
+            headers = try KeyedElementList<OpenAPIHeader>.map(subMap).value
         }
         if let subMap = map[Self.ENCODING_KEY] as? StringDictionary {
-            encoding = try KeyedElementList<OpenAPIEncoding>.map(subMap)
+            encoding = try KeyedElementList<OpenAPIEncoding>.map(subMap).value
         }
         if let subMap = map[Self.PREFIX_ENCODING_KEY] as? StringDictionary {
-            prefixEncoding = try KeyedElementList<OpenAPIEncoding>.map(subMap)
+            prefixEncoding = try KeyedElementList<OpenAPIEncoding>.map(subMap).value
         }
         if let subMap = map[Self.PREFIX_ENCODING_KEY] as? StringDictionary {
-            itemEncoding = try KeyedElementList<OpenAPIEncoding>.map(subMap)
+            itemEncoding = try KeyedElementList<OpenAPIEncoding>.map(subMap).value
         }
         
         
     }
-    
+    public static func initialize(_ map: StringDictionary) throws -> InitializationResult<Self> {
+        let element = try Self(load: map)
+        return InitializationResult(value: element, diagnostics: [])
+
+    }
     public func element(for segmentName: String) throws -> Any? {
         switch segmentName {
         case Self.CONTENT_TYPE_KEY: return contentType

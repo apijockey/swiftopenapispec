@@ -45,15 +45,20 @@ public struct OpenAPIServer : ThrowingHashMapInitiable , PointerNavigable {
     public init(url:String){
         self.url = url
     }
-    public init(_ map: StringDictionary) throws {
+    public init(load map: StringDictionary) throws {
         self.url = try map.tryRead(Self.URL_KEY, String.self, root: "OpenAPIServer")
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
         self.name = map.readIfPresent(Self.NAME_KEY, String.self)
         if let variables = map[Self.VARIABLES_KEY] as? StringDictionary {
-            self.variables = try KeyedElementList.map(variables)
+            self.variables = try KeyedElementList.map(variables).value
         }
         extensions = try OpenAPIExtension.extensionElements(map)
     }
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+           let element = try Self(load: map)
+           return InitializationResult(value: element, diagnostics: [])
+       }
+
     public var description : String? = nil
     public var extensions : [OpenAPIExtension]?
     public var name : String? = nil

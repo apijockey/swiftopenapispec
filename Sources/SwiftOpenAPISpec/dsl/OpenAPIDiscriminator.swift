@@ -37,7 +37,7 @@ public struct OpenAPIDiscriminator :  ThrowingHashMapInitiable, PointerNavigable
     
     
     
-    public init(_ map: [String : Any]) throws {
+    public init(load map: [String : Any]) throws {
         if let propertyName = map[Self.PROPERTY_NAME_KEY] as? String {
             self.propertyName = propertyName
         }
@@ -48,6 +48,10 @@ public struct OpenAPIDiscriminator :  ThrowingHashMapInitiable, PointerNavigable
         if let defaultMapping = map[Self.DEFAULT_MAPPING_KEY] as? String {
                 self.defaultMapping = defaultMapping
         }
+    }
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self>{
+        let element = try Self(load: map)
+        return InitializationResult(value: element, diagnostics: [])
     }
     public var propertyName: String?
     public var mapping: Dictionary<String, String>?

@@ -26,7 +26,7 @@ public struct OpenAPIResponse : KeyedElement, PointerNavigable,OpenAPISchemaRefe
     public static let CONTENT_KEY = "content"
     public static let HEADERS_KEY = "headers"
     public static let LINKS_KEY = "links"
-    public init(_ map: [String : Any]) throws {
+    public init(load map: [String : Any]) throws {
         if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
             self.ref = ref
             return
@@ -34,18 +34,23 @@ public struct OpenAPIResponse : KeyedElement, PointerNavigable,OpenAPISchemaRefe
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
         self.summary = map.readIfPresent(Self.SUMMARY_KEY, String.self)
         if let contentMap = map.readIfPresent(Self.CONTENT_KEY, StringDictionary .self) {
-            self.content = try KeyedElementList<OpenAPIMediaType>.map(contentMap)
+            self.content = try KeyedElementList<OpenAPIMediaType>.map(contentMap).value
         }
          if let headerMap = map.readIfPresent(Self.HEADERS_KEY, StringDictionary .self) {
-             self.headers = try KeyedElementList<OpenAPIHeader>.map(headerMap)
+             self.headers = try KeyedElementList<OpenAPIHeader>.map(headerMap).value
          }
         if let linkMap = map.readIfPresent(Self.LINKS_KEY, StringDictionary .self) {
-            self.links = try KeyedElementList<OpenAPILink>.map(linkMap)
+            self.links = try KeyedElementList<OpenAPILink>.map(linkMap).value
         }
       
       
       
     }
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+           let element = try Self(load: map)
+           return InitializationResult(value: element, diagnostics: [])
+       }
+
     public var summary : String?
     public var description : String?
     public var content: [OpenAPIMediaType] = []

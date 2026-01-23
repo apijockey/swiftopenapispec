@@ -59,11 +59,15 @@ public struct OpenAPIOAuthFlows : ThrowingHashMapInitiable, PointerNavigable {
     public static let CLIENT_CREDENTIALS_KEY  = "clientCredentials"
     public static let AUTHORIZATION_CODE_KEY  = "authorizationCode"
     public static let DEVICE_AUTHORIZATION_KEY  = "deviceAuthorization"
-    public init(_ map: [String : Any]) throws {
+    public init(load map: [String : Any]) throws {
         self.implicit = try map.mapIfPresent(Self.IMPLICIT_KEY, OpenAPIOAuthFlow.self)
         self.password = try map.mapIfPresent(Self.PASSWORD_KEY, OpenAPIOAuthFlow.self)
         self.clienCredentials = try map.mapIfPresent(Self.CLIENT_CREDENTIALS_KEY, OpenAPIOAuthFlow.self)
         self.authorizationCode = try map.mapIfPresent(Self.AUTHORIZATION_CODE_KEY, OpenAPIOAuthFlow.self)
+    }
+    public static func initialize(_ map: StringDictionary) throws -> InitializationResult<Self> {
+        let element = try Self(load: map)
+        return InitializationResult(value: element, diagnostics: [])
     }
     public var implicit : OpenAPIOAuthFlow? = nil
     public var password : OpenAPIOAuthFlow? = nil

@@ -39,7 +39,7 @@ public struct OpenAPICallBack : KeyedElement,PointerNavigable,OpenAPISchemaRefer
     }
     
     
-    public init(_ map : StringDictionary) throws {
+    public init(load map : StringDictionary) throws {
         
         if let ref = try OpenAPISchemaReference.initReference(from: map) {
             self.ref = ref
@@ -48,11 +48,15 @@ public struct OpenAPICallBack : KeyedElement,PointerNavigable,OpenAPISchemaRefer
         extensions = try OpenAPIExtension.extensionElements(map)
         if map.count > 0 {
             pathItems = []
-            self.pathItems = try KeyedElementList<OpenAPIPathItem>.map(map)
+            self.pathItems = try KeyedElementList<OpenAPIPathItem>.map(map).value
         }
      
     }
-    
+    public static func initialize(_ map: StringDictionary) throws -> InitializationResult<Self> {
+        let element = try Self(load: map)
+        return InitializationResult(value: element, diagnostics: [])
+
+    }
    
     public var extensions : [OpenAPIExtension]?
     public var pathItems : [OpenAPIPathItem]?

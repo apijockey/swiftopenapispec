@@ -71,49 +71,54 @@ public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
     public  enum Errors : LocalizedError {
         case unsupportedComponentlist, unrecognizedComponent
     }
-    public init(_ map: StringDictionary) throws {
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+        let element = try Self(load: map)
+        return InitializationResult(value: element, diagnostics: [])
+
+    }
+    public init(load map: StringDictionary) throws {
         
         if let map = map[Self.CALLBACKS_KEY] as? StringDictionary{
-            self.callbacks = try KeyedElementList<OpenAPICallBack>.map(map)
+            self.callbacks = try KeyedElementList<OpenAPICallBack>.map(map).value
         }
         if let map = map[Self.ENCODINGS_KEY] as? StringDictionary{
-            self.mediaTypes = try KeyedElementList<OpenAPIMediaType>.map(map)
+            self.mediaTypes = try KeyedElementList<OpenAPIMediaType>.map(map).value
         }
         if let map = map[Self.EXAMPLES_KEY] as? StringDictionary{
-            self.examples = try KeyedElementList<OpenAPIExample>.map(map)
+            self.examples = try KeyedElementList<OpenAPIExample>.map(map).value
         }
         extensions = try OpenAPIExtension.extensionElements(map)
         
         if let map = map[Self.HEADERS_KEY] as? StringDictionary{
-            self.headers = try KeyedElementList<OpenAPIHeader>.map(map)
+            self.headers = try KeyedElementList<OpenAPIHeader>.map(map).value
         }
         
        
         if let map = map[Self.LINKS_KEY] as? StringDictionary{
-            self.links = try KeyedElementList<OpenAPILink>.map(map)
+            self.links = try KeyedElementList<OpenAPILink>.map(map).value
         }
         if let map = map[Self.MEDIATYPES_KEY] as? StringDictionary{
-            self.mediaTypes = try KeyedElementList<OpenAPIMediaType>.map(map)
+            self.mediaTypes = try KeyedElementList<OpenAPIMediaType>.map(map).value
         }
         if let map = map[Self.PATHSITEMS_KEY] as? StringDictionary{
-            self.pathItems = try KeyedElementList<OpenAPIPathItem>.map(map)
+            self.pathItems = try KeyedElementList<OpenAPIPathItem>.map(map).value
         }
         
       
         if let paramsMap = map[Self.PARAMETERS_KEY] as? StringDictionary {
-            parameters = try KeyedElementList<OpenAPIParameter>.map(paramsMap)
+            parameters = try KeyedElementList<OpenAPIParameter>.map(paramsMap).value
         }
         if let map = map[Self.REQUEST_BODIES_KEY] as? StringDictionary{
-            self.requestBodies = try KeyedElementList<OpenAPIRequestBody>.map(map)
+            self.requestBodies = try KeyedElementList<OpenAPIRequestBody>.map(map).value
         }
         if let responsesMap = map[Self.RESPONSES_KEY] as? StringDictionary{
-            responses = try KeyedElementList<OpenAPIResponse>.map(responsesMap)
+            responses = try KeyedElementList<OpenAPIResponse>.map(responsesMap).value
         }
         if let schemasMap = map[Self.SCHEMAS_KEY] as? StringDictionary{
-            schemas = try KeyedElementList<OpenAPISchema>.map(schemasMap)
+            schemas = try KeyedElementList<OpenAPISchema>.map(schemasMap).value
         }
         if let securitySchemaMap = map[Self.SECURITY_SCHEMES_KEY] as? StringDictionary{
-            self.securitySchemas = try KeyedElementList<OpenAPISecurityScheme>.map(securitySchemaMap)
+            self.securitySchemas = try KeyedElementList<OpenAPISecurityScheme>.map(securitySchemaMap).value
         }
         
     }

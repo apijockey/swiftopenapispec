@@ -63,7 +63,7 @@ struct ArrayMediaTypesTests {
 
         let response200 = try #require(getOp.response(httpstatus: "200"))
         let media = try #require(response200.content[key: "application/json"])
-        let schemaType = try #require(media.schema?.schemaType as? OpenAPIArrayType)
+        let schemaType = try #require(media.schema?.arrayType)
 
         // Array-Constraints
         #expect(schemaType.minItems == 1)
@@ -84,7 +84,7 @@ struct ArrayMediaTypesTests {
         let reqBody = try #require(postOp.requestBody)
         let media = try #require(reqBody.contents[key: "application/json"])
        
-        let schemaType = try #require(media.schema?.schemaType as? OpenAPIArrayType)
+        let schemaType = try #require(media.schema?.arrayType)
         
         // Array-Flag
         #expect(schemaType.uniqueItems == true)

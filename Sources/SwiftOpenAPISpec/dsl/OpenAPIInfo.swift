@@ -29,7 +29,7 @@ public struct OpenAPIInfo : KeyedElement, PointerNavigable {
     static let TERMS_KEY = "termsOfService"
     static let TITLE_KEY = "title"
     static let VERSION_KEY = "version"
-    public init(_ map: [String : Any]) throws {
+    public init(load map: [String : Any]) throws {
         self.version = map[Self.VERSION_KEY] as? String  ?? ""
         self.title = map[Self.TITLE_KEY] as? String
         if let text = map[Self.SUMMARY_KEY] as? String {
@@ -42,7 +42,7 @@ public struct OpenAPIInfo : KeyedElement, PointerNavigable {
             self.termsOfService = text
         }
         if let contactMap  =  map[Self.CONTACT_KEY] as? StringDictionary{
-           let contact = try OpenAPIContact(contactMap)
+           let contact = try OpenAPIContact(load: contactMap)
             self.contact = contact
         }
         if let licenseMap  =  map[Self.LICENSE_KEY] as? StringDictionary,
@@ -52,7 +52,11 @@ public struct OpenAPIInfo : KeyedElement, PointerNavigable {
         extensions = try OpenAPIExtension.extensionElements(map)
         
     }
-    
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+           let element = try Self(load: map)
+           return InitializationResult(value: element, diagnostics: [])
+       }
+
     public func element(for segmentName: String) throws -> Any? {
         switch segmentName {
         case Self.CONTACT_KEY: return contact

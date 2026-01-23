@@ -32,7 +32,7 @@ public struct OpenAPIContact : ThrowingHashMapInitiable , PointerNavigable {
     public  static let NAME_KEY = "name"
     public static let URL_KEY = "url"
    
-    public init(_ map : StringDictionary) throws {
+    public init(load map : StringDictionary) throws {
         if let name = map[Self.NAME_KEY] as? String {
             self.name = name
         }
@@ -44,6 +44,11 @@ public struct OpenAPIContact : ThrowingHashMapInitiable , PointerNavigable {
         }
         extensions = try OpenAPIExtension.extensionElements(map)
     }
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+        let element = try Self(load: map)
+        return InitializationResult(value: element, diagnostics: [])
+    }
+    
     public var email : String? = nil
     public var extensions : [OpenAPIExtension]?
     public  var name : String? = nil

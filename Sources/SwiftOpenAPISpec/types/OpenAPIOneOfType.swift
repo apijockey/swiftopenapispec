@@ -38,22 +38,8 @@
 //
 
 
-public struct OpenAPIOneOfType : OpenAPIValidatableSchemaType,PointerNavigable {
-    public static func == (lhs: OpenAPIOneOfType, rhs: OpenAPIOneOfType) -> Bool {
-        guard lhs.type == rhs.type else { return false }
-        switch (lhs.items, rhs.items) {
-        case (nil, nil):
-            return true
-        case let (l?, r?):
-            guard l.count == r.count else { return false }
-            for (le, re) in zip(l, r) {
-                if !le.isEqual(to: re) { return false }
-            }
-            return true
-        default:
-            return false
-        }
-    }
+public struct OpenAPIOneOfType : ThrowingHashMapInitiable, PointerNavigable {
+   
     
     public func element(for segmentName: String) throws -> Any? {
         if let index = Int(segmentName),
@@ -70,18 +56,22 @@ public struct OpenAPIOneOfType : OpenAPIValidatableSchemaType,PointerNavigable {
     
     
     public static let TYPE_KEY = "oneOf"
-   
-    public init(_ map: [String : Any]) throws {
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+           let element = try Self(load: map)
+           return InitializationResult(value: element, diagnostics: [])
+       }
+
+    public init(load map: [String : Any]) throws {
         self.type = map[Self.TYPE_KEY] as? String
         guard let list = (map["oneOf"] as? [Any]) else {
             return
         }
-        self.items = try list.asValidatableSchemaType()
+        self.items = try HashmapInitializableList<OpenAPISchema>.map(list).value
     }
     public func validate() throws {
     }
     public let type : String?
-    public var items: [any OpenAPIValidatableSchemaType]?
+    public var items: [OpenAPISchema]?
   
     public var ref: OpenAPISchemaReference? { nil}
 }

@@ -26,7 +26,7 @@ import Foundation
   A unique parameter is defined by a combination of a name and location.
   */
  */
-public struct OpenAPIParameter :  KeyedElement, PointerNavigable,  OpenAPISchemaReferenceable {
+public struct OpenAPIParameter :  ThrowingHashMapInitiable, KeyedElement, PointerNavigable,  OpenAPISchemaReferenceable {
     
     
     public enum ParameterLocation : String, Codable, CaseIterable, Sendable {
@@ -50,7 +50,7 @@ public struct OpenAPIParameter :  KeyedElement, PointerNavigable,  OpenAPISchema
     public static let EXAMPLE_KEY = "example"
     public static let EXAMPLES_KEY = "examples"
     public static let CONTENT_KEY = "content"
-    public init(_ map: [String: Any]) throws {
+    public init(load map: [String: Any]) throws {
         
         if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
             self.ref = ref
@@ -71,7 +71,7 @@ public struct OpenAPIParameter :  KeyedElement, PointerNavigable,  OpenAPISchema
         self.format = map.readIfPresent(Self.FORMAT_KEY, String.self)
         
         if let examplesMap  = map[Self.EXAMPLES_KEY]  as? StringDictionary{
-            self.examples = try KeyedElementList.map(examplesMap)
+            self.examples = try KeyedElementList.map(examplesMap).value
         }
         extensions = try OpenAPIExtension.extensionElements(map)
         self.location = ParameterLocation(rawValue: location)
@@ -88,6 +88,11 @@ public struct OpenAPIParameter :  KeyedElement, PointerNavigable,  OpenAPISchema
        
        
     }
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+           let element = try Self(load: map)
+           return InitializationResult(value: element, diagnostics: [])
+       }
+
     public func element(for segmentName: String) throws -> Any? {
        switch segmentName {
         case Self.IN_KEY :return location?.rawValue

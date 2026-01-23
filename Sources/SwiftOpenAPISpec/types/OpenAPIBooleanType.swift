@@ -6,11 +6,16 @@
 //
 
 
-public struct OpenAPIBooleanType :  OpenAPIValidatableSchemaType, ThrowingHashMapInitiable, PointerNavigable  {
+public struct OpenAPIBooleanType :  ThrowingHashMapInitiable, PointerNavigable  {
     public static let TYPE_KEY = "type"
-    public init(_ map: StringDictionary) throws {
+    public init(load map: StringDictionary) throws {
         self.type = map[Self.TYPE_KEY] as? String
     }
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+           let element = try Self(load: map)
+           return InitializationResult(value: element, diagnostics: [])
+       }
+
     
     public let type : String?
     public var ref: OpenAPISchemaReference? { nil}
@@ -21,7 +26,5 @@ public struct OpenAPIBooleanType :  OpenAPIValidatableSchemaType, ThrowingHashMa
     
     
     
-    public func validate() throws {
-        
-    }
+   
 }

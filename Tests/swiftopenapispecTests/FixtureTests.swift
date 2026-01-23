@@ -85,10 +85,10 @@ struct FixtureTests {
         let responses = try #require(getPingOperation.responses)
         #expect(responses.count == 1)
         let contentType = try #require(getPingOperation.response(httpstatus: "200")?.content[key: "application/json"])
-        #expect(contentType.schema?.schemaType is OpenAPIObjectType)
+        #expect(contentType.schema?.objectType != nil)
         let getPing200Response = try #require(getPingOperation.response(httpstatus:  "200"))
         #expect(getPing200Response.content.count == 1)
-        let getPingResponseContent = try #require(getPing200Response.content.first?.schema?.schemaType as? OpenAPIObjectType)
+        let getPingResponseContent = try #require(getPing200Response.content.first?.schema?.objectType)
         #expect(getPingResponseContent.unevaluatedProperties == false)
         #expect(getPingResponseContent.properties.count == 1)
         #expect(getPingResponseContent.required.count == 1)
@@ -108,7 +108,7 @@ struct FixtureTests {
         let parameter = parameters.first!
         #expect(parameter.key == "id")
         #expect(parameter.location == SwiftOpenAPISpec.OpenAPIParameter.ParameterLocation.path)
-        #expect(parameter.schema?.schemaType is OpenAPIStringType)
+        #expect(parameter.schema?.stringType != nil)
         #expect(parameter.explode == nil)
         #expect(parameter.deprecated == nil)
 
@@ -121,7 +121,7 @@ struct FixtureTests {
         let queryParameter = searchParameters.first!
         #expect(queryParameter.key == "limit")
         #expect(queryParameter.location == OpenAPIParameter.ParameterLocation.query)
-        let parameterType = try #require(queryParameter.schema?.schemaType as? OpenAPIIntegerType)
+        let parameterType = try #require(queryParameter.schema?.numberType)
         #expect(parameterType.defaultValue == 10)
         #expect(parameterType.minimum == 1)
         #expect(parameterType.maximum == 100)
@@ -151,7 +151,7 @@ struct FixtureTests {
         
         let requestbodyContents = try #require(apiSpec[path: "/upload"]?.operations[operationID : "upload"]?.requestBody?.contents)
         #expect(requestbodyContents.count == 1)
-        let stringType = try #require(requestbodyContents[0].schema?.schemaType as? OpenAPIStringType)
+        let stringType = try #require(requestbodyContents[0].schema?.stringType)
         #expect(stringType.allowedElements == ["Alice","Bob","Carl"])
         
         
@@ -167,7 +167,7 @@ struct FixtureTests {
         
         let requestbodyContents = try #require(apiSpec[path: "/upload"]?.operations[operationID : "upload"]?.requestBody?.contents)
         #expect(requestbodyContents.count == 1)
-        let objectType = try #require(requestbodyContents[0].schema?.schemaType as? OpenAPIObjectType)
+        let objectType = try #require(requestbodyContents[0].schema?.objectType)
         #expect(objectType.properties.count == 2)
         #expect(objectType.properties.contains(where:{$0.key == "productName"}))
         #expect(objectType.properties.contains(where:{$0.key == "productPrice"}))
@@ -187,8 +187,8 @@ struct FixtureTests {
         
         let response201 = try #require(apiSpec[path: "/create"]?.operations[operationID : "create"]?.response(httpstatus: "201"))
         #expect(response201.description == "created")
-        #expect((response201.content.first?.schema?.schemaType as? OpenAPIObjectType)?.required.first  == "id")
-        #expect((response201.content.first?.schema?.schemaType as? OpenAPIObjectType)?.required.count  == 1)
+        #expect((response201.content.first?.schema?.objectType)?.required.first  == "id")
+        #expect((response201.content.first?.schema?.objectType)?.required.count  == 1)
         let defaultResponse = try #require(apiSpec[path: "/create"]?.operations[operationID : "create"]?.response(httpstatus: "default"))
         #expect(defaultResponse.description == "error")
         let component = try #require(defaultResponse.content.first?.schema?.ref as? OpenAPISchemaReference)
@@ -202,10 +202,10 @@ struct FixtureTests {
         let operations = try #require(apiSpec[path: "/board"]?.operations)
         #expect(operations.count == 1)
         #expect(operations.first?.response(httpstatus: "200")?.content.count == 1)
-        let objectType = try #require(operations.first?.response(httpstatus: "200")?.content.first?.schema?.schemaType as? OpenAPIObjectType)
+        let objectType = try #require(operations.first?.response(httpstatus: "200")?.content.first?.schema?.objectType)
         #expect(objectType.properties.count == 2)
         let winnerProperty = try #require(objectType.properties[key: "winner"])
-        let stringPropertyInfo = try #require(winnerProperty.type as? OpenAPIStringType )
+        let stringPropertyInfo = try #require(winnerProperty.type?.stringType )
         #expect(stringPropertyInfo.allowedElements == ["X", "O", "."])
         let boardProperty = try #require((objectType.properties[key: "board"]?.type as? OpenAPIArrayType))
         #expect(boardProperty.maxItems == 3)
@@ -220,7 +220,7 @@ struct FixtureTests {
     func refscircular() async throws {
         let yaml = try fixtureMap("07-refs-circular", subDirectory: "Resources/3_0/valid")
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url:"07-refs-circular", documentLoader: YamsDocumentLoader())
-        let nodeObjectComponent = try #require(apiSpec.components?.schemas?.first?.schemaType as? OpenAPIObjectType)
+        let nodeObjectComponent = try #require(apiSpec.components?.schemas?.first?.objectType)
         #expect(nodeObjectComponent.properties.count == 1)
         #expect(nodeObjectComponent.properties.first?.key == "next")
     }
@@ -229,7 +229,7 @@ struct FixtureTests {
     func oneofanyof() async throws {
         let yaml = try fixtureMap("08-oneof", subDirectory: "Resources/3_0/valid") 
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url:"08-oneof", documentLoader: YamsDocumentLoader())
-        let oneOf = try #require(apiSpec[path: "/shape"]?.operations[operationID : "createShape"]?.requestBody?.contents[ key: "application/json"]?.schema?.schemaType as? OpenAPIOneOfType)
+        let oneOf = try #require(apiSpec[path: "/shape"]?.operations[operationID : "createShape"]?.requestBody?.contents[ key: "application/json"]?.schema?.oneOf)
         #expect(oneOf.items?.count == 2)
         
     }
@@ -238,7 +238,7 @@ struct FixtureTests {
     func oneofallof() async throws {
         let yaml = try fixtureMap("08a-allof", subDirectory: "Resources/3_0/valid")
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url:"08a-allof", documentLoader: YamsDocumentLoader())
-        let allOf = try #require(apiSpec[path: "/shape"]?.operations[operationID : "createShape"]?.requestBody?.contents[ key: "application/json"]?.schema?.schemaType as? OpenAPIAllOfType)
+        let allOf = try #require(apiSpec[path: "/shape"]?.operations[operationID : "createShape"]?.requestBody?.contents[ key: "application/json"]?.schema?.allOf)
         #expect(allOf.items?.count == 2)
         
         
@@ -248,7 +248,7 @@ struct FixtureTests {
     func enumsdefaultsconstraints() async throws {
         let yaml = try fixtureMap("09-enums-defaults-constraints", subDirectory: "Resources/3_0/valid")
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url:"09-enums-defaults-constraints", documentLoader: YamsDocumentLoader())
-        let object = try #require(apiSpec[path: "/order"]?.operations[operationID : "createOrder"]?.requestBody?.contents[ key: "application/json"]?.schema?.schemaType as? OpenAPIObjectType)
+        let object = try #require(apiSpec[path: "/order"]?.operations[operationID : "createOrder"]?.requestBody?.contents[ key: "application/json"]?.schema?.objectType)
         #expect(object.required.contains( "status"))
         #expect(object.required.contains( "count"))
         #expect(object.properties.contains(name: "count"))
@@ -286,7 +286,7 @@ struct FixtureTests {
     func contenttypevendor() async throws {
         let yaml = try fixtureMap("11-contenttype-vendor-json", subDirectory: "Resources/3_0/valid")
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url:"11-contenttype-vendor-json", documentLoader: YamsDocumentLoader())
-        #expect(apiSpec[path: "/fail"]?.operations[key: "get"]?.responses?[key: "400"]?.content[key: "application/problem+json"]?.schema?.schemaType is OpenAPIObjectType)
+        #expect(apiSpec[path: "/fail"]?.operations[key: "get"]?.responses?[key: "400"]?.content[key: "application/problem+json"]?.schema?.objectType != nil)
     }
     @Test("20-webhook-minimal")
     func minimumwebhook() async throws {
@@ -315,10 +315,10 @@ struct FixtureTests {
         let yaml = try fixtureMap("21-webhooks-multiple", subDirectory: "Resources/3_1/valid")
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url:"21-webhooks-multiple", documentLoader: YamsDocumentLoader())
         let orderCreatedEventComponent = try #require(apiSpec[schemacomponent: "Money"])
-        let object = try #require(orderCreatedEventComponent.schemaType as? OpenAPIObjectType)
+        let object = try #require(orderCreatedEventComponent.objectType)
         #expect(object.properties.contains(name:"currency"))
         let currencyInfo = try #require(object.properties[key:"currency"])
-        let currencyTypeInfo = try #require(currencyInfo.type as? OpenAPIStringType)
+        let currencyTypeInfo = try #require(currencyInfo.type?.stringType)
         #expect(currencyTypeInfo.minLength == 3)
         #expect(currencyTypeInfo.maxLength == 3)
     }
@@ -327,7 +327,7 @@ struct FixtureTests {
         let yaml = try fixtureMap("21-webhooks-multiple",subDirectory: "Resources/3_1/valid")
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url:"21-webhooks-multiple", documentLoader: YamsDocumentLoader())
         let orderCreatedEventComponent = try #require(apiSpec[schemacomponent: "OrderCreatedEvent"])
-        #expect(orderCreatedEventComponent.schemaType is OpenAPIAllOfType)
+        #expect(orderCreatedEventComponent.allOf != nil)
     }
     @Test("22-secured-webhooks")
     func securedwebhooks() async throws {
@@ -346,7 +346,7 @@ struct FixtureTests {
         let yaml = try fixtureMap("23-oneOf-Webhooks",subDirectory: "Resources/3_1/valid")
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url:"23-oneOf-Webhooks", documentLoader: YamsDocumentLoader())
         let schemaComponent = try #require(apiSpec[schemacomponent: "EventEnvelope"])
-        let schemaComponentObject = try #require(schemaComponent.schemaType as? OpenAPIObjectType)
+        let schemaComponentObject = try #require(schemaComponent.objectType)
         let payloadProperty = try #require(schemaComponentObject.properties[key: "payload"])
         #expect(payloadProperty.type is OpenAPIOneOfType)
         let discriminator = try #require(payloadProperty.discriminator)

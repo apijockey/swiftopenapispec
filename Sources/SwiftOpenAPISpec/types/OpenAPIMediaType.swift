@@ -49,34 +49,38 @@ public struct OpenAPIMediaType :  KeyedElement , PointerNavigable,OpenAPISchemaR
     public static let ITEM_ENCODING_KEY = "itemEncoding"
     public static let EXTENSIONS_KEY = "extensions"
     public var key : String?
-    public init(_ map: [String : Any]) throws {
+    public init(load map: [String : Any]) throws {
         if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
             self.ref = ref
             return
         }
             if let schemaMap = map[Self.SCHEMA_KEY] as? StringDictionary {
-                self.schema  = try OpenAPISchema(schemaMap)
+                self.schema  = try OpenAPISchema(load: schemaMap)
             }
             if let schemaMap = map[Self.ITEM_SCHEMA_KEY] as? StringDictionary {
-                self.schema  = try OpenAPISchema(schemaMap)
+                self.schema  = try OpenAPISchema(load: schemaMap)
             }
              
             
             if let examplesMap  = map[Self.EXAMPLES_KEY]  as? StringDictionary{
-                self.examples = try KeyedElementList.map(examplesMap)
+                self.examples = try KeyedElementList.map(examplesMap).value
             }
             if let subMap = map[Self.ENCODING_KEY] as? StringDictionary {
-                encoding = try KeyedElementList<OpenAPIEncoding>.map(subMap)
+                encoding = try KeyedElementList<OpenAPIEncoding>.map(subMap).value
             }
             if let subMap = map[Self.PREFIX_ENCODING_KEY] as? StringDictionary {
-                prefixEncoding = try KeyedElementList<OpenAPIEncoding>.map(subMap)
+                prefixEncoding = try KeyedElementList<OpenAPIEncoding>.map(subMap).value
             }
             if let subMap = map[Self.PREFIX_ENCODING_KEY] as? StringDictionary {
-                itemEncoding = try KeyedElementList<OpenAPIEncoding>.map(subMap)
+                itemEncoding = try KeyedElementList<OpenAPIEncoding>.map(subMap).value
             }
        
     }
-    
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+           let element = try Self(load: map)
+           return InitializationResult(value: element, diagnostics: [])
+       }
+
     public func element(for segmentName: String) throws -> Any? {
         switch segmentName {
         case Self.SCHEMA_KEY:

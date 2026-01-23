@@ -47,7 +47,7 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable, OpenAPISchemaRef
     /// "/ping"
     /// inits an instance of ``OpenAPIPath``
     /// - Parameter map: Swift dictionary with a Path key and  value elements representing HTTP methods like **GET**, **POST** and **PUT**
-    public init(_ map: [String: Any]) throws {
+    public init(load map: [String: Any]) throws {
         // one resource may foresee several httpOperations
         if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
             self.ref = ref
@@ -55,7 +55,7 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable, OpenAPISchemaRef
         }
         for (key, httpOperation) in map {
                if let httpOperationMap = httpOperation as? [String: Any] {
-                var operation = try OpenAPIOperation(httpOperationMap)
+                var operation = try OpenAPIOperation(load: httpOperationMap)
                 operation.key = key
                 self.operations.append(operation)
             }
@@ -73,10 +73,14 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable, OpenAPISchemaRef
             self.parameters = parameters
         }
         if let additionalOperationsMap = map[Self.ADDITIONAL_OPERATIONS_KEY] as? StringDictionary {
-            self.additionalOperations = try KeyedElementList<OpenAPIOperation>.map(additionalOperationsMap)
+            self.additionalOperations = try KeyedElementList<OpenAPIOperation>.map(additionalOperationsMap).value
         }
         self.extensions = try OpenAPIExtension.extensionElements(map)
     }
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+           let element = try Self(load: map)
+           return InitializationResult(value: element, diagnostics: [])
+       }
     public func element(for segmentName: String) throws -> Any? {
         switch segmentName {
            

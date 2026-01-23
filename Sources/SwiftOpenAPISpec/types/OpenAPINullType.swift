@@ -38,7 +38,7 @@
 //
 
 
-public struct OpenAPIStringType :  OpenAPIValidatableSchemaType, ThrowingHashMapInitiable , PointerNavigable {
+public struct OpenAPIStringType :  ThrowingHashMapInitiable , PointerNavigable {
     public func element(for segmentName: String) throws -> Any? {
         switch segmentName {
             case Self.FORMAT_KEY : return format
@@ -65,7 +65,12 @@ public struct OpenAPIStringType :  OpenAPIValidatableSchemaType, ThrowingHashMap
     public static let TYPE_KEY = "type"
     public static let ALLOWED_ELEMENTS_KEY = "enum"
     
-    public init(_ map: [String : Any]) throws {
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+           let element = try Self(load: map)
+           return InitializationResult(value: element, diagnostics: [])
+       }
+
+    public init(load map: [String : Any]) throws {
         self.type = map[Self.TYPE_KEY] as? String
         if let allowedElements = map[Self.ALLOWED_ELEMENTS_KEY] as? [String] {
             self.allowedElements = Set(allowedElements)
@@ -78,9 +83,7 @@ public struct OpenAPIStringType :  OpenAPIValidatableSchemaType, ThrowingHashMap
         self.format = map.readIfPresent(Self.FORMAT_KEY, String.self)
     }
    
-    public func validate() throws {
-        
-    }
+    
     public var format : String?
     public let type : String?
     public let allowedElements : Set<String>?

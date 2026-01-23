@@ -35,8 +35,12 @@ public struct OpenAPIExternalDocumentation :
     }
     
   
-    
-    public init(_ map: [String : Any]) throws {
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+           let element = try Self(load: map)
+           return InitializationResult(value: element, diagnostics: [])
+       }
+
+    public init(load map: [String : Any]) throws {
         url = try map.tryRead("url", String.self, root: "OpenAPIExternalDocumentation")
         self.description = map.readIfPresent("description", String.self)
     }

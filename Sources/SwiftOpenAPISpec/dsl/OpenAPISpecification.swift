@@ -36,12 +36,12 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     
     /// initializes an OpenAPISpecification
     /// - Parameter unmerged: ``StringDictionary``
-    public init(_ unmerged: StringDictionary) throws {
+    public init(load unmerged: StringDictionary) throws {
         let map = resolveMergeKeys(in: unmerged)
         
         self.version = try map.tryRead(OpenAPISpecification.OPENAPI_KEY, String.self, root: "root")
         if let infoMap =  map[OpenAPISpecification.INFO_KEY] as? StringDictionary {
-            self.info = try OpenAPIInfo(infoMap)
+            self.info = try OpenAPIInfo(load: infoMap)
         }
         if map[OpenAPISpecification.COMPONENTS_KEY]  as? StringDictionary != nil {
             components =  try map.tryMap(OpenAPISpecification.COMPONENTS_KEY, root: "root", OpenAPIComponent.self)
@@ -49,18 +49,18 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
         selfUrl = map.readIfPresent(OpenAPISpecification.SELF_URL_KEY, String.self)
         self.key = selfUrl
         tags = try map.tryListIfPresent(OpenAPISpecification.TAGS_KEY, root: "root", OpenAPITag.self)
-        self.externalDocumentation = try map.tryMapIfPresent(OpenAPISpecification.EXTERNAL_DOCS_KEY,root: "root", OpenAPIExternalDocumentation.self)
-        self.jsonSchemaDialect = map.tryReadIfPresent(OpenAPISpecification.JSON_SCHEMA_DIALECT_KEY, String.self, root: "root")
+        self.externalDocumentation = map[OpenAPISpecification.EXTERNAL_DOCS_KEY] as? OpenAPIExternalDocumentation
+        self.jsonSchemaDialect = map[OpenAPISpecification.JSON_SCHEMA_DIALECT_KEY] as? String
         let servers =  try map.tryListIfPresent(OpenAPISpecification.SERVERS_KEY, root: "root", OpenAPIServer.self)
         if servers.count > 0 {
             self.servers = servers
         }
         if let pathsMap = map[OpenAPISpecification.PATHS_KEY]  as? StringDictionary{
-           let paths = try KeyedElementList<OpenAPIPathItem>.map(pathsMap)
+            let paths = try KeyedElementList<OpenAPIPathItem>.map(pathsMap).value
             self.paths = paths
         }
         if let webhooksMap = map[OpenAPISpecification.WEBHOOKS_KEY]  as? StringDictionary{
-           let webhooks = try KeyedElementList<OpenAPIPathItem>.map(webhooksMap)
+            let webhooks = try KeyedElementList<OpenAPIPathItem>.map(webhooksMap).value
             self.webhooks  = webhooks
         }
         if let securityObjectMap = map[Self.SECURITY_KEY] as?  [[String:[String]]] {
@@ -79,7 +79,10 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
         
        
     }
-    
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+          let element = try Self(load: map)
+          return InitializationResult(value: element, diagnostics: [])
+      }
     /// Userinfo  holds information about validation or generation errors on each struct to simplify and streamline error handling and navigation
     
     public enum Errors : CustomStringConvertible, LocalizedError {
@@ -151,7 +154,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     ///let specFromYaml = try OpenAPISpecification.read(unflattened: jsonMap)
     ///```
     public static func read(unflattened : StringDictionary, url : String? = nil , documentLoader : DocumentLoadable? = YamsDocumentLoader()) throws -> OpenAPISpecification{
-        var openapispec = try OpenAPISpecification(unflattened)
+        var openapispec = try OpenAPISpecification(load: unflattened)
         openapispec.documentLoader = documentLoader
         if openapispec.key == nil {
             openapispec.key = url

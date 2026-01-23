@@ -22,7 +22,7 @@ import Foundation
 
 public struct OpenAPIOperation : KeyedElement, PointerNavigable {
     public var key: String?
-    public init(_ map: [String : Any]) throws {
+    public init(load map: [String : Any]) throws {
         self.tags = map[Self.TAGS_KEY] as? [String] ?? []
         self.summary = map.readIfPresent(Self.SUMMARY_KEY, String.self)
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
@@ -30,16 +30,16 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
         self.operationId = map.readIfPresent(Self.OP_ID_KEY, String.self)
         if let parameterlist = map[Self.PARAMETERS_KEY] as? [StringDictionary] {
             
-            parameters =   try KeyedElementList<OpenAPIParameter>.map(list:parameterlist,yamlKeyName: "name", mayHaveRef: true)
+            parameters =   try KeyedElementList<OpenAPIParameter>.map(list:parameterlist,yamlKeyName: "name", mayHaveRef: true).value
         }
         if map[Self.REQUEST_BODIES_KEY] as? StringDictionary != nil {
             self.requestBody = try map.MapIfPresent(Self.REQUEST_BODIES_KEY, OpenAPIRequestBody.self)
         }
         if let responseMap = map[Self.RESPONSES_KEY] as? StringDictionary {
-            self.responses = try KeyedElementList<OpenAPIResponse>.map(responseMap)
+            self.responses = try KeyedElementList<OpenAPIResponse>.map(responseMap).value
         }
         if let map = map[Self.CALLBACKS_KEY] as? StringDictionary{
-            self.callbacks = try KeyedElementList<OpenAPICallBack>.map(map)
+            self.callbacks = try KeyedElementList<OpenAPICallBack>.map(map).value
         }
         
         self.deprecated = map.readIfPresent(Self.DEPRECATED_KEY, Bool.self)
@@ -61,6 +61,11 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
        
         
     }
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+           let element = try Self(load: map)
+           return InitializationResult(value: element, diagnostics: [])
+       }
+
     public func element(for segmentName: String) throws -> Any? {
         switch segmentName {
             

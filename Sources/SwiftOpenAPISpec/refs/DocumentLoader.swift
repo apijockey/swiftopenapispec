@@ -65,7 +65,7 @@ public actor YamsDocumentLoader : DocumentLoadable {
             guard let unflattened = unflattened else {
                 throw OpenAPISpecification.Errors.invalidYaml("text cannot be interpreted as a Key/Value List")
             }
-            var apiSpec = try OpenAPISpecification(unflattened)
+            var apiSpec = try OpenAPISpecification(load: unflattened)
             apiSpec.documentLoader = self
             objectCash[url] = apiSpec
             return apiSpec

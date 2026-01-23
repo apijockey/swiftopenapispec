@@ -34,7 +34,7 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable,OpenAPISchemaRefer
     public static let SCHEMA_KEY = "schema"
     public static let STYLE_KEY = "style"
    
-    public init(_ map: [String : Any]) throws {
+    public init(load map: [String : Any]) throws {
         if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
             self.ref = ref
             return
@@ -49,7 +49,7 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable,OpenAPISchemaRefer
         self.example = map.readIfPresent(Self.EXAMPLE_KEY, String.self)
         
         if let examplesMap  = map[Self.EXAMPLES_KEY]  as? StringDictionary{
-            self.examples = try KeyedElementList.map(examplesMap)
+            self.examples = try KeyedElementList.map(examplesMap).value
         }
         self.content = map.readIfPresent(Self.CONTENT_KEY, OpenAPIMediaType.self)
         extensions = try OpenAPIExtension.extensionElements(map)
@@ -60,6 +60,11 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable,OpenAPISchemaRefer
         self.style = map.readIfPresent(Self.STYLE_KEY, String.self)
        
     }
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+           let element = try Self(load: map)
+           return InitializationResult(value: element, diagnostics: [])
+       }
+
     public func element(for segmentName: String) throws -> Any? {
        switch segmentName {
        case Self.ALLOW_EMPTYVALUE_KEY: return allowEmptyValue

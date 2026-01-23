@@ -43,8 +43,12 @@ public struct OpenAPITag:  ThrowingHashMapInitiable, PointerNavigable {
     public static let KIND_KEY = "kind"
     
     
-   
-    public init(_ map : StringDictionary) throws {
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+           let element = try Self(load: map)
+           return InitializationResult(value: element, diagnostics: [])
+       }
+
+    public init(load map : StringDictionary) throws {
         self.name = map.readIfPresent(Self.NAME_KEY, String.self)
         self.summary = map.readIfPresent(Self.SUMMARY_KEY, String.self)
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
@@ -54,7 +58,7 @@ public struct OpenAPITag:  ThrowingHashMapInitiable, PointerNavigable {
         self.extensions = try OpenAPIExtension.extensionElements(map)
     }
     
-    public var schemaType : (any OpenAPIValidatableSchemaType)?
+   
     //https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-01  ("null", "boolean", "object", "array", "number", or "string"), or "integer"
     public var name : String?
     public var summary : String?
