@@ -38,7 +38,23 @@
 //
 
 
-public struct OpenAPIOneOfType : OpenAPISchema,ThrowingHashMapInitiable, PointerNavigable {
+public struct OpenAPIOneOfType : OpenAPISchemaType,ThrowingHashMapInitiable, PointerNavigable {
+    public var nullable: Bool?
+    
+    public var readOnly: Bool?
+    
+    public var writeOnly: Bool?
+    
+    public var xml: OpenAPIXMLObject?
+    
+    public var externalDocs: OpenAPIExternalDocumentation?
+    
+    public var example: OpenAPIExample?
+    
+    public var deprecated: Bool?
+    
+    public var extensions: OpenAPIExtension?
+    
    
     
     public func element(for segmentName: String) throws -> Any? {
@@ -56,6 +72,7 @@ public struct OpenAPIOneOfType : OpenAPISchema,ThrowingHashMapInitiable, Pointer
     
     
     public static let TYPE_KEY = "oneOf"
+    public static let DISCRIMINATOR_KEY = "discriminator"
     public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
            let element = try Self(load: map)
            return InitializationResult(value: element, diagnostics: [])
@@ -66,12 +83,16 @@ public struct OpenAPIOneOfType : OpenAPISchema,ThrowingHashMapInitiable, Pointer
         guard let list = (map["oneOf"] as? [Any]) else {
             return
         }
-        self.items = try HashmapInitializableList<OpenAPIType>.map(list).value
+        if let discriminatorMap = map[Self.DISCRIMINATOR_KEY] as? [String:Any] {
+            self.discriminator = try OpenAPIDiscriminator(load: discriminatorMap)
+        }
+        
+        self.items = try HashmapInitializableList<OpenAPISchema>.map(list).value
     }
     public func validate() throws {
     }
     public let type : String?
-    public var items: [OpenAPIType]?
-  
+    public var items: [OpenAPISchema]?
+   public var discriminator: OpenAPIDiscriminator?
     public var ref: OpenAPISchemaReference? { nil}
 }

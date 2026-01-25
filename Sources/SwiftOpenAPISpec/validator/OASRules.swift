@@ -638,7 +638,7 @@ struct ReferencesMustHaveRefRule : Rule {
         if let schemacomponents =  spec.components?.schemas  {
             for schema in schemacomponents {
                 let pointer =  "/components/schemas\(schema.key ?? "")"
-                diags.append(contentsOf: ReusableSchemaRefRule().check(schema: schema, ctx: ctx, pointer: pointer, rule: name))
+                diags.append(contentsOf: ReusableNamedSchemaRefRule().check(schema: schema, ctx: ctx, pointer: pointer, rule: name))
             }
         }
         

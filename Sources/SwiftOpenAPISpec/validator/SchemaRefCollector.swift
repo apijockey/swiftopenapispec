@@ -55,11 +55,11 @@ public struct SchemaRefCollector {
     
     public func collect(from namedSchema :OpenAPINamedSchema, pointer : String) -> [RefOccurrence] {
         var out: [RefOccurrence] = []
-        if let type = namedSchema.type {
+        if let type = namedSchema.schema {
             out.append(contentsOf:collect(from : type, pointer: pointer))
             return out
         }
-        if let type = namedSchema.type {
+        if let type = namedSchema.schema {
             out.append(contentsOf: collect(from: type, pointer: pointer))
         }
         
@@ -281,6 +281,7 @@ public struct SchemaRefCollector {
                 out.append(contentsOf: collect(from: items, pointer: itemPtr))
             
         }
+        return out
     }
     public func collect(from obj: OpenAPIAnyOfType, pointer: String) -> [RefOccurrence] {
         var out: [RefOccurrence] = []
@@ -298,6 +299,7 @@ public struct SchemaRefCollector {
                 out.append(contentsOf: collect(from: item, pointer: itemPtr))
             }
         }
+        return out
     }
     public func collect(from obj: OpenAPIOneOfType, pointer: String) -> [RefOccurrence] {
         var out: [RefOccurrence] = []
@@ -315,6 +317,7 @@ public struct SchemaRefCollector {
                 out.append(contentsOf: collect(from: item, pointer: itemPtr))
             }
         }
+        return out
     }
     public func collect(from obj: OpenAPIAllOfType, pointer: String) -> [RefOccurrence] {
         var out: [RefOccurrence] = []
@@ -332,6 +335,7 @@ public struct SchemaRefCollector {
                 out.append(contentsOf: collect(from: item, pointer: itemPtr))
             }
         }
+        return out
     }
     public func collect(from obj: OpenAPIObjectType, pointer: String) -> [RefOccurrence] {
         var out: [RefOccurrence] = []
@@ -346,7 +350,7 @@ public struct SchemaRefCollector {
                 ))
             }
             
-            else if let type = prop.type,
+            else if let type = prop.schema,
                     let key = prop.key{
                 let propPtr = JSONPointer.join(JSONPointer.join(pointer, "properties"), key)
                 out.append(contentsOf: collect(from: type  , pointer: JSONPointer.join(propPtr, "\(key)/")))
@@ -354,26 +358,26 @@ public struct SchemaRefCollector {
         }
         return out
     }
-    public func collect(from schema: OpenAPIType, pointer: String) -> [RefOccurrence] {
+    public func collect(from schema: OpenAPISchema, pointer: String) -> [RefOccurrence] {
         var out: [RefOccurrence] = []
-        switch schema {
+        switch schema.type {
         case .allOf(let openAPIAllOfType):
             out.append(contentsOf: collect(from: openAPIAllOfType, pointer: JSONPointer.join(pointer, "allOf")))
         case .anyOf(let openAPIAnyOfType):
             out.append(contentsOf: collect(from: openAPIAnyOfType, pointer: JSONPointer.join(pointer, "allOf")))
         case .array(let openAPIArrayType):
             out.append(contentsOf: collect(from: openAPIArrayType, pointer: JSONPointer.join(pointer, "array")))
-        case .bool(let openAPIBooleanType):
+        case .bool(_):
             return out
-        case .integer(let openAPIIntegerType):
+        case .integer(_):
             return out
-        case .number(let openAPINumberType):
+        case .number(_):
             return out
         case .object(let openAPIObjectType):
             out.append(contentsOf: collect(from: openAPIObjectType, pointer: pointer))
         case .oneOf(let openAPIOneOfType):
             out.append(contentsOf: collect(from: openAPIOneOfType, pointer: JSONPointer.join(pointer, "array")))
-        case .string(let openAPIStringType):
+        case .string(_):
             return out
         case .ref(let openAPISchemaReference):
             out.append(.init(
@@ -382,7 +386,9 @@ public struct SchemaRefCollector {
                 expected: .schemaObject
             ))
             return out
-        case .null(let openAPINullType):
+        case .null(_):
+            return []
+        case .none:
             return []
         }
         return out

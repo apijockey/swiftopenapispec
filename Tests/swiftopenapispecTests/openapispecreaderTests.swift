@@ -137,7 +137,7 @@ struct OpenAPILegacyPortedTests {
         #expect(greetPathParameter.required == false)
         #expect(greetPathParameter.location == OpenAPIParameter.ParameterLocation.query)
         #expect(greetPathParameter.description == "The name used in the returned greeting.")
-        #expect(greetPathParameter.schema?.stringType != nil)
+        #expect(greetPathParameter.schema?.type is OpenAPIStringType)
         #expect(greetPathParameter.allowEmptyValue == nil)
     }
 
@@ -155,7 +155,13 @@ struct OpenAPILegacyPortedTests {
         #expect(response.content.count == 1)
         let content = try #require(response.content.first)
         #expect(content.key == "application/json")
-        #expect(content.schema?.ref?.reference == "#/components/schemas/Greeting")
+        guard case let .ref(ref) = content.schema?.type else {
+            #expect(Bool(false), "expected ref")
+            return
+        }
+            
+            
+        #expect(ref.refString == "#/components/schemas/Greeting")
     }
 
     @Test
@@ -167,19 +173,25 @@ struct OpenAPILegacyPortedTests {
         let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
         #expect(apiSpec.components?.schemas?.count == 4)
         let greetingComponent = try #require(apiSpec.components?.schemas?.first { $0.key == "Greeting" })
-        let greetingObject = try #require(greetingComponent.objectType)
+        guard case let .object(greetingObject) = try #require(greetingComponent.schema?.type) else {
+                #expect(Bool(false), "expected object schema")
+            return
+        }
         #expect(greetingObject.properties.count == 1)
         let messageProperty = try #require(greetingObject.properties.first)
-        #expect(messageProperty.type?.objectType != nil)
+        #expect(messageProperty.schema?.type != nil)
         #expect(greetingObject.required == ["message"])
 
         let generalErrorComponent = try #require(apiSpec[schemacomponent: "GeneralError"])
-        let errorObject = try #require(generalErrorComponent.objectType)
+        guard case let .object(errorObject) = try #require(generalErrorComponent.schema?.type) else {
+            #expect(Bool(false), "expected object schema")
+            return
+        }
         #expect(errorObject.properties.count == 2)
         let errorMessageCodeProperty = errorObject.properties[key: "code"]
-        #expect(errorMessageCodeProperty?.type is OpenAPIIntegerType)
+        #expect(errorMessageCodeProperty?.schema?.type is OpenAPIIntegerType)
         let errorMessageMessageProperty = errorObject.properties[key: "message"]
-        #expect(errorMessageMessageProperty?.type is OpenAPIStringType)
+        #expect(errorMessageMessageProperty?.schema?.type is OpenAPIStringType)
         #expect(errorObject.required.count == 0)
     }
 
@@ -197,14 +209,14 @@ struct OpenAPILegacyPortedTests {
         #expect(skipParamComponent.location == OpenAPIParameter.ParameterLocation.query)
         #expect(skipParamComponent.description == "number of items to skip")
         #expect(skipParamComponent.required == true)
-        #expect(skipParamComponent.schema?.integerType != nil)
+        #expect(skipParamComponent.schema?.type is OpenAPIIntegerType)
     }
 
     @Test
     func testResponsesComponents() async throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
            
-                #expect(Bool(false), "no openapi")
+            #expect(Bool(false), "no openapi")
                 return
             }
             let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
@@ -223,7 +235,11 @@ struct OpenAPILegacyPortedTests {
         #expect(generalError.description == "General Error")
         #expect(generalError.content.count == 1)
         let jsonContent = try #require(generalError.content.first { $0.key == "application/json" })
-        #expect(jsonContent.schema?.ref?.reference == "#/components/schemas/GeneralError")
+        guard case let .ref(ref) = jsonContent.schema?.type else {
+            #expect(Bool(false), "Expected reference schema")
+            return 
+        }
+        #expect(ref.refString == "#/components/schemas/GeneralError")
     }
 
     @Test
@@ -255,8 +271,12 @@ struct OpenAPILegacyPortedTests {
         let patchOperation = try #require(getPetsPath.operations.first { $0.key == "patch" })
         #expect(patchOperation.requestBody?.required == false)
         let jsonContent = try #require(patchOperation.requestBody?.contents.first(where: { $0.key == "application/json" }))
-        let oneOfSchemas = try #require(jsonContent.schema?.oneOf)
-        #expect(oneOfSchemas.items?.count == 2)
+        guard case let .oneOf(oneOfSchema) = jsonContent.schema?.type else {
+            Issue.record("Expected oneOf schema but got \(String(describing: jsonContent.schema))")
+            return
+        }
+
+        #expect(oneOfSchema.items?.count == 2)
     }
 
     @Test

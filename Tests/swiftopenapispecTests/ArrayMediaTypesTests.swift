@@ -63,13 +63,18 @@ struct ArrayMediaTypesTests {
 
         let response200 = try #require(getOp.response(httpstatus: "200"))
         let media = try #require(response200.content[key: "application/json"])
-        let schemaType = try #require(media.schema?.arrayType)
+        guard case let .array(schemaType) = try #require(media.schema?.type) else {
+            Issue.record("Expected string schema")
+            return
+        }
 
         // Array-Constraints
-        #expect(schemaType.minItems == 1)
-        // items: string
-        let itemsType = try #require(schemaType.items as? OpenAPIStringType)
-        #expect(itemsType.type == "string")
+        guard case let .string(stringItem) = schemaType.items?.type else {
+            Issue.record("Expected string items")
+            return
+        }
+        #expect(stringItem.minLength == 1)
+
     }
 
     @Test("Object array")
@@ -84,17 +89,29 @@ struct ArrayMediaTypesTests {
         let reqBody = try #require(postOp.requestBody)
         let media = try #require(reqBody.contents[key: "application/json"])
        
-        let schemaType = try #require(media.schema?.arrayType)
+        guard case let .array(schemaType) = try #require(media.schema?.type) else {
+            Issue.record("Expected object schema")
+            return
+        }
         
         // Array-Flag
         #expect(schemaType.uniqueItems == true)
-        let objectItems = try #require(schemaType.items as? OpenAPIObjectType)
+        guard case let .object(objectItems) = try #require(schemaType.items?.type) else {
+            Issue.record("Expected object items")
+            return
+        }
         
         #expect(objectItems.properties.count == 2)
         #expect(objectItems.properties.contains(name: "id"))
         #expect(objectItems.properties.contains(name: "name"))
-        #expect(objectItems.properties[key: "id"]?.type is OpenAPIIntegerType)
-        #expect(objectItems.properties[key: "name"]?.type is OpenAPIStringType)
+        guard case let .integer(integerType ) = objectItems.properties[key: "id"]?.schema?.type else {
+            Issue.record("Expected integer type for id")
+            return
+        }
+        guard case let .string(stringType ) = objectItems.properties[key: "name"]?.schema?.type else {
+            Issue.record("Expected integer type for id")
+            return
+        }
         let resp204 = try #require(postOp.response(httpstatus: "204"))
         #expect(resp204.description == "No Content")
     }

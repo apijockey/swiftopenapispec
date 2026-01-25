@@ -215,10 +215,40 @@ struct ReusableResponseRefRule {
 struct ReusableSchemaRefRule {
     func check(schema : OpenAPISchema, ctx: ValidationContext, pointer : String, rule: String) -> [Diagnostic] {
         var diags: [Diagnostic] = []
-        let pointer =  "\(pointer)/\(schema.key ?? "")"
-        
-        if  schema.hasTypeInfo  {
+        switch schema.type{
+            case .allOf, .oneOf, .anyOf, .object, .array, .string, .integer, .bool, .number, .ref:
+            return diags
+            default:
+                let diagnotics = Diagnostic( severity: .error,
+                                         code: .missingRequired,
+                                         message: "schema needs a ref or a schema type",
+                                         pointer: pointer,
+                                         rule:rule)
+            diags.append(diagnotics)
+        }
+        return diags
+    }
+}
+
+struct ReusableNamedSchemaRefRule {
+    func check(schema : OpenAPINamedSchema, ctx: ValidationContext, pointer : String, rule: String) -> [Diagnostic] {
+        var diags: [Diagnostic] = []
+        guard let key = schema.key,
+              let type = schema.schema?.type else {
             let diagnotics = Diagnostic( severity: .error,
+                                     code: .missingRequired,
+                                     message: "schema incomplete missing 'name' or 'type'",
+                                     pointer: pointer,
+                                     rule:rule)
+            diags.append(diagnotics)
+            return diags
+        }
+        let pointer =  "\(pointer)/schemas/\(key)"
+        switch type{
+            case .allOf, .oneOf, .anyOf, .object, .array, .string, .integer, .bool, .number, .ref:
+            return diags
+            default:
+                let diagnotics = Diagnostic( severity: .error,
                                          code: .missingRequired,
                                          message: "schema needs a ref or a schema type",
                                          pointer: pointer,

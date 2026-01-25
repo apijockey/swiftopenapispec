@@ -38,7 +38,23 @@
 //
 
 
-public struct OpenAPIAllOfType : OpenAPISchema, ThrowingHashMapInitiable, PointerNavigable, OpenAPISchemaReferenceable {
+public struct OpenAPIAllOfType : OpenAPISchemaType, ThrowingHashMapInitiable, PointerNavigable, OpenAPISchemaReferenceable {
+    public var nullable: Bool?
+    
+    public var readOnly: Bool?
+    
+    public var writeOnly: Bool?
+    
+    public var xml: OpenAPIXMLObject?
+    
+    public var externalDocs: OpenAPIExternalDocumentation?
+    
+    public var example: OpenAPIExample?
+    
+    public var deprecated: Bool?
+    
+    public var extensions: OpenAPIExtension?
+    
   
     
     public func element(for segmentName: String) throws -> Any? {
@@ -54,6 +70,7 @@ public struct OpenAPIAllOfType : OpenAPISchema, ThrowingHashMapInitiable, Pointe
     public var ref: OpenAPISchemaReference?
    
     public static let TYPE_KEY = "allOf"
+    public static let DISCRIMINATOR_KEY = "discriminator"
     public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
            let element = try Self(load: map)
            return InitializationResult(value: element, diagnostics: [])
@@ -64,7 +81,10 @@ public struct OpenAPIAllOfType : OpenAPISchema, ThrowingHashMapInitiable, Pointe
         guard let list = (map["allOf"] as? [Any]) else {
             return
         }
-        self.items = try HashmapInitializableList<OpenAPIType>.map( list).value
+        self.items = try HashmapInitializableList<OpenAPISchema>.map( list).value
+        if let discriminatorMap = map[Self.DISCRIMINATOR_KEY] as? [String:Any] {
+            self.discriminator = try OpenAPIDiscriminator(load: discriminatorMap)
+        }
     }
     
     public func validate() throws {
@@ -72,6 +92,7 @@ public struct OpenAPIAllOfType : OpenAPISchema, ThrowingHashMapInitiable, Pointe
     }
 
     public let type : String?
-    public var items: [OpenAPIType]?
+    public var items: [OpenAPISchema]?
+    public var discriminator: OpenAPIDiscriminator?
   
 }

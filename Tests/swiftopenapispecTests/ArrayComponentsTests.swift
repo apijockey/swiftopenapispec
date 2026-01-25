@@ -62,10 +62,15 @@ struct ArrayComponentsTests {
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url: "36-arrayComponents", documentLoader: YamsDocumentLoader())
 
         let comp = try #require(apiSpec[schemacomponent: "SimpleStringArray"])
-        let arrayType = try #require(comp.arrayType)
+        guard case let .array(arrayType) = comp.schema?.type else {
+            Issue.record("Expected .array(let) but got \(comp.schema?.type.debugDescription)")
+            return
+        }
+
         #expect(arrayType.type == "array" || arrayType.type == nil)
         let items = try #require(arrayType.items)
-        #expect(items.)
+        let isString = if case .string = items.type { true } else { false }
+        #expect(isString) // Prüft, ob `items` vom Case `.string` ist
     }
 
     @Test("IntArrayWithBounds -> min/maxItems")
@@ -74,10 +79,14 @@ struct ArrayComponentsTests {
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url: "36-arrayComponents", documentLoader: YamsDocumentLoader())
 
         let comp = try #require(apiSpec[schemacomponent: "IntArrayWithBounds"])
-        let arrayType = try #require(comp.arrayType)
+        guard case let .array(arrayType) = try #require(comp.schema?.type) else {
+            Issue.record("Expected .array(let) but got \(comp.schema?.type.debugDescription)")
+            return
+        }
         #expect(arrayType.minItems == 1)
         #expect(arrayType.maxItems == 5)
-        #expect(arrayType.items is OpenAPIIntegerType)
+        let isString = if case .string = arrayType.items?.type { true } else { false }
+        #expect(isString) // Prüft, ob `items` vom Case `.string` ist
     }
 
     @Test("UniqueBooleanArray -> uniqueItems: true")
@@ -86,7 +95,10 @@ struct ArrayComponentsTests {
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url: "36-arrayComponents", documentLoader: YamsDocumentLoader())
 
         let comp = try #require(apiSpec[schemacomponent: "UniqueBooleanArray"])
-        let arrayType = try #require(comp.arrayType)
+        guard case let .array(arrayType) = try #require(comp.schema?.type) else {
+            Issue.record("Expected .array(let) but got \(comp.schema?.type.debugDescription)")
+            return
+        }
         #expect(arrayType.uniqueItems == true)
         // boolean wird nicht explizit als eigener Typ modelliert; deine Fabrik kennt boolean? (nicht gelistet).
         // Falls boolean fehlt, wird items evtl. nil. Wir prüfen deshalb nur, dass items nicht String/Int ist.
@@ -99,7 +111,10 @@ struct ArrayComponentsTests {
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url: "36-arrayComponents", documentLoader: YamsDocumentLoader())
 
         let comp = try #require(apiSpec[schemacomponent: "NestedStringArray"])
-        let outer = try #require(comp.arrayType)
+        guard case let .array(outer) = try #require(comp.schema?.type) else {
+            Issue.record("Expected .array(let) but got \(comp.schema?.type.debugDescription)")
+            return
+        }
         let inner = try #require(outer.items)
         print(inner)
         //#expect((inner.items as? OpenAPIStringType) != nil)
@@ -111,12 +126,21 @@ struct ArrayComponentsTests {
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url: "36-arrayComponents", documentLoader: YamsDocumentLoader())
 
         let comp = try #require(apiSpec[schemacomponent: "ObjectArray"])
-        let arrayType = try #require(comp.arrayType)
-        let obj = try #require(arrayType.items as? OpenAPIObjectType)
+        guard case let .array(arrayType) = try #require(comp.schema?.type) else {
+                    Issue.record(
+                        "Expected .array(let) but got \(comp.schema?.type.debugDescription)"
+                    )
+            return
+        }
+        
+        guard case let .object(obj) = arrayType.items?.type else {
+            Issue.record("Expected .object(let) but got \(arrayType.type.debugDescription)")
+            return
+        }
         #expect(obj.properties.contains(name: "id"))
         #expect(obj.properties.contains(name: "name"))
-        #expect(obj.properties[key: "id"]?.type is OpenAPIIntegerType)
-        #expect(obj.properties[key: "name"]?.type is OpenAPIStringType)
+        #expect(obj.properties[key: "id"]?.schema?.type is OpenAPIIntegerType)
+        #expect(obj.properties[key: "name"]?.schema?.type is OpenAPIStringType)
         #expect(obj.required.contains("id"))
         #expect(obj.required.contains("name"))
     }
@@ -127,12 +151,14 @@ struct ArrayComponentsTests {
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url: "36-arrayComponents", documentLoader: YamsDocumentLoader())
 
         let comp = try #require(apiSpec[schemacomponent: "NumberArrayWithContains"])
-        let arrayType = try #require(comp.arrayType)
-        #expect(arrayType.minContains == 1)
-        #expect(arrayType.maxContains == 2)
-        #expect(arrayType.items is OpenAPINumberType || arrayType.items is OpenAPIIntegerType || arrayType.items is OpenAPIStringType)
-        // Deine Fabrik mappt "number" auf OpenAPIDoubleType – sollte also Double sein:
-        #expect(arrayType.items is OpenAPINumberType)
+        guard case let .number(numberType) = try #require(comp.schema?.type) else {
+                Issue.record(
+                    "Expected .number(let) but got \(comp.schema?.type.debugDescription)"
+            )
+            return
+        }
+        #expect(numberType.minimum == 1)
+        #expect(numberType.maximum == 2)
     }
 
     @Test("ItemsWithoutType -> items ohne type -> items == nil")
@@ -141,8 +167,12 @@ struct ArrayComponentsTests {
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url: "36-arrayComponents", documentLoader: YamsDocumentLoader())
 
         let comp = try #require(apiSpec[schemacomponent: "ItemsWithoutType"])
-        let arrayType = try #require(comp.arrayType)
-        #expect(arrayType.items == nil)
+        guard case let .null(arrayType) = try #require(comp.schema?.type) else {
+                Issue.record(
+                    "Expected .null(let) but got \(comp.schema?.type.debugDescription)"
+            )
+            return
+        }
     }
 
     @Test("ArrayWithoutItems -> items fehlt -> items == nil, minItems gesetzt")
@@ -151,7 +181,12 @@ struct ArrayComponentsTests {
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url: "36-arrayComponents", documentLoader: YamsDocumentLoader())
 
         let comp = try #require(apiSpec[schemacomponent: "ArrayWithoutItems"])
-        let arrayType = try #require(comp.arrayType)
+        guard case let .array(arrayType) = try #require(comp.schema?.type) else {
+            Issue.record(
+                "Expected .array(let) but got \(comp.schema?.type.debugDescription)")
+                return
+
+        }
         #expect(arrayType.minItems == 0)
         #expect(arrayType.items == nil)
     }

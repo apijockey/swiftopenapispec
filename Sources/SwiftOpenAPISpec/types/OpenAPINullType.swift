@@ -38,7 +38,25 @@
 //
 
 
-public struct OpenAPIStringType :  OpenAPISchema,ThrowingHashMapInitiable , PointerNavigable {
+public struct OpenAPIStringType :  OpenAPISchemaType,ThrowingHashMapInitiable , PointerNavigable {
+    public var discriminator: OpenAPIDiscriminator?
+    
+    public var nullable: Bool?
+    
+    public var readOnly: Bool?
+    
+    public var writeOnly: Bool?
+    
+    public var xml: OpenAPIXMLObject?
+    
+    public var externalDocs: OpenAPIExternalDocumentation?
+    
+    public var example: OpenAPIExample?
+    
+    public var deprecated: Bool?
+    
+    public var extensions: OpenAPIExtension?
+    
     public func element(for segmentName: String) throws -> Any? {
         switch segmentName {
             case Self.FORMAT_KEY : return format

@@ -38,14 +38,30 @@
 //
 
 
-public struct OpenAPIAnyOfType : OpenAPISchema, PointerNavigable {
+public struct OpenAPIAnyOfType : OpenAPISchemaType, PointerNavigable {
+    public var nullable: Bool?
+    
+    public var readOnly: Bool?
+    
+    public var writeOnly: Bool?
+    
+    public var xml: OpenAPIXMLObject?
+    
+    public var externalDocs: OpenAPIExternalDocumentation?
+    
+    public var example: OpenAPIExample?
+    
+    public var deprecated: Bool?
+    
+    public var extensions: OpenAPIExtension?
+    
    
     
     public var ref: OpenAPISchemaReference? { nil}
-    
+    public static let DISCRIMINATOR_KEY = "discriminator"
     public static let TYPE_KEY = "anyOf"
    
-    public init(types :[OpenAPIType]) {
+    public init(types :[OpenAPISchema]) {
         self.items = types
         self.type = "anyOf"
     }
@@ -59,6 +75,9 @@ public struct OpenAPIAnyOfType : OpenAPISchema, PointerNavigable {
         self.type = map[Self.TYPE_KEY] as? String
         guard let list = (map["anyOf"] as? [Any]) else {
             return
+        }
+        if let discriminatorMap = map[Self.DISCRIMINATOR_KEY] as? [String:Any] {
+            self.discriminator = try OpenAPIDiscriminator(load: discriminatorMap)
         }
         self.items = try HashmapInitializableList.map( list).value
     }
@@ -76,6 +95,7 @@ public struct OpenAPIAnyOfType : OpenAPISchema, PointerNavigable {
         throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIAnyOfType",segmentName)
     }
     public let type : String?
-    public var items: [OpenAPIType]?
+    public var items: [OpenAPISchema]?
+    public var discriminator: OpenAPIDiscriminator?
     
 }

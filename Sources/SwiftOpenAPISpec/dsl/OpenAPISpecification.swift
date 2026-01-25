@@ -249,7 +249,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     ///let specFromURL = try await OpenAPISpecification.read(url: url)
     ///let userComponent = specFromURL[schemacomponent: "User"]
     ///```
-    public subscript(schemacomponent component: String) -> OpenAPISchema? {
+    public subscript(schemacomponent component: String) -> OpenAPINamedSchema? {
         return components?.schemas?.first(where: { c in
             c.key == component
         })
