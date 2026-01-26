@@ -18,11 +18,11 @@
 
 import Foundation
 public struct OpenAPIContact : ThrowingHashMapInitiable , PointerNavigable {
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
-        case Self.EMAIL_KEY: return email
-        case Self.NAME_KEY: return name
-        case Self.URL_KEY: return url
+        case Self.EMAIL_KEY: return .value(JSONValue(email))
+        case Self.NAME_KEY: return .value(JSONValue(name))
+        case Self.URL_KEY: return .value(JSONValue(url))
         default: throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIContact", segmentName)
         }
     }
@@ -33,15 +33,9 @@ public struct OpenAPIContact : ThrowingHashMapInitiable , PointerNavigable {
     public static let URL_KEY = "url"
    
     public init(load map : StringDictionary) throws {
-        if let name = map[Self.NAME_KEY] as? String {
-            self.name = name
-        }
-        if let url = map[Self.URL_KEY] as? String {
-            self.url = url
-        }
-        if let email = map[Self.EMAIL_KEY] as? String {
-            self.email = email
-        }
+        self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self)
+        self.url =  map.readIfPresent(Self.URL_KEY, valueType:  String.self)
+        self.email = map.readIfPresent(Self.EMAIL_KEY,valueType: String.self)
         extensions = try OpenAPIExtension.extensionElements(map)
     }
     public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {

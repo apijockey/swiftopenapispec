@@ -22,16 +22,13 @@ import Foundation
 
 public struct OpenAPIOperation : KeyedElement, PointerNavigable {
     public var key: String?
-    public init(load map: [String : Any]) throws {
-        self.tags = map[Self.TAGS_KEY] as? [String] ?? []
-        self.summary = map.readIfPresent(Self.SUMMARY_KEY, String.self)
-        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
-        self.externalDocs = try map.mapIfPresent(Self.EXTERNAL_DOCS_KEY, OpenAPIExternalDocumentation.self)
-        self.operationId = map.readIfPresent(Self.OP_ID_KEY, String.self)
-        if let parameterlist = map[Self.PARAMETERS_KEY] as? [StringDictionary] {
-            
-            parameters =   try KeyedElementList<OpenAPIParameter>.map(list:parameterlist,yamlKeyName: "name", mayHaveRef: true).value
-        }
+    public init(load map: StringDictionary) throws {
+        self.tags = map.readListIfPresent(Self.TAGS_KEY, valueType: String.self)  ?? []
+        self.summary = map.readIfPresent(Self.SUMMARY_KEY, valueType:  String.self)
+        self.description = map.readIfPresent(Self.DESCRIPTION_KEY,valueType:   String.self)
+        self.externalDocs = try map.readIfPresent(Self.EXTERNAL_DOCS_KEY, objectType:  OpenAPIExternalDocumentation.self)
+        self.operationId = map.readIfPresent(Self.OP_ID_KEY, valueType:  String.self)
+        self.parameters = try map.mapListIfPresent(Self.PARAMETERS_KEY, objectType: OpenAPIParameter.self)
         if map[Self.REQUEST_BODIES_KEY] as? StringDictionary != nil {
             self.requestBody = try map.MapIfPresent(Self.REQUEST_BODIES_KEY, OpenAPIRequestBody.self)
         }
@@ -66,14 +63,14 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
            return InitializationResult(value: element, diagnostics: [])
        }
 
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
             
-        case Self.DEPRECATED_KEY: return deprecated as Bool?
-        case Self.DESCRIPTION_KEY: return description as String?
-        case Self.EXTERNAL_DOCS_KEY: return externalDocs as OpenAPIExternalDocumentation?
-        case Self.OP_ID_KEY: return operationId as String?
-        case Self.PARAMETERS_KEY: return (parameters ?? []) as [OpenAPIParameter]
+        case Self.DEPRECATED_KEY:  return .value(JSONValue(deprecated))
+        case Self.DESCRIPTION_KEY: return .value(JSONValue(description))
+        case Self.EXTERNAL_DOCS_KEY: return .navigable(externalDocs)
+        case Self.OP_ID_KEY: return .value(JSONValue(operationId))
+        case Self.PARAMETERS_KEY: return  (parameters ?? []) as [OpenAPIParameter]
         case Self.REQUEST_BODIES_KEY: return requestBody as OpenAPIRequestBody?
         case Self.RESPONSES_KEY: return (responses  ?? []) as [OpenAPIResponse]
         case Self.SUMMARY_KEY: return summary as String?
@@ -113,9 +110,9 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
     public var description : String? = nil
     public var tags : [String] = []
    
-    public var callbacks : [OpenAPICallBack]? = []
-    public var responses : [OpenAPIResponse]? = []
-    public var parameters : [OpenAPIParameter]? = []
+    public var callbacks : [OpenAPICallBack] = []
+    public var responses : [OpenAPIResponse] = []
+    public var parameters : [OpenAPIParameter] = []
     public var servers : [OpenAPIServer] = [OpenAPIServer(url: "/")]
     //Lists the required security schemes to execute this operation. The name used for each property MUST correspond to a security scheme declared in the Security Schemes under the Components Object.
     public var securityObjects : [OpenAPISecuritySchemeReference] = []
@@ -126,7 +123,7 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
   
     /// returns an OpenAPIResponse for the given HTTP Status  if declared on the operation or nil.
     public func response(httpstatus  status : String) -> OpenAPIResponse? {
-        guard let responses else { return nil }
+        guard responses.count > 0  else { return nil }
         return responses[key: status]
     }
     

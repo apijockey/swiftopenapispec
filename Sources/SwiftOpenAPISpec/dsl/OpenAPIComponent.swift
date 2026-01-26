@@ -38,30 +38,86 @@ public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
     public static let SCHEMAS_KEY = "schemas"
     public static let SECURITY_SCHEMES_KEY = "securitySchemes"
     
-    public func element(for segmentName : String) throws -> Any? {
+    public func element(for segmentName : String) throws -> NavigationResult {
         switch segmentName {
             case Self.CALLBACKS_KEY:
-            return callbacks
+            
+            if let callbacks = callbacks {
+                return try callbacks.element(for: segmentName)
+            }
+            else {
+                throw OpenAPISpecification.Errors.unsupportedSegment(segmentName, "OpenAPIComponent")
+            }
         case Self.EXAMPLES_KEY:
-            return examples
+            if let examples =  examples {
+                return try examples.element(for: segmentName)
+            }
+            else {
+                throw OpenAPISpecification.Errors.unsupportedSegment(segmentName, "OpenAPIComponent")
+            }
         case Self.HEADERS_KEY:
-            return headers
+            if let headers =  headers {
+                return try headers.element(for: segmentName)
+            }
+            else {
+                throw OpenAPISpecification.Errors.unsupportedSegment(segmentName, "OpenAPIComponent")
+            }
         case Self.LINKS_KEY:
-            return links
+            if let links =  links {
+                return try links.element(for: segmentName)
+            }
+            else {
+                throw OpenAPISpecification.Errors.unsupportedSegment(segmentName, "OpenAPIComponent")
+            }
         case Self.MEDIATYPES_KEY:
-            return mediaTypes
+            if let mediaTypes =  mediaTypes {
+                return try mediaTypes.element(for: segmentName)
+            }
+            else {
+                throw OpenAPISpecification.Errors.unsupportedSegment(segmentName, "OpenAPIComponent")
+            }
         case Self.PATHSITEMS_KEY:
-            return pathItems
+            if let pathItems =  pathItems {
+                return try pathItems.element(for: segmentName)
+            }
+            else {
+                throw OpenAPISpecification.Errors.unsupportedSegment(segmentName, "OpenAPIComponent")
+            }
         case Self.PARAMETERS_KEY:
-            return parameters
+            if let parameters =  parameters {
+                return try parameters.element(for: segmentName)
+            }
+            else {
+                throw OpenAPISpecification.Errors.unsupportedSegment(segmentName, "OpenAPIComponent")
+            }
         case Self.REQUEST_BODIES_KEY:
-            return requestBodies
+            if let requestBodies =  requestBodies {
+                return try requestBodies.element(for: segmentName)
+            }
+            else {
+                throw OpenAPISpecification.Errors.unsupportedSegment(segmentName, "OpenAPIComponent")
+            }
         case Self.RESPONSES_KEY:
-            return responses
+            if let responses =  responses {
+                return try responses.element(for: segmentName)
+            }
+            else {
+                throw OpenAPISpecification.Errors.unsupportedSegment(segmentName, "OpenAPIComponent")
+            }
         case Self.SCHEMAS_KEY:
-            return schemas
+            if let schemas =  schemas {
+                return try schemas.element(for: segmentName)
+            }
+            else {
+                throw OpenAPISpecification.Errors.unsupportedSegment(segmentName, "OpenAPIComponent")
+            }
         case Self.SECURITY_SCHEMES_KEY:
-            return self.securitySchemas
+            if let securitySchemas =   securitySchemas {
+                return try securitySchemas.element(for: segmentName)
+            }
+            else {
+                throw OpenAPISpecification.Errors.unsupportedSegment(segmentName, "OpenAPIComponent")
+            }
         
         default :
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIComponent", segmentName)

@@ -57,15 +57,16 @@ public struct OpenAPIOneOfType : OpenAPISchemaType,ThrowingHashMapInitiable, Poi
     
    
     
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult {
         if let index = Int(segmentName),
            index >= 0,
            let itemsCount = self.items?.count,
-           index < itemsCount{
-            return self.items?[index]
+           index < itemsCount,
+            let items = items {
+            return .navigable (self.items?[index])
         }
         if segmentName ==  OpenAPISchemaReference.REF_KEY {
-            return ref
+            return .reference( ref?.reference)
         }
         throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIOneOfType",segmentName)
     }

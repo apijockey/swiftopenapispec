@@ -40,6 +40,15 @@
 
 extension StringDictionary {
     
+    func readListIfPresent<V>(_ key : String, valueType : V.Type) -> [V]? {
+        if case let .array(arrayValue) = self[key],
+                let typedArray = arrayValue as? [V]{
+            return typedArray
+        }
+        else {
+            return nil
+        }
+    }
     func readIfPresent<V>(_ key : String, objectType : V.Type) throws -> V?  where V: ThrowingHashMapInitiable{
         if case let  .object(map) = self[key]  {
             return try V.initialize(map).value
@@ -56,20 +65,33 @@ extension StringDictionary {
             return nil
         }
     }
+   
     func mapListIfPresent<T>(_ key : String, objectType : T.Type) throws -> [T]  where  T : KeyedElement{
-        var openAPIOperations = [T]()
+        var elements = [T]()
         if case let .object(objectMap)  = self[key]  {
             for element in objectMap {
                 let value = element.value
                 if case let .object(valueMap) = value {
                     var type = try T.initialize( valueMap).value
                     type.key = key
-                    openAPIOperations.append(type)
+                    elements.append(type)
                 }
             }
         }
-        return openAPIOperations
+        return elements
     }
+    func mapListIfPresent<T>(_ key : String, valueType : T.Type) throws -> [T]  where  T : KeyedElement{
+        var elements = [T]()
+        guard case let .array(list)  = self[key],
+              let typeList = list as? [T]  else {
+            throw OpenAPISpecification.Errors.invalidType("")
+        }
+            for element in typeList {
+                elements.append(element)
+            }
+        return elements
+    }
+    
     func mapListIfPresent<T>(objectType : T.Type) throws -> [T]  where  T : KeyedElement{
         var openAPIOperations = [T]()
 

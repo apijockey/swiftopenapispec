@@ -16,10 +16,21 @@
 //  Created by Patric Dubois on 10.12.25.
 //
 
-public struct OpenAPIExtension : PointerNavigable  {
-    public func element(for segmentName: String) throws -> Any? {
+
+public enum extensionType {
+    case simpleExtensionValue(String), structuredExtension( OpenAPIStructuredExtensionValues)
+}
+public struct OpenAPIExtension : KeyedElement, PointerNavigable  {
+    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+           let element = try Self(load: map)
+           return InitializationResult(value: element, diagnostics: [])
+       }
+    public init(load map: StringDictionary) throws {
+       
+    }
+    public func element(for segmentName: String) throws -> NavigationResult {
         if let simpleValue = simpleExtensionValue  {
-            return simpleValue
+            return  .value(JSONValue(simpleValue))
         }
         else if let structuredExtension = structuredExtension {
             return try structuredExtension.element(for: segmentName)
@@ -27,7 +38,7 @@ public struct OpenAPIExtension : PointerNavigable  {
         throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIExtension", segmentName)
     }
     
-    public var ref: OpenAPISchemaReference? { nil}
+   
     
     public var key : String?
     public var simpleExtensionValue : String?
@@ -39,42 +50,43 @@ public struct OpenAPIExtension : PointerNavigable  {
        let filteredKeys =  map.keys.filter { name in
             name.starts(with: "x-")
         }
+        //TODO:
         for (key,value) in map {
             if filteredKeys.contains(where: { filteredKey in
                 key == filteredKey
             }) {
                 // add
                
-                if let map = value as? StringDictionary {
-                    var extensionElement = OpenAPIExtension(key: key)
-                    extensionElement.structuredExtension = try OpenAPIStructuredExtensionValues(load: map)
-                    extensionList.append(extensionElement)
-                }
-                else if let stringValue = value as? String {
-                    var extensionElement = OpenAPIExtension(key: key)
-                    extensionElement.simpleExtensionValue = stringValue
-                    extensionList.append(extensionElement)
-                }
-                else if let stringValue = value as? Int {
-                    var extensionElement = OpenAPIExtension(key: key)
-                    extensionElement.simpleExtensionValue = String(stringValue)
-                    extensionList.append(extensionElement)
-                }
-                else if let stringValue = value as? Double {
-                    var extensionElement = OpenAPIExtension(key: key)
-                    extensionElement.simpleExtensionValue = String(stringValue)
-                    extensionList.append(extensionElement)
-                }
-                else if let stringValue = value as? Float {
-                    var extensionElement = OpenAPIExtension(key: key)
-                    extensionElement.simpleExtensionValue = String(stringValue)
-                    extensionList.append(extensionElement)
-                }
-                else if let stringValue = value as? Bool {
-                    var extensionElement = OpenAPIExtension(key: key)
-                    extensionElement.simpleExtensionValue = String(stringValue)
-                    extensionList.append(extensionElement)
-                }
+//                if let map = value as? StringDictionary {
+//                    var extensionElement = OpenAPIExtension(key: key)
+//                    extensionElement.structuredExtension = try OpenAPIStructuredExtensionValues(load: map)
+//                    extensionList.append(extensionElement)
+//                }
+//                else if let stringValue = value as? String {
+//                    var extensionElement = OpenAPIExtension(key: key)
+//                    extensionElement.simpleExtensionValue = stringValue
+//                    extensionList.append(extensionElement)
+//                }
+//                else if let stringValue = value as? Int {
+//                    var extensionElement = OpenAPIExtension(key: key)
+//                    extensionElement.simpleExtensionValue = String(stringValue)
+//                    extensionList.append(extensionElement)
+//                }
+//                else if let stringValue = value as? Double {
+//                    var extensionElement = OpenAPIExtension(key: key)
+//                    extensionElement.simpleExtensionValue = String(stringValue)
+//                    extensionList.append(extensionElement)
+//                }
+//                else if let stringValue = value as? Float {
+//                    var extensionElement = OpenAPIExtension(key: key)
+//                    extensionElement.simpleExtensionValue = String(stringValue)
+//                    extensionList.append(extensionElement)
+//                }
+//                else if let stringValue = value as? Bool {
+//                    var extensionElement = OpenAPIExtension(key: key)
+//                    extensionElement.simpleExtensionValue = String(stringValue)
+//                    extensionList.append(extensionElement)
+//                }
                
                 
             }
@@ -87,11 +99,11 @@ public struct OpenAPISimpleExtensionValues : KeyedElement, PointerNavigable {
         self.key = map.keys.first
         self.value = map.values.first as? String ?? ""
     }
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult{
         switch segmentName {
-            case "key" : return self.key
-            case "value" : return self.value
-            case "$ref": return self.ref
+        case "key" : return .value(JSONValue(self.key))
+            case "value" : return .value(JSONValue(self.value))
+            case "$ref": return .value(JSONValue(self.ref))
         default: throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPISimpleExtensionValues", segmentName)
         }
     }
@@ -111,14 +123,14 @@ public struct OpenAPISimpleExtensionValues : KeyedElement, PointerNavigable {
 }
     
 public struct OpenAPIStructuredExtensionValues : ThrowingHashMapInitiable, PointerNavigable{
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws ->NavigationResult {
         if let properties = self.properties {
-            return properties[segmentName]
+            return .value(JSONValue(properties[segmentName]))
         }
         throw OpenAPISpecification.Errors.unsupportedSegment("OOpenAPIStructuredExtensionValues", segmentName)
     }
     
-    public var ref: OpenAPISchemaReference? { nil}
+    
     
   
     public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {

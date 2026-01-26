@@ -26,22 +26,13 @@ public struct OpenAPIEncoding : KeyedElement, PointerNavigable {
     static let PREFIX_ENCODING_KEY = "prefixEncoding"
     static let ITEM_ENCODING_KEY = "itemEncoding"
     static let EXTENSIONS_KEY = "extensions"
-    public init(load map: [String : Any]) throws {
+    public init(load map: StringDictionary) throws {
         extensions = try OpenAPIExtension.extensionElements(map)
-        self.contentType = map.readIfPresent(Self.CONTENT_TYPE_KEY, String.self)
-        if let  subMap  = map[Self.HEADERS_KEY] as? StringDictionary {
-            headers = try KeyedElementList<OpenAPIHeader>.map(subMap).value
-        }
-        if let subMap = map[Self.ENCODING_KEY] as? StringDictionary {
-            encoding = try KeyedElementList<OpenAPIEncoding>.map(subMap).value
-        }
-        if let subMap = map[Self.PREFIX_ENCODING_KEY] as? StringDictionary {
-            prefixEncoding = try KeyedElementList<OpenAPIEncoding>.map(subMap).value
-        }
-        if let subMap = map[Self.PREFIX_ENCODING_KEY] as? StringDictionary {
-            itemEncoding = try KeyedElementList<OpenAPIEncoding>.map(subMap).value
-        }
-        
+        self.contentType = map.readIfPresent(Self.CONTENT_TYPE_KEY, valueType: String.self)
+        self.contentType = map.readIfPresent(Self.HEADERS_KEY, valueType : String.self)
+        self.encoding  = try map.mapListIfPresent(Self.ENCODING_KEY, objectType: OpenAPIEncoding.self)
+        self.prefixEncoding = try map.mapListIfPresent(Self.PREFIX_ENCODING_KEY,objectType: OpenAPIEncoding.self)
+        self.itemEncoding = try map.mapListIfPresent(Self.PREFIX_ENCODING_KEY,objectType: OpenAPIEncoding.self)
         
     }
     public static func initialize(_ map: StringDictionary) throws -> InitializationResult<Self> {
@@ -49,31 +40,31 @@ public struct OpenAPIEncoding : KeyedElement, PointerNavigable {
         return InitializationResult(value: element, diagnostics: [])
 
     }
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
-        case Self.CONTENT_TYPE_KEY: return contentType
-        case Self.HEADERS_KEY: return headers
-        case Self.ENCODING_KEY: return encoding
-        case Self.PREFIX_ENCODING_KEY: return prefixEncoding
-        case Self.ITEM_ENCODING_KEY: return itemEncoding
-        case Self.EXTENSIONS_KEY: return extensions
+        case Self.CONTENT_TYPE_KEY: return .value(JSONValue(contentType))
+        case Self.HEADERS_KEY: return try headers.element(for: segmentName)
+        case Self.ENCODING_KEY: return try encoding.element(for: segmentName)
+        case Self.PREFIX_ENCODING_KEY: return try prefixEncoding.element(for: segmentName)
+        case Self.ITEM_ENCODING_KEY: return try itemEncoding.element(for: segmentName)
+        case Self.EXTENSIONS_KEY: return try extensions.element(for: segmentName)
         default:
             // Für x-* Vendor Extensions einzelne Keys erlauben: "x-..." -> passenden Extension-Wert liefern
-            if segmentName.hasPrefix("x-"), let exts = extensions {
-                if let ext = exts.first(where: { $0.key == segmentName }) {
+            if segmentName.hasPrefix("x-") {
+                if let ext = extensions.first(where: { $0.key == segmentName }) {
                     // Gib die strukturierte oder einfache Extension zurück
-                    return ext.structuredExtension?.properties ?? ext.simpleExtensionValue
+                    //return ext.structuredExtension?.properties ?? ext.simpleExtensionValue
                 }
             }
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIEncoding", segmentName)
         }
     }
     public var contentType : String? = nil
-    public var headers : [OpenAPIHeader]? = nil
-    public var extensions : [OpenAPIExtension]?
-    public var encoding :[OpenAPIEncoding]? = nil
-    public var prefixEncoding :[OpenAPIEncoding]? = nil
-    public var itemEncoding :[OpenAPIEncoding]? = nil
+    public var headers : [OpenAPIHeader]  = []
+    public var extensions : [OpenAPIExtension] = []
+    public var encoding :[OpenAPIEncoding] = []
+    public var prefixEncoding :[OpenAPIEncoding] = []
+    public var itemEncoding :[OpenAPIEncoding] = []
    
     public var key: String?
    

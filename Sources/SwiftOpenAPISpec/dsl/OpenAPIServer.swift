@@ -21,12 +21,12 @@ import Foundation
 
 
 public struct OpenAPIServer : ThrowingHashMapInitiable , PointerNavigable {
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
-            case Self.DESCRIPTION_KEY : return self.description
-            case Self.URL_KEY : return url
-            case Self.NAME_KEY :return name
-            case Self.VARIABLES_KEY : return variables
+        case Self.DESCRIPTION_KEY :  return .value(JSONValue(self.description))
+            case Self.URL_KEY : return .value(JSONValue(url))
+        case Self.NAME_KEY :return .value(JSONValue(name))
+        case Self.VARIABLES_KEY : return try variables.element(for: segmentName)
         default:
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIInfo", segmentName)
 
@@ -46,12 +46,10 @@ public struct OpenAPIServer : ThrowingHashMapInitiable , PointerNavigable {
         self.url = url
     }
     public init(load map: StringDictionary) throws {
-        self.url = try map.tryRead(Self.URL_KEY, String.self, root: "OpenAPIServer")
-        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
-        self.name = map.readIfPresent(Self.NAME_KEY, String.self)
-        if let variables = map[Self.VARIABLES_KEY] as? StringDictionary {
-            self.variables = try KeyedElementList.map(variables).value
-        }
+        self.url = map.readIfPresent(Self.URL_KEY, valueType: String.self)
+        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType:  String.self)
+        self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self)
+        self.variables = try map.mapListIfPresent(Self.VARIABLES_KEY,objectType : OpenAPIVariable.self)
         extensions = try OpenAPIExtension.extensionElements(map)
     }
     public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {

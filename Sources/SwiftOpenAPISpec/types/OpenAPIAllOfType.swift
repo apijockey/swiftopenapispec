@@ -16,19 +16,19 @@
 
 
 
-public struct OpenAPIAllOfType : OpenAPISchemaType, ThrowingHashMapInitiable, PointerNavigable, OpenAPISchemaReferenceable {
+public struct OpenAPIAllOfType : OpenAPISchemaType, ThrowingHashMapInitiable, PointerNavigable {
   
     public let type : String?
     public var items: [OpenAPISchema]?
    
   
     
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult{
         if let index = Int(segmentName) {
-            return self.items?[index]
+            return .navigable(self.items?[index])
         }
         if segmentName ==  OpenAPISchemaReference.REF_KEY {
-            return ref
+            return .reference( ref?.reference)
         }
         throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIOneOfType",segmentName)
     }

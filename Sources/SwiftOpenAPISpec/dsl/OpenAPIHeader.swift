@@ -19,7 +19,7 @@
 
 import Foundation
 
-public struct OpenAPIHeader :  KeyedElement, PointerNavigable,OpenAPISchemaReferenceable {
+public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
 
     public static let ALLOW_EMPTYVALUE_KEY = "allowEmptyValue"
     public static let ALLOW_RESERVED_KEY = "allowReserved"
@@ -34,33 +34,29 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable,OpenAPISchemaRefer
     public static let SCHEMA_KEY = "schema"
     public static let STYLE_KEY = "style"
    
-    public init(load map: [String : Any]) throws {
+    public init(load map: StringDictionary) throws {
         if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
             self.ref = ref
             return
         }
         
-        self.description =  map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
-        self.deprecated =  map.readIfPresent(Self.DEPRECATED_KEY, Bool.self)
-        self.allowEmptyValue = map.readIfPresent(Self.ALLOW_EMPTYVALUE_KEY, Bool.self)
+        self.description =  map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self)
+        self.deprecated =  map.readIfPresent(Self.DEPRECATED_KEY, valueType: Bool.self)
+        self.allowEmptyValue = map.readIfPresent(Self.ALLOW_EMPTYVALUE_KEY, valueType: Bool.self)
        
-        self.explode = map.readIfPresent(Self.EXPLODE_KEY, Bool.self)
-        self.allowReserved = map.readIfPresent(Self.ALLOW_RESERVED_KEY, Bool.self)
-        self.example = map.readIfPresent(Self.EXAMPLE_KEY, String.self)
+        self.explode = map.readIfPresent(Self.EXPLODE_KEY, valueType: Bool.self)
+        self.allowReserved = map.readIfPresent(Self.ALLOW_RESERVED_KEY,valueType:  Bool.self)
+        self.example = map.readIfPresent(Self.EXAMPLE_KEY,valueType:  String.self)
         
-        if let examplesMap  = map[Self.EXAMPLES_KEY]  as? StringDictionary{
-            self.examples = try KeyedElementList.map(examplesMap).value
-        }
-        self.content = map.readIfPresent(Self.CONTENT_KEY, OpenAPIMediaType.self)
+        self.examples  = try map.mapListIfPresent(Self.EXAMPLES_KEY, objectType: OpenAPIExample.self)
+        self.content = try map.readIfPresent(Self.CONTENT_KEY,objectType:  OpenAPIMediaType.self)
         extensions = try OpenAPIExtension.extensionElements(map)
      
        
-        self.required = map.readIfPresent(Self.REQUIRED_KEY, Bool.self) ?? false
-        if let schemaMap = map[Self.SCHEMA_KEY] as? StringDictionary{
-            self.schema = try OpenAPISchema.initialize(schemaMap).value
-        }
+        self.required = map.readIfPresent(Self.REQUIRED_KEY, valueType: Bool.self) ?? false
+        self.schema = try map.readIfPresent(Self.SCHEMA_KEY, objectType: OpenAPISchema.self)
        
-        self.style = map.readIfPresent(Self.STYLE_KEY, String.self)
+        self.style = map.readIfPresent(Self.STYLE_KEY, valueType: String.self)
        
     }
     public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
@@ -68,29 +64,29 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable,OpenAPISchemaRefer
            return InitializationResult(value: element, diagnostics: [])
        }
 
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult {
        switch segmentName {
-       case Self.ALLOW_EMPTYVALUE_KEY: return allowEmptyValue
-       case Self.ALLOW_RESERVED_KEY: return allowReserved
-       case Self.CONTENT_KEY: return content
+       case Self.ALLOW_EMPTYVALUE_KEY: return .value(JSONValue(allowEmptyValue))
+       case Self.ALLOW_RESERVED_KEY: return .value(JSONValue(allowReserved))
+       case Self.CONTENT_KEY: return .navigable(content)
        
-       case Self.EXAMPLE_KEY: return example
-       case Self.EXAMPLES_KEY: return examples
-       case Self.EXPLODE_KEY: return explode
-       case Self.EXTENSIONS_KEY: return extensions
-       case Self.DESCRIPTION_KEY: return description
-       case Self.DEPRECATED_KEY: return deprecated
-       case Self.SCHEMA_KEY: return schema       
-       case Self.STYLE_KEY: return style
-       case OpenAPISchemaReference.REF_KEY: return ref
+       case Self.EXAMPLE_KEY: return .value(JSONValue(example))
+       case Self.EXAMPLES_KEY: return try examples.element(for: segmentName)
+       case Self.EXPLODE_KEY: return .value(JSONValue(explode))
+       case Self.EXTENSIONS_KEY: return try extensions.element(for: segmentName)
+       case Self.DESCRIPTION_KEY: return .value(JSONValue(description))
+       case Self.DEPRECATED_KEY: return .value(JSONValue(deprecated))
+       case Self.SCHEMA_KEY: return .navigable(schema)
+       case Self.STYLE_KEY: return .value(JSONValue(style))
+       case OpenAPISchemaReference.REF_KEY: return .reference(ref?.reference)
        default:
            // Für x-* Vendor Extensions einzelne Keys erlauben: "x-..." -> passenden Extension-Wert liefern
-           if segmentName.hasPrefix("x-"), let exts = extensions {
-               if let ext = exts.first(where: { $0.key == segmentName }) {
-                   // Gib die strukturierte oder einfache Extension zurück
-                   return ext.structuredExtension?.properties ?? ext.simpleExtensionValue
-               }
-           }
+//           if segmentName.hasPrefix("x-"), let exts = extensions {
+//               let ext = exts.first(where: { $0.key == segmentName }) {
+//                   // Gib die strukturierte oder einfache Extension zurück
+//                   //return ext.structuredExtension?.properties ?? ext.simpleExtensionValue
+//               }
+//           }
            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIHeader", segmentName)
     
        
@@ -108,8 +104,8 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable,OpenAPISchemaRefer
     public var ref : OpenAPISchemaReference? = nil
     public var allowReserved : Bool? = nil
     public var example :(any Sendable)? = nil
-    public var extensions : [OpenAPIExtension]?
-    public var examples : [OpenAPIExample]? = []
+    public var extensions : [OpenAPIExtension] = []
+    public var examples : [OpenAPIExample] = []
     public var content : OpenAPIMediaType? = nil
  
    

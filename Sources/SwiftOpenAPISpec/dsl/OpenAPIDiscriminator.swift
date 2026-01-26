@@ -20,11 +20,11 @@
 public struct OpenAPIDiscriminator :  ThrowingHashMapInitiable, PointerNavigable {
     public var ref: OpenAPISchemaReference? { nil}
     
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
-        case Self.PROPERTY_NAME_KEY: return propertyName
-        case Self.MAPPING_KEY: return mapping
-        case Self.DEFAULT_MAPPING_KEY: return defaultMapping
+        case Self.PROPERTY_NAME_KEY: return .value(JSONValue(propertyName))
+        case Self.MAPPING_KEY: return .value(JSONValue(mapping))
+        case Self.DEFAULT_MAPPING_KEY: return .value(JSONValue(defaultMapping))
         default: throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIDiscriminator", segmentName)
         }
     }

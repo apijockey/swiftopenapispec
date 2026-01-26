@@ -33,24 +33,24 @@ public struct OpenAPIXMLObject : PointerNavigable, ThrowingHashMapInitiable {
     public static let WRAPPED_KEY = "wrapped"
     
     public init(load map: StringDictionary) throws {
-        let nodeType = map.readIfPresent(Self.NODETYPE_KEY, String.self)
+        let nodeType = map.readIfPresent(Self.NODETYPE_KEY,valueType:  String.self)
         self.nodeType = NodeKind(rawValue: nodeType ?? "none")
-        self.name = map.readIfPresent(Self.NAME_KEY, String.self)
-        self.namespace = map.readIfPresent(Self.NAMESPACE_KEY, String.self)
-        self.prefix = map.readIfPresent(Self.PREFIX_KEY, String.self)
-        self.attribute = map.readIfPresent(Self.ATTRIBUTE_KEY, Bool.self)
-        self.wrapped = map.readIfPresent(Self.WRAPPED_KEY, Bool.self)
+        self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self)
+        self.namespace = map.readIfPresent(Self.NAMESPACE_KEY, valueType: String.self)
+        self.prefix = map.readIfPresent(Self.PREFIX_KEY, valueType: String.self)
+        self.attribute = map.readIfPresent(Self.ATTRIBUTE_KEY,valueType:  Bool.self)
+        self.wrapped = map.readIfPresent(Self.WRAPPED_KEY,valueType:  Bool.self)
         self.extensions = try OpenAPIExtension.extensionElements(map)
     }
    
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
-        case Self.NODETYPE_KEY : return nodeType
-        case Self.NAME_KEY :return name
-        case Self.NAMESPACE_KEY : return namespace
-        case Self.PREFIX_KEY :return prefix
-        case Self.ATTRIBUTE_KEY : return attribute
-        case Self.WRAPPED_KEY : return wrapped
+        case Self.NODETYPE_KEY : return .value(JSONValue( nodeType))
+        case Self.NAME_KEY :return .value(JSONValue( name))
+        case Self.NAMESPACE_KEY : return .value(JSONValue( namespace))
+        case Self.PREFIX_KEY :return .value(JSONValue( prefix))
+        case Self.ATTRIBUTE_KEY : return .value(JSONValue( attribute))
+        case Self.WRAPPED_KEY : return .value(JSONValue( wrapped))
         default:
         throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIXMLObject", segmentName)
         }

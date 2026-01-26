@@ -59,18 +59,18 @@ public struct OpenAPIObjectType : OpenAPISchemaType,ThrowingHashMapInitiable, Po
     
    
     
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
-        case Self.DEPENDENT_REQUIRED_KEY : return self.dependentRequired
-        case Self.MIN_PROPERTIES_KEY : return self.minProperties
-        case Self.MAX_PROPERTIES_KEY : return self.maxProperties
-        case Self .TYPE_KEY: return self.type
-        case Self.UNEVALUATEDPROPERTIES_KEY : return self.unevaluatedProperties
-        case Self .PROPERTIES_KEY: return self.properties
-        case Self .REQUIRED_KEY: return self.required
+        case Self.DEPENDENT_REQUIRED_KEY : return .value(JSONValue(self.dependentRequired))
+        case Self.MIN_PROPERTIES_KEY : return .value(JSONValue(self.minProperties))
+        case Self.MAX_PROPERTIES_KEY : return .value(JSONValue(self.maxProperties))
+        case Self .TYPE_KEY:  return .value(JSONValue(self.type))
+        case Self.UNEVALUATEDPROPERTIES_KEY : return .value(JSONValue(self.unevaluatedProperties))
+        case Self .PROPERTIES_KEY: return try  self.properties.element(for: segmentName)
+        case Self .REQUIRED_KEY: return  .value(JSONValue(self.required))
         default:
             if let prop = self.properties[key: segmentName] {
-                return prop
+                return .navigable( prop)
             }
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPISpecificationType", segmentName)
             

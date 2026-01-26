@@ -69,6 +69,7 @@ public typealias StringDictionary = [String: JSONValue]
 
 // MARK: - Array helpers for KeyedElement
 
+
 public extension Array where Element : KeyedElement {
     subscript (key key: String) -> Element? {
         return self.first(where: { $0.key == key })
@@ -83,17 +84,16 @@ public extension Array where Element : KeyedElement {
     }
 }
 
-// Support arrays whose static type is [any KeyedElement] (existential)
-public extension Array where Element == any KeyedElement {
-    func element(for segmentName: String) -> (any KeyedElement)? {
-        self.first { namedComponent in
-            namedComponent.key == segmentName
+extension Array where Element : KeyedElement, Element : PointerNavigable {
+    public func element(for segmentName : String) throws -> NavigationResult{
+        guard let element = self.first (where:{ element in
+            element.key == segmentName
+        }) else {
+            return .notFound(segmentName)
         }
+        return .navigable(element)
     }
 }
-
-
-
 
 /**A KeyedElement expects that the key Value is set from outside**/
 

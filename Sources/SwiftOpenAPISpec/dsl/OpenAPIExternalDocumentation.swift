@@ -19,16 +19,15 @@
 
 import Foundation
 
-public struct OpenAPIExternalDocumentation :
-    ThrowingHashMapInitiable, PointerNavigable {
+public struct OpenAPIExternalDocumentation : ThrowingHashMapInitiable, PointerNavigable {
     
     public static let URL_KEY = "url"
     public static let DESCRIPTION_KEY = "desccription"
     
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
-        case Self.URL_KEY: return url
-        case Self.DESCRIPTION_KEY: return self.description
+        case Self.URL_KEY: return .value(JSONValue(url))
+        case Self.DESCRIPTION_KEY: return .value(JSONValue(self.description))
         default:
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIExternalDocumentation", segmentName)
         }

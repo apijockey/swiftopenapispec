@@ -20,7 +20,7 @@
 import Foundation
 
 
-public struct OpenAPINamedSchema: KeyedElement ,Sendable {
+public struct OpenAPINamedSchema: PointerNavigable, KeyedElement ,Sendable {
    
     
   
@@ -34,7 +34,7 @@ public struct OpenAPINamedSchema: KeyedElement ,Sendable {
            return InitializationResult(value: element, diagnostics: [])
        }
 
-    public init(load map: [String : Any]) throws {
+    public init(load map: StringDictionary) throws {
        
             self.schema = try OpenAPISchema.initialize(map).value
       
@@ -44,9 +44,15 @@ public struct OpenAPINamedSchema: KeyedElement ,Sendable {
     
    
     public var schema : OpenAPISchema?
-    public func element(for segmentName : String) throws -> Any? {
+    public func element(for segmentName : String) throws -> NavigationResult {
         switch segmentName {
-            default : return self
+        default :
+            if let schema = schema {
+                return try schema.element(for: segmentName)
+            }
+            else {
+                throw OpenAPISpecification.Errors.notFound(segmentName)
+            }
             
            
         }

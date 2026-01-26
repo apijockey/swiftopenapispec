@@ -55,6 +55,8 @@ public struct OpenAPISchema : ThrowingHashMapInitiable, PointerNavigable {
             case Self.XML_KEY : return .value(JSONValue(xml))
             case Self.WRITE_ONLY_KEY : return .value(JSONValue(writeOnly))
             
+        default:
+            throw OpenAPISpecification.Errors.notFound(segmentName)
         }
     }
     
@@ -97,31 +99,25 @@ public struct OpenAPISchema : ThrowingHashMapInitiable, PointerNavigable {
     public static let REQUIRED_KEY = "required"
     
     public init(load map: StringDictionary, _ diagnostics: inout [Diagnostic]) throws {
-        if let discriminatorMap = map.readIfPresent(Self.DISCRIMINATOR_KEY,   StringDictionary.self) {
-            self.discriminator = try OpenAPIDiscriminator(load: discriminatorMap)
-        }
+        self.discriminator = try map.readIfPresent(Self.DISCRIMINATOR_KEY,  objectType:  OpenAPIDiscriminator.self)
         // Value MUST be a string. Multiple types via an array are not supported.
-        if map[Self.TYPE_KEY] as? String  != nil{
-            let initializationResult = try OpenAPIType.initialize(map)
-            self.type = initializationResult.value
-            diagnostics.append(contentsOf: initializationResult.diagnostics)
-        }
+        self.type = try map.readIfPresent(Self.TYPE_KEY, objectType: OpenAPIType.self)
+       
         
-        if let allowedElements = map[Self.ALLOWED_ELEMENTS_KEY] as? [String] {
-            self.allowedValues = allowedElements
+        if case let .array(allowedElements)  = map[Self.ALLOWED_ELEMENTS_KEY]  {
+            self.allowedValues = allowedElements as? [String]
         } else {
             self.allowedValues = nil
         }
-        self.maxLength = map.readIfPresent(Self.MAX_LENGTH_KEY, Int.self)
-        self.minLength = map.readIfPresent(Self.MIN_LENGTH_KEY, Int.self)
-        self.pattern = map.readIfPresent(Self.PATTERN_KEY,String.self)
-        self.pattern = map.readIfPresent(Self.PATTERN_KEY,String.self)
+        self.maxLength = map.readIfPresent(Self.MAX_LENGTH_KEY,valueType:  Int.self)
+        self.minLength = map.readIfPresent(Self.MIN_LENGTH_KEY,valueType: Int.self)
+        self.pattern = map.readIfPresent(Self.PATTERN_KEY,valueType:String.self)
+        self.pattern = map.readIfPresent(Self.PATTERN_KEY,valueType:String.self)
         
-        self.title = map.readIfPresent(OpenAPISchema.TYPE_KEY, String.self)
-        self.multipleOf = map.readIfPresent(Self.TYPE_KEY, Double.self)
+        self.title = map.readIfPresent(OpenAPISchema.TYPE_KEY, valueType:String.self)
+        self.multipleOf = map.readIfPresent(Self.TYPE_KEY, valueType:Double.self)
         self.extensions = try OpenAPIExtension.extensionElements(map)
-        self
-        self.format = map.readIfPresent(Self.FORMAT_KEY, String.self)
+        self.format = map.readIfPresent(Self.FORMAT_KEY, valueType:  String.self)
         
     }
     public static func initialize(_ map: StringDictionary) throws -> InitializationResult<OpenAPISchema> {
