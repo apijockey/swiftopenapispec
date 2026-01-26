@@ -20,7 +20,7 @@
 import Foundation
 
 
-public struct OpenAPINamedSchema: KeyedElement , PointerNavigable,Sendable {
+public struct OpenAPINamedSchema: KeyedElement ,Sendable {
    
     
   
@@ -41,7 +41,7 @@ public struct OpenAPINamedSchema: KeyedElement , PointerNavigable,Sendable {
     }
     
     public  var key : String? = nil
-    public var ref: OpenAPISchemaReference?
+    
    
     public var schema : OpenAPISchema?
     public func element(for segmentName : String) throws -> Any? {

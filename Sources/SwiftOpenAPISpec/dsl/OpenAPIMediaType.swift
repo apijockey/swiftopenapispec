@@ -39,7 +39,7 @@
 
 import Foundation
 
-public struct OpenAPIMediaType :  KeyedElement , PointerNavigable,OpenAPISchemaReferenceable {
+public struct OpenAPIMediaType :  KeyedElement , PointerNavigable {
     public static let SCHEMA_KEY = "schema"
     public static let ITEM_SCHEMA_KEY = "itemSchema"
     public static let EXAMPLES_KEY = "examples"
@@ -49,50 +49,34 @@ public struct OpenAPIMediaType :  KeyedElement , PointerNavigable,OpenAPISchemaR
     public static let ITEM_ENCODING_KEY = "itemEncoding"
     public static let EXTENSIONS_KEY = "extensions"
     public var key : String?
-    public init(load map: [String : Any]) throws {
-        if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
-            self.ref = ref
-            return
-        }
-            if let schemaMap = map[Self.SCHEMA_KEY] as? StringDictionary {
-                self.schema  = try OpenAPISchema.initialize( schemaMap).value
+    public init(load map: StringDictionary) throws {
+            if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
+                self.ref = ref
+                return
             }
-            if let schemaMap = map[Self.ITEM_SCHEMA_KEY] as? StringDictionary {
-                self.schema  = try OpenAPISchema.initialize( schemaMap).value
-            }
-             
-            
-            if let examplesMap  = map[Self.EXAMPLES_KEY]  as? StringDictionary{
-                self.examples = try KeyedElementList.map(examplesMap).value
-            }
-            if let subMap = map[Self.ENCODING_KEY] as? StringDictionary {
-                encoding = try KeyedElementList<OpenAPIEncoding>.map(subMap).value
-            }
-            if let subMap = map[Self.PREFIX_ENCODING_KEY] as? StringDictionary {
-                prefixEncoding = try KeyedElementList<OpenAPIEncoding>.map(subMap).value
-            }
-            if let subMap = map[Self.PREFIX_ENCODING_KEY] as? StringDictionary {
-                itemEncoding = try KeyedElementList<OpenAPIEncoding>.map(subMap).value
-            }
-       
+        self.schema = try map.readIfPresent(Self.SCHEMA_KEY, objectType: OpenAPISchema.self)
+        self.examples = try map.mapListIfPresent(Self.EXAMPLES_KEY, objectType: OpenAPIExample.self)
+        self.encoding =  try map.mapListIfPresent(Self.ENCODING_KEY, objectType: OpenAPIEncoding.self)
+        self.prefixEncoding = try map.mapListIfPresent(Self.PREFIX_ENCODING_KEY, objectType: OpenAPIEncoding.self)
+        self.itemEncoding =  try map.mapListIfPresent(Self.ITEM_ENCODING_KEY, objectType: OpenAPIEncoding.self)
     }
     public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
            let element = try Self(load: map)
            return InitializationResult(value: element, diagnostics: [])
        }
 
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
         case Self.SCHEMA_KEY:
-            return self.schema
+            return .navigable(self.schema)
         case Self.EXAMPLES_KEY:
-            return self.examples
-        case Self.ENCODING_KEY: return encoding
-        case Self.PREFIX_ENCODING_KEY: return prefixEncoding
-        case Self.ITEM_ENCODING_KEY: return itemEncoding
-        case OpenAPISchemaReference.REF_KEY: return ref
+            return try self.examples.element(for: segmentName)
+        case Self.ENCODING_KEY: return try encoding.element(for: segmentName)
+        case Self.PREFIX_ENCODING_KEY: return try prefixEncoding.element(for: segmentName)
+        case Self.ITEM_ENCODING_KEY: return try itemEncoding.element(for: segmentName)
+        case OpenAPISchemaReference.REF_KEY: return .reference(ref?.reference)
         default:
-            if self.key == segmentName { return self.schema }
+            if self.key == segmentName { return .navigable(self.schema) }
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIMediaType", segmentName)
         }
     }
@@ -100,9 +84,9 @@ public struct OpenAPIMediaType :  KeyedElement , PointerNavigable,OpenAPISchemaR
     public var itemSchema : OpenAPISchema? = nil
     public var examples : [OpenAPIExample] = []
    
-    public var encoding :[OpenAPIEncoding]? = nil
-    public var prefixEncoding :[OpenAPIEncoding]? = nil
-    public var itemEncoding :[OpenAPIEncoding]? = nil
+    public var encoding :[OpenAPIEncoding] = []
+    public var prefixEncoding :[OpenAPIEncoding] = []
+    public var itemEncoding :[OpenAPIEncoding] = []
     public var ref : OpenAPISchemaReference? = nil
     //ENCODING
 }

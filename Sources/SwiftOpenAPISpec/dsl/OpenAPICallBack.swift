@@ -17,21 +17,26 @@
 //
 
 import Foundation
-public struct OpenAPICallBack : KeyedElement,PointerNavigable,OpenAPISchemaReferenceable{
+public struct OpenAPICallBack : KeyedElement,PointerNavigable{
     
     //TODO: Call
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult {
        switch segmentName {
-       case OpenAPISchemaReference.REF_KEY: return ref
+       case OpenAPISchemaReference.REF_KEY: return  .reference(ref?.reference)
            
        default:
            if let item = pathItems?.first(where: { $0.key == segmentName }) {
-               return item
+               return .navigable(item)
            }
            if segmentName.hasPrefix("x-"), let exts = extensions {
                            if let ext = exts.first(where: { $0.key == segmentName }) {
-                               // Gib die strukturierte oder einfache Extension zurück
-                               return ext.structuredExtension?.properties ?? ext.simpleExtensionValue
+                               if let list = ext.structuredExtension?.properties {
+                                   return .navigable(ext.structuredExtension)
+                               }
+                               else {
+                                   return .value(JSONValue(ext.simpleExtensionValue))
+                               }
+                               
                            }
                        }
                        throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPICallBack", segmentName)
@@ -48,7 +53,7 @@ public struct OpenAPICallBack : KeyedElement,PointerNavigable,OpenAPISchemaRefer
         extensions = try OpenAPIExtension.extensionElements(map)
         if map.count > 0 {
             pathItems = []
-            self.pathItems = try KeyedElementList<OpenAPIPathItem>.map(map).value
+            self.pathItems =  try KeyedElementList<OpenAPIPathItem>.map(map).value
         }
      
     }

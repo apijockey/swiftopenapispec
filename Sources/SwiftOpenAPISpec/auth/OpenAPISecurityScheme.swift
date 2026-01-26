@@ -39,7 +39,7 @@
 
 import Foundation
 
-public struct OpenAPISecurityScheme : KeyedElement , PointerNavigable,OpenAPISchemaReferenceable {
+public struct OpenAPISecurityScheme : KeyedElement , PointerNavigable {
    
     public static let BEARER_FORMAT_KEY = "bearerFormat"
     public static let DESCRIPTION_KEY = "description"
@@ -71,32 +71,31 @@ public struct OpenAPISecurityScheme : KeyedElement , PointerNavigable,OpenAPISch
         return InitializationResult(value: element, diagnostics: [])
 
     }
-    public init(load map: [String : Any]) throws {
-        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
+    public init(load map: StringDictionary) throws {
+       
+        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self)
         if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
             self.ref = ref
             return
         }
-        if let securityRawType = map.readIfPresent(Self.TYPE_KEY, String.self),
+        if let securityRawType = map.readIfPresent(Self.TYPE_KEY, valueType: String.self),
            let securityType =  SecurityType(rawValue: securityRawType) {
             self.securityType = securityType
             switch securityType  {
             case .apiKey:
-                self.name = map.readIfPresent(Self.NAME_KEY, String.self)
-                if let locationRawValue = map.readIfPresent(Self.LOCATION_KEY, String.self),
+                self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self)
+                if let locationRawValue = map.readIfPresent(Self.LOCATION_KEY, valueType: String.self),
                    let location = APIKeyLocation(rawValue: locationRawValue) {
                     self.location = location
                 }
             case .http:
-                self.httpScheme = map.readIfPresent(Self.SCHEME_KEY, String.self)
-                self.httpBearerFormat = map.readIfPresent(Self.BEARER_FORMAT_KEY, String.self)
+                self.httpScheme = map.readIfPresent(Self.SCHEME_KEY,valueType:  String.self)
+                self.httpBearerFormat = map.readIfPresent(Self.BEARER_FORMAT_KEY, valueType: String.self)
             case .oauth2:
-                if let flowsMap = map.readIfPresent(Self.FLOWS_KEY, StringDictionary.self) {
-                    self.flows = try OpenAPIOAuthFlows(load: flowsMap)
-                }
-                self.oauth2MetadataURL = map.readIfPresent(Self.OAUTH2_METADATA_URL_KEY, String.self)
+                self.flows = try map.readIfPresent(Self.FLOWS_KEY, objectType: OpenAPIOAuthFlows.self) 
+                self.oauth2MetadataURL = map.readIfPresent(Self.OAUTH2_METADATA_URL_KEY, valueType: String.self)
             case .openIdConnect:
-                self.openIdConnectURL = map.readIfPresent(Self.OPENID_CONNECT_URL_KEY, String.self)
+                self.openIdConnectURL = map.readIfPresent(Self.OPENID_CONNECT_URL_KEY, valueType: String.self)
                 
             case .mutualTLS:
                 return
@@ -106,19 +105,19 @@ public struct OpenAPISecurityScheme : KeyedElement , PointerNavigable,OpenAPISch
          
        
     }
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult {
        switch segmentName {
-       case Self.TYPE_KEY : return securityType?.rawValue
-       case Self.DESCRIPTION_KEY : return description
-       case Self.NAME_KEY : return name
-       case Self.LOCATION_KEY : return location?.rawValue
-       case Self.SCHEME_KEY : return httpScheme
-       case Self.BEARER_FORMAT_KEY : return  httpBearerFormat
-       case Self.FLOWS_KEY : return flows
-       case Self.OPENID_CONNECT_URL_KEY : return openIdConnectURL
-       case Self.OAUTH2_METADATA_URL_KEY : return openIdConnectURL
-       case Self.DEPRECATED_KEY : return deprecated
-       case OpenAPISchemaReference.REF_KEY: return ref
+       case Self.TYPE_KEY : return .value(JSONValue(securityType?.rawValue))
+       case Self.DESCRIPTION_KEY : return .value(JSONValue(description))
+       case Self.NAME_KEY : return .value(JSONValue(name))
+       case Self.LOCATION_KEY : return .value(JSONValue(location?.rawValue))
+       case Self.SCHEME_KEY : return .value(JSONValue(httpScheme))
+       case Self.BEARER_FORMAT_KEY : return  .value(JSONValue(httpBearerFormat))
+        case Self.FLOWS_KEY : return .navigable(flows)
+       case Self.OPENID_CONNECT_URL_KEY : return  .value(JSONValue(openIdConnectURL))
+       case Self.OAUTH2_METADATA_URL_KEY : return  .value(JSONValue(openIdConnectURL))
+       case Self.DEPRECATED_KEY : return  .value(JSONValue(deprecated))
+       case OpenAPISchemaReference.REF_KEY: return .reference(ref?.reference)
        default:
        throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPISecurityScheme", segmentName)
         }

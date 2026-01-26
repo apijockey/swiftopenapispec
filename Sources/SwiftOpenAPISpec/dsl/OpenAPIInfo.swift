@@ -29,26 +29,14 @@ public struct OpenAPIInfo : KeyedElement, PointerNavigable {
     static let TERMS_KEY = "termsOfService"
     static let TITLE_KEY = "title"
     static let VERSION_KEY = "version"
-    public init(load map: [String : Any]) throws {
-        self.version = map[Self.VERSION_KEY] as? String  ?? ""
-        self.title = map[Self.TITLE_KEY] as? String
-        if let text = map[Self.SUMMARY_KEY] as? String {
-            self.summary = text
-        }
-        if let text = map[Self.DESCRIPTION_KEY] as? String {
-            self.description = text
-        }
-        if let text = map[Self.TERMS_KEY] as? String {
-            self.termsOfService = text
-        }
-        if let contactMap  =  map[Self.CONTACT_KEY] as? StringDictionary{
-           let contact = try OpenAPIContact(load: contactMap)
-            self.contact = contact
-        }
-        if let licenseMap  =  map[Self.LICENSE_KEY] as? StringDictionary,
-           let license = OpenAPILicense(licenseMap) {
-            self.license = license
-        }
+    public init(load map: StringDictionary) throws {
+        self.version = map.readIfPresent(Self.VERSION_KEY, valueType: String.self)
+        self.title = map.readIfPresent(Self.TITLE_KEY,valueType: String.self)
+        self.summary = map.readIfPresent(Self.SUMMARY_KEY,valueType: String.self)
+        self.description = map.readIfPresent(Self.DESCRIPTION_KEY,valueType: String.self)
+        self.termsOfService = map.readIfPresent( Self.TERMS_KEY,valueType: String.self)
+        self.contact = try  map.readIfPresent(Self.CONTACT_KEY, objectType: OpenAPIContact.self)
+        self.license = try map.readIfPresent(Self.LICENSE_KEY, objectType: OpenAPILicense.self)
         extensions = try OpenAPIExtension.extensionElements(map)
         
     }
@@ -57,17 +45,17 @@ public struct OpenAPIInfo : KeyedElement, PointerNavigable {
            return InitializationResult(value: element, diagnostics: [])
        }
 
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
-        case Self.CONTACT_KEY: return contact
-        case Self.DESCRIPTION_KEY: return description
-        case Self.LICENSE_KEY: return license
-        case Self.TERMS_KEY: return termsOfService
-        case Self.TITLE_KEY: return title
-        case Self.VERSION_KEY: return version
-        case Self.SUMMARY_KEY: return summary
-        case Self.TERMS_KEY: return termsOfService
-        case Self.CONTACT_KEY: return contact
+        case Self.CONTACT_KEY: return .navigable(contact)
+        case Self.DESCRIPTION_KEY: return.value(JSONValue(description))
+        case Self.LICENSE_KEY: return .navigable(license)
+        case Self.TERMS_KEY: return .value(JSONValue(termsOfService))
+        case Self.TITLE_KEY: return .value(JSONValue(title))
+        case Self.VERSION_KEY: return .value(JSONValue(version))
+        case Self.SUMMARY_KEY: return .value(JSONValue(summary))
+    case Self.TERMS_KEY: return .value(JSONValue(termsOfService))
+        case Self.CONTACT_KEY: return .navigable(contact)
         
         
         default:
@@ -75,7 +63,7 @@ public struct OpenAPIInfo : KeyedElement, PointerNavigable {
             if segmentName.hasPrefix("x-"), let exts = extensions {
                 if let ext = exts.first(where: { $0.key == segmentName }) {
                     // Gib die strukturierte oder einfache Extension zurück
-                    return ext.structuredExtension?.properties ?? ext.simpleExtensionValue
+                    return .value(JSONValue(ext.structuredExtension?.properties ?? ext.simpleExtensionValue))
                 }
             }
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIInfo", segmentName)

@@ -142,7 +142,7 @@ public struct JSONPointerResolver : JSONPointerResolving {
             }
             //found the right element, now continue to resolve 
             // try to resolve References before accessing their properties
-            if let currentNavigatable = current as? PointerNavigable{
+            if let currentNavigatable = current as? RefPointerNavigable{
                 if seg == "$ref" {
                     if let element = try currentNavigatable.element(for: seg) {
                         return element

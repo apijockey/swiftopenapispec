@@ -19,7 +19,7 @@
 
 public protocol SchemaRule : Sendable {
     var name: String { get }
-    func check(schemaType: OpenAPISchema,  ctx: ValidationContext,pointer: String) -> [Diagnostic]
+    func check(schema: OpenAPISchema,  ctx: ValidationContext,pointer: String) -> [Diagnostic]
 
 }
 
@@ -35,7 +35,7 @@ public struct SchemaRuleRunner  : Sendable{
     public func run(schema: OpenAPISchema, pointer: String,resolver: inout JSONPointerResolver) async throws -> [Diagnostic] {
         if let type =  schema.type {
             var out: [Diagnostic] = []
-            out.append(contentsOf: rules.flatMap { $0.check(schemaType: schema, ctx: ctx, pointer: JSONPointer.join(pointer,"type")) })
+            out.append(contentsOf: rules.flatMap { $0.check(schema: schema, ctx: ctx, pointer: JSONPointer.join(pointer,"type")) })
             
             // Recurse into schemaType (if no $ref on wrapper)
             
@@ -118,11 +118,11 @@ public struct NonEmptyCompositionRule: SchemaRule {
     public let name = "Schema.NonEmptyComposition"
     public init() {}
     
-    public func check(schemaType: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
         
         var diags: [Diagnostic] = []
         
-        if case let .anyOf(ofType) = schemaType.type,
+        if case let .anyOf(ofType) = schema.type,
             (ofType.items ?? []).isEmpty {
             diags.append(.init(
                 severity: .error,
@@ -133,7 +133,7 @@ public struct NonEmptyCompositionRule: SchemaRule {
             ))
         }
         
-        if case let .anyOf(ofType) = schemaType.type,
+        if case let .anyOf(ofType) = schema.type,
             (ofType.items ?? []).isEmpty {
             diags.append(.init(
                 severity: .error,
@@ -144,7 +144,7 @@ public struct NonEmptyCompositionRule: SchemaRule {
             ))
         }
         
-        if case let .allOf(ofType) = schemaType.type,
+        if case let .allOf(ofType) = schema.type,
            (ofType.items ?? []).isEmpty {
             diags.append(.init(
                 severity: .error,
@@ -164,10 +164,10 @@ public struct StringMinMaxLengthRule: SchemaRule {
     public let name = "Schema.StringMinMaxLength"
     public init() {}
     
-    public func check(schemaType: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
-        guard case let .string(stringType) = schemaType.type  else { return [] }
-        guard let min = stringType.minLength,
-            let max = stringType.maxLength else { return [] }
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        guard case let .string = schema.type  else { return [] }
+        guard let min = schema.minLength,
+            let max = schema.maxLength else { return [] }
         if min > max {
             return [.init(
                 severity: .error,
@@ -185,11 +185,11 @@ public struct MultipleOfRule: SchemaRule {
     public let name = "Schema.MultipleOf"
     public init() {}
     
-    public func check(schemaType: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
-        guard case let .number(openAPINumberType) = schemaType.type else {
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        guard case let .number = schema.type else {
             return []
         }
-        if let doubleValue =  openAPINumberType.multipleOf,
+        if let doubleValue =  schema.multipleOf,
            doubleValue > 0 {
             return []
         }
@@ -207,7 +207,7 @@ public struct OAS30SupportedRegexRule: SchemaRule {
     public let name = "Schema.SupportedTypes"
     public init() {}
     
-    public func check(schemaType: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
         
         return []
     }
@@ -217,15 +217,15 @@ public struct OAS30SupportedTypeRule: SchemaRule {
     public let name = "Schema.SupportedTypes"
     public init() {}
     
-    public func check(schemaType: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
         
-        if case let .integer(openAPIIntegerType) = schemaType.type {
+        if case .integer = schema.type {
             return [.init(severity: .error, code: .invalidType,
                           message: "unknown type 'integer'",
                           pointer: "\(pointer)/\("type")",
                           rule: "Schema.SupportedTypes")]
         }
-        else if case let .null(openAPINullType) = schemaType.type {
+        else if case .null = schema.type {
             return [.init(severity: .error, code: .invalidType,
                           message: "Null type not supported in OpenAPI 3.0 (switch to nullable)",
                           pointer: "\(pointer)/type",
@@ -241,9 +241,9 @@ public struct RequiredSubsetOfPropertiesRule: SchemaRule {
     public let name = "Schema.RequiredSubsetOfProperties"
     public init() {}
     
-    public func check(schemaType: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
         var diags: [Diagnostic] = []
-        guard case let .object(openAPIObjectType) = schemaType.type else {
+        guard case let .object(openAPIObjectType) = schema.type else {
             return []
         }
         let required = openAPIObjectType.required
@@ -269,33 +269,33 @@ public struct SupportedFormatsRule: SchemaRule {
     public let name = "Schema.SupportedFormat"
     public init() {}
     
-    public func check(schemaType: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
         var diags: [Diagnostic] = []
         
-        if case let .string(openAPIStringType) = schemaType.type {
-            if ["byte","binary","", "date","date-time ","password"].contains(openAPIStringType.format)  || openAPIStringType.format == nil { return [] }
+        if case .string = schema.type {
+            if ["byte","binary","", "date","date-time ","password"].contains(schema.format)  || schema.format == nil { return [] }
             else {
                 diags.append(Diagnostic(severity: .warning, code: .invalidValue, message: "format not predefined for 'string'", pointer: pointer, rule: name))
             }
         }
-        if case let .array(openAPIArrayType) = schemaType.type {
+        if case let .array(openAPIArrayType) = schema.type {
             return []
         }
-        if case let .integer(openAPIIntegerType) = schemaType.type {
-            if  ["int32","int64"].contains(openAPIIntegerType.format) || (openAPIIntegerType.format ?? "").isEmpty {
+        if case .integer = schema.type {
+            if  ["int32","int64"].contains(schema.format) || (schema.format ?? "").isEmpty {
                 return []
             }
             else {
-                diags.append(Diagnostic(severity: .warning, code: .invalidValue, message: "format '\(openAPIIntegerType.format ?? "")' not predefined for 'integer'", pointer: pointer, rule: name))
+                diags.append(Diagnostic(severity: .warning, code: .invalidValue, message: "format '\(schema.format ?? "")' not predefined for 'integer'", pointer: pointer, rule: name))
             }
         }
             
-        if case let .number(openAPINumberType) = schemaType.type {
-        if  ["float","double"].contains(openAPINumberType.format) || (openAPINumberType.format ?? "").isEmpty {
+        if case  .number = schema.type {
+        if  ["float","double"].contains(schema.format) || (schema.format ?? "").isEmpty {
                 return []
             }
             else {
-                diags.append(Diagnostic(severity: .warning, code: .invalidValue, message: "format '\(openAPINumberType.format ?? "")' not predefined for 'String'", pointer: pointer, rule: name))
+                diags.append(Diagnostic(severity: .warning, code: .invalidValue, message: "format '\(schema.format ?? "")' not predefined for 'String'", pointer: pointer, rule: name))
             }
         }
         

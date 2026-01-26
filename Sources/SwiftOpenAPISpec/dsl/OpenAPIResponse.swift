@@ -20,30 +20,22 @@ import Foundation
 
 
 /// An OpenAPIResponse is a child of ``OpenAPIOperation`` and can be identified by its unique ``key``, being an HTTP status, like '200'
-public struct OpenAPIResponse : KeyedElement, PointerNavigable,OpenAPISchemaReferenceable {
+public struct OpenAPIResponse : KeyedElement, PointerNavigable {
     public static let DESCRIPTION_KEY = "description"
     public static let SUMMARY_KEY = "summary"
     public static let CONTENT_KEY = "content"
     public static let HEADERS_KEY = "headers"
     public static let LINKS_KEY = "links"
-    public init(load map: [String : Any]) throws {
+    public init(load map: StringDictionary) throws {
         if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
             self.ref = ref
             return
         }
-        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
-        self.summary = map.readIfPresent(Self.SUMMARY_KEY, String.self)
-        if let contentMap = map.readIfPresent(Self.CONTENT_KEY, StringDictionary .self) {
-            self.content = try KeyedElementList<OpenAPIMediaType>.map(contentMap).value
-        }
-         if let headerMap = map.readIfPresent(Self.HEADERS_KEY, StringDictionary .self) {
-             self.headers = try KeyedElementList<OpenAPIHeader>.map(headerMap).value
-         }
-        if let linkMap = map.readIfPresent(Self.LINKS_KEY, StringDictionary .self) {
-            self.links = try KeyedElementList<OpenAPILink>.map(linkMap).value
-        }
-      
-      
+        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType:  String.self)
+        self.summary = map.readIfPresent(Self.SUMMARY_KEY, valueType: String.self)
+        self.content = try map.mapListIfPresent(Self.CONTENT_KEY, objectType: OpenAPIMediaType.self)
+        self.headers = try map.mapListIfPresent(Self.HEADERS_KEY, objectType: OpenAPIHeader.self)
+        self.links =   try map.mapListIfPresent(Self.LINKS_KEY, objectType: OpenAPILink .self)
       
     }
     public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
@@ -60,17 +52,28 @@ public struct OpenAPIResponse : KeyedElement, PointerNavigable,OpenAPISchemaRefe
     public var ref : OpenAPISchemaReference? = nil
    
     
-    public func element(for segmentName : String) throws -> Any? {
+    public func element(for segmentName : String) throws -> NavigationResult{
         switch segmentName {
-        case Self.CONTENT_KEY: return self.content
-        case Self.DESCRIPTION_KEY : return self.content
-        case Self.HEADERS_KEY: return self.headers
-        case Self.LINKS_KEY: return self.links
+        case Self.CONTENT_KEY: return try content.element(for: segmentName)
+        case Self.DESCRIPTION_KEY : return .value(JSONValue(description))
+        case Self.HEADERS_KEY: return try self.headers.element(for: segmentName)
+        case Self.LINKS_KEY: return try self.links.element(for: segmentName)
              
-        case Self.SUMMARY_KEY: return self.summary
-        case OpenAPISchemaReference.REF_KEY: return ref
-            default : throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIResponse", segmentName)
+        case Self.SUMMARY_KEY: return .value(JSONValue(self.summary))
+        case OpenAPISchemaReference.REF_KEY: return .reference(ref?.reference)
+        default : throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIResponse", segmentName)
         }
     }
 }
 
+
+extension Array where Element : KeyedElement, Element : PointerNavigable {
+    public func element(for segmentName : String) throws -> NavigationResult{
+        guard let element = self.first (where:{ element in
+            element.key == segmentName
+        }) else {
+            return .notFound(segmentName)
+        }
+        return .navigable(element)
+    }
+}

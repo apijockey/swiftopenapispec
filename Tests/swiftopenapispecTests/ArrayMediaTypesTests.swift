@@ -69,11 +69,11 @@ struct ArrayMediaTypesTests {
         }
 
         // Array-Constraints
-        guard case let .string(stringItem) = schemaType.items?.type else {
+        guard case .string = schemaType.items?.type else {
             Issue.record("Expected string items")
             return
         }
-        #expect(stringItem.minLength == 1)
+        #expect(media.schema?.minLength == 1)
 
     }
 
@@ -104,11 +104,11 @@ struct ArrayMediaTypesTests {
         #expect(objectItems.properties.count == 2)
         #expect(objectItems.properties.contains(name: "id"))
         #expect(objectItems.properties.contains(name: "name"))
-        guard case let .integer(integerType ) = objectItems.properties[key: "id"]?.schema?.type else {
+        guard case .integer = objectItems.properties[key: "id"]?.schema?.type else {
             Issue.record("Expected integer type for id")
             return
         }
-        guard case let .string(stringType ) = objectItems.properties[key: "name"]?.schema?.type else {
+        guard case  .string = objectItems.properties[key: "name"]?.schema?.type else {
             Issue.record("Expected integer type for id")
             return
         }

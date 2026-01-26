@@ -16,7 +16,12 @@
 //  Created by Patric Dubois on 16.12.25.
 //
 
-public struct OpenAPIXMLObject : PointerNavigable {
+public struct OpenAPIXMLObject : PointerNavigable, ThrowingHashMapInitiable {
+    public static func initialize(_ map: StringDictionary) throws -> InitializationResult<OpenAPIXMLObject> {
+        let element = try Self.init(load: map)
+        return InitializationResult(value: element, diagnostics: [])
+    }
+    
     public enum NodeKind: String, Codable, Sendable {
         case element, attribute, text, cdata, none
     }
@@ -27,18 +32,17 @@ public struct OpenAPIXMLObject : PointerNavigable {
     public static let ATTRIBUTE_KEY = "attribute"
     public static let WRAPPED_KEY = "wrapped"
     
-    
-    public init(_ map: [String : Any]) throws {
+    public init(load map: StringDictionary) throws {
         let nodeType = map.readIfPresent(Self.NODETYPE_KEY, String.self)
-        self.nodeType = NodeKind(rawValue: nodeType ?? "none") 
+        self.nodeType = NodeKind(rawValue: nodeType ?? "none")
         self.name = map.readIfPresent(Self.NAME_KEY, String.self)
         self.namespace = map.readIfPresent(Self.NAMESPACE_KEY, String.self)
         self.prefix = map.readIfPresent(Self.PREFIX_KEY, String.self)
         self.attribute = map.readIfPresent(Self.ATTRIBUTE_KEY, Bool.self)
         self.wrapped = map.readIfPresent(Self.WRAPPED_KEY, Bool.self)
         self.extensions = try OpenAPIExtension.extensionElements(map)
-            
     }
+   
     public func element(for segmentName: String) throws -> Any? {
         switch segmentName {
         case Self.NODETYPE_KEY : return nodeType

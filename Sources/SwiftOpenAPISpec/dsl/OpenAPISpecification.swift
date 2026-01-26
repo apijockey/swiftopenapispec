@@ -43,8 +43,9 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
         if let infoMap =  map[OpenAPISpecification.INFO_KEY] as? StringDictionary {
             self.info = try OpenAPIInfo(load: infoMap)
         }
-        if map[OpenAPISpecification.COMPONENTS_KEY]  as? StringDictionary != nil {
+        if map[OpenAPISpecification.COMPONENTS_KEY]  as? StringDictionary != nil{
             components =  try map.tryMap(OpenAPISpecification.COMPONENTS_KEY, root: "root", OpenAPIComponent.self)
+           
         }
         selfUrl = map.readIfPresent(OpenAPISpecification.SELF_URL_KEY, String.self)
         self.key = selfUrl

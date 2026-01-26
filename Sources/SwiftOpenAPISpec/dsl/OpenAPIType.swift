@@ -12,14 +12,14 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
     case allOf(OpenAPIAllOfType)
     case anyOf(OpenAPIAnyOfType)
     case array(OpenAPIArrayType)
-    case bool(OpenAPIBooleanType)
-    case integer(OpenAPIIntegerType)
-    case number(OpenAPINumberType)
+    case bool
+    case integer
+    case number
     case object(OpenAPIObjectType)
     case oneOf(OpenAPIOneOfType)
-    case string(OpenAPIStringType)
+    case string
     case ref(OpenAPISchemaReference)
-    case null(OpenAPINullType)
+    case null
     
     static let NULLABLE_KEY = "nullable"
     public static let TYPE_KEY = "type"
@@ -27,10 +27,8 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
     public static let ANYOF_KEY = "anyOf"
     public static let XML_KEY = "xml"
     public static let ALLOF_KEY = "allOf"
-    public static let DISCRIMINATOR_KEY = "discriminator"
-    public static let FORMAT_KEY = "format"
     public init() {
-        self = .null(OpenAPINullType())
+        self = .null
     }
     public static func initialize(_ map: StringDictionary) throws -> InitializationResult<OpenAPIType> {
         if let reference = try OpenAPISchemaReference.initReference(from: (map)) {
@@ -41,16 +39,13 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
         let type = map.readIfPresent(Self.TYPE_KEY, String.self)
         switch type {
                 case "string":
-                    let type = try OpenAPIType.string(OpenAPIStringType(load: map))
-                    return  InitializationResult(value:type, diagnostics: [])
+                    return .init(value: .string, diagnostics: [])
 
                     case "number":
-                        let type = try OpenAPIType.number(OpenAPINumberType(load: map))
-                        return  InitializationResult(value:type, diagnostics: [])
+                        return .init(value: .number, diagnostics: [])
 
                     case "integer":
-                        let type = try OpenAPIType.integer(OpenAPIIntegerType(load: map))
-                        return  InitializationResult(value:type, diagnostics: [])
+                        return .init(value: .integer, diagnostics: [])
 
                     case "array":
                         let type = try OpenAPIType.array(OpenAPIArrayType(load: map))
@@ -61,23 +56,15 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
                         return  InitializationResult(value:type, diagnostics: [])
 
                     case "boolean":
-                        let type = try OpenAPIType.bool(OpenAPIBooleanType(load: map))
-                        return  InitializationResult(value:type, diagnostics: [])
-
+                            return .init(value: .bool, diagnostics: [])
+                   
                     case "null":
-                        let type = try OpenAPIType.null(OpenAPINullType(load: map))
-                        return  InitializationResult(value:type, diagnostics: [])
-
-                    case .none:
-                    let diagnostic = Diagnostic(severity: .error, code: .missingRequired, message: "no type info", pointer: "", rule: "Initialization.OpenAPIType")
-                    let nullType = try OpenAPINullType(load: map)
-                    let type = OpenAPIType.null(nullType)
-                    return  InitializationResult(value:type, diagnostics: [diagnostic])
+                        return .init(value: .null, diagnostics: [])
 
                     default:
-                    let diagnostic = Diagnostic(severity: .error, code: .missingRequired, message: "no type info", pointer: "", rule: "Initialization.OpenAPIType")
-                    let nullType = try OpenAPINullType(load: map)
-                    let type = OpenAPIType.null(nullType)
+                    let diagnostic = Diagnostic(severity: .error, code: .missingRequired, message: "unsupported or missing type info", pointer: "", rule: "Initialization.OpenAPIType")
+            
+                        let type = OpenAPIType.null
                     return  InitializationResult(value:type, diagnostics: [diagnostic])
                     }
          
@@ -93,22 +80,22 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
             return openAPIAnyOfType
         case .array(let openAPIArrayType):
             return try openAPIArrayType.element(for: segmentName)
-        case .bool(let openAPIBooleanType):
-            return try openAPIBooleanType.element(for: segmentName)
-        case .integer(let openAPIIntegerType):
-            return try openAPIIntegerType.element(for: segmentName)
-        case .number(let openAPINumberType):
-            return try openAPINumberType.element(for: segmentName)
+        case .bool:
+            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIType", segmentName)
+        case .integer:
+            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIType", segmentName)
+        case .number:
+            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIType", segmentName)
         case .object(let openAPIObjectType):
             return try openAPIObjectType.element(for: segmentName)
         case .oneOf(let openAPIOneOfType):
             return openAPIOneOfType
-        case .string(let openAPIStringType):
-            return try openAPIStringType.element(for: segmentName)
+        case .string:
+            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIType", segmentName)
         case .ref(let openAPISchemaReference):
             return openAPISchemaReference
-        case .null(let openAPINullType):
-            return openAPINullType
+        case .null:
+            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIType", segmentName)
         }
         
         

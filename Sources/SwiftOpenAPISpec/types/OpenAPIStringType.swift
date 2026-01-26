@@ -23,32 +23,32 @@
 //
 
 
-public struct OpenAPINullType :  ThrowingHashMapInitiable , PointerNavigable,OpenAPISchemaReferenceable {
-    public func validate() throws {
-        
-    }
-    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
-           let element = try Self(load: map)
-           return InitializationResult(value: element, diagnostics: [])
-       }
-    public init(load map: StringDictionary) throws {
-        
-    }
-    public init () {
-        
-    }
-    public var ref: OpenAPISchemaReference?
-    
-    public func element(for segmentName: String) throws -> Any? {
-      
-          
-        throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPINullType", segmentName)
-
-        
-    }
-    
-   
-    
-    
-   
-}
+//public struct OpenAPINullType :  ThrowingHashMapInitiable , PointerNavigable,OpenAPISchemaReferenceable {
+//    public func validate() throws {
+//        
+//    }
+//    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
+//           let element = try Self(load: map)
+//           return InitializationResult(value: element, diagnostics: [])
+//       }
+//    public init(load map: StringDictionary) throws {
+//        
+//    }
+//    public init () {
+//        
+//    }
+//    public var ref: OpenAPISchemaReference?
+//    
+//    public func element(for segmentName: String) throws -> Any? {
+//      
+//          
+//        throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPINullType", segmentName)
+//
+//        
+//    }
+//    
+//   
+//    
+//    
+//   
+//}

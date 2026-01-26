@@ -179,8 +179,12 @@ struct OpenAPIJSONPointerTests {
             ref: "#/components/schemas/user~1admin~0meta/properties/note/type"
         )
         // Schema name in ext-components.yaml is "user/admin~meta"
-        
-        #expect(any is OpenAPIStringType)
+            
+        let stringType = try #require(any as? OpenAPIType)
+        guard case .string = stringType else {
+            Issue.record("Failed to extract string type from: \(stringType)")
+            return
+        }
     }
 
     @Test("Encoding map key contains '/', must use ~1 (event~1payload)")

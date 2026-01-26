@@ -114,7 +114,7 @@ struct FixtureTests {
         let parameter = parameters.first!
         #expect(parameter.key == "id")
         #expect(parameter.location == SwiftOpenAPISpec.OpenAPIParameter.ParameterLocation.path)
-        guard case  .string(_) = parameter.schema?.type   else { Issue.record("string expected"); return }
+        guard case  .string = parameter.schema?.type   else { Issue.record("string expected"); return }
         
         #expect(parameter.explode == nil)
         #expect(parameter.deprecated == nil)
@@ -128,10 +128,10 @@ struct FixtureTests {
         let queryParameter = searchParameters.first!
         #expect(queryParameter.key == "limit")
         #expect(queryParameter.location == OpenAPIParameter.ParameterLocation.query)
-        guard case  let .number(parameterType) = parameter.schema?.type   else { Issue.record("number expected"); return }
-        #expect(parameterType.defaultValue == 10)
-        #expect(parameterType.minimum == 1)
-        #expect(parameterType.maximum == 100)
+        guard case  .number = parameter.schema?.type   else { Issue.record("number expected"); return }
+        #expect(parameter.schema?.defaultValue == 10)
+        #expect(parameter.schema?.minimum == 1)
+        #expect(parameter.schema?.maximum == 100)
         
     }
     
@@ -158,11 +158,11 @@ struct FixtureTests {
         
         let requestbodyContents = try #require(apiSpec[path: "/upload"]?.operations[operationID : "upload"]?.requestBody?.contents)
         #expect(requestbodyContents.count == 1)
-        guard case  let .string(stringType)  = try #require(requestbodyContents[0].schema?.type ) else {
+        guard case  let .string  = try #require(requestbodyContents[0].schema?.type ) else {
             Issue.record("Failed to extract string schema")
             return
         }
-        #expect(stringType.allowedElements == ["Alice","Bob","Carl"])
+        #expect(requestbodyContents[0].schema?.allowedValues == ["Alice","Bob","Carl"])
         
         
     }
@@ -219,8 +219,9 @@ struct FixtureTests {
         guard case let .object(objectType) = try #require(operations.first?.response(httpstatus: "200")?.content.first?.schema?.type ) else { Issue.record(); return }
         #expect(objectType.properties.count == 2)
         let winnerProperty = try #require(objectType.properties[key: "winner"])
-        guard case let .string(stringPropertyInfo) = try #require(winnerProperty.schema?.type) else { Issue.record(); return }
-        #expect(stringPropertyInfo.allowedElements == ["X", "O", "."])
+        let schema = try #require(winnerProperty.schema)
+        guard case let .string(stringPropertyInfo) = try #require(schema.type) else { Issue.record(); return }
+        #expect(schema.allowedValues == ["X", "O", "."])
         let boardProperty = try #require((objectType.properties[key: "board"]?.schema?.type as? OpenAPIArrayType))
         #expect(boardProperty.maxItems == 3)
         #expect(boardProperty.minItems == 3)
@@ -268,8 +269,9 @@ struct FixtureTests {
         #expect(object.properties.contains(name: "count"))
         #expect(object.properties.contains(name: "status"))
         #expect(object.properties.contains(name: "note"))
-        guard case let  .string(noteProperty) = try #require(object.properties[key: "note"]?.schema?.type) else { Issue.record(); return }
-        #expect(noteProperty.pattern == "^[A-Z]+$")
+        let schema = try #require(object.properties[key: "note"]?.schema)
+        guard case let  .string(noteProperty) = try #require(schema.type) else { Issue.record(); return }
+        #expect(schema.pattern == "^[A-Z]+$")
     }
     @Test("10-servers-variables")
     func serversvariables() async throws {
@@ -335,12 +337,13 @@ struct FixtureTests {
         }
         #expect(object.properties.contains(name:"currency"))
         let currencyInfo = try #require(object.properties[key:"currency"])
+        let schema = try #require(currencyInfo.schema)
         guard case let .string(currencyTypeInfo) = try #require(currencyInfo.schema?.type) else {
             Issue.record("Expected to extract a string schema for the 'currency' property")
             return
         }
-        #expect(currencyTypeInfo.minLength == 3)
-        #expect(currencyTypeInfo.maxLength == 3)
+        #expect(schema.minLength == 3)
+        #expect(schema.maxLength == 3)
     }
     @Test("21-allofcomponents")
     func nestedallofcomponent() async throws {

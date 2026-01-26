@@ -59,15 +59,15 @@ public struct OpenAPIArrayType : OpenAPISchemaType, PointerNavigable{
     
     
     
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
-        case Self.ITEMS_KEY: return self.items
-        case Self.ARRAY_TYPE_KEY: return self.type
-        case Self.MAX_ITEMS_KEY : return maxItems
-        case Self.MIN_ITEMS_KEY : return minItems
-        case Self.UNIQE_ITEMS_KEY : return uniqueItems
-        case Self.MAX_CONTAINS_KEY : return maxContains
-        case Self.MIN_CONTAINS_KEY : return minContains
+        case Self.ITEMS_KEY: return .navigable(self.items)
+        case Self.ARRAY_TYPE_KEY: return .value(JSONValue(self.type))
+        case Self.MAX_ITEMS_KEY : return .value(JSONValue(maxItems))
+        case Self.MIN_ITEMS_KEY : return .value(JSONValue(minItems))
+        case Self.UNIQE_ITEMS_KEY : return .value(JSONValue(uniqueItems))
+        case Self.MAX_CONTAINS_KEY : return .value(JSONValue(maxContains))
+        case Self.MIN_CONTAINS_KEY : return .value(JSONValue(minContains))
         default:
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIArrayType", segmentName)
         }
@@ -91,7 +91,7 @@ public struct OpenAPIArrayType : OpenAPISchemaType, PointerNavigable{
         self.minContains = map[Self.MIN_CONTAINS_KEY] as? Int
         self.uniqueItems = map[Self.UNIQE_ITEMS_KEY] as? Bool
          if let list = (map[Self.ITEMS_KEY] as? StringDictionary),
-            let type = list[Self.TYPE_KEY] as? String{
+            case let .string(type) = list[Self.TYPE_KEY] {
              self.items = try OpenAPISchema.initialize(list).value
              }
     }

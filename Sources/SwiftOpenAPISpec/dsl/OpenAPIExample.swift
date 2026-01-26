@@ -18,38 +18,36 @@
 
 import Foundation
 
-public struct OpenAPIExample : KeyedElement, PointerNavigable,OpenAPISchemaReferenceable {
+public struct OpenAPIExample : KeyedElement, RefPointerNavigable {
     public static let SUMMARY_KEY = "summary"
     public static let DESCRIPTION_KEY = "description"
     public static let VALUE_KEY = "value"
  
     public static let EXTERNAL_VALUE_KEY = "externalValue"
     public static let SERIALIZED_VALUE_KEY = "serializedValue"
-    public init(load map: [String : Any]) throws {
+    public init(load map: StringDictionary) throws {
         if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
             self.ref = ref
             return
         }
-        self.summary = map.readIfPresent(Self.SUMMARY_KEY, String.self)
-        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
-        self.value = map[Self.VALUE_KEY].stringifyValue
-        self.externalValue = map.readIfPresent(Self.EXTERNAL_VALUE_KEY, String.self)
-       
-       
-       
-        self.serializedValue = map[Self.SERIALIZED_VALUE_KEY].stringifyValue
+        self.summary = map.readIfPresent(Self.SUMMARY_KEY, valueType: String.self)
+        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self)
+        self.value = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self)
+        self.externalValue = map.readIfPresent(Self.EXTERNAL_VALUE_KEY, valueType: String.self)
+
+        self.serializedValue = map.readIfPresent(Self.SERIALIZED_VALUE_KEY,valueType: String.self)
     }
     public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
         let element = try Self(load: map)
         return InitializationResult(value: element, diagnostics: [])
     }
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
-        case Self.SUMMARY_KEY: return self.summary
-        case Self.DESCRIPTION_KEY: return self.description
-        case Self.VALUE_KEY: return self.value
-        case Self.EXTERNAL_VALUE_KEY: return self.externalValue
-        case OpenAPISchemaReference.REF_KEY: return self.ref
+        case Self.SUMMARY_KEY: return .value(JSONValue(self.summary))
+        case Self.DESCRIPTION_KEY: return .value(JSONValue(self.description))
+        case Self.VALUE_KEY: return .value(JSONValue(self.value))
+        case Self.EXTERNAL_VALUE_KEY: return .value(JSONValue(self.externalValue))
+        case OpenAPISchemaReference.REF_KEY: return .reference(ref?.reference)
         default:
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIExample", segmentName)
         }

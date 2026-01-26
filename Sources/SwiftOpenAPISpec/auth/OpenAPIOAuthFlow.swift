@@ -40,17 +40,19 @@
 import Foundation
 
 public struct OpenAPIOAuthFlow : ThrowingHashMapInitiable, PointerNavigable {
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
-        case Self.AUTHORIZATIONURL_KEY: return authorizationUrl
-        case Self.DEVICE_AUTHORIZATIONURL_KEY: return deviceAuthorizationUrl
-        case Self.TOKENURL_KEY: return tokenUrl
-        case Self.REFRESHURL_KEY : return refreshUrl
-            case Self.SCOPES_KEY : return scopes
+        case Self.AUTHORIZATIONURL_KEY: return .value(JSONValue(authorizationUrl))
+        case Self.DEVICE_AUTHORIZATIONURL_KEY: return .value(JSONValue(deviceAuthorizationUrl))
+        case Self.TOKENURL_KEY: return .value(JSONValue(tokenUrl))
+        case Self.REFRESHURL_KEY : return .value(JSONValue(refreshUrl))
+        case Self.SCOPES_KEY : return  .value(JSONValue(scopes))
         default:
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIOAuthFlow", segmentName)
         }
     }
+    
+   
     
     public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
         let element = try Self(load: map)

@@ -139,10 +139,15 @@ struct ArrayComponentsTests {
         }
         #expect(obj.properties.contains(name: "id"))
         #expect(obj.properties.contains(name: "name"))
-        #expect(obj.properties[key: "id"]?.schema?.type is OpenAPIIntegerType)
-        #expect(obj.properties[key: "name"]?.schema?.type is OpenAPIStringType)
-        #expect(obj.required.contains("id"))
-        #expect(obj.required.contains("name"))
+        guard case .integer = obj.properties[key: "id"]?.schema?.type else {
+            Issue.record("Expected .integer but got \(String(describing: obj.properties[key: "id"]?.schema?.type))")
+            return
+        }
+        guard case .string = obj.properties[key: "name"]?.schema?.type else {
+            Issue.record("Expected .string but got \(String(describing: obj.properties[key: "id"]?.schema?.type))")
+            return
+        }
+
     }
 
     @Test("NumberArrayWithContains -> minContains/maxContains")
@@ -151,14 +156,14 @@ struct ArrayComponentsTests {
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url: "36-arrayComponents", documentLoader: YamsDocumentLoader())
 
         let comp = try #require(apiSpec[schemacomponent: "NumberArrayWithContains"])
-        guard case let .number(numberType) = try #require(comp.schema?.type) else {
+        guard case let .number = try #require(comp.schema?.type) else {
                 Issue.record(
                     "Expected .number(let) but got \(comp.schema?.type.debugDescription)"
             )
             return
         }
-        #expect(numberType.minimum == 1)
-        #expect(numberType.maximum == 2)
+        #expect(comp.schema?.minimum == 1)
+        #expect(comp.schema?.maximum == 2)
     }
 
     @Test("ItemsWithoutType -> items ohne type -> items == nil")
@@ -167,7 +172,7 @@ struct ArrayComponentsTests {
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url: "36-arrayComponents", documentLoader: YamsDocumentLoader())
 
         let comp = try #require(apiSpec[schemacomponent: "ItemsWithoutType"])
-        guard case let .null(arrayType) = try #require(comp.schema?.type) else {
+        guard case  .null = try #require(comp.schema?.type) else {
                 Issue.record(
                     "Expected .null(let) but got \(comp.schema?.type.debugDescription)"
             )

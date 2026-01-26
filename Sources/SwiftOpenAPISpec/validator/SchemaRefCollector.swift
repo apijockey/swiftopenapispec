@@ -341,7 +341,7 @@ public struct SchemaRefCollector {
         var out: [RefOccurrence] = []
         for prop in obj.properties {
             if let key = prop.key,
-               let ref = prop.ref {
+               case let .ref(ref) = prop.schema?.type {
                 let propPtr = JSONPointer.join(JSONPointer.join(pointer, "properties"), key)
                 out.append(.init(
                     refString: ref.reference ?? "",
@@ -367,17 +367,17 @@ public struct SchemaRefCollector {
             out.append(contentsOf: collect(from: openAPIAnyOfType, pointer: JSONPointer.join(pointer, "allOf")))
         case .array(let openAPIArrayType):
             out.append(contentsOf: collect(from: openAPIArrayType, pointer: JSONPointer.join(pointer, "array")))
-        case .bool(_):
+        case .bool:
             return out
-        case .integer(_):
+        case .integer:
             return out
-        case .number(_):
+        case .number:
             return out
         case .object(let openAPIObjectType):
             out.append(contentsOf: collect(from: openAPIObjectType, pointer: pointer))
         case .oneOf(let openAPIOneOfType):
             out.append(contentsOf: collect(from: openAPIOneOfType, pointer: JSONPointer.join(pointer, "array")))
-        case .string(_):
+        case .string:
             return out
         case .ref(let openAPISchemaReference):
             out.append(.init(
@@ -386,7 +386,7 @@ public struct SchemaRefCollector {
                 expected: .schemaObject
             ))
             return out
-        case .null(_):
+        case .null:
             return []
         case .none:
             return []

@@ -18,18 +18,16 @@
 
 import Foundation
 
-protocol OpenAPISchemaReferenceable {
-    var ref: OpenAPISchemaReference? { get set }
-}
+
 // initally a special type to handle the ref element on an OpenaPISchema, now maybe more a base type for all elements, that can hold a ref, meas, such an element must be included, where a ref can occur, try with OpenAPIExample
 public struct OpenAPISchemaReference  : ThrowingHashMapInitiable, PointerNavigable{
     public func validate() throws {
         
     }
     
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult {
         if segmentName == Self.REF_KEY {
-            return self
+            return .reference(reference)
         }
         throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPISchemaReference", segmentName)
     }
@@ -63,7 +61,7 @@ public struct OpenAPISchemaReference  : ThrowingHashMapInitiable, PointerNavigab
     public init(ref: String) {
         self.reference = ref
     }
-    public var ref: OpenAPISchemaReference? { nil}
+    
     public var reference : String? = nil
     public var summary : String? = nil
     public var description : String? = nil

@@ -40,13 +40,13 @@
 import Foundation
 
 public struct OpenAPIOAuthFlows : ThrowingHashMapInitiable, PointerNavigable {
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
-            case Self.IMPLICIT_KEY: return self.implicit as Any?
-            case Self.PASSWORD_KEY: return self.password as Any?
-            case Self.CLIENT_CREDENTIALS_KEY: return self.clienCredentials as Any?
-            case Self.AUTHORIZATION_CODE_KEY: return self.authorizationCode as Any?
-            case Self.DEVICE_AUTHORIZATION_KEY: return self.deviceAuthorization as Any?
+        case Self.IMPLICIT_KEY: return .value(JSONValue(self.implicit))
+            case Self.PASSWORD_KEY: return .value(JSONValue(self.password))
+            case Self.CLIENT_CREDENTIALS_KEY: return .value(JSONValue(clienCredentials))
+            case Self.AUTHORIZATION_CODE_KEY: return .value(JSONValue(self.authorizationCode))
+            case Self.DEVICE_AUTHORIZATION_KEY: return .value(JSONValue(self.deviceAuthorization ))
         default:
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIOAuthFlows", segmentName)
         }
