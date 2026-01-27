@@ -27,12 +27,9 @@ public struct OpenAPILink : KeyedElement , PointerNavigable {
     public static let DESCRIPTION_KEY = "description"
     public static let SERVER_KEY = "server"
     
-    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
-           let element = try Self(load: map)
-           return InitializationResult(value: element, diagnostics: [])
-       }
-    public init(load map: StringDictionary) throws {
-        if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
+   
+    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+        if let ref  =  try map.readIfPresent(OpenAPISchemaReference.REF_KEY, objectType: OpenAPISchemaReference.self) {
             self.ref = ref
             return
         }

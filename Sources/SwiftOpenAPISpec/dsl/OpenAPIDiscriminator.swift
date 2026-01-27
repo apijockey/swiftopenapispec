@@ -29,30 +29,21 @@ public struct OpenAPIDiscriminator :  ThrowingHashMapInitiable, PointerNavigable
         }
     }
     
-   
-  
+    
+    
     public static let PROPERTY_NAME_KEY = "propertyName"
     public static let MAPPING_KEY = "mapping"
     public static let DEFAULT_MAPPING_KEY = "defaultMapping"
     
     
     
-    public init(load map: [String : Any]) throws {
-        if let propertyName = map[Self.PROPERTY_NAME_KEY] as? String {
-            self.propertyName = propertyName
-        }
+    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+        self.propertyName = map.readIfPresent(Self.PROPERTY_NAME_KEY, valueType: String.self)
+        self.mapping =  map.readIfPresent(Self.MAPPING_KEY, valueType: [String:String].self)
+        self.defaultMapping = map.readIfPresent(Self.DEFAULT_MAPPING_KEY, valueType: String.self)
         
-        if let mapping = map[Self.MAPPING_KEY] as? [String: String] {
-            self.mapping = mapping
-        }
-        if let defaultMapping = map[Self.DEFAULT_MAPPING_KEY] as? String {
-                self.defaultMapping = defaultMapping
-        }
     }
-    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self>{
-        let element = try Self(load: map)
-        return InitializationResult(value: element, diagnostics: [])
-    }
+    
     public var propertyName: String?
     public var mapping: Dictionary<String, String>?
     public var defaultMapping: String?

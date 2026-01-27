@@ -26,11 +26,9 @@ public struct OpenAPIResponse : KeyedElement, PointerNavigable {
     public static let CONTENT_KEY = "content"
     public static let HEADERS_KEY = "headers"
     public static let LINKS_KEY = "links"
-    public init(load map: StringDictionary) throws {
-        if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
-            self.ref = ref
-            return
-        }
+    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+     
+            self.ref =  try map.readIfPresent(OpenAPISchemaReference.REF_KEY, objectType: OpenAPISchemaReference.self)
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType:  String.self)
         self.summary = map.readIfPresent(Self.SUMMARY_KEY, valueType: String.self)
         self.content = try map.mapListIfPresent(Self.CONTENT_KEY, objectType: OpenAPIMediaType.self)
@@ -38,10 +36,7 @@ public struct OpenAPIResponse : KeyedElement, PointerNavigable {
         self.links =   try map.mapListIfPresent(Self.LINKS_KEY, objectType: OpenAPILink .self)
       
     }
-    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
-           let element = try Self(load: map)
-           return InitializationResult(value: element, diagnostics: [])
-       }
+   
 
     public var summary : String?
     public var description : String?

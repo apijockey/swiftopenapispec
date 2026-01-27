@@ -49,8 +49,8 @@ public struct OpenAPIMediaType :  KeyedElement , PointerNavigable {
     public static let ITEM_ENCODING_KEY = "itemEncoding"
     public static let EXTENSIONS_KEY = "extensions"
     public var key : String?
-    public init(load map: StringDictionary) throws {
-            if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
+    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+            if let ref  =  try map.readIfPresent(OpenAPISchemaReference.REF_KEY, objectType: OpenAPISchemaReference.self) {
                 self.ref = ref
                 return
             }
@@ -60,10 +60,7 @@ public struct OpenAPIMediaType :  KeyedElement , PointerNavigable {
         self.prefixEncoding = try map.mapListIfPresent(Self.PREFIX_ENCODING_KEY, objectType: OpenAPIEncoding.self)
         self.itemEncoding =  try map.mapListIfPresent(Self.ITEM_ENCODING_KEY, objectType: OpenAPIEncoding.self)
     }
-    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
-           let element = try Self(load: map)
-           return InitializationResult(value: element, diagnostics: [])
-       }
+   
 
     public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {

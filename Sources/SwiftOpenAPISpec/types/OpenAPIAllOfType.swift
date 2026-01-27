@@ -37,17 +37,12 @@ public struct OpenAPIAllOfType : OpenAPISchemaType, ThrowingHashMapInitiable, Po
    
     public static let TYPE_KEY = "allOf"
     public static let DISCRIMINATOR_KEY = "discriminator"
-    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
-           let element = try Self(load: map)
-           return InitializationResult(value: element, diagnostics: [])
-       }
+  
 
-    public init(load map: [String : Any]) throws {
-        self.type = map[Self.TYPE_KEY] as? String
-        guard let list = (map["allOf"] as? [Any]) else {
-            return
-        }
-        self.items = try HashmapInitializableList<OpenAPISchema>.map( list).value
+    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+        self.type = map.readIfPresent(Self.TYPE_KEY, String.self)
+        
+        self.items = try map.mapListIfPresent("allOf", objectType: OpenAPISchema.self)
        
     }
     

@@ -19,28 +19,21 @@
 //
 
 import Foundation
-public struct OpenAPIRequestBody : KeyedElement , PointerNavigable,OpenAPISchemaReferenceable {
+public struct OpenAPIRequestBody : KeyedElement , PointerNavigable {
+   
     public static let DESCRIPTION_KEY = "description"
     public static let REQUIRED_KEY = "required"
     public static let CONTENTS_KEY = "content"
-    public init(load map: [String : Any]) throws {
-        if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
-            self.ref = ref
-            return
-        }
-       
-        if let contentsMap = map[Self.CONTENTS_KEY] as? [String : Any]{
-            self.contents = try KeyedElementList.map(contentsMap ).value
-        }
-        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
-        self.ref =  try OpenAPISchemaReference.initReference(from: (map))
-        self.required = map.readIfPresent(Self.REQUIRED_KEY, Bool.self) ?? false
+    public  init(load map: StringDictionary,_ diagnostics: inout [Diagnostic])  throws {
+        
+        self.ref =  try map.readIfPresent(OpenAPISchemaReference.REF_KEY, objectType: OpenAPISchemaReference.self)
+        self.contents = try map.mapListIfPresent(Self.CONTENTS_KEY, objectType: OpenAPIMediaType.self)
+        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self)
+        
+        self.required = map.readIfPresent(Self.REQUIRED_KEY, valueType: Bool.self) ?? false
         
     }
-    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
-           let element = try Self(load: map)
-           return InitializationResult(value: element, diagnostics: [])
-       }
+   
 
     public var key : String?
     
@@ -49,9 +42,9 @@ public struct OpenAPIRequestBody : KeyedElement , PointerNavigable,OpenAPISchema
     public var contents : [OpenAPIMediaType] = []
    
     public var ref : OpenAPISchemaReference? = nil
-    public func element(for segmentName : String) throws -> Any? {
+    public func element(for segmentName : String) throws -> NavigationResult {
         switch segmentName {
-        case Self.CONTENTS_KEY : return self.contents
+        case Self.CONTENTS_KEY : return try contents.element(for: segmentName)
             default : throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIRequestBody", segmentName)
         }
     }

@@ -20,6 +20,10 @@
 import Foundation
 
 public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
+   
+    
+   
+    
     
     
   
@@ -127,12 +131,10 @@ public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
     public  enum Errors : LocalizedError {
         case unsupportedComponentlist, unrecognizedComponent
     }
-    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
-        let element = try Self(load: map)
-        return InitializationResult(value: element, diagnostics: [])
-
-    }
-    public init(load map: StringDictionary) throws {
+   
+   
+    
+public init(load map: StringDictionary, _ diagnostics: inout [Diagnostic]) throws {
         
         if let map = map[Self.CALLBACKS_KEY] as? StringDictionary{
             self.callbacks = try KeyedElementList<OpenAPICallBack>.map(map).value

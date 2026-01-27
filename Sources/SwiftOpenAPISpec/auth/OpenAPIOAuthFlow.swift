@@ -40,6 +40,15 @@
 import Foundation
 
 public struct OpenAPIOAuthFlow : ThrowingHashMapInitiable, PointerNavigable {
+   
+   
+    public init(load map: StringDictionary, _ diagnostics: inout [Diagnostic]) throws {
+        authorizationUrl = map.readIfPresent(Self.AUTHORIZATIONURL_KEY,valueType: String.self)
+        tokenUrl = map.readIfPresent(Self.TOKENURL_KEY, valueType: String.self)
+        refreshUrl = map.readIfPresent(Self.REFRESHURL_KEY, valueType: String.self)
+        scopes = map.readIfPresent(Self.SCOPES_KEY,valueType:  [String:String].self)
+    }
+    
     public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
         case Self.AUTHORIZATIONURL_KEY: return .value(JSONValue(authorizationUrl))
@@ -54,22 +63,14 @@ public struct OpenAPIOAuthFlow : ThrowingHashMapInitiable, PointerNavigable {
     
    
     
-    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
-        let element = try Self(load: map)
-        return InitializationResult(value: element, diagnostics: [])
-    }
+   
     
     public static let AUTHORIZATIONURL_KEY = "authorizationUrl"
     public static let DEVICE_AUTHORIZATIONURL_KEY = "deviceAuthorizationUrl"
     public static let TOKENURL_KEY = "tokenUrl"
     public static let REFRESHURL_KEY = "refreshUrl"
     public static let SCOPES_KEY = "scopes"
-    public init(load map: [String : Any]) throws {
-        authorizationUrl = map.readIfPresent(Self.AUTHORIZATIONURL_KEY, String.self)
-        tokenUrl = map.readIfPresent(Self.TOKENURL_KEY, String.self)
-        refreshUrl = map.readIfPresent(Self.REFRESHURL_KEY, String.self)
-        scopes = map.readIfPresent(Self.SCOPES_KEY, [String:String].self)
-    }
+   
     public var authorizationUrl : String? = nil
     public var deviceAuthorizationUrl : String? = nil
     public var tokenUrl : String? = nil

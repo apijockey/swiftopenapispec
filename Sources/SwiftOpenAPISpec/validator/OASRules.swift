@@ -95,7 +95,7 @@ struct RequiredServerURLRule: Rule {
                 diagnostics.append( .init(severity: .error,
                               code: .missingRequired,
                               message: "Missing required field 'url' in one of the 'servers'.",
-                              pointer: "/servers/\(server.name ?? "")/url",
+                              pointer: "/servers/\(server.key ?? "")/url",
                               rule: name))
             }
         }
@@ -117,7 +117,7 @@ struct RequiredServerVariablesRule: Rule {
                     diagnostics.append(.init(severity: .error,
                                   code: .missingRequired,
                                   message: "Missing required field 'default' in one of the 'servers' variables.",
-                                  pointer: "/servers/\(server.name ?? "")/variables/\(variable.key ?? "")/default",
+                                  pointer: "/servers/\(server.key ?? "")/variables/\(variable.key ?? "")/default",
                                              rule: name))
                                        
                 }
@@ -373,8 +373,7 @@ struct OperationMustHaveResponsesRule: Rule {
 
         for pathItem in spec.paths {
             for op in pathItem.operations {
-                guard let responses = op.responses,
-                      responses.count > 0 else {
+                guard op.responses.count > 0 else {
                     let diagnotics = Diagnostic( severity: .error,
                                                  code: .missingResponses,
                                                  message: "Operation must define at least one response.",
@@ -501,10 +500,10 @@ struct SupportedHTPStatusRule: Rule {
           
         for pathItem in spec.paths {
             for op in pathItem.operations {
-                guard let responses = op.responses else {
+                guard op.responses.count > 0 else {
                     return []
                 }
-                for response in responses {
+                for response in op.responses {
                     guard let key = response.key else {
                         continue
                     }
@@ -522,10 +521,10 @@ struct SupportedHTPStatusRule: Rule {
         guard let pathItems = spec.components?.pathItems else { return diags }
         for pathItem in pathItems  {
             for op in pathItem.operations {
-                guard let responses = op.responses else {
+                guard op.responses.count > 0 else {
                     return []
                 }
-                for response in responses {
+                for response in op.responses {
                     guard let key = response.key else {
                         continue
                     }

@@ -59,16 +59,13 @@ public struct OpenAPIOAuthFlows : ThrowingHashMapInitiable, PointerNavigable {
     public static let CLIENT_CREDENTIALS_KEY  = "clientCredentials"
     public static let AUTHORIZATION_CODE_KEY  = "authorizationCode"
     public static let DEVICE_AUTHORIZATION_KEY  = "deviceAuthorization"
-    public init(load map: [String : Any]) throws {
-        self.implicit = try map.mapIfPresent(Self.IMPLICIT_KEY, OpenAPIOAuthFlow.self)
-        self.password = try map.mapIfPresent(Self.PASSWORD_KEY, OpenAPIOAuthFlow.self)
-        self.clienCredentials = try map.mapIfPresent(Self.CLIENT_CREDENTIALS_KEY, OpenAPIOAuthFlow.self)
-        self.authorizationCode = try map.mapIfPresent(Self.AUTHORIZATION_CODE_KEY, OpenAPIOAuthFlow.self)
+    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+        self.implicit = try map.readIfPresent(Self.IMPLICIT_KEY, objectType: OpenAPIOAuthFlow.self)
+        self.password = try map.readIfPresent(Self.PASSWORD_KEY, objectType: OpenAPIOAuthFlow.self)
+        self.clienCredentials = try map.readIfPresent(Self.CLIENT_CREDENTIALS_KEY, objectType: OpenAPIOAuthFlow.self)
+        self.authorizationCode = try map.readIfPresent(Self.AUTHORIZATION_CODE_KEY, objectType: OpenAPIOAuthFlow.self)
     }
-    public static func initialize(_ map: StringDictionary) throws -> InitializationResult<Self> {
-        let element = try Self(load: map)
-        return InitializationResult(value: element, diagnostics: [])
-    }
+   
     public var implicit : OpenAPIOAuthFlow? = nil
     public var password : OpenAPIOAuthFlow? = nil
     public var clienCredentials : OpenAPIOAuthFlow? = nil

@@ -66,20 +66,14 @@ public struct OpenAPIAnyOfType : OpenAPISchemaType, PointerNavigable {
         self.type = "anyOf"
     }
     
-    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
-           let element = try Self(load: map)
-           return InitializationResult(value: element, diagnostics: [])
-       }
+  
+    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+        self.type = map.readIfPresent(Self.TYPE_KEY, String.self)
+        
 
-    public init(load map: [String : Any]) throws {
-        self.type = map[Self.TYPE_KEY] as? String
-        guard let list = (map["anyOf"] as? [Any]) else {
-            return
-        }
-        if let discriminatorMap = map[Self.DISCRIMINATOR_KEY] as? [String:Any] {
-            self.discriminator = try OpenAPIDiscriminator(load: discriminatorMap)
-        }
-        self.items = try HashmapInitializableList.map( list).value
+        self.discriminator = try map.readIfPresent(Self.DISCRIMINATOR_KEY, objectType: OpenAPIDiscriminator.self)
+        
+        self.items = try map.mapListIfPresent(objectType: OpenAPISchema.self )
     }
     
     public func validate() throws {

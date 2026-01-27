@@ -27,7 +27,7 @@ import Foundation
  
    
  */
-public struct OpenAPIPathItem: KeyedElement , PointerNavigable, OpenAPISchemaReferenceable {
+public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
    
     
     public enum Operations: String, Codable {
@@ -47,52 +47,48 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable, OpenAPISchemaRef
     /// "/ping"
     /// inits an instance of ``OpenAPIPath``
     /// - Parameter map: Swift dictionary with a Path key and  value elements representing HTTP methods like **GET**, **POST** and **PUT**
-    public init(load map: [String: Any]) throws {
+    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
         // one resource may foresee several httpOperations
-        if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
+        if let ref  =  try map.readIfPresent(OpenAPISchemaReference.REF_KEY, objectType: OpenAPISchemaReference.self) {
             self.ref = ref
             return
         }
         for (key, httpOperation) in map {
-               if let httpOperationMap = httpOperation as? [String: Any] {
-                var operation = try OpenAPIOperation(load: httpOperationMap)
+            if case let .object(dictionary) = httpOperation {
+
+                   var operation = try OpenAPIOperation(load: dictionary, &diagnostics)
                 operation.key = key
                 self.operations.append(operation)
             }
             
         }
        
-        self.summary  = map.readIfPresent(Self.SUMMARY_KEY, String.self)
-        self.description  = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
-        let servers = try map.tryListIfPresent(OpenAPISpecification.SERVERS_KEY, root: "OpenAPIPath", OpenAPIServer.self)
+        self.summary  = map.readIfPresent(Self.SUMMARY_KEY, valueType: String.self)
+        self.description  = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self)
+        let servers = try map.mapListIfPresent(OpenAPISpecification.SERVERS_KEY, objectType: OpenAPIServer.self)
         if servers.count > 0 {
             self.servers = servers
         }
-        let parameters = try map.tryListIfPresent(Self.PARAMETERS_KEY, root: "OpenAPIPath", OpenAPIParameter.self)
+        let parameters = try map.mapListIfPresent(Self.PARAMETERS_KEY, objectType: OpenAPIParameter.self)
         if parameters.count > 0 {
             self.parameters = parameters
         }
-        if let additionalOperationsMap = map[Self.ADDITIONAL_OPERATIONS_KEY] as? StringDictionary {
-            self.additionalOperations = try KeyedElementList<OpenAPIOperation>.map(additionalOperationsMap).value
-        }
+        self.additionalOperations = try map.mapListIfPresent(Self.ADDITIONAL_OPERATIONS_KEY, valueType: OpenAPIOperation.self)
         self.extensions = try OpenAPIExtension.extensionElements(map)
     }
-    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
-           let element = try Self(load: map)
-           return InitializationResult(value: element, diagnostics: [])
-       }
-    public func element(for segmentName: String) throws -> Any? {
+   
+    public func element(for segmentName: String) throws -> NavigationResult{
         switch segmentName {
            
-            case Self.SUMMARY_KEY: return summary
-            case Self.DESCRIPTION_KEY: return description
-            case Self.SERVERS_KEY: return servers
-            case Self.PARAMETERS_KEY: return parameters
-            case Self.ADDITIONAL_OPERATIONS_KEY: return additionalOperations
-            case OpenAPISchemaReference.REF_KEY: return ref
+        case Self.SUMMARY_KEY: return .value(JSONValue(summary))
+            case Self.DESCRIPTION_KEY: return .value(JSONValue(description))
+        case Self.SERVERS_KEY: return try servers.element(for: segmentName)
+        case Self.PARAMETERS_KEY: return try parameters.element(for: segmentName)
+        case Self.ADDITIONAL_OPERATIONS_KEY: return try additionalOperations.element(for: segmentName)
+        case OpenAPISchemaReference.REF_KEY: return .reference(ref?.reference)
             default :
             if let operation = operations[key: segmentName] {
-                return operation
+                return .navigable(operation)
             }
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIPathItem", segmentName)
         }

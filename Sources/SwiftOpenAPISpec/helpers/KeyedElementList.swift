@@ -20,10 +20,10 @@ public struct KeyedElementList<T> where T :  KeyedElement {
         for element in elements {
             let value = element.value
             if case let .object(valueMap) = value {
-                var type = try T.initialize(valueMap)
-                type.value.key = element.key
-                diagnostics.append(contentsOf:type.diagnostics)
-                types.append(type.value)
+                var initializationResult = try T.initialize(load: valueMap, diagnostics: diagnostics)
+                initializationResult.value.key = element.key
+                diagnostics.append(contentsOf:initializationResult.diagnostics)
+                types.append(initializationResult.value)
             }
         }
         return InitializationResult(value: types, diagnostics: diagnostics)

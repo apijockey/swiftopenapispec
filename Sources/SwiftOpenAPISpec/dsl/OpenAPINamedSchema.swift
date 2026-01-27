@@ -29,12 +29,9 @@ public struct OpenAPINamedSchema: PointerNavigable, KeyedElement ,Sendable {
    
     static let TYPE_KEY = "type"
     
-    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
-           let element = try Self(load: map)
-           return InitializationResult(value: element, diagnostics: [])
-       }
+   
 
-    public init(load map: StringDictionary) throws {
+    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
        
             self.schema = try OpenAPISchema.initialize(map).value
       

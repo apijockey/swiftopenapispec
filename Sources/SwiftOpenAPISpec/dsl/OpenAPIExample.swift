@@ -25,8 +25,8 @@ public struct OpenAPIExample : KeyedElement, RefPointerNavigable {
  
     public static let EXTERNAL_VALUE_KEY = "externalValue"
     public static let SERIALIZED_VALUE_KEY = "serializedValue"
-    public init(load map: StringDictionary) throws {
-        if let ref  =  try OpenAPISchemaReference.initReference(from: (map)) {
+    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+        if let ref  =  try map.readIfPresent(OpenAPISchemaReference.REF_KEY, objectType: OpenAPISchemaReference.self) {
             self.ref = ref
             return
         }
@@ -37,10 +37,7 @@ public struct OpenAPIExample : KeyedElement, RefPointerNavigable {
 
         self.serializedValue = map.readIfPresent(Self.SERIALIZED_VALUE_KEY,valueType: String.self)
     }
-    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
-        let element = try Self(load: map)
-        return InitializationResult(value: element, diagnostics: [])
-    }
+   
     public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
         case Self.SUMMARY_KEY: return .value(JSONValue(self.summary))

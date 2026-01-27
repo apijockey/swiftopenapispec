@@ -74,24 +74,16 @@ public struct OpenAPIOneOfType : OpenAPISchemaType,ThrowingHashMapInitiable, Poi
     
     public static let TYPE_KEY = "oneOf"
     public static let DISCRIMINATOR_KEY = "discriminator"
-    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
-           let element = try Self(load: map)
-           return InitializationResult(value: element, diagnostics: [])
-       }
+    
 
-    public init(load map: [String : Any]) throws {
-        self.type = map[Self.TYPE_KEY] as? String
-        guard let list = (map["oneOf"] as? [Any]) else {
-            return
-        }
-        if let discriminatorMap = map[Self.DISCRIMINATOR_KEY] as? [String:Any] {
-            self.discriminator = try OpenAPIDiscriminator(load: discriminatorMap)
-        }
+    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+        self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self)  
         
-        self.items = try HashmapInitializableList<OpenAPISchema>.map(list).value
+        self.discriminator = try map.readIfPresent(Self.DISCRIMINATOR_KEY, objectType: OpenAPIDiscriminator.self)
+        
+        self.items = try map.mapListIfPresent("oneOf",objectType: OpenAPISchema.self)
     }
-    public func validate() throws {
-    }
+   
     public let type : String?
     public var items: [OpenAPISchema]?
    public var discriminator: OpenAPIDiscriminator?

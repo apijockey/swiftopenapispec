@@ -24,32 +24,29 @@ public struct OpenAPIVariable : KeyedElement , PointerNavigable {
     public static let DESCRIPTION_KEY = "description"
    
     public var key: String?
-    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
-           let element = try Self(load: map)
-           return InitializationResult(value: element, diagnostics: [])
-       }
+  
 
-    public init(load map: [String : Any]) throws {
-        self.enumList = map.readIfPresent(Self.ENUM_KEY, [String].self)
-        self.defaultValue = try map.tryRead(Self.DEFAULT_KEY, String.self,root: "variable")
-        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
+    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+        self.enumList = map.readListIfPresent(Self.ENUM_KEY, valueType: String.self)
+        self.defaultValue = map.readIfPresent(Self.DEFAULT_KEY,  valueType: String.self)
+        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self)
         self.extensions = try OpenAPIExtension.extensionElements(map)
             
     }
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult{
         switch segmentName {
-        case Self.ENUM_KEY : return enumList
-        case Self.DEFAULT_KEY : return defaultValue
-        case Self.DESCRIPTION_KEY : return description
+        case Self.ENUM_KEY : return .value(JSONValue(enumList))
+        case Self.DEFAULT_KEY : return .value(JSONValue(defaultValue))
+        case Self.DESCRIPTION_KEY : return .value(JSONValue(description))
             
         default:
-            if segmentName.hasPrefix("x-"), let exts = extensions {
-                if let ext = exts.first(where: { $0.key == segmentName }) {
-                    // Gib die strukturierte oder einfache Extension zurück
-                    return ext.structuredExtension?.properties ?? ext.simpleExtensionValue
-                }
-               
-            }
+//            if segmentName.hasPrefix("x-"), let exts = extensions {
+//                if let ext = exts.first(where: { $0.key == segmentName }) {
+//                    // Gib die strukturierte oder einfache Extension zurück
+//                    return ext.structuredExtension?.properties ?? ext.simpleExtensionValue
+//                }
+//               
+//            }
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIVariable", segmentName)
         }
     }

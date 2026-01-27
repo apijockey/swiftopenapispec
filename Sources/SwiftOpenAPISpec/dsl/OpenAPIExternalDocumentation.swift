@@ -34,14 +34,11 @@ public struct OpenAPIExternalDocumentation : ThrowingHashMapInitiable, PointerNa
     }
     
   
-    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
-           let element = try Self(load: map)
-           return InitializationResult(value: element, diagnostics: [])
-       }
+  
 
-    public init(load map: [String : Any]) throws {
-        url = try map.tryRead("url", String.self, root: "OpenAPIExternalDocumentation")
-        self.description = map.readIfPresent("description", String.self)
+    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+        self.url = map.readIfPresent("url", valueType: String.self)
+        self.description = map.readIfPresent("description", valueType: String.self)
     }
     public var description : String? = nil
     public var url : String?

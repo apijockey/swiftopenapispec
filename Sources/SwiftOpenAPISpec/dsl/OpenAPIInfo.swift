@@ -29,7 +29,7 @@ public struct OpenAPIInfo : KeyedElement, PointerNavigable {
     static let TERMS_KEY = "termsOfService"
     static let TITLE_KEY = "title"
     static let VERSION_KEY = "version"
-    public init(load map: StringDictionary) throws {
+    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
         self.version = map.readIfPresent(Self.VERSION_KEY, valueType: String.self)
         self.title = map.readIfPresent(Self.TITLE_KEY,valueType: String.self)
         self.summary = map.readIfPresent(Self.SUMMARY_KEY,valueType: String.self)
@@ -40,11 +40,7 @@ public struct OpenAPIInfo : KeyedElement, PointerNavigable {
         extensions = try OpenAPIExtension.extensionElements(map)
         
     }
-    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
-           let element = try Self(load: map)
-           return InitializationResult(value: element, diagnostics: [])
-       }
-
+   
     public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
         case Self.CONTACT_KEY: return .navigable(contact)

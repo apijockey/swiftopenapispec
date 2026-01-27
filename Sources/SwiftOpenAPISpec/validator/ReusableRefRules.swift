@@ -111,28 +111,28 @@ struct ReusableOperationRefRule {
             diags.append(diagnotics)
             return diags
         }
-        if let parameters = operation.parameters {
-            for parameter in parameters {
+        
+            for parameter in operation.parameters {
                 diags.append(contentsOf: ReusableParameterRefRule().check(parameter: parameter, ctx: ctx, pointer: pointer, rule: rule))
             }
-        }
+        
         if let requestBody = operation.requestBody{
             
             diags.append(contentsOf: ReusableRequestBodyRefRule().check(requestBody: requestBody, ctx: ctx, pointer: pointer, rule: rule))
             
         }
-        if let responses = operation.responses{
-            for response in responses {
+        
+            for response in operation.responses {
                 diags.append(contentsOf: ReusableResponseRefRule().check(response: response, ctx: ctx, pointer: pointer, rule: rule))
             }
-        }
-        if let callbacks = operation.callbacks{
-            for callback in callbacks {
+        
+        
+            for callback in operation.callbacks {
                 diags.append(contentsOf: ReusableCallbackRefRule().check(callback: callback, ctx: ctx, pointer: pointer, rule: rule))
             }
             
             
-        }
+        
      
         return diags
     }
@@ -156,11 +156,11 @@ struct ReusableParameterRefRule {
                 diags.append(contentsOf: ReusableSchemaRefRule().check(schema: schema, ctx: ctx, pointer: pointer, rule: rule))
                 
             }
-            if let examples = parameter.examples {
-                for example in examples {
+            
+                for example in parameter.examples {
                     diags.append(contentsOf: ReusableExampleRefRule().check(example: example, ctx: ctx, pointer: pointer, rule: rule))
                 }
-            }
+            
         }
         return diags
     }

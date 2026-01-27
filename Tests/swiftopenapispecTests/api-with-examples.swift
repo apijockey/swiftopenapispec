@@ -66,7 +66,7 @@ struct APIWithExamplesTests {
         #expect(pingAPIPath.key == "/ping")
         #expect(pingAPIPath.operations.count == 1)
         let getPingOperation = try #require(pingAPIPath[operationId: "ping"].first)
-        #expect(getPingOperation.responses?.count == 1)
+        #expect(getPingOperation.responses.count == 1)
     }
     
 

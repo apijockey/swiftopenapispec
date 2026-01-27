@@ -20,12 +20,14 @@
 import Foundation
 
 
-public struct OpenAPIServer : ThrowingHashMapInitiable , PointerNavigable {
+public struct OpenAPIServer : KeyedElement , PointerNavigable {
+    
+    
     public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
         case Self.DESCRIPTION_KEY :  return .value(JSONValue(self.description))
             case Self.URL_KEY : return .value(JSONValue(url))
-        case Self.NAME_KEY :return .value(JSONValue(name))
+        case Self.NAME_KEY :return .value(JSONValue(key))
         case Self.VARIABLES_KEY : return try variables.element(for: segmentName)
         default:
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIInfo", segmentName)
@@ -45,21 +47,18 @@ public struct OpenAPIServer : ThrowingHashMapInitiable , PointerNavigable {
     public init(url:String){
         self.url = url
     }
-    public init(load map: StringDictionary) throws {
+    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
         self.url = map.readIfPresent(Self.URL_KEY, valueType: String.self)
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType:  String.self)
-        self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self)
+        
         self.variables = try map.mapListIfPresent(Self.VARIABLES_KEY,objectType : OpenAPIVariable.self)
         extensions = try OpenAPIExtension.extensionElements(map)
     }
-    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
-           let element = try Self(load: map)
-           return InitializationResult(value: element, diagnostics: [])
-       }
+   
 
     public var description : String? = nil
     public var extensions : [OpenAPIExtension]?
-    public var name : String? = nil
+    public var key: String? = nil
     public var url : String? = "/"
    
     //https://spec.openapis.org/oas/latest.html#server-variable-object

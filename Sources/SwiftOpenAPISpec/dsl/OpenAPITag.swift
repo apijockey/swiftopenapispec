@@ -18,14 +18,14 @@
 
 public struct OpenAPITag:  ThrowingHashMapInitiable, PointerNavigable {
    
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult{
         switch segmentName {
-            case Self.NAME_KEY: return name
-            case Self.SUMMARY_KEY : return summary
-            case Self.DESCRIPTION_KEY : return description
-            case Self.EXTERNAL_DOCS_KEY : return externalDocs
-            case Self.PARENT_KEY : return parent
-            case Self.KIND_KEY : return kind
+        case Self.NAME_KEY: return .value(JSONValue(name))
+        case Self.SUMMARY_KEY : return .value(JSONValue(summary))
+        case Self.DESCRIPTION_KEY : return .value(JSONValue(description))
+            case Self.EXTERNAL_DOCS_KEY : return .navigable(externalDocs)
+            case Self.PARENT_KEY : return .value(JSONValue(parent))
+            case Self.KIND_KEY : return .value(JSONValue(kind))
         default:
         throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPITag", segmentName)
 
@@ -43,18 +43,15 @@ public struct OpenAPITag:  ThrowingHashMapInitiable, PointerNavigable {
     public static let KIND_KEY = "kind"
     
     
-    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
-           let element = try Self(load: map)
-           return InitializationResult(value: element, diagnostics: [])
-       }
+   
 
-    public init(load map : StringDictionary) throws {
-        self.name = map.readIfPresent(Self.NAME_KEY, String.self)
-        self.summary = map.readIfPresent(Self.SUMMARY_KEY, String.self)
-        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, String.self)
-        self.parent = map.readIfPresent(Self.PARENT_KEY, String.self)
-        self.kind = map.readIfPresent(Self.KIND_KEY, String.self)
-        self.externalDocs = try map.mapIfPresent(Self.EXTERNAL_DOCS_KEY, OpenAPIExternalDocumentation.self)
+    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+        self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self)
+        self.summary = map.readIfPresent(Self.SUMMARY_KEY, valueType: String.self)
+        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self)
+        self.parent = map.readIfPresent(Self.PARENT_KEY, valueType: String.self)
+        self.kind = map.readIfPresent(Self.KIND_KEY, valueType: String.self)
+        self.externalDocs = try map.readIfPresent(Self.EXTERNAL_DOCS_KEY, objectType: OpenAPIExternalDocumentation.self)
         self.extensions = try OpenAPIExtension.extensionElements(map)
     }
     

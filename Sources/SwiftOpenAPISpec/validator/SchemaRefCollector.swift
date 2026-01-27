@@ -76,16 +76,16 @@ public struct SchemaRefCollector {
             ))
         }
         else  {
-            if let parameters = op.parameters {
-                for parameter in parameters {
+            
+                for parameter in op.parameters {
                     out.append(contentsOf: collect(from: parameter, pointer: JSONPointer.join(pointer, "parameters")))
                 }
                 
-            }
+            
             if let requestBody = op.requestBody {
                 out.append(contentsOf:collect(from: requestBody, pointer: JSONPointer.join(pointer, "requestBody")))
             }
-            for response in (op.responses ?? []){
+            for response in (op.responses){
                     let ptr = pointer + "/responses/" + (response.key ?? "")
                     out.append(contentsOf: collect(from: response, pointer: ptr))
             }

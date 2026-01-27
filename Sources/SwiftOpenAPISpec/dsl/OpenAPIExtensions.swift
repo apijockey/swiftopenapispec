@@ -21,12 +21,9 @@ public enum extensionType {
     case simpleExtensionValue(String), structuredExtension( OpenAPIStructuredExtensionValues)
 }
 public struct OpenAPIExtension : KeyedElement, PointerNavigable  {
-    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
-           let element = try Self(load: map)
-           return InitializationResult(value: element, diagnostics: [])
-       }
-    public init(load map: StringDictionary) throws {
-       
+   
+    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+       fatalError("Not yet implemented init for OpenAPIExtension")
     }
     public func element(for segmentName: String) throws -> NavigationResult {
         if let simpleValue = simpleExtensionValue  {
@@ -95,7 +92,7 @@ public struct OpenAPIExtension : KeyedElement, PointerNavigable  {
     }
 }
 public struct OpenAPISimpleExtensionValues : KeyedElement, PointerNavigable {
-    public init(load map: StringDictionary) throws {
+    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
         self.key = map.keys.first
         self.value = map.values.first as? String ?? ""
     }
@@ -108,10 +105,7 @@ public struct OpenAPISimpleExtensionValues : KeyedElement, PointerNavigable {
         }
     }
     
-    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
-           let element = try Self(load: map)
-           return InitializationResult(value: element, diagnostics: [])
-       }
+   
 
     
     public var key: String?
@@ -129,18 +123,9 @@ public struct OpenAPIStructuredExtensionValues : ThrowingHashMapInitiable, Point
         }
         throw OpenAPISpecification.Errors.unsupportedSegment("OOpenAPIStructuredExtensionValues", segmentName)
     }
-    
-    
-    
-  
-    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
-           let element = try Self(load: map)
-           return InitializationResult(value: element, diagnostics: [])
-       }
-
-    public init(load map: StringDictionary) throws {
+    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
         self.properties = map.mapValues({ value in
-            if let stringValue = value as? String {
+            if case let .string(stringValue) = value  {
                 return stringValue
             }
                 // Replace invalid Any extension usage with free function

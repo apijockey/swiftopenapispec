@@ -22,47 +22,28 @@ import Foundation
 
 public struct OpenAPIOperation : KeyedElement, PointerNavigable {
     public var key: String?
-    public init(load map: StringDictionary) throws {
+    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
         self.tags = map.readListIfPresent(Self.TAGS_KEY, valueType: String.self)  ?? []
         self.summary = map.readIfPresent(Self.SUMMARY_KEY, valueType:  String.self)
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY,valueType:   String.self)
         self.externalDocs = try map.readIfPresent(Self.EXTERNAL_DOCS_KEY, objectType:  OpenAPIExternalDocumentation.self)
         self.operationId = map.readIfPresent(Self.OP_ID_KEY, valueType:  String.self)
         self.parameters = try map.mapListIfPresent(Self.PARAMETERS_KEY, objectType: OpenAPIParameter.self)
-        if map[Self.REQUEST_BODIES_KEY] as? StringDictionary != nil {
-            self.requestBody = try map.MapIfPresent(Self.REQUEST_BODIES_KEY, OpenAPIRequestBody.self)
-        }
-        if let responseMap = map[Self.RESPONSES_KEY] as? StringDictionary {
-            self.responses = try KeyedElementList<OpenAPIResponse>.map(responseMap).value
-        }
-        if let map = map[Self.CALLBACKS_KEY] as? StringDictionary{
-            self.callbacks = try KeyedElementList<OpenAPICallBack>.map(map).value
-        }
+        self.requestBody = try map.readIfPresent(Self.REQUEST_BODIES_KEY, objectType: OpenAPIRequestBody.self)
+        self.responses = try map.mapListIfPresent(Self.RESPONSES_KEY, objectType: OpenAPIResponse.self)
+        self.callbacks =  try map.mapListIfPresent(Self.CALLBACKS_KEY, objectType: OpenAPICallBack.self)
         
-        self.deprecated = map.readIfPresent(Self.DEPRECATED_KEY, Bool.self)
-        if let securityObjectMap = map[Self.SECURITY_KEY] as?  [[String:[String]]] {
-            for element in securityObjectMap {
-                if let mapElement = element.first {
-                    let ref = OpenAPISecuritySchemeReference(key: mapElement.key, scopes:mapElement.value)
-                    securityObjects.append(ref)
-                    
-                }
-            }
-        }
-        let servers =  try map.tryOptionalList(OpenAPISpecification.SERVERS_KEY, root: "operations", OpenAPIServer.self)
-        if servers.count > 0 {
-            self.servers = servers
-        }
+        self.deprecated = map.readIfPresent(Self.DEPRECATED_KEY, valueType: Bool.self)
+        self.securityObjects = try map.mapListIfPresent(Self.SECURITY_KEY, objectType: OpenAPISecuritySchemeReference.self)
+        
+        self.servers =  try map.mapListIfPresent(OpenAPISpecification.SERVERS_KEY, objectType: OpenAPIServer.self)
+        
         extensions = try OpenAPIExtension.extensionElements(map)
        
        
         
     }
-    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
-           let element = try Self(load: map)
-           return InitializationResult(value: element, diagnostics: [])
-       }
-
+   
     public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
             
@@ -70,19 +51,21 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
         case Self.DESCRIPTION_KEY: return .value(JSONValue(description))
         case Self.EXTERNAL_DOCS_KEY: return .navigable(externalDocs)
         case Self.OP_ID_KEY: return .value(JSONValue(operationId))
-        case Self.PARAMETERS_KEY: return  (parameters ?? []) as [OpenAPIParameter]
-        case Self.REQUEST_BODIES_KEY: return requestBody as OpenAPIRequestBody?
-        case Self.RESPONSES_KEY: return (responses  ?? []) as [OpenAPIResponse]
-        case Self.SUMMARY_KEY: return summary as String?
-        case Self.SECURITY_KEY: return securityObjects as [OpenAPISecuritySchemeReference]
-        case Self.TAGS_KEY: return tags as [String]
+        case Self.PARAMETERS_KEY: return  try parameters.element(for: segmentName)
+        case Self.REQUEST_BODIES_KEY: return .navigable(requestBody)
+        case Self.RESPONSES_KEY: return try responses.element(for: segmentName)
+        case Self.SUMMARY_KEY: return  .value(JSONValue(summary))
+        case Self.SECURITY_KEY:
+            let value =  securityObjects.element(for: segmentName)
+            return .value(JSONValue(value))
+        case Self.TAGS_KEY: return .value(JSONValue(tags))
         default:
             if segmentName.hasPrefix("x-"), let exts = extensions {
-                if let ext = exts.first(where: { $0.key == segmentName }) {
-                    // Gib die strukturierte oder einfache Extension zurück
-                    return ext.structuredExtension?.properties ?? ext.simpleExtensionValue
-                }
-               
+//                if let ext = exts.first(where: { $0.key == segmentName }) {
+//                    // Gib die strukturierte oder einfache Extension zurück
+//                    return ext.structuredExtension?.properties ?? ext.simpleExtensionValue
+//                }
+//               
                 
                 
             }

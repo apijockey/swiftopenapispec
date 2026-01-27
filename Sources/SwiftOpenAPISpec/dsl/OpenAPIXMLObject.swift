@@ -17,10 +17,7 @@
 //
 
 public struct OpenAPIXMLObject : PointerNavigable, ThrowingHashMapInitiable {
-    public static func initialize(_ map: StringDictionary) throws -> InitializationResult<OpenAPIXMLObject> {
-        let element = try Self.init(load: map)
-        return InitializationResult(value: element, diagnostics: [])
-    }
+   
     
     public enum NodeKind: String, Codable, Sendable {
         case element, attribute, text, cdata, none
@@ -32,7 +29,7 @@ public struct OpenAPIXMLObject : PointerNavigable, ThrowingHashMapInitiable {
     public static let ATTRIBUTE_KEY = "attribute"
     public static let WRAPPED_KEY = "wrapped"
     
-    public init(load map: StringDictionary) throws {
+    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
         let nodeType = map.readIfPresent(Self.NODETYPE_KEY,valueType:  String.self)
         self.nodeType = NodeKind(rawValue: nodeType ?? "none")
         self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self)

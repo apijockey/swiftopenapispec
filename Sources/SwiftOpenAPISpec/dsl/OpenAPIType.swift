@@ -8,7 +8,6 @@
 
 public indirect enum OpenAPIType: ThrowingHashMapInitiable {
    
-    
     case allOf(OpenAPIAllOfType)
     case anyOf(OpenAPIAnyOfType)
     case array(OpenAPIArrayType)
@@ -27,52 +26,78 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
     public static let ANYOF_KEY = "anyOf"
     public static let XML_KEY = "xml"
     public static let ALLOF_KEY = "allOf"
+    
     public init() {
         self = .null
     }
-    public static func initialize(_ map: StringDictionary) throws -> InitializationResult<OpenAPIType> {
-        if let reference = try OpenAPISchemaReference.initReference(from: (map)) {
-            let ref  =  OpenAPIType.ref(reference)
-            return InitializationResult(value: ref, diagnostics: [])
+    
+    public init(load map: StringDictionary, _ diagnostics: inout [Diagnostic]) throws {
+        // Handle $ref first
+        if let reference =  try map.readIfPresent(OpenAPISchemaReference.REF_KEY, objectType: OpenAPISchemaReference.self) {
+            self = .ref(reference)
+            return
         }
       
-        let type = map.readIfPresent(Self.TYPE_KEY, String.self)
+        let type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self)
         switch type {
-                case "string":
-                    return .init(value: .string, diagnostics: [])
+        case .some("string"):
+            self = .string
 
-                    case "number":
-                        return .init(value: .number, diagnostics: [])
+        case .some("number"):
+            self = .number
 
-                    case "integer":
-                        return .init(value: .integer, diagnostics: [])
+        case .some("integer"):
+            self = .integer
 
-                    case "array":
-                        let type = try OpenAPIType.array(OpenAPIArrayType(load: map))
-                        return  InitializationResult(value:type, diagnostics: [])
+        case .some("array"):
+            let arrayType = try OpenAPIArrayType(load: map)
+            self = .array(arrayType)
 
-                    case "object":
-                        let type = try OpenAPIType.object(OpenAPIObjectType(load: map))
-                        return  InitializationResult(value:type, diagnostics: [])
+        case .some("object"):
+            let objectType = try OpenAPIObjectType(load: map, &diagnostics)
+            self = .object(objectType)
 
-                    case "boolean":
-                            return .init(value: .bool, diagnostics: [])
+        case .some("boolean"):
+            self = .bool
                    
-                    case "null":
-                        return .init(value: .null, diagnostics: [])
+        case .some("null"):
+            self = .null
 
-                    default:
-                    let diagnostic = Diagnostic(severity: .error, code: .missingRequired, message: "unsupported or missing type info", pointer: "", rule: "Initialization.OpenAPIType")
+        default:
+            // Try composite constructs if type is missing
+            if map.readIfPresent(Self.ONEOF_KEY, valueType: [Any].self) != nil {
+                var localDiagnostics: [Diagnostic] = []
+                let oneOf = try OpenAPIOneOfType(load: map, &localDiagnostics)
+                diagnostics.append(contentsOf: localDiagnostics)
+                self = .oneOf(oneOf)
+                return
+            }
+            if map.readIfPresent(Self.ANYOF_KEY, valueType: [Any].self) != nil {
+                // OpenAPIAnyOfType has a different initializer style
+                let anyOf = try OpenAPIAnyOfType(load: map,  &diagnostics)
+                self = .anyOf(anyOf)
+                return
+            }
+            if map.readIfPresent(Self.ALLOF_KEY, valueType: [Any].self) != nil {
+                let allOf = try OpenAPIAllOfType(load: map, &diagnostics)
+                self = .allOf(allOf)
+                return
+            }
             
-                        let type = OpenAPIType.null
-                    return  InitializationResult(value:type, diagnostics: [diagnostic])
-                    }
-         
-
+            // Unsupported or missing type info
+            let diagnostic = Diagnostic(
+                severity: .error,
+                code: .missingRequired,
+                message: "unsupported or missing type info",
+                pointer: "",
+                rule: "Initialization.OpenAPIType"
+            )
+            diagnostics.append(diagnostic)
+            self = .null
+        }
     }
+    
     public func element(for segmentName : String) throws -> Any? {
-        // switch segmentName {
-        
         switch self {
         case .allOf(let openAPIAllOfType):
             return openAPIAllOfType
@@ -97,11 +122,5 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
         case .null:
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIType", segmentName)
         }
-        
-        
     }
-          
-       
-
 }
-

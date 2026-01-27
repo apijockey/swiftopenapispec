@@ -40,26 +40,26 @@
 import Foundation
 
 
-/// Helper struct which maps  a Yaml-List / JSON-Array to Swift-Array
-public struct HashmapInitializableList<T> where T : ThrowingHashMapInitiable {
-    
-    /// Creates a list of elements from a Yaml-List / JSON-Array 
-    /// - Parameter a Yaml-List / JSON-Array
-    /// - Returns: a Swift Array or  throws an error if any element  of type `T` cannot be created
-    static func map(_ list:  [Any]) throws -> InitializationResult<[T]> {
-        var diagnostics: [Diagnostic] = []
-        var types = [T]()
-        for element in list {
-            if let elementMap = element as? StringDictionary {
-                let element = try T.initialize(elementMap)
-                diagnostics.append(contentsOf: element.diagnostics)
-                types.append(element.value)
-            }
-        }
-        return InitializationResult(value: types, diagnostics: diagnostics)
-    }
-    
-}
+///// Helper struct which maps  a Yaml-List / JSON-Array to Swift-Array
+//public struct HashmapInitializableList<T> where T : ThrowingHashMapInitiable {
+//    
+//    /// Creates a list of elements from a Yaml-List / JSON-Array 
+//    /// - Parameter a Yaml-List / JSON-Array
+//    /// - Returns: a Swift Array or  throws an error if any element  of type `T` cannot be created
+//    static func map(_ list:  [Any]) throws -> InitializationResult<[T]> {
+//        var diagnostics: [Diagnostic] = []
+//        var types = [T]()
+//        for element in list {
+//            if let elementMap = element as? StringDictionary {
+//                let element = try T.initialize(load: elementMap, diagnostics: diagnostics)
+//                diagnostics.append(contentsOf: element.diagnostics)
+//                types.append(element.value)
+//            }
+//        }
+//        return InitializationResult(value: types, diagnostics: diagnostics)
+//    }
+//    
+//}
 
 
 
@@ -73,9 +73,17 @@ public struct InitializationResult<T> {
     public let diagnostics: [Diagnostic]
 }
 public protocol ThrowingHashMapInitiable : Sendable {
-    static func initialize(_ map : StringDictionary) throws -> InitializationResult<Self>
-   
-   
+    static func initialize(load map : StringDictionary,diagnostics: [Diagnostic]) throws -> InitializationResult<Self>
+    init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws
+}
+public extension ThrowingHashMapInitiable {
+    
+    static func initialize(load map : StringDictionary,diagnostics: [Diagnostic]) throws -> InitializationResult<Self>{
+        var diagnostics = diagnostics
+        let element = try Self(load: map, &diagnostics)
+        return InitializationResult(value: element, diagnostics: diagnostics)
+    }
+    
 }
 /**A KeyedElement expects that the key Value is set from outside**/
 

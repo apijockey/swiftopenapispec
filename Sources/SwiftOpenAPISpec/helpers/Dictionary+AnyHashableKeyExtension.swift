@@ -50,8 +50,9 @@ extension StringDictionary {
         }
     }
     func readIfPresent<V>(_ key : String, objectType : V.Type) throws -> V?  where V: ThrowingHashMapInitiable{
+        var diagnostics: [Diagnostic] = []
         if case let  .object(map) = self[key]  {
-            return try V.initialize(map).value
+            return try V.initialize(load: map, diagnostics: diagnostics).value
         }
         else {
             return nil
@@ -65,14 +66,28 @@ extension StringDictionary {
             return nil
         }
     }
-   
-    func mapListIfPresent<T>(_ key : String, objectType : T.Type) throws -> [T]  where  T : KeyedElement{
+    func mapListIfPresent<T>(_ key : String, objectType : T.Type) throws -> [T]  where  T : ThrowingHashMapInitiable{
         var elements = [T]()
+        var diagnostics: [Diagnostic] = []
         if case let .object(objectMap)  = self[key]  {
             for element in objectMap {
                 let value = element.value
                 if case let .object(valueMap) = value {
-                    var type = try T.initialize( valueMap).value
+                    var type = try T.initialize(load:  valueMap, diagnostics: diagnostics).value
+                    elements.append(type)
+                }
+            }
+        }
+        return elements
+    }
+    func mapListIfPresent<T>(_ key : String, objectType : T.Type) throws -> [T]  where  T : KeyedElement{
+        var elements = [T]()
+        var diagnostics: [Diagnostic] = []
+        if case let .object(objectMap)  = self[key]  {
+            for element in objectMap {
+                let value = element.value
+                if case let .object(valueMap) = value {
+                    var type = try T.initialize(load:  valueMap, diagnostics: diagnostics).value
                     type.key = key
                     elements.append(type)
                 }
@@ -91,24 +106,37 @@ extension StringDictionary {
             }
         return elements
     }
-    
-    func mapListIfPresent<T>(objectType : T.Type) throws -> [T]  where  T : KeyedElement{
-        var openAPIOperations = [T]()
-
+    func mapListIfPresent<T>(objectType : T.Type) throws -> [T]  where  T : ThrowingHashMapInitiable{
+        var elements = [T]()
+        var diagnostics: [Diagnostic] = []
             for element in self {
                 let value = element.value
                 if case let .object(valueMap) = value {
-                    var type = try T.initialize( valueMap).value
-                    type.key = element.key
-                    openAPIOperations.append(type)
+                    var type = try T.initialize(load: valueMap, diagnostics: diagnostics).value
+                    
+                    elements.append(type)
                 }
             }
         
-        return openAPIOperations
+        return elements
+    }
+    func mapListIfPresent<T>(objectType : T.Type) throws -> [T]  where  T : KeyedElement{
+        var elements = [T]()
+        var diagnostics: [Diagnostic] = []
+            for element in self {
+                let value = element.value
+                if case let .object(valueMap) = value {
+                    var type = try T.initialize(load: valueMap, diagnostics: diagnostics).value
+                    type.key = element.key
+                    elements.append(type)
+                }
+            }
+        
+        return elements
     }
 }
 
-extension Dictionary where Key == String, Value == Any {
+extension Dictionary where Key == String, Value == JSONValue {
     
     /**
        creates an instance of type V if the dictionary value for *key* corresponds to a type that can be initiated by the value. Use, if the dictionary key is mandatory and the value must not be null
@@ -133,14 +161,14 @@ extension Dictionary where Key == String, Value == Any {
     /// - type: The expected typ to create
     /// - root: Additional information about the context like parent element
     /// - Returns: An Instance of type V, which implements `ThrowingHashMapInitiable` or throws if the value is not a `StringDictionary` or inita
-    func tryMap<V>(_ key : String ,root: String,_ result : V.Type) throws -> V  where V : ThrowingHashMapInitiable{
-        if let value = self[key] as? StringDictionary {
-            return try V.initialize( value).value
-        }
-        else {
-            throw OpenAPISpecification.Errors.invalidSpecification(root, key.description)
-        }
-    }
+//    func tryMap<V>(_ key : String ,root: String,_ result : V.Type) throws -> V  where V : ThrowingHashMapInitiable{
+//        if let value = self[key] as? StringDictionary {
+//            return try V.initialize( value).value
+//        }
+//        else {
+//            throw OpenAPISpecification.Errors.invalidSpecification(root, key.description)
+//        }
+//    }
     /**
      creates an instance of type V if the dictionary value for *key* corresponds to.
      
@@ -167,14 +195,14 @@ extension Dictionary where Key == String, Value == Any {
         - type: The expected type to create
      - Returns: An instance of type V  or nil
      */
-    func mapIfPresent<V>(_ key : String, _ type : V.Type) throws -> V?  where V: ThrowingHashMapInitiable{
-       if let mapValue = readIfPresent(key, StringDictionary.self){
-            return try V.initialize( mapValue).value
-        }
-        else {
-            return nil
-        }
-    }
+//    func mapIfPresent<V>(_ key : String, _ type : V.Type) throws -> V?  where V: ThrowingHashMapInitiable{
+//       if let mapValue = readIfPresent(key, StringDictionary.self){
+//            return try V.initialize( mapValue).value
+//        }
+//        else {
+//            return nil
+//        }
+//    }
     
    
     
@@ -185,35 +213,35 @@ extension Dictionary where Key == String, Value == Any {
     ///  - key: the key to use in the dictionary
     ///   - result: the expected type to create
     /// - Returns:  An instance of type V  if the value is not nil, throws if V.init(value) throws and error
-    func MapIfPresent<V>(_ key : String ,_ result : V.Type) throws -> V?  where V : ThrowingHashMapInitiable{
-        if let value = self[key] as? StringDictionary {
-            return try V.initialize( value).value
-        }
-        else {
-            return nil
-        }
-    }
+//    func MapIfPresent<V>(_ key : String ,_ result : V.Type) throws -> V?  where V : ThrowingHashMapInitiable{
+//        if let value = self[key] as? StringDictionary {
+//            return try V.initialize( value).value
+//        }
+//        else {
+//            return nil
+//        }
+//    }
 
-    func tryOptionalList<V>(_ key : String,root: String,_ result : V.Type) throws -> [V]  where V : ThrowingHashMapInitiable{
-        guard let list = self[key] as? [Any] else {
-            return []
-        }
-        return try HashmapInitializableList.map(list).value
-    }
-    
+//    func tryOptionalList<V>(_ key : String,root: String,_ result : V.Type) throws -> [V]  where V : ThrowingHashMapInitiable{
+//        guard let list = self[key] as? [Any] else {
+//            return []
+//        }
+//        return try HashmapInitializableList.map(list).value
+//    }
+//    
     
     
     /**
         Reads an optional sequence for give key and maps the contents to the given type
           Returns an empty list, if the key cannot be found or the key does not point to an [Any]
         Throws if the list cannot be mapped to [V]
-     */
-    func tryListIfPresent<V>(_ key : String,root: String,_ result : V.Type) throws -> [V]  where V : ThrowingHashMapInitiable{
-        guard let list = self[key] as? [Any] else {
-            return []
-        }
-        return try HashmapInitializableList.map(list).value
-    }
+//     */
+//    func tryListIfPresent<V>(_ key : String,root: String,_ result : V.Type) throws -> [V]  where V : ThrowingHashMapInitiable{
+//        guard let list = self[key] as? [Any] else {
+//            return []
+//        }
+//        return try HashmapInitializableList.map(list).value
+//    }
     
     /// Reads a dictionary value and transforms it to the specified type.
     /// - Parameters:
