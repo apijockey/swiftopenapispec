@@ -36,7 +36,7 @@ struct ArrayMediaTypesTests {
         }
     }
 
-    private func fixtureMap(_ resource: String, ext: String = "yaml", subDirectory : String? = nil) throws -> StringDictionary {
+    private func fixtureMap(_ resource: String, ext: String = "yaml", subDirectory : String? = nil) throws -> JSONValue {
         let name = "\(resource).\(ext)"
         guard let url = Bundle.module.url(forResource: resource, withExtension: ext, subdirectory: subDirectory) else {
             throw Errors.notFound(name)
@@ -44,10 +44,11 @@ struct ArrayMediaTypesTests {
         do {
             let data = try Data(contentsOf: url)
             guard let string = String(data: data, encoding: .utf8),
-                  let yaml = try Yams.load(yaml: string) as? StringDictionary else {
-                throw Errors.notUTF8(name)
+                  let map = try Yams.load(yaml: string)  as? [String:Any],
+                  let jsonValue = JSONValue(map) else  {
+                throw Self.Errors.notUTF8(name)
             }
-            return yaml
+            return jsonValue
         } catch {
             throw Errors.unreadable(name, error)
         }
@@ -55,7 +56,11 @@ struct ArrayMediaTypesTests {
 
     @Test("String array")
     func getTagsResponseArrayOfString() async throws {
-        let yaml = try fixtureMap("37-array-mediatypes", subDirectory: "Resources/3_1/valid")
+        guard case let .object(yaml) = try fixtureMap("37-array-mediatypes",subDirectory: "Resources/3_1/valid") else {
+            #expect(Bool(false), "cannot read yaml")
+            return
+        }
+        
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url: "37-array-mediatypes", documentLoader: YamsDocumentLoader())
 
         let path = try #require(apiSpec[path: "/tags"])
@@ -73,13 +78,16 @@ struct ArrayMediaTypesTests {
             Issue.record("Expected string items")
             return
         }
-        #expect(media.schema?.minLength == 1)
+        #expect(media.schema?.minItems == 1)
 
     }
 
     @Test("Object array")
     func postTagsRequestArrayOfObject() async throws {
-        let yaml = try fixtureMap("37-array-mediatypes", subDirectory: "Resources/3_1/valid")
+        guard case let .object(yaml) = try fixtureMap("37-array-mediatypes",subDirectory: "Resources/3_1/valid") else {
+            #expect(Bool(false), "cannot read yaml")
+            return
+        }
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url: "37-array-mediatypes", documentLoader: YamsDocumentLoader())
        
         let path = try #require(apiSpec[path: "/tags"])

@@ -32,12 +32,9 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
         self.requestBody = try map.readIfPresent(Self.REQUEST_BODIES_KEY, objectType: OpenAPIRequestBody.self)
         self.responses = try map.mapListIfPresent(Self.RESPONSES_KEY, objectType: OpenAPIResponse.self)
         self.callbacks =  try map.mapListIfPresent(Self.CALLBACKS_KEY, objectType: OpenAPICallBack.self)
-        
         self.deprecated = map.readIfPresent(Self.DEPRECATED_KEY, valueType: Bool.self)
         self.securityObjects = try map.mapListIfPresent(Self.SECURITY_KEY, objectType: OpenAPISecuritySchemeReference.self)
-        
         self.servers =  try map.mapListIfPresent(OpenAPISpecification.SERVERS_KEY, objectType: OpenAPIServer.self)
-        
         extensions = try OpenAPIExtension.extensionElements(map)
        
        

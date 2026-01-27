@@ -30,7 +30,7 @@ public struct OpenAPISchema : ThrowingHashMapInitiable, PointerNavigable {
             case Self.DEFAULT_VALUE_KEY: return .value(JSONValue(defaultValue))
             case Self.DISCRIMINATOR_KEY: return .value(JSONValue(discriminator))
             case Self.EXTENSIONS_KEY : return .value(JSONValue(extensions))
-            case Self.EXCLUSIVE_MINIMUM__KEY : return .value(JSONValue(exclusiveMinimum))
+            case Self.EXCLUSIVE_MINIMUM_KEY : return .value(JSONValue(exclusiveMinimum))
             case OpenAPISpecification.EXTERNAL_DOCS_KEY : return .navigable(externalDocs)
             case Self.EXAMPLE_KEY : return .navigable(example)
             case Self.EXCLUSIVE_MAXIMUM_KEY : return .value(JSONValue(exclusiveMaximum))
@@ -63,17 +63,19 @@ public struct OpenAPISchema : ThrowingHashMapInitiable, PointerNavigable {
     public static let ALLOWED_ELEMENTS_KEY = "enum"
     public static let DEFAULT_VALUE_KEY : String = "default"
     public static let DISCRIMINATOR_KEY = "discriminator"
+    public static let DEPRECATED_KEY = "deprecated"
     public static let EXAMPLE_KEY = "example"
     public static let EXTENSIONS_KEY = "extensions"
     public static let EXCLUSIVE_MAXIMUM_KEY : String = "exclusiveMaximum"
-    public static let EXCLUSIVE_MINIMUM__KEY : String = "exclusiveMinimum"
+    public static let EXCLUSIVE_MINIMUM_KEY : String = "exclusiveMinimum"
     public static let FORMAT_KEY : String = "format"
     
     
     public static let MULTIPLEOF_KEY : String = "multipleOf"
     public static let MAXIMUM_KEY : String = "maximum"
-    
     public static let MINIMUM_KEY : String = "minimum"
+    public static let MAX_CONTAINS_KEY : String = "maxContains"
+    public static let MIN_CONTAINS_KEY : String = "minContains"
     public static let NULLABLE_KEY : String = "nullable"
     public static let UNIQUE_ITEMS_KEY = "uniqueItems"
     public static let XML_KEY = "xml"
@@ -99,6 +101,9 @@ public struct OpenAPISchema : ThrowingHashMapInitiable, PointerNavigable {
     public static let REQUIRED_KEY = "required"
     
     public init(load map: StringDictionary, _ diagnostics: inout [Diagnostic]) throws {
+       
+        self.defaultValue =  map[Self.DEFAULT_VALUE_KEY]
+        self.deprecated = map.readIfPresent(Self.DEPRECATED_KEY, valueType:  Bool.self)
         self.discriminator = try map.readIfPresent(Self.DISCRIMINATOR_KEY,  objectType:  OpenAPIDiscriminator.self)
         // Value MUST be a string. Multiple types via an array are not supported.
        
@@ -111,15 +116,33 @@ public struct OpenAPISchema : ThrowingHashMapInitiable, PointerNavigable {
         } else {
             self.allowedValues = nil
         }
+        self.extensions = try OpenAPIExtension.extensionElements(map)
+        self.exclusiveMinimum = map.readIfPresent(Self.EXCLUSIVE_MINIMUM_KEY, valueType:  Bool.self)
+        self.externalDocs = try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIExternalDocumentation.self)
+        self.example = try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIExample.self)
+        self.exclusiveMaximum = map.readIfPresent(Self.EXCLUSIVE_MAXIMUM_KEY, valueType:  Bool.self)
+        self.format = map.readIfPresent(Self.FORMAT_KEY, valueType:  String.self)
+        self.multipleOf = map.readIfPresent(Self.TYPE_KEY, valueType:Double.self)
+        self.maximum = map.readIfPresent(Self.MAXIMUM_KEY, valueType:  Double.self)
+        self.minimum = map.readIfPresent(Self.MINIMUM_KEY, valueType:  Double.self)
+        self.maxContains = map.readIfPresent(Self.MAX_CONTAINS_KEY, valueType:  Int.self)
+        self.minContains = map.readIfPresent(Self.MIN_CONTAINS_KEY, valueType:  Int.self)
+        self.maxProperties = map.readIfPresent(Self.MAX_PROPERTIES_KEY, valueType:  Int.self)
         self.maxLength = map.readIfPresent(Self.MAX_LENGTH_KEY,valueType:  Int.self)
         self.minLength = map.readIfPresent(Self.MIN_LENGTH_KEY,valueType: Int.self)
+        self.minProperties = map.readIfPresent(Self.MIN_PROPERTIES_KEY, valueType:  Int.self)
+        self.maxItems = map.readIfPresent(Self.MAX_ITEMS_KEY, valueType:  Int.self)
+        self.minItems = map.readIfPresent(Self.MIN_ITEMS_KEY, valueType:  Int.self)
+        self.nullable = map.readIfPresent(Self.NULLABLE_KEY, valueType:  Bool.self)
         self.pattern = map.readIfPresent(Self.PATTERN_KEY,valueType:String.self)
-       
+        self.readOnly = map.readIfPresent(Self.READ_ONLY_KEY, valueType:  Bool.self)
+        self.required = map.readListIfPresent(Self.REQUIRED_KEY, valueType:  String.self)
         
         self.title = map.readIfPresent(OpenAPISchema.TYPE_KEY, valueType:String.self)
-        self.multipleOf = map.readIfPresent(Self.TYPE_KEY, valueType:Double.self)
-        self.extensions = try OpenAPIExtension.extensionElements(map)
-        self.format = map.readIfPresent(Self.FORMAT_KEY, valueType:  String.self)
+       
+        self.uniqueItems = map.readIfPresent(Self.UNIQUE_ITEMS_KEY, valueType:  Bool.self)
+        self.writeOnly = map.readIfPresent(Self.WRITE_ONLY_KEY, valueType:  Bool.self)
+        self.xml =  try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIXMLObject.self)
         
     }
     public static func initialize(_ map: StringDictionary) throws -> InitializationResult<OpenAPISchema> {
@@ -147,6 +170,8 @@ public struct OpenAPISchema : ThrowingHashMapInitiable, PointerNavigable {
     public var multipleOf: Double?
     public var maximum: Double?
     public var minimum: Double?
+    public var maxContains: Int?
+    public var minContains: Int?
     public var maxProperties: Int?
     public var maxLength: Int?
     public var minLength: Int?

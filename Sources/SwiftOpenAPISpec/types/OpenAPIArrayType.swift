@@ -83,16 +83,16 @@ public struct OpenAPIArrayType : OpenAPISchemaType, PointerNavigable{
     public static let MAX_CONTAINS_KEY = "maxContains"
     public static let MIN_CONTAINS_KEY = "minContains"
     
-    public init(load map: [String : Any]) throws {
-        self.type = map[Self.TYPE_KEY] as? String
-        self.minItems = map[Self.MIN_ITEMS_KEY] as? Int
-        self.maxItems = map[Self.MAX_ITEMS_KEY] as? Int
-        self.maxContains = map[Self.MAX_CONTAINS_KEY] as? Int
-        self.minContains = map[Self.MIN_CONTAINS_KEY] as? Int
-        self.uniqueItems = map[Self.UNIQE_ITEMS_KEY] as? Bool
-         if let list = (map[Self.ITEMS_KEY] as? StringDictionary),
-            case let .string(type) = list[Self.TYPE_KEY] {
-             self.items = try OpenAPISchema.initialize(list).value
+    public init(load map: StringDictionary) throws {
+        self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self)
+        self.minItems = map.readIfPresent(Self.MIN_ITEMS_KEY, valueType: Int.self)
+        self.maxItems = map.readIfPresent(Self.MAX_ITEMS_KEY, valueType:  Int.self)
+        self.maxContains = map.readIfPresent(Self.MAX_CONTAINS_KEY, valueType : Int.self)
+        self.minContains = map.readIfPresent(Self.MIN_CONTAINS_KEY, valueType:  Int.self)
+        self.uniqueItems = map.readIfPresent(Self.UNIQE_ITEMS_KEY, valueType:  Bool.self)
+         if let list = map[Self.ITEMS_KEY] ,
+            case let .object(type) = list {
+             self.items = try OpenAPISchema.initialize(type).value
              }
     }
     public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
