@@ -101,7 +101,9 @@ public struct OpenAPISchema : ThrowingHashMapInitiable, PointerNavigable {
     public init(load map: StringDictionary, _ diagnostics: inout [Diagnostic]) throws {
         self.discriminator = try map.readIfPresent(Self.DISCRIMINATOR_KEY,  objectType:  OpenAPIDiscriminator.self)
         // Value MUST be a string. Multiple types via an array are not supported.
-        self.type = try map.readIfPresent(Self.TYPE_KEY, objectType: OpenAPIType.self)
+       
+            self.type = try OpenAPIType(load: map,  &diagnostics)
+       
        
         
         if case let .array(allowedElements)  = map[Self.ALLOWED_ELEMENTS_KEY]  {
@@ -112,7 +114,7 @@ public struct OpenAPISchema : ThrowingHashMapInitiable, PointerNavigable {
         self.maxLength = map.readIfPresent(Self.MAX_LENGTH_KEY,valueType:  Int.self)
         self.minLength = map.readIfPresent(Self.MIN_LENGTH_KEY,valueType: Int.self)
         self.pattern = map.readIfPresent(Self.PATTERN_KEY,valueType:String.self)
-        self.pattern = map.readIfPresent(Self.PATTERN_KEY,valueType:String.self)
+       
         
         self.title = map.readIfPresent(OpenAPISchema.TYPE_KEY, valueType:String.self)
         self.multipleOf = map.readIfPresent(Self.TYPE_KEY, valueType:Double.self)

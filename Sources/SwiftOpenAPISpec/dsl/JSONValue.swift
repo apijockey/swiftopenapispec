@@ -27,6 +27,8 @@ public enum JSONValue: Equatable, Sendable {
 }
 
 public extension JSONValue {
+    
+    
     init?(from any: Any) {
         switch any {
         case let v as String:
@@ -94,5 +96,62 @@ public extension JSONValue {
         }
         self = .string(string)
         return
+    }
+}
+
+// MARK: - Extractors for Swift primitive types
+
+public extension JSONValue {
+    var stringValue: String? {
+        switch self {
+        case .string(let s): return s
+        case .integer(let i): return String(i)
+        case .number(let d): return String(d)
+        case .boolean(let b): return String(b)
+        case .null: return nil
+        case .array, .object: return nil
+        }
+    }
+    
+    var intValue: Int? {
+        switch self {
+        case .integer(let i): return i
+        case .number(let d): return Int(exactly: d) ?? Int(d)
+        case .string(let s): return Int(s)
+        case .boolean(let b): return b ? 1 : 0
+        case .null: return nil
+        case .array, .object: return nil
+        }
+    }
+    
+    var doubleValue: Double? {
+        switch self {
+        case .number(let d): return d
+        case .integer(let i): return Double(i)
+        case .string(let s): return Double(s)
+        case .boolean(let b): return b ? 1.0 : 0.0
+        case .null: return nil
+        case .array, .object: return nil
+        }
+    }
+    
+    var floatValue: Float? {
+        doubleValue.map(Float.init)
+    }
+    
+    var boolValue: Bool? {
+        switch self {
+        case .boolean(let b): return b
+        case .integer(let i): return i != 0
+        case .number(let d): return d != 0.0
+        case .string(let s):
+            switch s.lowercased() {
+            case "true", "yes", "1": return true
+            case "false", "no", "0": return false
+            default: return nil
+            }
+        case .null: return nil
+        case .array, .object: return nil
+        }
     }
 }

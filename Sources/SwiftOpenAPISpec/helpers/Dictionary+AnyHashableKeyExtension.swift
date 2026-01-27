@@ -49,23 +49,34 @@ extension StringDictionary {
             return nil
         }
     }
-    func readIfPresent<V>(_ key : String, objectType : V.Type) throws -> V?  where V: ThrowingHashMapInitiable{
-        var diagnostics: [Diagnostic] = []
-        if case let  .object(map) = self[key]  {
-            return try V.initialize(load: map, diagnostics: diagnostics).value
-        }
-        else {
-            return nil
-        }
-    }
     func readIfPresent<V>(_ key : String, valueType : V.Type) -> V? {
-        if let  value = self[key] as? V {
-            return value
-        }
-        else {
-            return nil
+        guard let value = self[key] else { return nil }
+        switch V.self {
+        case is String.Type:
+            return (value.stringValue as? V)
+        case is Int.Type:
+            return (value.intValue as? V)
+        case is Double.Type:
+            return (value.doubleValue as? V)
+        case is Float.Type:
+            return (value.floatValue as? V)
+        case is Bool.Type:
+            return (value.boolValue as? V)
+        case is JSONValue.Type:
+            return (value as? V)
+        default:
+            // Fallback: try direct cast (for future types that might already be JSONValue-backed)
+            return (value as? V)
         }
     }
+    
+    func readIfPresent<V>(_ key : String, objectType : V.Type) throws -> V?  where V : ThrowingHashMapInitiable{
+        var diagnostics: [Diagnostic] = []
+        guard let value = self[key] else { return nil }
+        guard case let .object(objectMap) = value else { return nil }
+        return  try  V(load: objectMap,&diagnostics)
+    }
+    
     func mapListIfPresent<T>(_ key : String, objectType : T.Type) throws -> [T]  where  T : ThrowingHashMapInitiable{
         var elements = [T]()
         var diagnostics: [Diagnostic] = []
@@ -83,12 +94,13 @@ extension StringDictionary {
     func mapListIfPresent<T>(_ key : String, objectType : T.Type) throws -> [T]  where  T : KeyedElement{
         var elements = [T]()
         var diagnostics: [Diagnostic] = []
-        if case let .object(objectMap)  = self[key]  {
+        if let value = self[key],
+        case let .object(objectMap)  = value{
             for element in objectMap {
                 let value = element.value
                 if case let .object(valueMap) = value {
                     var type = try T.initialize(load:  valueMap, diagnostics: diagnostics).value
-                    type.key = key
+                    type.key = element.key
                     elements.append(type)
                 }
             }
@@ -97,13 +109,25 @@ extension StringDictionary {
     }
     func mapListIfPresent<T>(_ key : String, valueType : T.Type) throws -> [T]  where  T : KeyedElement{
         var elements = [T]()
-        guard case let .array(list)  = self[key],
-              let typeList = list as? [T]  else {
-            throw OpenAPISpecification.Errors.invalidType("")
+        var diagnostics: [Diagnostic] = []
+        guard let value = self[key] else {
+            return elements
         }
-            for element in typeList {
-                elements.append(element)
+        if case let .object(element)  = value {
+            let type = try T.initialize(load: element, diagnostics: diagnostics).value
+            elements.append(type)
+            return elements
+        }
+        if case let .array(list)  = value {
+            for element in list {
+                if case let .object(objectElement) = element {
+                    let element = try T.initialize(load: objectElement, diagnostics: diagnostics).value
+                    elements.append(element)
+                }
+                
             }
+            return elements
+        }
         return elements
     }
     func mapListIfPresent<T>(objectType : T.Type) throws -> [T]  where  T : ThrowingHashMapInitiable{
@@ -178,14 +202,14 @@ extension Dictionary where Key == String, Value == JSONValue {
      - type: The expected typ to create
      - Returns: An instance of type V  or nil
      */
-    func readIfPresent<V>(_ key : String, _ type : V.Type) -> V? {
-        if let value = self[key] as? V {
-            return value
-        }
-        else {
-            return nil
-        }
-    }
+//    func readIfPresent<V>(_ key : String, _ type : V.Type) -> V? {
+//        if let value = self[key] as? V {
+//            return value
+//        }
+//        else {
+//            return nil
+//        }
+//    }
     /**
      creates an instance of type V if the dictionary value for *key* corresponds to.
      

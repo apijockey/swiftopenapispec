@@ -40,7 +40,7 @@ public struct OpenAPIAllOfType : OpenAPISchemaType, ThrowingHashMapInitiable, Po
   
 
     public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
-        self.type = map.readIfPresent(Self.TYPE_KEY, String.self)
+        self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self)
         
         self.items = try map.mapListIfPresent("allOf", objectType: OpenAPISchema.self)
        

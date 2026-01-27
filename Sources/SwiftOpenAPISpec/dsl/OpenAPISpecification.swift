@@ -45,27 +45,26 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     /// - Parameter unmerged: ``StringDictionary``
     /// public init(load map: StringDictionary throws {
     public init(load unmerged: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
-        let map = resolveMergeKeys(in: unmerged)
+        guard let dictionary  =  resolveMergeKeys(in: unmerged) as? StringDictionary else {
+            throw OpenAPISpecification.Errors.invalidYaml("mergeKeys failed")
         
-        self.version = unmerged.readIfPresent(OpenAPISpecification.OPENAPI_KEY, valueType: String.self)
-        self.info = try unmerged.readIfPresent(OpenAPISpecification.INFO_KEY, objectType: OpenAPIInfo.self)
-        self.components = try unmerged.readIfPresent(OpenAPISpecification.COMPONENTS_KEY, objectType: OpenAPIComponent.self)
-        self.selfUrl =  unmerged.readIfPresent(OpenAPISpecification.SELF_URL_KEY, valueType: String.self)
+        }
+       
+        
+        self.version = dictionary.readIfPresent(OpenAPISpecification.OPENAPI_KEY, valueType: String.self)
+        self.info = try dictionary.readIfPresent(OpenAPISpecification.INFO_KEY, objectType: OpenAPIInfo.self)
+        self.components = try dictionary.readIfPresent(OpenAPISpecification.COMPONENTS_KEY, objectType: OpenAPIComponent.self)
+        self.selfUrl =  dictionary.readIfPresent(OpenAPISpecification.SELF_URL_KEY, valueType: String.self)
         self.key = selfUrl
-        self.tags = try unmerged.mapListIfPresent(OpenAPISpecification.TAGS_KEY, objectType: OpenAPITag.self)
-        self.externalDocumentation = unmerged.readIfPresent(OpenAPISpecification.EXTERNAL_DOCS_KEY, OpenAPIExternalDocumentation.self)
-        self.jsonSchemaDialect = unmerged.readIfPresent(OpenAPISpecification.JSON_SCHEMA_DIALECT_KEY, valueType: String.self)
-        let servers =  try unmerged.mapListIfPresent(OpenAPISpecification.SERVERS_KEY, objectType: OpenAPIServer.self)
+        self.tags = try dictionary.mapListIfPresent(OpenAPISpecification.TAGS_KEY, objectType: OpenAPITag.self)
+        self.externalDocumentation = try dictionary.readIfPresent(OpenAPISpecification.EXTERNAL_DOCS_KEY,objectType: OpenAPIExternalDocumentation.self)
+        self.jsonSchemaDialect = dictionary.readIfPresent(OpenAPISpecification.JSON_SCHEMA_DIALECT_KEY, valueType: String.self)
+        let servers =  try dictionary.mapListIfPresent(OpenAPISpecification.SERVERS_KEY, objectType: OpenAPIServer.self)
         if servers.count > 0 {
             self.servers = servers
         }
-        if let pathsMap =  map[OpenAPISpecification.PATHS_KEY]  as? StringDictionary{
-            self.paths = try pathsMap.mapListIfPresent(objectType: OpenAPIPathItem.self)
-            
-        }
-        if let webhooksMap = map[OpenAPISpecification.WEBHOOKS_KEY]  as? StringDictionary{
-            self.webhooks = try webhooksMap.mapListIfPresent(objectType: OpenAPIPathItem.self)
-        }
+        self.paths   =  try dictionary.mapListIfPresent(OpenAPISpecification.PATHS_KEY, objectType: OpenAPIPathItem.self)
+        self.webhooks = try dictionary.mapListIfPresent(OpenAPISpecification.WEBHOOKS_KEY, objectType: OpenAPIPathItem.self)
         self.securityObjects = try unmerged.mapListIfPresent(Self.SECURITY_KEY, objectType: OpenAPISecuritySchemeReference.self)
         
         

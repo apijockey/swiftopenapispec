@@ -68,7 +68,7 @@ public struct OpenAPIAnyOfType : OpenAPISchemaType, PointerNavigable {
     
   
     public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
-        self.type = map.readIfPresent(Self.TYPE_KEY, String.self)
+        self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self)
         
 
         self.discriminator = try map.readIfPresent(Self.DISCRIMINATOR_KEY, objectType: OpenAPIDiscriminator.self)

@@ -136,48 +136,19 @@ public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
     
 public init(load map: StringDictionary, _ diagnostics: inout [Diagnostic]) throws {
         
-        if let map = map[Self.CALLBACKS_KEY] as? StringDictionary{
-            self.callbacks = try KeyedElementList<OpenAPICallBack>.map(map).value
-        }
-        if let map = map[Self.ENCODINGS_KEY] as? StringDictionary{
-            self.mediaTypes = try KeyedElementList<OpenAPIMediaType>.map(map).value
-        }
-        if let map = map[Self.EXAMPLES_KEY] as? StringDictionary{
-            self.examples = try KeyedElementList<OpenAPIExample>.map(map).value
-        }
-        extensions = try OpenAPIExtension.extensionElements(map)
-        
-        if let map = map[Self.HEADERS_KEY] as? StringDictionary{
-            self.headers = try KeyedElementList<OpenAPIHeader>.map(map).value
-        }
-        
-       
-        if let map = map[Self.LINKS_KEY] as? StringDictionary{
-            self.links = try KeyedElementList<OpenAPILink>.map(map).value
-        }
-        if let map = map[Self.MEDIATYPES_KEY] as? StringDictionary{
-            self.mediaTypes = try KeyedElementList<OpenAPIMediaType>.map(map).value
-        }
-        if let map = map[Self.PATHSITEMS_KEY] as? StringDictionary{
-            self.pathItems = try KeyedElementList<OpenAPIPathItem>.map(map).value
-        }
-        
-      
-        if let paramsMap = map[Self.PARAMETERS_KEY] as? StringDictionary {
-            parameters = try KeyedElementList<OpenAPIParameter>.map(paramsMap).value
-        }
-        if let map = map[Self.REQUEST_BODIES_KEY] as? StringDictionary{
-            self.requestBodies = try KeyedElementList<OpenAPIRequestBody>.map(map).value
-        }
-        if let responsesMap = map[Self.RESPONSES_KEY] as? StringDictionary{
-            responses = try KeyedElementList<OpenAPIResponse>.map(responsesMap).value
-        }
-        if let schemasMap = map[Self.SCHEMAS_KEY] as? StringDictionary{
-            schemas = try KeyedElementList<OpenAPINamedSchema>.map(schemasMap).value
-        }
-        if let securitySchemaMap = map[Self.SECURITY_SCHEMES_KEY] as? StringDictionary{
-            self.securitySchemas = try KeyedElementList<OpenAPISecurityScheme>.map(securitySchemaMap).value
-        }
+            self.callbacks = try map.mapListIfPresent(Self.CALLBACKS_KEY, objectType: OpenAPICallBack.self)
+            self.mediaTypes = try map.mapListIfPresent(Self.ENCODINGS_KEY, objectType: OpenAPIMediaType.self)
+            self.examples =  try map.mapListIfPresent(Self.EXAMPLES_KEY, objectType: OpenAPIExample.self)
+            extensions = try OpenAPIExtension.extensionElements(map)
+            self.headers =  try map.mapListIfPresent(Self.HEADERS_KEY, objectType: OpenAPIHeader.self)
+            self.links =   try map.mapListIfPresent(Self.LINKS_KEY, objectType: OpenAPILink.self)
+            self.mediaTypes =  try map.mapListIfPresent(Self.MEDIATYPES_KEY, objectType: OpenAPIMediaType.self)
+            self.pathItems =   try map.mapListIfPresent(Self.PATHSITEMS_KEY, objectType: OpenAPIPathItem.self)
+            parameters =   try map.mapListIfPresent(Self.PARAMETERS_KEY, objectType: OpenAPIParameter.self)
+            self.requestBodies =   try map.mapListIfPresent(Self.REQUEST_BODIES_KEY, objectType: OpenAPIRequestBody.self)
+            responses =  try map.mapListIfPresent(Self.RESPONSES_KEY, objectType: OpenAPIResponse.self)
+            schemas =   try map.mapListIfPresent(Self.SCHEMAS_KEY, objectType: OpenAPINamedSchema.self)
+            self.securitySchemas =   try map.mapListIfPresent(Self.SECURITY_SCHEMES_KEY, objectType:OpenAPISecurityScheme.self)
         
     }
    
