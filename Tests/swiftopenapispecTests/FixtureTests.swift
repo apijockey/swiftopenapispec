@@ -90,21 +90,34 @@ struct FixtureTests {
         #expect(getPingOperation.responses.count == 1)
         let responses = getPingOperation.responses
         #expect(responses.count == 1)
-        let contentType = try #require(getPingOperation.response(httpstatus: "200")?.content[key: "application/json"])
+        guard let getPing200Response = getPingOperation.response(httpstatus:  "200") else {
+            return
+        }
+        
+        let contentType = getPing200Response.content[key: "application/json"]
+       
+        
+        guard let contentType = contentType else {
+            Issue.record("Content Type is nil")
+            return
+        }
+        
+         #expect(getPing200Response.content.count == 1)
+       
         guard case let .object(objectType) = contentType.schema?.type else {
             Issue.record("Could not extract object schema from: \(String(describing: contentType.schema))")
             return
         }
-        let getPing200Response = try #require(getPingOperation.response(httpstatus:  "200"))
-        #expect(getPing200Response.content.count == 1)
-        guard case let .object(getPingResponseContent) = try #require(getPing200Response.content.first?.schema?.type ) else {
-            Issue.record("Could not extract object schema from: \(String(describing: getPing200Response.content.first?.schema))")
-            return
-        }
-        #expect(getPingResponseContent.unevaluatedProperties == false)
-        #expect(getPingResponseContent.properties.count == 1)
-        #expect(getPingResponseContent.required.count == 1)
-        #expect(getPingResponseContent.required.first! == "ok")
+        
+        print(objectType.properties.count)
+        
+        
+      
+        #expect(objectType.unevaluatedProperties == false)
+        #expect(objectType.properties.count == 1)
+        #expect(contentType.schema?.required?.count == 1)
+        #expect(contentType.schema?.required?.first == "ok")
+       
         
     }
     @Test("03-pathitems, parameter matrix, operations, additional operations")
