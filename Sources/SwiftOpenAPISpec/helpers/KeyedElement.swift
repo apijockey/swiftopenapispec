@@ -84,6 +84,7 @@ public extension Array where Element : KeyedElement {
     }
 }
 
+
 extension Array where Element : KeyedElement, Element : PointerNavigable {
     public func element(for segmentName : String) throws -> NavigationResult{
         guard let element = self.first (where:{ element in

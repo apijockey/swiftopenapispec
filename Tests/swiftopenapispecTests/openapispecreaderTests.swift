@@ -20,7 +20,7 @@ import Testing
 
 @Suite("OpenAPI Spec (legacy XCTest -> Swift Testing)")
 struct OpenAPILegacyPortedTests {
-
+    
     @Test
     func testBasics() async throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
@@ -40,7 +40,7 @@ struct OpenAPILegacyPortedTests {
         #expect((apiSpec.info?.license?.name ?? "") == "Apache 2.0")
         #expect((apiSpec.info?.license?.url ?? "") == "https://www.apache.org/licenses/LICENSE-2.0.html")
     }
-
+    
     @Test
     func testServers() async throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
@@ -54,14 +54,14 @@ struct OpenAPILegacyPortedTests {
         #expect(apiSpec.servers[1].url == "http://127.0.0.1:8080/api")
         #expect(apiSpec.servers[1].description == "Localhost deployment.")
         #expect(apiSpec.servers[2].variables.count == 3)
-
+        
         guard let usernameVariable = apiSpec.servers[2].variables.first(where: { $0.key == "username" }) else {
             #expect(Bool(false), "no username variable"); return
         }
         #expect(usernameVariable.defaultValue == "demo")
         #expect(usernameVariable.description == "this value is assigned by the service provider, in this example `gigantic-server.com`")
         #expect(usernameVariable.enumList == nil)
-
+        
         guard let portVariable = apiSpec.servers[2].variables.first(where: { $0.key == "port" }) else {
             #expect(Bool(false), "no port variable"); return
         }
@@ -70,16 +70,16 @@ struct OpenAPILegacyPortedTests {
         #expect(portVariable.enumList?.contains("8443") == true)
         #expect(portVariable.enumList?.contains("443") == true)
     }
-
+    
     @Test
     func testPathInfo() async throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
-                #expect(Bool(false), "no openapi")
-                return
-            }
+            #expect(Bool(false), "no openapi")
+            return
+        }
         let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
         #expect(apiSpec.paths.count == 4)
-
+        
         let getGreetPath = try #require(apiSpec.paths.first { $0.key == "/greet" })
         #expect(getGreetPath.operations.count == 1)
         let getEmojiPath = try #require(apiSpec.paths.first { $0.key == "/emoji" })
@@ -87,18 +87,18 @@ struct OpenAPILegacyPortedTests {
         #expect(getGreetPath.operations.count == 1)
         #expect(getEmojiPath.operations.count == 1)
         #expect(getClipPath.operations.count == 1)
-
+        
         let emojiPathOperation = try #require(getEmojiPath.operations.first)
         #expect(emojiPathOperation.responses.count == 1)
         #expect(emojiPathOperation.key == "get")
-
+        
         let clipPathOperation = try #require(getClipPath.operations.first)
         #expect(clipPathOperation.key == "get")
-
+        
         let greetingPathOperation = try #require(getGreetPath.operations.first)
         #expect(greetingPathOperation.key == "get")
     }
-
+    
     @Test
     func testOperations() async throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
@@ -115,7 +115,7 @@ struct OpenAPILegacyPortedTests {
         #expect(response.description == "Returns a cat video! 😽")
         #expect(response.key == "200")
     }
-
+    
     @Test
     func testParameters() async throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
@@ -140,7 +140,7 @@ struct OpenAPILegacyPortedTests {
         //#expect(greetPathParameter.schema?.type is OpenAPIStringType)
         #expect(greetPathParameter.allowEmptyValue == nil)
     }
-
+    
     @Test
     func testResponses() async throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
@@ -159,11 +159,11 @@ struct OpenAPILegacyPortedTests {
             #expect(Bool(false), "expected ref")
             return
         }
-            
-            
+        
+        
         #expect(ref.refString == "#/components/schemas/Greeting")
     }
-
+    
     @Test
     func testSchemaComponents() async throws {
         guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
@@ -173,24 +173,24 @@ struct OpenAPILegacyPortedTests {
         let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
         #expect(apiSpec.components?.schemas?.count == 4)
         let greetingComponent = try #require(apiSpec.components?.schemas?.first { $0.key == "Greeting" })
-        guard case let .object(greetingObject) = try #require(greetingComponent.schema?.type) else {
-                #expect(Bool(false), "expected object schema")
+        guard case let .object(greetingObject) = try #require(greetingComponent.element.type) else {
+            #expect(Bool(false), "expected object schema")
             return
         }
         #expect(greetingObject.properties.count == 1)
         let messageProperty = try #require(greetingObject.properties.first)
-        #expect(messageProperty.schema?.type != nil)
+        #expect(messageProperty.element.type != nil)
         #expect(greetingObject.required == ["message"])
-
+        
         let generalErrorComponent = try #require(apiSpec[schemacomponent: "GeneralError"])
-        guard case let .object(errorObject) = try #require(generalErrorComponent.schema?.type) else {
+        guard case let .object(errorObject) = try #require(generalErrorComponent.element.type) else {
             #expect(Bool(false), "expected object schema")
             return
         }
         #expect(errorObject.properties.count == 2)
-        let errorMessageCodeProperty = errorObject.properties[key: "code"]
-        //#expect(errorMessageCodeProperty?.schema?.type is OpenAPIIntegerType)
-        let errorMessageMessageProperty = errorObject.properties[key: "message"]
+        let errorMessageCodeProperty = errorObject.properties.first(where: {$0.key == "code"})
+    //#expect(errorMessageCodeProperty?.schema?.type is OpenAPIIntegerType)
+        let errorMessageMessageProperty = errorObject.properties.first(where: {$0.key == "message"})
         //#expect(errorMessageMessageProperty?.schema?.type is OpenAPIStringType)
         #expect(errorObject.required.count == 0)
     }

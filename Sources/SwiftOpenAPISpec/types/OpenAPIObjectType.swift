@@ -66,10 +66,16 @@ public struct OpenAPIObjectType : OpenAPISchemaType,ThrowingHashMapInitiable, Po
         case Self.MAX_PROPERTIES_KEY : return .value(JSONValue(self.maxProperties))
         case Self .TYPE_KEY:  return .value(JSONValue(self.type))
         case Self.UNEVALUATEDPROPERTIES_KEY : return .value(JSONValue(self.unevaluatedProperties))
-        case Self .PROPERTIES_KEY: return try  self.properties.element(for: segmentName)
+        case Self .PROPERTIES_KEY:
+            let property = self.properties.first(where: { element in
+            element.key == segmentName
+        })
+            return .navigable(property)
         case Self .REQUIRED_KEY: return  .value(JSONValue(self.required))
         default:
-            if let prop = self.properties[key: segmentName] {
+            if let prop = self.properties.first(where: { element in
+                element.key == segmentName
+            }) {
                 return .navigable( prop)
             }
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPISpecificationType", segmentName)
@@ -85,7 +91,7 @@ public struct OpenAPIObjectType : OpenAPISchemaType,ThrowingHashMapInitiable, Po
     public static let REQUIRED_KEY = "required"
     public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
         self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self)
-        self.properties = try map.mapListIfPresent(Self.PROPERTIES_KEY, objectType: OpenAPINamedSchema.self)
+        self.properties = try map.mapNamedElementListIfPresent(Self.PROPERTIES_KEY, objectType: OpenAPISchema.self)
         
         self.required = map.readListIfPresent(Self.REQUIRED_KEY, valueType: String.self) ?? []
         self.minProperties = map.readIfPresent(Self.MIN_PROPERTIES_KEY, valueType: Int.self)
@@ -98,7 +104,7 @@ public struct OpenAPIObjectType : OpenAPISchemaType,ThrowingHashMapInitiable, Po
     public var dependentRequired : String?
     public var maxProperties : Int?
     public var minProperties : Int?
-    public var properties : [OpenAPINamedSchema] = []
+    public var properties = [OpenAPINamedElement<OpenAPISchema>]()
     public var required : [String] = []
     public var unevaluatedProperties : Bool = false
   

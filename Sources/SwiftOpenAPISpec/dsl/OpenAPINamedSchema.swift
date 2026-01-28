@@ -20,38 +20,21 @@
 import Foundation
 
 
-public struct OpenAPINamedSchema: PointerNavigable, KeyedElement ,Sendable {
-   
-    
-  
-    
-    
-   
-    static let TYPE_KEY = "type"
-    
-   
-
-    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+public struct OpenAPINamedElement<T>: PointerNavigable, Sendable where T: PointerNavigable, T : ThrowingHashMapInitiable {
+   public init(load map: StringDictionary, objectType _: T.Type,  _ diagnostics: inout [Diagnostic]) throws {
        
-            self.schema = try OpenAPISchema.initialize(map).value
+       self.element = try T.init(load: map, &diagnostics)
       
     }
     
     public  var key : String? = nil
     
    
-    public var schema : OpenAPISchema?
+    public var element: T
     public func element(for segmentName : String) throws -> NavigationResult {
         switch segmentName {
         default :
-            if let schema = schema {
-                return try schema.element(for: segmentName)
-            }
-            else {
-                throw OpenAPISpecification.Errors.notFound(segmentName)
-            }
-            
-           
+                return try element.element(for: segmentName)
         }
     }
     

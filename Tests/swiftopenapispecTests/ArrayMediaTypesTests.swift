@@ -110,13 +110,16 @@ struct ArrayMediaTypesTests {
         }
         
         #expect(objectItems.properties.count == 2)
-        #expect(objectItems.properties.contains(name: "id"))
-        #expect(objectItems.properties.contains(name: "name"))
-        guard case .integer = objectItems.properties[key: "id"]?.schema?.type else {
+        let idProperty = objectItems.properties.first(where: { element in
+            element.key == "id"
+        })
+        let nameProperty = objectItems.properties.first(where :{$0.key == "name"})
+        
+        guard case .integer = idProperty?.element.type else {
             Issue.record("Expected integer type for id")
             return
         }
-        guard case  .string = objectItems.properties[key: "name"]?.schema?.type else {
+        guard case  .string = nameProperty?.element.type else {
             Issue.record("Expected integer type for id")
             return
         }

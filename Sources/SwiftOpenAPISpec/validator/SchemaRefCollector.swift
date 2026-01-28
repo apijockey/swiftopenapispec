@@ -53,17 +53,11 @@ public struct SchemaRefCollector {
         return out
     }
     
-    public func collect(from namedSchema :OpenAPINamedSchema, pointer : String) -> [RefOccurrence] {
+    public func collect(from namedSchema :OpenAPINamedElement<OpenAPISchema>, pointer : String) -> [RefOccurrence] {
         var out: [RefOccurrence] = []
-        if let type = namedSchema.schema {
-            out.append(contentsOf:collect(from : type, pointer: pointer))
-            return out
-        }
-        if let type = namedSchema.schema {
-            out.append(contentsOf: collect(from: type, pointer: pointer))
-        }
         
-        return out
+            out.append(contentsOf:collect(from : namedSchema.element , pointer: pointer))
+            return out
     }
        
     public func collect(from op : OpenAPIOperation , pointer : String)  -> [RefOccurrence] {
@@ -221,7 +215,7 @@ public struct SchemaRefCollector {
             ))
         }
         else {
-            if let schema = parameter.schema {
+            if let schema = parameter.namedSchema {
                 out.append(contentsOf: collect(from: schema, pointer: JSONPointer.join(pointer, "schema")))
             }
         }
@@ -341,7 +335,7 @@ public struct SchemaRefCollector {
         var out: [RefOccurrence] = []
         for prop in obj.properties {
             if let key = prop.key,
-               case let .ref(ref) = prop.schema?.type {
+               case let .ref(ref) = prop.element.type {
                 let propPtr = JSONPointer.join(JSONPointer.join(pointer, "properties"), key)
                 out.append(.init(
                     refString: ref.reference ?? "",
@@ -350,10 +344,9 @@ public struct SchemaRefCollector {
                 ))
             }
             
-            else if let type = prop.schema,
-                    let key = prop.key{
+            else if let key = prop.key{
                 let propPtr = JSONPointer.join(JSONPointer.join(pointer, "properties"), key)
-                out.append(contentsOf: collect(from: type  , pointer: JSONPointer.join(propPtr, "\(key)/")))
+                out.append(contentsOf: collect(from:  prop.element  , pointer: JSONPointer.join(propPtr, "\(key)/")))
             }
         }
         return out

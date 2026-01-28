@@ -40,17 +40,8 @@
 
 extension StringDictionary {
     
-    func readListIfPresent<V>(_ key : String, valueType : V.Type) -> [V]? {
-        if case let .array(arrayValue) = self[key],
-                let typedArray = arrayValue as? [V]{
-            return typedArray
-        }
-        else {
-            return nil
-        }
-    }
-    func readIfPresent<V>(_ key : String, valueType : V.Type) -> V? {
-        guard let value = self[key] else { return nil }
+    
+    func mapTypes<V>(value : JSONValue, valueType : V.Type) -> V? {
         switch V.self {
         case is String.Type:
             return (value.stringValue as? V)
@@ -69,12 +60,38 @@ extension StringDictionary {
             return (value as? V)
         }
     }
+    func readListIfPresent<V>(_ key : String, valueType : V.Type) -> [V]? {
+        var typedArray = [V]()
+        if case let .array(arrayValue) = self[key] {
+            for value in arrayValue {
+                if let typedValue = mapTypes(value: value, valueType: valueType) {
+                    typedArray.append(typedValue)
+                }
+            }
+            return typedArray
+        }
+        else {
+            return nil
+        }
+    }
+    func readIfPresent<V>(_ key : String, valueType : V.Type) -> V? {
+        guard let value = self[key] else { return nil }
+        return mapTypes(value: value, valueType: valueType)
+    }
     
     func readIfPresent<V>(_ key : String, objectType : V.Type) throws -> V?  where V : ThrowingHashMapInitiable{
         var diagnostics: [Diagnostic] = []
         guard let value = self[key] else { return nil }
         guard case let .object(objectMap) = value else { return nil }
         return  try  V(load: objectMap,&diagnostics)
+    }
+    func readNamedElementIfPresent<V>(_ key : String, objectType : V.Type) throws -> OpenAPINamedElement<V>?  where V : ThrowingHashMapInitiable{
+        var diagnostics: [Diagnostic] = []
+        guard let value = self[key] else { return nil }
+        guard case let .object(objectMap) = value else { return nil }
+        var namedElement = try OpenAPINamedElement<V>(load: objectMap, objectType: V.self, &diagnostics)
+        
+        return  namedElement
     }
     
     func mapListIfPresent<T>(_ key : String, objectType : T.Type) throws -> [T]  where  T : ThrowingHashMapInitiable{
@@ -91,6 +108,36 @@ extension StringDictionary {
         }
         return elements
     }
+    func mapNamedElementListIfPresent<T>(_ key : String, objectType : T.Type) throws -> [OpenAPINamedElement<T>]  where  T : ThrowingHashMapInitiable, T : PointerNavigable{
+        var elements = [OpenAPINamedElement<T>]()
+        var diagnostics: [Diagnostic] = []
+        if case let .object(objectMap)  = self[key]  {
+            for element in objectMap {
+                let value = element.value
+                if case let .object(valueMap) = value {
+                    var namedElement = try OpenAPINamedElement<T>(load: valueMap, objectType: T.self, &diagnostics)
+                    namedElement.key = element.key
+                    elements.append(namedElement)
+                }
+            }
+        }
+        return elements
+    }
+    func mapDictionaryfPresent<T>(_ key : String, objectType : T.Type) throws -> [T]  where  T : ThrowingHashMapInitiable{
+        var elements = [T]()
+        var diagnostics: [Diagnostic] = []
+        if case let .object(objectMap)  = self[key]  {
+            for element in objectMap {
+                let value = element.value
+                if case let .object(valueMap) = value {
+                    var type = try T.initialize(load:  valueMap, diagnostics: diagnostics).value
+                    elements.append(type)
+                }
+            }
+        }
+        return elements
+    }
+    
     func mapListIfPresent<T>(_ key : String, objectType : T.Type) throws -> [T]  where  T : KeyedElement{
         var elements = [T]()
         var diagnostics: [Diagnostic] = []
@@ -153,6 +200,14 @@ extension StringDictionary {
                     var type = try T.initialize(load: valueMap, diagnostics: diagnostics).value
                     type.key = element.key
                     elements.append(type)
+                }
+                //this must be a reference
+                else if case .string(let string) = value,
+                        string == OpenAPISchemaReference.REF_KEY {
+                        let value = element.value
+                        var type = try T.initialize(load: self, diagnostics: diagnostics).value
+                        type.key = element.key
+                        elements.append(type)
                 }
             }
         

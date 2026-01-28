@@ -97,9 +97,9 @@ public struct Validator {
         let schemaRuleRunner = SchemaRuleRunner.defaultRunner(ctx: ctx)
         if let schemas = spec.components?.schemas {
             for namedSchema in schemas {
-                if let schema = namedSchema.schema{
-                    try await diagnostics.append(contentsOf:schemaRuleRunner.run(schema: schema, pointer: "/components/schema/\(namedSchema.key ?? "")", resolver: &resolver))
-                }
+                
+                    try await diagnostics.append(contentsOf:schemaRuleRunner.run(schema: namedSchema.element, pointer: "/components/schema/\(namedSchema.key ?? "")", resolver: &resolver))
+                
             }
         }
         // Validate requestBody content schemas in paths
@@ -111,7 +111,7 @@ public struct Validator {
                     }
                     
                 }
-                for response in (op.responses ?? []) {
+                for response in (op.responses) {
                     for content in response.content {
                         if let schema = content.schema  {
                             try await diagnostics.append(contentsOf:schemaRuleRunner.run(schema: schema, pointer: "/paths/\(JSONPointer.escape(path.key ?? ""))/operations/responses/\(response.key ?? "")/content/\(JSONPointer.escape(content.key ?? ""))/schema", resolver: &resolver))

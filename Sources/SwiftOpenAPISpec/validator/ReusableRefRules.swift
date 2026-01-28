@@ -143,7 +143,7 @@ struct ReusableParameterRefRule {
     func check(parameter: OpenAPIParameter, ctx: ValidationContext, pointer : String, rule: String) -> [Diagnostic] {
         var diags: [Diagnostic] = []
         let pointer =  "\(pointer)/\(parameter.key ?? "")"
-        if parameter.ref == nil  && parameter.schema == nil && parameter.content == nil {
+        if parameter.ref == nil  && parameter.namedSchema == nil && parameter.content == nil {
             let diagnotics = Diagnostic( severity: .error,
                                          code: .missingRequired,
                                          message: "Parameter needs a ref, a schema or a content object",
@@ -152,8 +152,9 @@ struct ReusableParameterRefRule {
             diags.append(diagnotics)
         }
         else {
-            if let schema = parameter.schema {
-                diags.append(contentsOf: ReusableSchemaRefRule().check(schema: schema, ctx: ctx, pointer: pointer, rule: rule))
+            if  let namedSchema = parameter.namedSchema{
+               
+                diags.append(contentsOf: ReusableSchemaRefRule().check(schema: namedSchema.element, ctx: ctx, pointer: pointer, rule: rule))
                 
             }
             
@@ -231,10 +232,10 @@ struct ReusableSchemaRefRule {
 }
 
 struct ReusableNamedSchemaRefRule {
-    func check(schema : OpenAPINamedSchema, ctx: ValidationContext, pointer : String, rule: String) -> [Diagnostic] {
+    func check(schema : OpenAPINamedElement<OpenAPISchema>, ctx: ValidationContext, pointer : String, rule: String) -> [Diagnostic] {
         var diags: [Diagnostic] = []
         guard let key = schema.key,
-              let type = schema.schema?.type else {
+              let type = schema.element.type else {
             let diagnotics = Diagnostic( severity: .error,
                                      code: .missingRequired,
                                      message: "schema incomplete missing 'name' or 'type'",

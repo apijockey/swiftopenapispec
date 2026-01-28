@@ -77,7 +77,7 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable, KeyedElement, Pointe
        
         let required = map.readIfPresent(Self.REQUIRED_KEY,valueType: Bool.self)
         self.required = required ?? false
-        self.schema = try map.readIfPresent(Self.SCHEMA_KEY, objectType: OpenAPISchema.self)
+        self.namedSchema = try map.readNamedElementIfPresent(Self.SCHEMA_KEY, objectType: OpenAPISchema.self)
         if let style = map.readIfPresent(Self.STYLE_KEY, valueType: String.self) {
             self.style = ParameterStyle(rawValue: style)
         }
@@ -96,7 +96,7 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable, KeyedElement, Pointe
        case Self.DEPRECATED_KEY: return .value(JSONValue(deprecated))
        case Self.ALLOW_EMPTYVALUE_KEY: return .value(JSONValue(allowEmptyValue))
        case Self.ALLOW_RESERVED_KEY: return .value(JSONValue(allowReserved))
-       case Self.SCHEMA_KEY: return .navigable(schema)
+       case Self.SCHEMA_KEY: return .navigable(namedSchema)
        case Self.STYLE_KEY: return .value(JSONValue(style))
        case Self.EXPLODE_KEY: return .value(JSONValue(explode))
        case Self.EXAMPLE_KEY: return .value(example)
@@ -120,7 +120,7 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable, KeyedElement, Pointe
     public var description : String? = nil
     public var deprecated : Bool? = nil
     public var allowEmptyValue : Bool? = nil
-    public var schema : OpenAPISchema? = nil
+    public var namedSchema :  OpenAPINamedElement<OpenAPISchema>? = nil
     //https://learn.openapis.org/specification/parameters.html
     public var style : ParameterStyle? = nil
     public var explode : Bool? = nil

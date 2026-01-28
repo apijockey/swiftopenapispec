@@ -110,7 +110,10 @@ public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
             }
         case Self.SCHEMAS_KEY:
             if let schemas =  schemas {
-                return try schemas.element(for: segmentName)
+                let schema = schemas.first(where: { element in
+                    element.key == segmentName
+                })
+                return .navigable(schema)
             }
             else {
                 throw OpenAPISpecification.Errors.unsupportedSegment(segmentName, "OpenAPIComponent")
@@ -147,7 +150,7 @@ public init(load map: StringDictionary, _ diagnostics: inout [Diagnostic]) throw
             parameters =   try map.mapListIfPresent(Self.PARAMETERS_KEY, objectType: OpenAPIParameter.self)
             self.requestBodies =   try map.mapListIfPresent(Self.REQUEST_BODIES_KEY, objectType: OpenAPIRequestBody.self)
             responses =  try map.mapListIfPresent(Self.RESPONSES_KEY, objectType: OpenAPIResponse.self)
-            schemas =   try map.mapListIfPresent(Self.SCHEMAS_KEY, objectType: OpenAPINamedSchema.self)
+            schemas =   try map.mapNamedElementListIfPresent(Self.SCHEMAS_KEY, objectType: OpenAPISchema.self)
             self.securitySchemas =   try map.mapListIfPresent(Self.SECURITY_SCHEMES_KEY, objectType:OpenAPISecurityScheme.self)
         
     }
@@ -167,7 +170,7 @@ public init(load map: StringDictionary, _ diagnostics: inout [Diagnostic]) throw
     public var requestBodies : [OpenAPIRequestBody]?
     public var responses : [OpenAPIResponse]?
     public var securitySchemas : [OpenAPISecurityScheme]?
-    public var schemas : [OpenAPINamedSchema]?
+    public var schemas : [OpenAPINamedElement<OpenAPISchema>]?
    
     public var ref : OpenAPISchemaReference? { nil}
     
