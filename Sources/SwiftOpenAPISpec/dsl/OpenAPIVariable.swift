@@ -35,7 +35,9 @@ public struct OpenAPIVariable : KeyedElement , PointerNavigable {
     }
     public func element(for segmentName: String) throws -> NavigationResult{
         switch segmentName {
-        case Self.ENUM_KEY : return .value(JSONValue(enumList))
+        case Self.ENUM_KEY :
+            let value = try JSONValue(enumList)
+            return .value(value)
         case Self.DEFAULT_KEY : return .value(JSONValue(defaultValue))
         case Self.DESCRIPTION_KEY : return .value(JSONValue(description))
             

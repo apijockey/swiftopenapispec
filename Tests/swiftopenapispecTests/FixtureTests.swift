@@ -45,10 +45,10 @@ struct FixtureTests {
         do {
             let data = try Data(contentsOf: url)
             guard let string = String(data: data, encoding: .utf8),
-                  let map = try Yams.load(yaml: string)  as? [String:Any],
-                  let jsonValue = JSONValue(map) else  {
+                  let map = try Yams.load(yaml: string)  as? [String:Any] else  {
                 throw Self.Errors.notUTF8(name)
             }
+            let jsonValue = try JSONValue(from: map) 
             return jsonValue
         } catch {
             throw Self.Errors.unreadable(name, error)
@@ -117,7 +117,7 @@ struct FixtureTests {
     }
     @Test("03-pathitems, parameter matrix, operations, additional operations")
     func pathitems() async throws {
-        guard case let .object(yaml) = try fixtureMap("03-pathitems", subDirectory: "Resources/3_0/valid") else {
+        guard case let .object(yaml) = try fixtureMap("03-pathitems", subDirectory: "Resources/3_2/valid") else {
             Issue.record("Expected .object(let)")
             return
         }
@@ -131,7 +131,7 @@ struct FixtureTests {
               let parameter = parameters.first else { Issue.record("one parameter expected"); return }
         #expect(parameter.name == "id")
         #expect(parameter.location == SwiftOpenAPISpec.OpenAPIParameter.ParameterLocation.path)
-        guard case  .string = parameter.namedSchema?.element.type   else { Issue.record("string expected"); return }
+        guard case  .string = parameter.schema?.type   else { Issue.record("string expected"); return }
         
         #expect(parameter.explode == nil)
         #expect(parameter.deprecated == nil)
@@ -142,13 +142,18 @@ struct FixtureTests {
         
         
         #expect(parameters.count == 1)
-        let queryParameter = searchParameters.first!
-        #expect(queryParameter.name == "limit")
+        let queryParameter = try #require(searchParameters.first { $0.name == "limit" })
+        
         #expect(queryParameter.location == OpenAPIParameter.ParameterLocation.query)
-        guard case  .number = parameter.namedSchema?.element.type   else { Issue.record("number expected"); return }
-        //#expect(parameter.schema?.defaultValue == 10)
-        #expect(parameter.namedSchema?.element.minimum == 1)
-        #expect(parameter.namedSchema?.element.maximum == 100)
+        let schema = try #require(queryParameter.schema)
+        guard case .integer = schema.type   else { Issue.record("integer expected"); return }
+        guard case .integer(let defaultValue) = schema.defaultValue else {
+            Issue.record(".number expected for defaultValue")
+            return
+        }
+        #expect(defaultValue == 10)
+        #expect(schema.minimum == 1.0)
+        #expect(schema.maximum == 100.0)
         
     }
     
@@ -179,7 +184,7 @@ struct FixtureTests {
         
         let requestbodyContents = try #require(apiSpec[path: "/upload"]?.operations[operationID : "upload"]?.requestBody?.contents)
         #expect(requestbodyContents.count == 1)
-        guard case  let .string  = try #require(requestbodyContents[0].schema?.type ) else {
+        guard case .string  = try #require(requestbodyContents[0].schema?.type ) else {
             Issue.record("Failed to extract string schema")
             return
         }
@@ -236,7 +241,7 @@ struct FixtureTests {
     
     @Test("tictactor-nested-array-elements")
     func nestedArrayElements() async throws {
-        guard case let .object(yaml) = try fixtureMap("tictactoe", subDirectory: "Resources/3_0/valid") else {
+        guard case let .object(yaml) = try fixtureMap("tictactoe", subDirectory: "Resources/3_1/valid") else {
             Issue.record("Expected .object(let)")
             return
         }
@@ -250,11 +255,12 @@ struct FixtureTests {
         let schema = winnerProperty.element
         //guard case let .string(stringPropertyInfo) = try #require(schema.type) else { Issue.record(); return }
         #expect(schema.allowedValues == ["X", "O", "."])
-        let boardProperty = try #require((objectType.properties.first(where: { $0.key == "board" })?.element.type as? OpenAPIArrayType))
-        #expect(boardProperty.maxItems == 3)
-        #expect(boardProperty.minItems == 3)
-        guard case let .array(boardSubItems) = try #require(boardProperty.items?.type ) else { Issue.record(); return }
-        //guard case .string(_) = try #require(boardSubItems.items?.type) else { Issue.record(); return }
+        let boardProperty = try #require(objectType.properties.first(where: { $0.key == "board" }))
+        
+        #expect(boardProperty.element.maxItems == 3)
+        #expect(boardProperty.element.minItems == 3)
+        guard case let .array(boardSubItems) = try #require(boardProperty.element.type ) else { Issue.record(); return }
+        guard case  .array = try #require(boardSubItems.items?.type) else { Issue.record(); return }
 
         
     }
@@ -285,7 +291,7 @@ struct FixtureTests {
     
     @Test("08a-allof")
     func oneofallof() async throws {
-        guard case let .object(yaml) = try fixtureMap("08a-alloff", subDirectory: "Resources/3_0/valid") else {
+        guard case let .object(yaml) = try fixtureMap("08a-allof", subDirectory: "Resources/3_0/valid") else {
             Issue.record("Expected .object(let)")
             return
         }
@@ -332,10 +338,10 @@ struct FixtureTests {
         #expect(selfurlServer.description == "The production API on this device")
         
         let stagingServer =  try #require(apiSpec.servers[url: "https://staging.gigantic-server.com/v1"])
-        #expect(stagingServer.key == "staging")
+        #expect(stagingServer.name == "staging")
         
         let prodServer =  try #require(apiSpec.servers[url: "https://{username}.gigantic-server.com:{port}/{basePath}"])
-        #expect(prodServer.key == "prod")
+        #expect(prodServer.name == "prod")
         let prodServerPortVariable = try #require(prodServer.variables[key: "port"])
         #expect(prodServerPortVariable.defaultValue == "8443")
         #expect(prodServerPortVariable.enumList == ["8443","443"])
@@ -365,7 +371,7 @@ struct FixtureTests {
     }
     @Test("21-webhooks-multiple")
     func multiplewebhooks() async throws {
-        guard case let .object(yaml) = try fixtureMap("21-webhooks-multiple", subDirectory: "Resources/3_0/valid") else {
+        guard case let .object(yaml) = try fixtureMap("21-webhooks-multiple", subDirectory: "Resources/3_1/valid") else {
             Issue.record("Expected .object(let)")
             return
         }
@@ -380,7 +386,7 @@ struct FixtureTests {
     }
     @Test("21-components")
     func nestedcomponents() async throws {
-        guard case let .object(yaml) = try fixtureMap("21-webhooks-multiple", subDirectory: "Resources/3_0/valid") else {
+        guard case let .object(yaml) = try fixtureMap("21-webhooks-multiple", subDirectory: "Resources/3_1/valid") else {
             Issue.record("Expected .object(let)")
             return
         }
@@ -392,18 +398,18 @@ struct FixtureTests {
         }
         #expect(object.properties.contains(where :{$0.key == "currency"}))
         let currencyInfo = try #require(object.properties.first(where: { $0.key == "currency" }))
-        let schema = try #require(currencyInfo.element)
-        /*guard case let .string(currencyTypeInfo) = try #require(currencyInfo.schema?.type) else {
+        let schema = currencyInfo.element
+        guard case .string = try #require(currencyInfo.element.type) else {
             Issue.record("Expected to extract a string schema for the 'currency' property")
             return
         }
-         */
+        
         #expect(schema.minLength == 3)
         #expect(schema.maxLength == 3)
     }
     @Test("21-allofcomponents")
     func nestedallofcomponent() async throws {
-        guard case let .object(yaml) = try fixtureMap("21-webhooks-multiple", subDirectory: "Resources/3_0/valid") else {
+        guard case let .object(yaml) = try fixtureMap("21-webhooks-multiple", subDirectory: "Resources/3_1/valid") else {
             Issue.record("Expected .object(let)")
             return
         }
@@ -416,7 +422,7 @@ struct FixtureTests {
     }
     @Test("22-secured-webhooks")
     func securedwebhooks() async throws {
-        guard case let .object(yaml) = try fixtureMap("22-secured-webhooks", subDirectory: "Resources/3_0/valid") else {
+        guard case let .object(yaml) = try fixtureMap("22-secured-webhooks", subDirectory: "Resources/3_1/valid") else {
             Issue.record("Expected .object(let)")
             return
         }
@@ -431,7 +437,7 @@ struct FixtureTests {
     
     @Test("23-oneOf-WebhookComponent")
     func oenOfsecurityWebhooks() async throws {
-        guard case let .object(yaml) = try fixtureMap("23-oneOf-Webhooks", subDirectory: "Resources/3_0/valid") else {
+        guard case let .object(yaml) = try fixtureMap("23-oneOf-Webhooks", subDirectory: "Resources/3_1/valid") else {
             Issue.record("Expected .object(let)")
             return
         }
@@ -446,17 +452,18 @@ struct FixtureTests {
             Issue.record("Expected to extract an oneOf schema for the payload property of the EventEnvelope component")
             return
         }
-        let discriminator = try #require(OneOfType.discriminator)
-        #expect(discriminator.propertyName == "type")
-        #expect(discriminator.mapping?.count == 2)
-        #expect(discriminator.mapping?["user.created"] == "#/components/schemas/UserCreated")
-        #expect(discriminator.mapping?["user.deleted"] == "#/components/schemas/UserDeleted")
+        
+        
+        #expect(payloadProperty.element.discriminator?.mapping.count == 2)
+        #expect(payloadProperty.element.discriminator?.propertyName == "type")
+        #expect(payloadProperty.element.discriminator?.mapping["user.created"] == "#/components/schemas/UserCreated")
+        #expect(payloadProperty.element.discriminator?.mapping["user.deleted"] == "#/components/schemas/UserDeleted")
         
         
     }
     @Test("30-externaldocs-tags")
     func externaldocstags() async throws {
-        guard case let .object(yaml) = try fixtureMap("30-externaldocs-tags", subDirectory: "Resources/3_0/valid") else {
+        guard case let .object(yaml) = try fixtureMap("30-externaldocs-tags", subDirectory: "Resources/3_1/valid") else {
             Issue.record("Expected .object(let)")
             return
         }
@@ -478,7 +485,7 @@ struct FixtureTests {
     
     @Test("31-extensions-01")
     func extensions() async throws {
-        guard case let .object(yaml) = try fixtureMap("31-extensions-01", subDirectory: "Resources/3_0/valid") else {
+        guard case let .object(yaml) = try fixtureMap("31-extensions-01", subDirectory: "Resources/3_1/valid") else {
             Issue.record("Expected .object(let)")
             return
         }
@@ -512,7 +519,7 @@ struct FixtureTests {
         let extendedParameter = try #require(apiSpec.paths[key: "/ping"]?.operations[operationID: "ping"]?.parameters.first(where: { $0.name == "verbose" }) )
         #expect(extendedParameter.extensions?.count == 1)
         #expect(extendedParameter.extensions?[extensionName:"x-parameter-source"]?.simpleExtensionValue == "internal")
-        let parameterSchema = try #require(extendedParameter.namedSchema)
+        let parameterSchema = try #require(extendedParameter.schema)
         //#expect(parameterSchema.extensions?.count == 1)
         //let parameterStructuredExtensionProperties = try #require(parameterSchema.extensions?[extensionName: "x-schema-ui"]?.structuredExtension?.properties)
         //#expect(parameterStructuredExtensionProperties["widget"] == "toggle")

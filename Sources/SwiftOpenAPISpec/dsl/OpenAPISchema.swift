@@ -26,34 +26,62 @@ import Foundation
 public struct OpenAPISchema : ThrowingHashMapInitiable, PointerNavigable {
     public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
-            case Self.ALLOWED_ELEMENTS_KEY: return .value(JSONValue(allowedValues))
-            case Self.DEFAULT_VALUE_KEY: return .value(JSONValue(defaultValue))
-            case Self.DISCRIMINATOR_KEY: return .value(JSONValue(discriminator))
-            case Self.EXTENSIONS_KEY : return .value(JSONValue(extensions))
-            case Self.EXCLUSIVE_MINIMUM_KEY : return .value(JSONValue(exclusiveMinimum))
+            case Self.ALLOWED_ELEMENTS_KEY:
+            let value = try JSONValue(allowedValues)
+            return .value(value)
+            case Self.DEFAULT_VALUE_KEY:
+            
+            let value = try JSONValue(defaultValue)
+            return .value(value)
+            case Self.DISCRIMINATOR_KEY:
+            
+            let value = try JSONValue(discriminator)
+            return .value(value)
+            case Self.EXTENSIONS_KEY :
+            let value = try JSONValue(extensions)
+            
+            return .value(value)
+        case Self.EXCLUSIVE_MINIMUM_KEY : return .value(JSONValue(bool: exclusiveMinimum))
             case OpenAPISpecification.EXTERNAL_DOCS_KEY : return .navigable(externalDocs)
             case Self.EXAMPLE_KEY : return .navigable(example)
-            case Self.EXCLUSIVE_MAXIMUM_KEY : return .value(JSONValue(exclusiveMaximum))
-            case Self.FORMAT_KEY : return .value(JSONValue(format))
+        case Self.EXCLUSIVE_MAXIMUM_KEY : return .value(JSONValue(bool: exclusiveMaximum))
+        case Self.FORMAT_KEY : return .value(JSONValue(string: format))
             
-            case Self.MULTIPLEOF_KEY : return .value(JSONValue(multipleOf))
-            case Self.MAXIMUM_KEY : return .value(JSONValue(maximum))
-            case Self.MINIMUM_KEY : return .value(JSONValue(minimum))
-            case Self.MAX_PROPERTIES_KEY : return .value(JSONValue(maxProperties))
-            case Self.MIN_PROPERTIES_KEY : return .value(JSONValue(minProperties))
-            case Self.MAX_LENGTH_KEY : return .value(JSONValue(maxLength))
-            case Self.MIN_LENGTH_KEY : return .value(JSONValue(maxLength))
-            case Self.MAX_ITEMS_KEY : return .value(JSONValue(maxItems))
-            case Self.MIN_ITEMS_KEY : return .value(JSONValue(minItems))
-            case Self.NULLABLE_KEY : return .value(JSONValue(nullable))
-            case Self.PATTERN_KEY : return .value(JSONValue(pattern))
-            case Self.READ_ONLY_KEY : return .value(JSONValue(readOnly))
-            case Self.REQUIRED_KEY : return .value(JSONValue(required))
-            case Self.TITLE_KEY : return .value(JSONValue(title))
-            case Self.TYPE_KEY : return .value(JSONValue(type))
-            case Self.UNIQUE_ITEMS_KEY : return .value(JSONValue(type))
-            case Self.XML_KEY : return .value(JSONValue(xml))
-            case Self.WRITE_ONLY_KEY : return .value(JSONValue(writeOnly))
+        case Self.MULTIPLEOF_KEY : return .value(JSONValue(double: multipleOf))
+        case Self.MAXIMUM_KEY : return .value(JSONValue(double: maximum))
+        case Self.MINIMUM_KEY : return .value(JSONValue(double: minimum))
+        case Self.MAX_PROPERTIES_KEY : return .value(JSONValue(int: maxProperties))
+        case Self.MIN_PROPERTIES_KEY : return .value(JSONValue(int: minProperties))
+        case Self.MAX_LENGTH_KEY : return .value(JSONValue(int: maxLength))
+        case Self.MIN_LENGTH_KEY : return .value(JSONValue(int: maxLength))
+        case Self.MAX_ITEMS_KEY : return .value(JSONValue(int: maxItems))
+        case Self.MIN_ITEMS_KEY :
+            
+            return .value(JSONValue(int: minItems))
+            case Self.NULLABLE_KEY :
+            
+            let value = try JSONValue(nullable)
+            return .value(value)
+        case Self.PATTERN_KEY : return .value(JSONValue(string: pattern))
+        case Self.READ_ONLY_KEY :
+            
+            return .value(JSONValue(bool: readOnly))
+            case Self.REQUIRED_KEY :
+            
+            let value = try JSONValue(required)
+            return .value(value)
+        case Self.TITLE_KEY : return .value(JSONValue(string: title))
+        case Self.TYPE_KEY :
+            let value = try JSONValue(type)
+           return .value(value)
+        case Self.UNIQUE_ITEMS_KEY :
+            
+            let value = try JSONValue(uniqueItems)
+            return .value(value)
+        case Self.XML_KEY :
+            let value = try JSONValue(xml)
+            return .value(value)
+        case Self.WRITE_ONLY_KEY : return .value(JSONValue(bool: writeOnly))
             
         default:
             throw OpenAPISpecification.Errors.notFound(segmentName)
@@ -112,7 +140,13 @@ public struct OpenAPISchema : ThrowingHashMapInitiable, PointerNavigable {
        
         
         if case let .array(allowedElements)  = map[Self.ALLOWED_ELEMENTS_KEY]  {
-            self.allowedValues = allowedElements as? [String]
+            var collected: Set<String> = []
+            for value in allowedElements {
+                if case let .string(text) = value {
+                    collected.insert(text)
+                }
+            }
+            self.allowedValues = collected.isEmpty ? nil : collected
         } else {
             self.allowedValues = nil
         }
@@ -153,7 +187,7 @@ public struct OpenAPISchema : ThrowingHashMapInitiable, PointerNavigable {
          //self.format30 = map.readIfPresent(Self.FORMAT_KEY, String.self)
          //extensions = try OpenAPIExtension.extensionElements(map)
     
-    public var allowedValues: [String]?
+    public var allowedValues: Set<String>?
     public var defaultValue : JSONValue?
     public var deprecated: Bool?
     public var discriminator: OpenAPIDiscriminator?

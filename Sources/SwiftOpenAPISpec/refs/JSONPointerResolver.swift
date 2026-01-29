@@ -103,22 +103,25 @@ public struct JSONPointerResolver : JSONPointerResolving {
     ) async throws -> NavigationResult {
         // Normalize: "#" -> root; "#/a/b" -> "/a/b"
         if fragment == "#" || fragment.isEmpty {
-            return .value(JSONValue(root))
+            let value = try JSONValue(root)
+            return .value(value)
         }
         guard fragment.hasPrefix("#") else {
             throw Self.Errors.missingHash(fragment)
         }
         
         let pointer = String(fragment.dropFirst()) // remove leading '#'
-        if pointer.isEmpty { return .value(JSONValue(root)) }
+        if pointer.isEmpty {
+            let value = try JSONValue(root)
+            return .value(value) }
         guard pointer.hasPrefix("/") else {
             throw Self.Errors.missingSlash(pointer)
         }
         
         let rawSegments = pointer.dropFirst().split(separator: "/").map(String.init)
         let segments = rawSegments.map(JSONPointerResolver.decodePointerSegment)
-        
-        var current: NavigationResult = .value(JSONValue(root))
+        let value = try JSONValue(root)
+        var current: NavigationResult = .value(value)
         var traversed = ""
          
         for seg in segments {

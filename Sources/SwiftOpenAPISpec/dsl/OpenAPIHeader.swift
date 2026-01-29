@@ -63,16 +63,26 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
 
     public func element(for segmentName: String) throws -> NavigationResult {
        switch segmentName {
-       case Self.ALLOW_EMPTYVALUE_KEY: return .value(JSONValue(allowEmptyValue))
-       case Self.ALLOW_RESERVED_KEY: return .value(JSONValue(allowReserved))
+       case Self.ALLOW_EMPTYVALUE_KEY:
+           let value = try JSONValue(bool: allowEmptyValue)
+           return .value(value)
+       case Self.ALLOW_RESERVED_KEY:
+           let value = JSONValue(bool: allowReserved)
+           return .value(value)
        case Self.CONTENT_KEY: return .navigable(content)
-       
-       case Self.EXAMPLE_KEY: return .value(JSONValue(example))
+       case Self.EXAMPLE_KEY:
+           let value = try JSONValue(example)
+           return .value(value)
        case Self.EXAMPLES_KEY: return try examples.element(for: segmentName)
-       case Self.EXPLODE_KEY: return .value(JSONValue(explode))
+       case Self.EXPLODE_KEY:
+           let value = JSONValue(bool: explode)
+           return .value(value)
        case Self.EXTENSIONS_KEY: return try extensions.element(for: segmentName)
-       case Self.DESCRIPTION_KEY: return .value(JSONValue(description))
-       case Self.DEPRECATED_KEY: return .value(JSONValue(deprecated))
+       case Self.DESCRIPTION_KEY:
+           let value = JSONValue(description)
+           return .value(value)
+       case Self.DEPRECATED_KEY:
+           return .value(JSONValue(bool: deprecated))
        case Self.SCHEMA_KEY: return .navigable(schema)
        case Self.STYLE_KEY: return .value(JSONValue(style))
        case OpenAPISchemaReference.REF_KEY: return .reference(ref?.reference)

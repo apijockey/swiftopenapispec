@@ -106,9 +106,19 @@ extension StringDictionary {
                 }
             }
         }
+        else if case let .array(array)  = self[key]  {
+            for element in array {
+                if case let .object(valueMap) = element {
+                    let element = try T.initialize(load: valueMap, diagnostics: diagnostics).value
+                    elements.append(element)
+                }
+            }
+        }
         return elements
     }
+    
     func mapNamedElementListIfPresent<T>(_ key : String, objectType : T.Type) throws -> [OpenAPINamedElement<T>]  where  T : ThrowingHashMapInitiable, T : PointerNavigable{
+        // I have a list, this list may contain one element only.
         var elements = [OpenAPINamedElement<T>]()
         var diagnostics: [Diagnostic] = []
         if case let .object(objectMap)  = self[key]  {
@@ -117,6 +127,15 @@ extension StringDictionary {
                 if case let .object(valueMap) = value {
                     var namedElement = try OpenAPINamedElement<T>(load: valueMap, objectType: T.self, &diagnostics)
                     namedElement.key = element.key
+                    elements.append(namedElement)
+                }
+            }
+        }
+        else if case let .array(array)  = self[key]  {
+            for element in array {
+                if case let .object(valueMap) = element {
+                    var namedElement = try OpenAPINamedElement<T>(load: valueMap, objectType: T.self, &diagnostics)
+                    namedElement.key = "Hallo"
                     elements.append(namedElement)
                 }
             }
@@ -179,7 +198,7 @@ extension StringDictionary {
         if case let .object(element)  = value,
            case let .object(elementContent) = element.first?.value{
             var type = try T.initialize(load: elementContent, diagnostics: diagnostics).value
-            type.key = element.keys.first
+            type.key = element.keys.first // the StringDictionary holds one key and the object information in the values
             elements.append(type)
             return elements
         }

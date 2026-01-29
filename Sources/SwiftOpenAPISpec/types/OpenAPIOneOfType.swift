@@ -39,21 +39,7 @@
 
 
 public struct OpenAPIOneOfType : OpenAPISchemaType,ThrowingHashMapInitiable, PointerNavigable {
-    public var nullable: Bool?
     
-    public var readOnly: Bool?
-    
-    public var writeOnly: Bool?
-    
-    public var xml: OpenAPIXMLObject?
-    
-    public var externalDocs: OpenAPIExternalDocumentation?
-    
-    public var example: OpenAPIExample?
-    
-    public var deprecated: Bool?
-    
-    public var extensions: OpenAPIExtension?
     
    
     
@@ -79,13 +65,13 @@ public struct OpenAPIOneOfType : OpenAPISchemaType,ThrowingHashMapInitiable, Poi
     public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
         self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self)  
         
-        self.discriminator = try map.readIfPresent(Self.DISCRIMINATOR_KEY, objectType: OpenAPIDiscriminator.self)
+       
         
         self.items = try map.mapListIfPresent("oneOf",objectType: OpenAPISchema.self)
     }
    
     public let type : String?
     public var items: [OpenAPISchema]?
-   public var discriminator: OpenAPIDiscriminator?
+ 
     public var ref: OpenAPISchemaReference? { nil}
 }

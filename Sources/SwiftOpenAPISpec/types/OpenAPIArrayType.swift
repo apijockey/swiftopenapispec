@@ -62,12 +62,12 @@ public struct OpenAPIArrayType : OpenAPISchemaType, PointerNavigable{
     public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
         case Self.ITEMS_KEY: return .navigable(self.items)
-        case Self.ARRAY_TYPE_KEY: return .value(JSONValue(self.type))
-        case Self.MAX_ITEMS_KEY : return .value(JSONValue(maxItems))
-        case Self.MIN_ITEMS_KEY : return .value(JSONValue(minItems))
-        case Self.UNIQE_ITEMS_KEY : return .value(JSONValue(uniqueItems))
-        case Self.MAX_CONTAINS_KEY : return .value(JSONValue(maxContains))
-        case Self.MIN_CONTAINS_KEY : return .value(JSONValue(minContains))
+        case Self.ARRAY_TYPE_KEY: return .value(JSONValue(string: self.type))
+        case Self.MAX_ITEMS_KEY : return .value(JSONValue(int: maxItems))
+        case Self.MIN_ITEMS_KEY : return .value(JSONValue(int: minItems))
+        case Self.UNIQE_ITEMS_KEY : return .value(JSONValue(bool: uniqueItems))
+        case Self.MAX_CONTAINS_KEY : return .value(JSONValue(int: maxContains))
+        case Self.MIN_CONTAINS_KEY : return .value(JSONValue(int: minContains))
         default:
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIArrayType", segmentName)
         }

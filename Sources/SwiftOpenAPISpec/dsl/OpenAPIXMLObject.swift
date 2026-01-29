@@ -42,12 +42,18 @@ public struct OpenAPIXMLObject : PointerNavigable, ThrowingHashMapInitiable {
    
     public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
-        case Self.NODETYPE_KEY : return .value(JSONValue( nodeType))
+        case Self.NODETYPE_KEY :
+            let value = try JSONValue( nodeType)
+            return .value(value)
         case Self.NAME_KEY :return .value(JSONValue( name))
         case Self.NAMESPACE_KEY : return .value(JSONValue( namespace))
         case Self.PREFIX_KEY :return .value(JSONValue( prefix))
-        case Self.ATTRIBUTE_KEY : return .value(JSONValue( attribute))
-        case Self.WRAPPED_KEY : return .value(JSONValue( wrapped))
+        case Self.ATTRIBUTE_KEY :
+            let value = try JSONValue( attribute)
+            return .value(value)
+        case Self.WRAPPED_KEY :
+            let value = try JSONValue( wrapped)
+            return .value(value)
         default:
         throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIXMLObject", segmentName)
         }

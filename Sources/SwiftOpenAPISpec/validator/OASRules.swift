@@ -95,7 +95,7 @@ struct RequiredServerURLRule: Rule {
                 diagnostics.append( .init(severity: .error,
                               code: .missingRequired,
                               message: "Missing required field 'url' in one of the 'servers'.",
-                              pointer: "/servers/\(server.key ?? "")/url",
+                              pointer: "/servers/\(server.name ?? "")/url",
                               rule: name))
             }
         }
@@ -117,7 +117,7 @@ struct RequiredServerVariablesRule: Rule {
                     diagnostics.append(.init(severity: .error,
                                   code: .missingRequired,
                                   message: "Missing required field 'default' in one of the 'servers' variables.",
-                                  pointer: "/servers/\(server.key ?? "")/variables/\(variable.key ?? "")/default",
+                                  pointer: "/servers/\(server.name ?? "")/variables/\(variable.key ?? "")/default",
                                              rule: name))
                                        
                 }

@@ -61,17 +61,19 @@ public struct OpenAPIObjectType : OpenAPISchemaType,ThrowingHashMapInitiable, Po
     
     public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
-        case Self.DEPENDENT_REQUIRED_KEY : return .value(JSONValue(self.dependentRequired))
-        case Self.MIN_PROPERTIES_KEY : return .value(JSONValue(self.minProperties))
-        case Self.MAX_PROPERTIES_KEY : return .value(JSONValue(self.maxProperties))
-        case Self .TYPE_KEY:  return .value(JSONValue(self.type))
-        case Self.UNEVALUATEDPROPERTIES_KEY : return .value(JSONValue(self.unevaluatedProperties))
+        case Self.DEPENDENT_REQUIRED_KEY : return .value(JSONValue(string: self.dependentRequired))
+        case Self.MIN_PROPERTIES_KEY : return .value(JSONValue(int: self.minProperties))
+        case Self.MAX_PROPERTIES_KEY : return .value(JSONValue(int: self.maxProperties))
+        case Self .TYPE_KEY:  return .value(JSONValue(string: self.type))
+        case Self.UNEVALUATEDPROPERTIES_KEY : return .value(JSONValue(bool: self.unevaluatedProperties))
         case Self .PROPERTIES_KEY:
             let property = self.properties.first(where: { element in
             element.key == segmentName
         })
             return .navigable(property)
-        case Self .REQUIRED_KEY: return  .value(JSONValue(self.required))
+        case Self .REQUIRED_KEY:
+            let value = try JSONValue(self.required)
+            return  .value(value)
         default:
             if let prop = self.properties.first(where: { element in
                 element.key == segmentName

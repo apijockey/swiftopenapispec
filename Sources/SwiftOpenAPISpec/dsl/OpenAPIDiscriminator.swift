@@ -23,7 +23,9 @@ public struct OpenAPIDiscriminator :  ThrowingHashMapInitiable, PointerNavigable
     public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
         case Self.PROPERTY_NAME_KEY: return .value(JSONValue(propertyName))
-        case Self.MAPPING_KEY: return .value(JSONValue(mapping))
+        case Self.MAPPING_KEY:
+            let value = try JSONValue(mapping)
+            return .value(value)
         case Self.DEFAULT_MAPPING_KEY: return .value(JSONValue(defaultMapping))
         default: throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIDiscriminator", segmentName)
         }
@@ -39,13 +41,20 @@ public struct OpenAPIDiscriminator :  ThrowingHashMapInitiable, PointerNavigable
     
     public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
         self.propertyName = map.readIfPresent(Self.PROPERTY_NAME_KEY, valueType: String.self)
-        self.mapping =  map.readIfPresent(Self.MAPPING_KEY, valueType: [String:String].self)
+        if case let .object(mappings) = map[Self.MAPPING_KEY] {
+            
+            for mapping in mappings {
+                if case let .string(value) = mapping.value {
+                    self.mapping[mapping.key] = value
+                }
+            }
+        }
         self.defaultMapping = map.readIfPresent(Self.DEFAULT_MAPPING_KEY, valueType: String.self)
         
     }
     
     public var propertyName: String?
-    public var mapping: Dictionary<String, String>?
+    public var mapping =  Dictionary<String, String>()
     public var defaultMapping: String?
     
 }

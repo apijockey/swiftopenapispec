@@ -99,8 +99,10 @@ public struct OpenAPISimpleExtensionValues : KeyedElement, PointerNavigable {
     public func element(for segmentName: String) throws -> NavigationResult{
         switch segmentName {
         case "key" : return .value(JSONValue(self.key))
-            case "value" : return .value(JSONValue(self.value))
-            case "$ref": return .value(JSONValue(self.ref))
+            case "value" :
+
+            return .value(JSONValue(string: self.value))
+        case "$ref": return .reference(ref?.reference)
         default: throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPISimpleExtensionValues", segmentName)
         }
     }

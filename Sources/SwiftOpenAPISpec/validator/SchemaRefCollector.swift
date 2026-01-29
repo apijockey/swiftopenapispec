@@ -215,7 +215,7 @@ public struct SchemaRefCollector {
             ))
         }
         else {
-            if let schema = parameter.namedSchema {
+            if let schema = parameter.schema {
                 out.append(contentsOf: collect(from: schema, pointer: JSONPointer.join(pointer, "schema")))
             }
         }

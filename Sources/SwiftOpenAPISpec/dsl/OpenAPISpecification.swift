@@ -62,6 +62,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
         let servers =  try dictionary.mapListIfPresent(OpenAPISpecification.SERVERS_KEY, objectType: OpenAPIServer.self)
         if servers.count > 0 {
             self.servers = servers
+            
         }
         self.paths   =  try dictionary.mapListIfPresent(OpenAPISpecification.PATHS_KEY, objectType: OpenAPIPathItem.self)
         self.webhooks = try dictionary.mapListIfPresent(OpenAPISpecification.WEBHOOKS_KEY, objectType: OpenAPIPathItem.self)

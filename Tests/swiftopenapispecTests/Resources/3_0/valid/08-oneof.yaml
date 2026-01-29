@@ -38,16 +38,12 @@ components:
       type: object
       properties: {a: {type: number, minimum: 0}}
       required: [a]
-
-Expected: Sample nimmt Circle (1. Option) → {"r":0}.
-Wenn du allOf testen willst, ergänze:
-
-Pet:
-  allOf:
-    - $ref: "#/components/schemas/Base"
-    - type: object
-      properties: {tag: {type: string}}
-Base:
-  type: object
-  properties: {id: {type: integer}, name: {type: string}}
-  required: [id, name]
+    Pet:
+      allOf:
+        - $ref: "#/components/schemas/Base"
+        - type: object
+          properties: {tag: {type: string}}
+    Base:
+      type: object
+      properties: {id: {type: integer}, name: {type: string}}
+      required: [id, name]

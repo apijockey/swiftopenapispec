@@ -143,7 +143,7 @@ struct ReusableParameterRefRule {
     func check(parameter: OpenAPIParameter, ctx: ValidationContext, pointer : String, rule: String) -> [Diagnostic] {
         var diags: [Diagnostic] = []
         let pointer =  "\(pointer)/\(parameter.name ?? "")"
-        if parameter.ref == nil  && parameter.namedSchema == nil && parameter.content == nil {
+        if parameter.ref == nil  && parameter.schema == nil && parameter.content == nil {
             let diagnotics = Diagnostic( severity: .error,
                                          code: .missingRequired,
                                          message: "Parameter needs a ref, a schema or a content object",
@@ -152,9 +152,9 @@ struct ReusableParameterRefRule {
             diags.append(diagnotics)
         }
         else {
-            if  let namedSchema = parameter.namedSchema{
+            if  let namedSchema = parameter.schema{
                
-                diags.append(contentsOf: ReusableSchemaRefRule().check(schema: namedSchema.element, ctx: ctx, pointer: pointer, rule: rule))
+                diags.append(contentsOf: ReusableSchemaRefRule().check(schema: namedSchema, ctx: ctx, pointer: pointer, rule: rule))
                 
             }
             

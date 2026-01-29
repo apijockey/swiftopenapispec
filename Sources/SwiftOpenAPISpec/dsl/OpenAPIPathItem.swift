@@ -54,6 +54,7 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
             return
         }
         //hier selektier ich alle Path-Sub-Elemente nicht nur die Get...
+        
         for (key, httpOperation) in map {
             if Self.Operations(rawValue: key) != nil,
                case let .object(dictionary) = httpOperation {
@@ -84,8 +85,12 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
            
         case Self.SUMMARY_KEY: return .value(JSONValue(summary))
             case Self.DESCRIPTION_KEY: return .value(JSONValue(description))
-        case Self.SERVERS_KEY: return try servers.element(for: segmentName)
-        case Self.PARAMETERS_KEY: return  .value(JSONValue(parameters.first(where: { $0.name == segmentName })))
+        case Self.SERVERS_KEY:
+            let value = servers.first(where: { $0.name == segmentName })
+            return .navigable(value)
+        case Self.PARAMETERS_KEY:
+            let value = try JSONValue(parameters.first(where: { $0.name == segmentName }))
+            return  .value(value)
         case Self.ADDITIONAL_OPERATIONS_KEY: return try additionalOperations.element(for: segmentName)
         case OpenAPISchemaReference.REF_KEY: return .reference(ref?.reference)
             default :

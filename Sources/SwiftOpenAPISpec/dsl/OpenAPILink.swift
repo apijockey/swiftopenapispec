@@ -47,7 +47,9 @@ public struct OpenAPILink : KeyedElement , PointerNavigable {
        switch segmentName {
        case Self.OPERATIION_REF_KEY : return .value(JSONValue(operationRef))
        case Self.OPERATIION_ID_KEY :return .value(JSONValue(operationId))
-           case Self.PARAMETERS_KEY :return .value(JSONValue(parameters))
+           case Self.PARAMETERS_KEY :
+           let value = try JSONValue(parameters)
+           return .value(value)
            case Self.REQUEST_BODY_KEY :return .value(JSONValue(requestBody))
            case Self.DESCRIPTION_KEY :return .value(JSONValue(description))
            case Self.SERVER_KEY :return .navigable(server)

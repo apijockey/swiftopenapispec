@@ -109,7 +109,7 @@ public struct OpenAPISecurityScheme : KeyedElement , PointerNavigable {
         case Self.FLOWS_KEY : return .navigable(flows)
        case Self.OPENID_CONNECT_URL_KEY : return  .value(JSONValue(openIdConnectURL))
        case Self.OAUTH2_METADATA_URL_KEY : return  .value(JSONValue(openIdConnectURL))
-       case Self.DEPRECATED_KEY : return  .value(JSONValue(deprecated))
+       case Self.DEPRECATED_KEY : return  .value(JSONValue(bool: deprecated))
        case OpenAPISchemaReference.REF_KEY: return .reference(ref?.reference)
        default:
        throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPISecurityScheme", segmentName)

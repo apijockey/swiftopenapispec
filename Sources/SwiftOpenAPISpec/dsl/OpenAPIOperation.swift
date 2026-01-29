@@ -44,18 +44,25 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
     public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
             
-        case Self.DEPRECATED_KEY:  return .value(JSONValue(deprecated))
+        case Self.DEPRECATED_KEY:
+            let value = try JSONValue(deprecated)
+            return .value(value)
         case Self.DESCRIPTION_KEY: return .value(JSONValue(description))
         case Self.EXTERNAL_DOCS_KEY: return .navigable(externalDocs)
         case Self.OP_ID_KEY: return .value(JSONValue(operationId))
-        case Self.PARAMETERS_KEY: return  .value(JSONValue( parameters.first(where: { $0.name == segmentName })))
+        case Self.PARAMETERS_KEY:
+            let value = try JSONValue( parameters.first(where: { $0.name == segmentName }))
+            return  .value(value)
         case Self.REQUEST_BODIES_KEY: return .navigable(requestBody)
         case Self.RESPONSES_KEY: return try responses.element(for: segmentName)
         case Self.SUMMARY_KEY: return  .value(JSONValue(summary))
         case Self.SECURITY_KEY:
-            let value =  securityObjects.element(for: segmentName)
-            return .value(JSONValue(value))
-        case Self.TAGS_KEY: return .value(JSONValue(tags))
+            
+            return try securityObjects.element(for: segmentName)
+            
+        case Self.TAGS_KEY:
+            let value = try JSONValue(tags)
+            return .value(value)
         default:
             if segmentName.hasPrefix("x-"), let exts = extensions {
 //                if let ext = exts.first(where: { $0.key == segmentName }) {

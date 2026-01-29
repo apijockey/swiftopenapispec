@@ -77,7 +77,7 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable,  PointerNavigable {
         self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self)
         let required = map.readIfPresent(Self.REQUIRED_KEY,valueType: Bool.self)
         self.required = required ?? false
-        self.namedSchema = try map.readNamedElementIfPresent(Self.SCHEMA_KEY, objectType: OpenAPISchema.self)
+        self.schema = try map.readIfPresent(Self.SCHEMA_KEY, objectType: OpenAPISchema.self)
         if let style = map.readIfPresent(Self.STYLE_KEY, valueType: String.self) {
             self.style = ParameterStyle(rawValue: style)
         }
@@ -91,14 +91,28 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable,  PointerNavigable {
     public func element(for segmentName: String) throws -> NavigationResult {
        switch segmentName {
        case Self.IN_KEY :return .value(JSONValue(location?.rawValue))
-       case Self.REQUIRED_KEY : return .value(JSONValue(required))
-       case Self.DESCRIPTION_KEY: return .value(JSONValue(description))
-       case Self.DEPRECATED_KEY: return .value(JSONValue(deprecated))
-       case Self.ALLOW_EMPTYVALUE_KEY: return .value(JSONValue(allowEmptyValue))
-       case Self.ALLOW_RESERVED_KEY: return .value(JSONValue(allowReserved))
-       case Self.SCHEMA_KEY: return .navigable(namedSchema)
-       case Self.STYLE_KEY: return .value(JSONValue(style))
-       case Self.EXPLODE_KEY: return .value(JSONValue(explode))
+       case Self.REQUIRED_KEY :
+           let value = try JSONValue(required)
+           return .value(value)
+       case Self.DESCRIPTION_KEY:
+           let value = JSONValue(description)
+           return .value(value)
+       case Self.DEPRECATED_KEY:
+           let value = try JSONValue(deprecated)
+           return .value(value)
+       case Self.ALLOW_EMPTYVALUE_KEY:
+           
+           return .value(JSONValue(bool: allowEmptyValue))
+       case Self.ALLOW_RESERVED_KEY: return .value(JSONValue(bool: allowReserved))
+       case Self.SCHEMA_KEY:
+           
+           return .navigable(schema)
+       case Self.STYLE_KEY:
+           let value = try JSONValue(style)
+           return .value(value)
+       case Self.EXPLODE_KEY:
+           let value = try JSONValue(explode)
+           return .value(value)
        case Self.EXAMPLE_KEY: return .value(example)
        case Self.EXAMPLES_KEY: return try examples.element(for: segmentName)
        case Self.CONTENT_KEY: return .navigable(content)
@@ -120,7 +134,7 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable,  PointerNavigable {
     public var description : String? = nil
     public var deprecated : Bool? = nil
     public var allowEmptyValue : Bool? = nil
-    public var namedSchema :  OpenAPINamedElement<OpenAPISchema>? = nil
+    public var schema :  OpenAPISchema? = nil
     //https://learn.openapis.org/specification/parameters.html
     public var style : ParameterStyle? = nil
     public var explode : Bool? = nil

@@ -20,14 +20,14 @@
 import Foundation
 
 
-public struct OpenAPIServer : KeyedElement , PointerNavigable {
+public struct OpenAPIServer : ThrowingHashMapInitiable , PointerNavigable {
     
     
     public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
         case Self.DESCRIPTION_KEY :  return .value(JSONValue(self.description))
             case Self.URL_KEY : return .value(JSONValue(url))
-        case Self.NAME_KEY :return .value(JSONValue(key))
+        case Self.NAME_KEY :return .value(JSONValue(name))
         case Self.VARIABLES_KEY : return try variables.element(for: segmentName)
         default:
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIInfo", segmentName)
@@ -50,7 +50,7 @@ public struct OpenAPIServer : KeyedElement , PointerNavigable {
     public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
         self.url = map.readIfPresent(Self.URL_KEY, valueType: String.self)
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType:  String.self)
-        
+        self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self)
         self.variables = try map.mapListIfPresent(Self.VARIABLES_KEY,objectType : OpenAPIVariable.self)
         extensions = try OpenAPIExtension.extensionElements(map)
     }
@@ -58,7 +58,7 @@ public struct OpenAPIServer : KeyedElement , PointerNavigable {
 
     public var description : String? = nil
     public var extensions : [OpenAPIExtension]?
-    public var key: String? = nil
+    public var name : String?
     public var url : String? = "/"
    
     //https://spec.openapis.org/oas/latest.html#server-variable-object

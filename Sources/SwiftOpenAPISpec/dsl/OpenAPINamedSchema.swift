@@ -24,7 +24,7 @@ public struct OpenAPINamedElement<T>: PointerNavigable, Sendable where T: Pointe
    public init(load map: StringDictionary, objectType _: T.Type,  _ diagnostics: inout [Diagnostic]) throws {
        
        self.element = try T.init(load: map, &diagnostics)
-      
+       
     }
     
     public  var key : String? = nil

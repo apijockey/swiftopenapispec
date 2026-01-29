@@ -51,11 +51,13 @@ public struct OpenAPIOAuthFlow : ThrowingHashMapInitiable, PointerNavigable {
     
     public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
-        case Self.AUTHORIZATIONURL_KEY: return .value(JSONValue(authorizationUrl))
-        case Self.DEVICE_AUTHORIZATIONURL_KEY: return .value(JSONValue(deviceAuthorizationUrl))
-        case Self.TOKENURL_KEY: return .value(JSONValue(tokenUrl))
-        case Self.REFRESHURL_KEY : return .value(JSONValue(refreshUrl))
-        case Self.SCOPES_KEY : return  .value(JSONValue(scopes))
+        case Self.AUTHORIZATIONURL_KEY: return .value(JSONValue(string: authorizationUrl))
+        case Self.DEVICE_AUTHORIZATIONURL_KEY: return .value(JSONValue(string: deviceAuthorizationUrl))
+        case Self.TOKENURL_KEY: return .value(JSONValue(string: tokenUrl))
+        case Self.REFRESHURL_KEY : return .value(JSONValue(string: refreshUrl))
+        case Self.SCOPES_KEY :
+            let value = try JSONValue(scopes)
+            return  .value(value)
         default:
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIOAuthFlow", segmentName)
         }

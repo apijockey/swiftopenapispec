@@ -28,8 +28,20 @@ public enum JSONValue: Equatable, Sendable {
 
 public extension JSONValue {
     
-    
-    init?(from any: Any) {
+    enum Errors : LocalizedError    {
+       case notReadable(String), notConvertible(String)
+    }
+    init(from v : [String:Any]) throws {
+        var obj: [String: JSONValue] = [:]
+        obj.reserveCapacity(v.count)
+        for (k, val) in v {
+                let jv = try JSONValue(from: val)
+                obj[k] = jv
+            
+        }
+        self = .object(obj)
+    }
+    init(from any: Any) throws  {
         switch any {
         case let v as String:
             self = .string(v)
@@ -42,24 +54,61 @@ public extension JSONValue {
         case let v as Bool:
             self = .boolean(v)
         case let v as [Any]:
-            let arr = v.compactMap { JSONValue(from: $0) }
-            guard arr.count == v.count else { return nil }
+            let arr = try v.compactMap { try JSONValue(from: $0) }
+            guard arr.count == v.count else  {
+                throw Self.Errors.notConvertible(v.debugDescription)
+            }
             self = .array(arr)
         case let v as [String: Any]:
             var obj: [String: JSONValue] = [:]
             obj.reserveCapacity(v.count)
             for (k, val) in v {
-                guard let jv = JSONValue(from: val) else { return nil }
+                let jv = try JSONValue(from: val)
                 obj[k] = jv
             }
             self = .object(obj)
         case Optional<Any>.none:
             self = .null
         default:
-            return nil
+            throw Self.Errors.notConvertible(String(describing: any))
         }
     }
-    init?(_ any: Any?) {
+    init(string : String?) {
+        guard let string = string else {
+            self =  .null
+            return
+        }
+        self = .string(string)
+    }
+    init(int : Int?) {
+        guard let int = int else {
+            self = .null
+            return
+        }
+        self = .integer(int)
+    }
+    init(float : Float?) {
+        guard let float = float else {
+            self = .null
+            return
+        }
+        self = .number(Double(float))
+    }
+    init(double : Double?) {
+        guard let double = double else {
+            self = .null
+            return
+        }
+        self = .number(double)
+    }
+    init(bool : Bool?) {
+        guard let bool = bool else {
+            self = .null
+            return
+        }
+        self = .boolean(bool)
+    }
+    init(_ any: Any?) throws {
         switch any {
         case let v as String:
             self = .string(v)
@@ -72,21 +121,23 @@ public extension JSONValue {
         case let v as Bool:
             self = .boolean(v)
         case let v as [Any]:
-            let arr = v.compactMap { JSONValue(from: $0) }
-            guard arr.count == v.count else { return nil }
+            let arr = try v.compactMap { try JSONValue(from: $0) }
+            guard arr.count == v.count else {
+                throw Self.Errors.notConvertible(v.debugDescription)
+            }
             self = .array(arr)
         case let v as [String: Any]:
             var obj: [String: JSONValue] = [:]
             obj.reserveCapacity(v.count)
             for (k, val) in v {
-                guard let jv = JSONValue(from: val) else { return nil }
+                let jv = try JSONValue(from: val)
                 obj[k] = jv
             }
             self = .object(obj)
         case Optional<Any>.none:
             self = .null
         default:
-            return nil
+            throw Self.Errors.notConvertible(String(describing: any))
         }
     }
     init(_ string: String?) {

@@ -47,10 +47,10 @@ struct ArrayComponentsTests {
         do {
             let data = try Data(contentsOf: url)
             guard let string = String(data: data, encoding: .utf8),
-                  let map = try Yams.load(yaml: string)  as? [String:Any],
-                  let jsonValue = JSONValue(map) else  {
+                  let map = try Yams.load(yaml: string)  as? [String:Any] else  {
                 throw Self.Errors.notUTF8(name)
             }
+            let jsonValue = try JSONValue(map)
             return jsonValue
         } catch {
             throw Errors.unreadable(name, error)

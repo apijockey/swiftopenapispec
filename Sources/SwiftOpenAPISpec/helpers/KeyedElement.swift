@@ -77,10 +77,13 @@ public extension Array where Element : KeyedElement {
     func contains(name key: String) -> Bool {
         return self.contains(where: { $0.key == key })
     }
-    func element(for segmentName: String) -> Element? {
-        self.first { namedComponent in
+    func element(for segmentName: String) throws -> NavigationResult{
+        let value = self.first { namedComponent in
             namedComponent.key == segmentName
         }
+        
+        let jsonValue = try JSONValue(value)
+        return .value(jsonValue)
     }
 }
 

@@ -71,7 +71,7 @@ public struct OpenAPIAnyOfType : OpenAPISchemaType, PointerNavigable {
         self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self)
         
 
-        self.discriminator = try map.readIfPresent(Self.DISCRIMINATOR_KEY, objectType: OpenAPIDiscriminator.self)
+        
         
         self.items = try map.mapListIfPresent(objectType: OpenAPISchema.self )
     }
@@ -90,6 +90,6 @@ public struct OpenAPIAnyOfType : OpenAPISchemaType, PointerNavigable {
     }
     public let type : String?
     public var items: [OpenAPISchema]?
-    public var discriminator: OpenAPIDiscriminator?
+   
     
 }

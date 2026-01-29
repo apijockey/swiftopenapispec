@@ -62,23 +62,32 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
                    
         case .some("null"):
             self = .null
-
         default:
+            if map.readIfPresent(OpenAPISchemaReference.REF_KEY, valueType: String.self) != nil{
+                let ref = try OpenAPISchemaReference(load: map, &diagnostics)
+                   self = .ref(ref)
+                   return
+            }
             // Try composite constructs if type is missing
-            if map.readIfPresent(Self.ONEOF_KEY, valueType: [Any].self) != nil {
+            if let oneOfValue = map[OpenAPIOneOfType.TYPE_KEY],
+                case .array  = oneOfValue  {
+                
                 var localDiagnostics: [Diagnostic] = []
                 let oneOf = try OpenAPIOneOfType(load: map, &localDiagnostics)
                 diagnostics.append(contentsOf: localDiagnostics)
                 self = .oneOf(oneOf)
                 return
             }
-            if map.readIfPresent(Self.ANYOF_KEY, valueType: [Any].self) != nil {
+           
+            if let oneOfValue = map[OpenAPIAnyOfType.TYPE_KEY],
+                case .array  = oneOfValue  {
                 // OpenAPIAnyOfType has a different initializer style
                 let anyOf = try OpenAPIAnyOfType(load: map,  &diagnostics)
                 self = .anyOf(anyOf)
                 return
             }
-            if map.readIfPresent(Self.ALLOF_KEY, valueType: [Any].self) != nil {
+            if let oneOfValue = map[OpenAPIAllOfType.TYPE_KEY],
+                case .array  = oneOfValue  {
                 let allOf = try OpenAPIAllOfType(load: map, &diagnostics)
                 self = .allOf(allOf)
                 return
