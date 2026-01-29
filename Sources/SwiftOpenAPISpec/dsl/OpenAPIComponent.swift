@@ -89,7 +89,7 @@ public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
             }
         case Self.PARAMETERS_KEY:
             if let parameters =  parameters {
-                return try parameters.element(for: segmentName)
+                return try .value(JSONValue(parameters.first(where: { $0.name == segmentName })))
             }
             else {
                 throw OpenAPISpecification.Errors.unsupportedSegment(segmentName, "OpenAPIComponent")

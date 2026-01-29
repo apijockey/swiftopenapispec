@@ -129,7 +129,7 @@ struct FixtureTests {
         
         guard parameters.count == 1,
               let parameter = parameters.first else { Issue.record("one parameter expected"); return }
-        #expect(parameter.key == "id")
+        #expect(parameter.name == "id")
         #expect(parameter.location == SwiftOpenAPISpec.OpenAPIParameter.ParameterLocation.path)
         guard case  .string = parameter.namedSchema?.element.type   else { Issue.record("string expected"); return }
         
@@ -143,7 +143,7 @@ struct FixtureTests {
         
         #expect(parameters.count == 1)
         let queryParameter = searchParameters.first!
-        #expect(queryParameter.key == "limit")
+        #expect(queryParameter.name == "limit")
         #expect(queryParameter.location == OpenAPIParameter.ParameterLocation.query)
         guard case  .number = parameter.namedSchema?.element.type   else { Issue.record("number expected"); return }
         //#expect(parameter.schema?.defaultValue == 10)
@@ -509,7 +509,7 @@ struct FixtureTests {
         let pingOpExtensionsProperties = try #require(pingOpExtensions[extensionName: "x-operation-rate-limit"]?.structuredExtension?.properties)
         #expect(pingOpExtensionsProperties["burst"] == "20")
         #expect(pingOpExtensionsProperties["sustainedPerMin"] == "120")
-        let extendedParameter = try #require(apiSpec.paths[key: "/ping"]?.operations[operationID: "ping"]?.parameters[key: "verbose"])
+        let extendedParameter = try #require(apiSpec.paths[key: "/ping"]?.operations[operationID: "ping"]?.parameters.first(where: { $0.name == "verbose" }) )
         #expect(extendedParameter.extensions?.count == 1)
         #expect(extendedParameter.extensions?[extensionName:"x-parameter-source"]?.simpleExtensionValue == "internal")
         let parameterSchema = try #require(extendedParameter.namedSchema)

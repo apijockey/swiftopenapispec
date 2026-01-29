@@ -45,7 +45,7 @@ public struct Validator {
             occurrences += SchemaRefCollector().collect(from: response, pointer: p)
         }
         for (parameter) in (spec.components?.parameters ?? []){
-            let p = "/components/parameters/\(JSONPointer.escape(parameter.key ?? ""))"
+            let p = "/components/parameters/\(JSONPointer.escape(parameter.name ?? ""))"
             occurrences += SchemaRefCollector().collect(from: parameter, pointer: p)
         }
         for (header) in (spec.components?.headers ?? []){

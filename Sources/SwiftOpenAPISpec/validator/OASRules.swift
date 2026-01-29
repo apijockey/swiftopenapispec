@@ -197,7 +197,7 @@ struct RequiredParameterComponentsNamessRule: Rule {
       
         guard let schemas = spec.components?.parameters else { return diagnostics }
         for schema in schemas {
-            if let key = schema.key {
+            if let key = schema.name {
                 
                     if !key.matches("[a-zA-Z0-9\\.\\-_]+") {
                         diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "/components/parameters/\(key)", rule: name))
@@ -419,7 +419,7 @@ struct ParameterLocationsMustHaveInRule: Rule {
                 let diagnostic = Diagnostic( severity: .error,
                                              code: .missingRequired,
                                              message: "Parameters need a location value.",
-                                             pointer: "/components/parameters/\(parameter.key ?? "")",
+                                             pointer: "/components/parameters/\(parameter.name ?? "")",
                                              rule: name)
                 diags.append(diagnostic)
                 if parameter.location == .path {
@@ -427,7 +427,7 @@ struct ParameterLocationsMustHaveInRule: Rule {
                         let diagnostic = Diagnostic( severity: .error,
                                                      code: .missingRequired,
                                                      message: "Path Parameters MUST BE required.",
-                                                     pointer: "/components/parameters/\(parameter.key ?? "")",
+                                                     pointer: "/components/parameters/\(parameter.name ?? "")",
                                                      rule: name)
                         diags.append(diagnostic)
                     }

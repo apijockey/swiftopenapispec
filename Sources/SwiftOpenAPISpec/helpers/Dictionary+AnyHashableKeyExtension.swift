@@ -141,16 +141,32 @@ extension StringDictionary {
     func mapListIfPresent<T>(_ key : String, objectType : T.Type) throws -> [T]  where  T : KeyedElement{
         var elements = [T]()
         var diagnostics: [Diagnostic] = []
-        if let value = self[key],
-        case let .object(objectMap)  = value{
+        if let value = self[key] {
+        if case let .object(objectMap)  = value{
             for element in objectMap {
                 let value = element.value
                 if case let .object(valueMap) = value {
                     var type = try T.initialize(load:  valueMap, diagnostics: diagnostics).value
-                    type.key = element.key
+                    if type.key == nil {
+                        type.key = element.key
+                    }
                     elements.append(type)
                 }
             }
+        }
+        if case let .array(arrayList) = value {
+            for jsonElement in arrayList {
+                if case let .object(objectElement) = jsonElement {
+                    var type = try T.initialize(load:  objectElement, diagnostics: diagnostics).value
+                    if type.key == nil {
+                        type.key = objectElement.keys.first
+                    }
+                    elements.append(type)
+                    
+                    
+                }
+            }
+        }
         }
         return elements
     }
@@ -160,16 +176,21 @@ extension StringDictionary {
         guard let value = self[key] else {
             return elements
         }
-        if case let .object(element)  = value {
-            let type = try T.initialize(load: element, diagnostics: diagnostics).value
+        if case let .object(element)  = value,
+           case let .object(elementContent) = element.first?.value{
+            var type = try T.initialize(load: elementContent, diagnostics: diagnostics).value
+            type.key = element.keys.first
             elements.append(type)
             return elements
         }
         if case let .array(list)  = value {
             for element in list {
                 if case let .object(objectElement) = element {
-                    let element = try T.initialize(load: objectElement, diagnostics: diagnostics).value
-                    elements.append(element)
+                    var type = try T.initialize(load: objectElement, diagnostics: diagnostics).value
+                    if type.key == nil {
+                        type.key = objectElement.keys.first
+                    }
+                    elements.append(type)
                 }
                 
             }

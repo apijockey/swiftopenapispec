@@ -289,7 +289,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     ///```
     public subscript(parametercomponent component: String) -> OpenAPIParameter? {
         return components?.parameters?.first(where: { c in
-            c.key == component
+            c.name == component
         })
     }
     /**

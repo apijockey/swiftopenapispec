@@ -26,7 +26,7 @@ import Foundation
   A unique parameter is defined by a combination of a name and location.
   */
  */
-public struct OpenAPIParameter :  ThrowingHashMapInitiable, KeyedElement, PointerNavigable {
+public struct OpenAPIParameter :  ThrowingHashMapInitiable,  PointerNavigable {
     
     
     public enum ParameterLocation : String, Codable, CaseIterable, Sendable {
@@ -74,7 +74,7 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable, KeyedElement, Pointe
         extensions = try OpenAPIExtension.extensionElements(map)
         self.location = ParameterLocation(rawValue: location)
       
-       
+        self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self)
         let required = map.readIfPresent(Self.REQUIRED_KEY,valueType: Bool.self)
         self.required = required ?? false
         self.namedSchema = try map.readNamedElementIfPresent(Self.SCHEMA_KEY, objectType: OpenAPISchema.self)
@@ -113,7 +113,7 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable, KeyedElement, Pointe
            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIParameter", segmentName)
         }
     }
-    public var key: String?
+    public var name: String?
     public var ref : OpenAPISchemaReference? = nil
     public var location : ParameterLocation?
     public var required : Bool? 

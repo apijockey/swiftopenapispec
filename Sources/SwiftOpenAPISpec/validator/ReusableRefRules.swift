@@ -142,7 +142,7 @@ struct ReusableOperationRefRule {
 struct ReusableParameterRefRule {
     func check(parameter: OpenAPIParameter, ctx: ValidationContext, pointer : String, rule: String) -> [Diagnostic] {
         var diags: [Diagnostic] = []
-        let pointer =  "\(pointer)/\(parameter.key ?? "")"
+        let pointer =  "\(pointer)/\(parameter.name ?? "")"
         if parameter.ref == nil  && parameter.namedSchema == nil && parameter.content == nil {
             let diagnotics = Diagnostic( severity: .error,
                                          code: .missingRequired,
