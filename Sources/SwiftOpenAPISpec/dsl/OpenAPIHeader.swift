@@ -50,7 +50,7 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
         
         self.examples  = try map.mapListIfPresent(Self.EXAMPLES_KEY, objectType: OpenAPIExample.self)
         self.content = try map.readIfPresent(Self.CONTENT_KEY,objectType:  OpenAPIMediaType.self)
-        extensions = try OpenAPIExtension.extensionElements(map)
+        extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
      
        
         self.required = map.readIfPresent(Self.REQUIRED_KEY, valueType: Bool.self) ?? false

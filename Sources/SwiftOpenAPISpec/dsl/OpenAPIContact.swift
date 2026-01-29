@@ -36,7 +36,7 @@ public struct OpenAPIContact : ThrowingHashMapInitiable , PointerNavigable {
         self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self)
         self.url =  map.readIfPresent(Self.URL_KEY, valueType:  String.self)
         self.email = map.readIfPresent(Self.EMAIL_KEY,valueType: String.self)
-        extensions = try OpenAPIExtension.extensionElements(map)
+        extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
     }
    
     

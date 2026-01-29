@@ -34,7 +34,7 @@ public struct OpenAPILink : KeyedElement , PointerNavigable {
             return
         }
         description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self)
-        extensions = try OpenAPIExtension.extensionElements(map)
+        extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
         operationRef = map.readIfPresent(Self.OPERATIION_REF_KEY,valueType:  String.self)
         operationId = map.readIfPresent(Self.OPERATIION_ID_KEY,valueType:  String.self)
         server = try map.readIfPresent(Self.SERVER_KEY, objectType: OpenAPIServer.self)

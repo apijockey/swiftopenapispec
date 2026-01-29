@@ -27,7 +27,7 @@ public struct OpenAPIEncoding : KeyedElement, PointerNavigable {
     static let ITEM_ENCODING_KEY = "itemEncoding"
     static let EXTENSIONS_KEY = "extensions"
     public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
-        extensions = try OpenAPIExtension.extensionElements(map)
+        extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
         self.contentType = map.readIfPresent(Self.CONTENT_TYPE_KEY, valueType: String.self)
         self.contentType = map.readIfPresent(Self.HEADERS_KEY, valueType : String.self)
         self.encoding  = try map.mapListIfPresent(Self.ENCODING_KEY, objectType: OpenAPIEncoding.self)
@@ -48,9 +48,8 @@ public struct OpenAPIEncoding : KeyedElement, PointerNavigable {
             // Für x-* Vendor Extensions einzelne Keys erlauben: "x-..." -> passenden Extension-Wert liefern
             if segmentName.hasPrefix("x-") {
                 if let ext = extensions.first(where: { $0.key == segmentName }) {
-                    // Gib die strukturierte oder einfache Extension zurück
-                    //return ext.structuredExtension?.properties ?? ext.simpleExtensionValue
-                }
+                                              return .value(ext.value)
+                                          }
             }
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIEncoding", segmentName)
         }

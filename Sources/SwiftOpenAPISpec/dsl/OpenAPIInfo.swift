@@ -37,7 +37,7 @@ public struct OpenAPIInfo : KeyedElement, PointerNavigable {
         self.termsOfService = map.readIfPresent( Self.TERMS_KEY,valueType: String.self)
         self.contact = try  map.readIfPresent(Self.CONTACT_KEY, objectType: OpenAPIContact.self)
         self.license = try map.readIfPresent(Self.LICENSE_KEY, objectType: OpenAPILicense.self)
-        extensions = try OpenAPIExtension.extensionElements(map)
+        extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
         
     }
    
@@ -59,8 +59,8 @@ public struct OpenAPIInfo : KeyedElement, PointerNavigable {
             if segmentName.hasPrefix("x-"), let exts = extensions {
                 if let ext = exts.first(where: { $0.key == segmentName }) {
                     // Gib die strukturierte oder einfache Extension zurück
-                    let value = try JSONValue(ext.structuredExtension?.properties ?? ext.simpleExtensionValue)
-                    return .value(value)
+                    
+                    return .value(ext.value)
                 }
             }
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIInfo", segmentName)

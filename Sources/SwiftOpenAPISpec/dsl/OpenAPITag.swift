@@ -52,7 +52,7 @@ public struct OpenAPITag:  ThrowingHashMapInitiable, PointerNavigable {
         self.parent = map.readIfPresent(Self.PARENT_KEY, valueType: String.self)
         self.kind = map.readIfPresent(Self.KIND_KEY, valueType: String.self)
         self.externalDocs = try map.readIfPresent(Self.EXTERNAL_DOCS_KEY, objectType: OpenAPIExternalDocumentation.self)
-        self.extensions = try OpenAPIExtension.extensionElements(map)
+        self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
     }
     
    

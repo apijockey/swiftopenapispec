@@ -30,13 +30,7 @@ public struct OpenAPICallBack : KeyedElement,PointerNavigable{
            }
            if segmentName.hasPrefix("x-"), let exts = extensions {
                            if let ext = exts.first(where: { $0.key == segmentName }) {
-                               if let list = ext.structuredExtension?.properties {
-                                   return .navigable(ext.structuredExtension)
-                               }
-                               else {
-                                   return .value(JSONValue(ext.simpleExtensionValue))
-                               }
-                               
+                               return .value(ext.value)
                            }
                        }
                        throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPICallBack", segmentName)
@@ -50,7 +44,7 @@ public struct OpenAPICallBack : KeyedElement,PointerNavigable{
             self.ref = ref
             return
         }
-        extensions = try OpenAPIExtension.extensionElements(map)
+        extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
         if map.count > 0 {
             pathItems = []
             self.pathItems =  try map.mapListIfPresent(objectType: OpenAPIPathItem.self)

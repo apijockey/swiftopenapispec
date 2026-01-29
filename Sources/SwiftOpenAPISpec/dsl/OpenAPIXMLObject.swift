@@ -37,7 +37,7 @@ public struct OpenAPIXMLObject : PointerNavigable, ThrowingHashMapInitiable {
         self.prefix = map.readIfPresent(Self.PREFIX_KEY, valueType: String.self)
         self.attribute = map.readIfPresent(Self.ATTRIBUTE_KEY,valueType:  Bool.self)
         self.wrapped = map.readIfPresent(Self.WRAPPED_KEY,valueType:  Bool.self)
-        self.extensions = try OpenAPIExtension.extensionElements(map)
+        self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
     }
    
     public func element(for segmentName: String) throws -> NavigationResult {

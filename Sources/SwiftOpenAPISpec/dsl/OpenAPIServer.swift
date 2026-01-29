@@ -52,7 +52,7 @@ public struct OpenAPIServer : ThrowingHashMapInitiable , PointerNavigable {
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType:  String.self)
         self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self)
         self.variables = try map.mapListIfPresent(Self.VARIABLES_KEY,objectType : OpenAPIVariable.self)
-        extensions = try OpenAPIExtension.extensionElements(map)
+        extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
     }
    
 

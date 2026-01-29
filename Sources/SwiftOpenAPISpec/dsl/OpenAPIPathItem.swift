@@ -77,7 +77,7 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
             self.parameters = parameters
         }
         self.additionalOperations = try map.mapListIfPresent(Self.ADDITIONAL_OPERATIONS_KEY, valueType: OpenAPIOperation.self)
-        self.extensions = try OpenAPIExtension.extensionElements(map)
+        self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
     }
    
     public func element(for segmentName: String) throws -> NavigationResult{

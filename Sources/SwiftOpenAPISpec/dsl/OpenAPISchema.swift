@@ -150,7 +150,7 @@ public struct OpenAPISchema : ThrowingHashMapInitiable, PointerNavigable {
         } else {
             self.allowedValues = nil
         }
-        self.extensions = try OpenAPIExtension.extensionElements(map)
+        self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
         self.exclusiveMinimum = map.readIfPresent(Self.EXCLUSIVE_MINIMUM_KEY, valueType:  Bool.self)
         self.externalDocs = try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIExternalDocumentation.self)
         self.example = try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIExample.self)

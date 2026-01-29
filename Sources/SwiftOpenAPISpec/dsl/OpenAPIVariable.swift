@@ -30,7 +30,7 @@ public struct OpenAPIVariable : KeyedElement , PointerNavigable {
         self.enumList = map.readListIfPresent(Self.ENUM_KEY, valueType: String.self)
         self.defaultValue = map.readIfPresent(Self.DEFAULT_KEY,  valueType: String.self)
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self)
-        self.extensions = try OpenAPIExtension.extensionElements(map)
+        self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
             
     }
     public func element(for segmentName: String) throws -> NavigationResult{

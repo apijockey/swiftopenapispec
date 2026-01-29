@@ -66,10 +66,10 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
         }
         self.paths   =  try dictionary.mapListIfPresent(OpenAPISpecification.PATHS_KEY, objectType: OpenAPIPathItem.self)
         self.webhooks = try dictionary.mapListIfPresent(OpenAPISpecification.WEBHOOKS_KEY, objectType: OpenAPIPathItem.self)
-        self.securityObjects = try unmerged.mapListIfPresent(Self.SECURITY_KEY, objectType: OpenAPISecuritySchemeReference.self)
+        self.securityObjects = try dictionary.mapListIfPresent(Self.SECURITY_KEY, objectType: OpenAPISecuritySchemeReference.self)
         
         
-        //self.extensions = try OpenAPIExtension.extensionElements(map)
+        self.extensions = try OpenAPIExtension.extensionElements(dictionary, &diagnostics)
 
        
         

@@ -71,7 +71,7 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable,  PointerNavigable {
         self.format = map.readIfPresent(Self.FORMAT_KEY, valueType: String.self)
         
         self.examples  = try map.mapListIfPresent(Self.EXAMPLES_KEY,objectType: OpenAPIExample.self)
-        extensions = try OpenAPIExtension.extensionElements(map)
+        extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
         self.location = ParameterLocation(rawValue: location)
       
         self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self)

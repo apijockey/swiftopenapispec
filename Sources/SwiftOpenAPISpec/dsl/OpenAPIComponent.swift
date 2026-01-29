@@ -142,7 +142,7 @@ public init(load map: StringDictionary, _ diagnostics: inout [Diagnostic]) throw
             self.callbacks = try map.mapListIfPresent(Self.CALLBACKS_KEY, objectType: OpenAPICallBack.self)
             self.mediaTypes = try map.mapListIfPresent(Self.ENCODINGS_KEY, objectType: OpenAPIMediaType.self)
             self.examples =  try map.mapListIfPresent(Self.EXAMPLES_KEY, objectType: OpenAPIExample.self)
-            extensions = try OpenAPIExtension.extensionElements(map)
+            extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
             self.headers =  try map.mapListIfPresent(Self.HEADERS_KEY, objectType: OpenAPIHeader.self)
             self.links =   try map.mapListIfPresent(Self.LINKS_KEY, objectType: OpenAPILink.self)
             self.mediaTypes =  try map.mapListIfPresent(Self.MEDIATYPES_KEY, objectType: OpenAPIMediaType.self)

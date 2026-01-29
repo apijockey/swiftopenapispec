@@ -35,7 +35,7 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
         self.deprecated = map.readIfPresent(Self.DEPRECATED_KEY, valueType: Bool.self)
         self.securityObjects = try map.mapListIfPresent(Self.SECURITY_KEY, objectType: OpenAPISecuritySchemeReference.self)
         self.servers =  try map.mapListIfPresent(OpenAPISpecification.SERVERS_KEY, objectType: OpenAPIServer.self)
-        extensions = try OpenAPIExtension.extensionElements(map)
+        extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
        
        
         
