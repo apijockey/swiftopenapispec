@@ -43,6 +43,6 @@ public struct OpenAPIExternalDocumentation : ThrowingHashMapInitiable, PointerNa
     public var description : String? = nil
     public var url : String?
    
-    public var ref: OpenAPISchemaReference? { nil}
+   
     
 }

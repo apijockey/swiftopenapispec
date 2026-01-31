@@ -45,5 +45,5 @@ public struct OpenAPIContact : ThrowingHashMapInitiable , PointerNavigable {
     public  var name : String? = nil
     public var url : String? = nil
     
-    public var ref: OpenAPISchemaReference? { nil}
+    
 }

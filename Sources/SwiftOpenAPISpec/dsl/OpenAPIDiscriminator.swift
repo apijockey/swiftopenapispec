@@ -18,7 +18,7 @@
 //
 
 public struct OpenAPIDiscriminator :  ThrowingHashMapInitiable, PointerNavigable {
-    public var ref: OpenAPISchemaReference? { nil}
+   
     
     public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {

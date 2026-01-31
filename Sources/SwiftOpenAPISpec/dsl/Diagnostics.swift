@@ -30,7 +30,7 @@
  */
 
 
-public struct Diagnostic: Equatable, CustomDebugStringConvertible, CustomStringConvertible {
+public struct Diagnostic: Sendable, Equatable, CustomDebugStringConvertible, CustomStringConvertible {
     public var debugDescription: String {
         return "severity: \(severity.rawValue), code: \(code.rawValue), message: \(message), pointer: \(pointer), rule: \(rule)"
     }
@@ -39,8 +39,8 @@ public struct Diagnostic: Equatable, CustomDebugStringConvertible, CustomStringC
         return "severity: \(severity.rawValue), code: \(code.rawValue), message: \(message), pointer: \(pointer), rule: \(rule)"
     }
     
-    public enum Severity : String { case warning, error }
-    public enum Code: String, Equatable {
+    public enum Severity : String, Sendable { case warning, error,info }
+    public enum Code: String, Sendable, Equatable {
         case invalidRef
         case invalidRefTargetType
         case schemaViolation
@@ -48,6 +48,7 @@ public struct Diagnostic: Equatable, CustomDebugStringConvertible, CustomStringC
         case missingResponses
         case invalidValue
         case invalidType
+        case debugTrace
     }
 
     public let severity: Severity

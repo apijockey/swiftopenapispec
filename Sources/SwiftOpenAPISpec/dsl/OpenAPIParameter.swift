@@ -26,7 +26,7 @@ import Foundation
   A unique parameter is defined by a combination of a name and location.
   */
  */
-public struct OpenAPIParameter :  ThrowingHashMapInitiable,  PointerNavigable {
+public struct OpenAPIParameter :  KeyedElement,  PointerNavigable {
     
     
     public enum ParameterLocation : String, Codable, CaseIterable, Sendable {
@@ -74,7 +74,7 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable,  PointerNavigable {
         extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
         self.location = ParameterLocation(rawValue: location)
       
-        self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self)
+        self.key = map.readIfPresent(Self.NAME_KEY, valueType: String.self)
         let required = map.readIfPresent(Self.REQUIRED_KEY,valueType: Bool.self)
         self.required = required ?? false
         self.schema = try map.readIfPresent(Self.SCHEMA_KEY, objectType: OpenAPISchema.self)
@@ -118,16 +118,17 @@ public struct OpenAPIParameter :  ThrowingHashMapInitiable,  PointerNavigable {
        case Self.CONTENT_KEY: return .navigable(content)
        case OpenAPISchemaReference.REF_KEY: return .reference(ref?.reference)
        default:
-//           if segmentName.hasPrefix("x-"), let exts = extensions {
-//                           if let ext = exts.first(where: { $0.key == segmentName }) {
-//                               // Gib die strukturierte oder einfache Extension zurück
-//                               return ext.structuredExtension?.properties ?? ext.simpleExtensionValue
-//                           }
-//                       }
+           if segmentName.hasPrefix("x-"), let exts = extensions {
+                           if let ext = exts.first(where: { $0.key == segmentName }) {
+                               let value = try JSONValue(ext)
+                               return .value(value)
+                               
+                           }
+                       }
            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIParameter", segmentName)
         }
     }
-    public var name: String?
+    public var key: String?
     public var ref : OpenAPISchemaReference? = nil
     public var location : ParameterLocation?
     public var required : Bool? 

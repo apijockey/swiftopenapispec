@@ -32,6 +32,7 @@ public protocol DocumentLoadable : Sendable{
 /// Default implementation for the ``DocumentLoadable`` protocol which is a required parameter.
 public actor YamsDocumentLoader : DocumentLoadable {
     private var objectCash: [URL: OpenAPISpecification] = [:]
+    private let diagnostics = [Diagnostic]()
     
     /// inits an instance of the object.
     ///
@@ -45,33 +46,38 @@ public actor YamsDocumentLoader : DocumentLoadable {
             case .unreadable(let name, let err): return "Fixture unreadable: \(name) (\(err))"
             case .notUTF8(let name): return "Fixture not UTF-8 encoded: \(name)"
             
+            case .notAnObject(let url ):
+                return "expected a JSONValue.object at \(url)"
             }
         }
         
         case unreadable(String, Error)
+        case notAnObject(String)
         case notUTF8(String)
         public var errorDescription: String? {
             return description
         }
     }
-    
+   
     public func load(from url: URL) async throws -> OpenAPISpecification {
-        do {
-            var diagnostics = [Diagnostic]()
-            let data = try Data(contentsOf: url)
-            guard let string = String(data: data, encoding: .utf8) else {
-                throw Self.Errors.notUTF8(url.absoluteString)
+     
+           
+            do {
+                let data = try Data(contentsOf: url)
+                guard let string = String(data: data, encoding: .utf8),
+                      let map = try Yams.load(yaml: string)  else  {
+                    throw Self.Errors.notUTF8(url.absoluteString)
+                }
+                let jsonValue = try JSONValue(from: map)
+                guard case let .object(yaml) = jsonValue else {
+                    throw Self.Errors.notAnObject(url.absoluteString)
+                    
+                }
+                let apiSpec = try OpenAPISpecification.read(unflattened:  yaml, url:url.absoluteString, documentLoader: self)
+                return apiSpec
+                
+            } catch {
+                throw Self.Errors.unreadable(url.absoluteString, error)
             }
-            let unflattened = try Yams.load(yaml: string) as? StringDictionary
-            guard let unflattened = unflattened else {
-                throw OpenAPISpecification.Errors.invalidYaml("text cannot be interpreted as a Key/Value List")
-            }
-            var apiSpec = try OpenAPISpecification(load: unflattened, &diagnostics)
-            apiSpec.documentLoader = self
-            objectCash[url] = apiSpec
-            return apiSpec
-        } catch {
-            throw Self.Errors.unreadable(url.absoluteString, error)
-        }
     }
 }

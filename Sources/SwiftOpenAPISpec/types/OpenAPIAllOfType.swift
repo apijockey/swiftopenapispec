@@ -30,6 +30,15 @@ public struct OpenAPIAllOfType : OpenAPISchemaType, ThrowingHashMapInitiable, Po
         if segmentName ==  OpenAPISchemaReference.REF_KEY {
             return .reference( ref?.reference)
         }
+        if segmentName == OpenAPISchemaReference.REF_KEY {
+            if let reference = ref {
+                return .reference(reference.refString)
+                
+            }
+            else {
+                throw OpenAPISpecification.Errors.notFound(segmentName)
+            }
+        }
         throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIOneOfType",segmentName)
     }
     

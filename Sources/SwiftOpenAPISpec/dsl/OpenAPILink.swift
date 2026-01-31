@@ -39,8 +39,17 @@ public struct OpenAPILink : KeyedElement , PointerNavigable {
         operationId = map.readIfPresent(Self.OPERATIION_ID_KEY,valueType:  String.self)
         server = try map.readIfPresent(Self.SERVER_KEY, objectType: OpenAPIServer.self)
         requestBody = map.readIfPresent(Self.REQUEST_BODY_KEY,valueType:  String.self)
-        parameters = map.readIfPresent(Self.PARAMETERS_KEY,valueType:  [String:String].self) ?? [:]
-      
+        let parameterData = map[Self.PARAMETERS_KEY]
+
+        if case let .object(value) = parameterData {
+            for (key,value) in value {
+                if case let .string(stringValue) = value {
+                    parameters[key] = stringValue
+                }
+              
+            }
+        }
+           
     }
     
     public func element(for segmentName: String) throws -> NavigationResult {

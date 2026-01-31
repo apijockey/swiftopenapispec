@@ -37,7 +37,7 @@ public struct OpenAPILicense : ThrowingHashMapInitiable , PointerNavigable {
     }
     
     
-    public var ref: OpenAPISchemaReference? { nil}
+   
     
     public static let NAME_KEY = "name"
     public static let IDENTIFIER_KEY = "identifier"

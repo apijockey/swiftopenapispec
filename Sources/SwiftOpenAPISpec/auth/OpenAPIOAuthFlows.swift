@@ -82,5 +82,5 @@ public struct OpenAPIOAuthFlows : ThrowingHashMapInitiable, PointerNavigable {
     public var authorizationCode : OpenAPIOAuthFlow? = nil
     public var deviceAuthorization : OpenAPIOAuthFlow? = nil
    
-    public var ref: OpenAPISchemaReference? { nil}
+   
 }

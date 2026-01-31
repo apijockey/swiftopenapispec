@@ -85,14 +85,14 @@ extension StringDictionary {
         guard case let .object(objectMap) = value else { return nil }
         return  try  V(load: objectMap,&diagnostics)
     }
-    func readNamedElementIfPresent<V>(_ key : String, objectType : V.Type) throws -> OpenAPINamedElement<V>?  where V : ThrowingHashMapInitiable{
-        var diagnostics: [Diagnostic] = []
-        guard let value = self[key] else { return nil }
-        guard case let .object(objectMap) = value else { return nil }
-        var namedElement = try OpenAPINamedElement<V>(load: objectMap, objectType: V.self, &diagnostics)
-        
-        return  namedElement
-    }
+//    func readNamedElementIfPresent<V>(_ key : String, objectType : V.Type) throws -> OpenAPINamedElement<V>?  where V : ThrowingHashMapInitiable{
+//        var diagnostics: [Diagnostic] = []
+//        guard let value = self[key] else { return nil }
+//        guard case let .object(objectMap) = value else { return nil }
+//        var namedElement = try OpenAPINamedElement<V>(load: objectMap, objectType: V.self, &diagnostics)
+//        
+//        return  namedElement
+//    }
     
     func mapListIfPresent<T>(_ key : String, objectType : T.Type) throws -> [T]  where  T : ThrowingHashMapInitiable{
         var elements = [T]()
@@ -117,31 +117,31 @@ extension StringDictionary {
         return elements
     }
     
-    func mapNamedElementListIfPresent<T>(_ key : String, objectType : T.Type) throws -> [OpenAPINamedElement<T>]  where  T : ThrowingHashMapInitiable, T : PointerNavigable{
-        // I have a list, this list may contain one element only.
-        var elements = [OpenAPINamedElement<T>]()
-        var diagnostics: [Diagnostic] = []
-        if case let .object(objectMap)  = self[key]  {
-            for element in objectMap {
-                let value = element.value
-                if case let .object(valueMap) = value {
-                    var namedElement = try OpenAPINamedElement<T>(load: valueMap, objectType: T.self, &diagnostics)
-                    namedElement.key = element.key
-                    elements.append(namedElement)
-                }
-            }
-        }
-        else if case let .array(array)  = self[key]  {
-            for element in array {
-                if case let .object(valueMap) = element {
-                    var namedElement = try OpenAPINamedElement<T>(load: valueMap, objectType: T.self, &diagnostics)
-                    namedElement.key = "Hallo"
-                    elements.append(namedElement)
-                }
-            }
-        }
-        return elements
-    }
+//    func mapNamedElementListIfPresent<T>(_ key : String, objectType : T.Type) throws -> [OpenAPINamedElement<T>]  where  T : ThrowingHashMapInitiable, T : PointerNavigable{
+//        // I have a list, this list may contain one element only.
+//        var elements = [OpenAPINamedElement<T>]()
+//        var diagnostics: [Diagnostic] = []
+//        if case let .object(objectMap)  = self[key]  {
+//            for element in objectMap {
+//                let value = element.value
+//                if case let .object(valueMap) = value {
+//                    var namedElement = try OpenAPINamedElement<T>(load: valueMap, objectType: T.self, &diagnostics)
+//                    namedElement.key = element.key
+//                    elements.append(namedElement)
+//                }
+//            }
+//        }
+//        else if case let .array(array)  = self[key]  {
+//            for element in array {
+//                if case let .object(valueMap) = element {
+//                    var namedElement = try OpenAPINamedElement<T>(load: valueMap, objectType: T.self, &diagnostics)
+//                    namedElement.key = "Hallo"
+//                    elements.append(namedElement)
+//                }
+//            }
+//        }
+//        return elements
+//    }
     func mapDictionaryfPresent<T>(_ key : String, objectType : T.Type) throws -> [T]  where  T : ThrowingHashMapInitiable{
         var elements = [T]()
         var diagnostics: [Diagnostic] = []
@@ -170,6 +170,14 @@ extension StringDictionary {
                         type.key = element.key
                     }
                     elements.append(type)
+                }
+                if case .string = value {
+                    var type = try T.initialize(load:  [key:value], diagnostics: diagnostics).value
+                    if type.key == nil {
+                        type.key = element.key
+                    }
+                    elements.append(type)
+                    
                 }
             }
         }

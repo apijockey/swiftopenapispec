@@ -78,6 +78,7 @@ public struct SwiftOpenAPICLIApp {
                     
                     let ctx = ValidationContext(version: version , dialect: version.dialect, baseURI: url.absoluteString, operationIds: [])
                     let objectLoader = YamsDocumentLoader()
+                    let jsonValue = objectLoader.load(from:)
                     var resolver = JSONPointerResolver(baseURL : url,loadDocument: objectLoader.load(from:))
                     var diagnostics = try await Validator.validate(spec: spec, baseURI: url.absoluteString, ctx :  ctx, resolver: &resolver)
                     try await diagnostics.append(contentsOf: Validator.validateSchema(spec: spec, ctx: ctx, baseURI: url.absoluteString, resolver: &resolver))

@@ -72,6 +72,5 @@ public struct OpenAPIOneOfType : OpenAPISchemaType,ThrowingHashMapInitiable, Poi
    
     public let type : String?
     public var items: [OpenAPISchema]?
- 
-    public var ref: OpenAPISchemaReference? { nil}
+  public var ref: OpenAPISchemaReference? { nil}
 }

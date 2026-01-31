@@ -86,6 +86,15 @@ public struct OpenAPIAnyOfType : OpenAPISchemaType, PointerNavigable {
         if segmentName ==  OpenAPISchemaReference.REF_KEY {
             return .reference(ref?.reference)
         }
+        if segmentName == OpenAPISchemaReference.REF_KEY {
+            if let reference = ref {
+                return .reference(reference.refString)
+                
+            }
+            else {
+                throw OpenAPISpecification.Errors.notFound(segmentName)
+            }
+        }
         throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIAnyOfType",segmentName)
     }
     public let type : String?

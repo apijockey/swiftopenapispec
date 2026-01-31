@@ -26,22 +26,33 @@ public enum JSONValue: Equatable, Sendable {
     case null
 }
 
+// MARK: - Protocol to allow model types to provide their own JSONValue
+public protocol JSONValueConvertible {
+    func toJSONValue() throws -> JSONValue
+}
+
 public extension JSONValue {
     
     enum Errors : LocalizedError    {
-       case notReadable(String), notConvertible(String)
+       case notReadable(String), notConvertible([Diagnostic])
     }
-    init(from v : [String:Any]) throws {
+    init(from v : [String:Any], diagnostics : inout [Diagnostic]) throws {
+        diagnostics.append(Diagnostic(severity: .info, code: .debugTrace, message: "_ any: Any \(String(describing: v))", pointer: "(diagnostics.count)", rule: "JSONValueConvertible"))
         var obj: [String: JSONValue] = [:]
         obj.reserveCapacity(v.count)
         for (k, val) in v {
-                let jv = try JSONValue(from: val)
+                let jv = try JSONValue(from: val, diagnostics : &diagnostics)
                 obj[k] = jv
             
         }
         self = .object(obj)
     }
     init(from any: Any) throws  {
+    var diagnostics: [Diagnostic] = []
+        try self.init(from: any, diagnostics: &diagnostics)
+    }
+    init(from any: Any, diagnostics : inout [Diagnostic]) throws  {
+        diagnostics.append(Diagnostic(severity: .info, code: .debugTrace, message: "_ any: Any \(String(describing: any))", pointer: "(diagnostics.count)", rule: "JSONValueConvertible"))
         switch any {
         case let v as String:
             self = .string(v)
@@ -54,23 +65,23 @@ public extension JSONValue {
         case let v as Bool:
             self = .boolean(v)
         case let v as [Any]:
-            let arr = try v.compactMap { try JSONValue(from: $0) }
+            let arr = try v.compactMap { try JSONValue(from: $0,diagnostics : &diagnostics) }
             guard arr.count == v.count else  {
-                throw Self.Errors.notConvertible(v.debugDescription)
+                throw Self.Errors.notConvertible(diagnostics)
             }
             self = .array(arr)
         case let v as [String: Any]:
             var obj: [String: JSONValue] = [:]
             obj.reserveCapacity(v.count)
             for (k, val) in v {
-                let jv = try JSONValue(from: val)
+                let jv = try JSONValue(from: val,diagnostics : &diagnostics)
                 obj[k] = jv
             }
             self = .object(obj)
         case Optional<Any>.none:
             self = .null
         default:
-            throw Self.Errors.notConvertible(String(describing: any))
+            throw Self.Errors.notConvertible(diagnostics)
         }
     }
     init(string : String?) {
@@ -109,6 +120,11 @@ public extension JSONValue {
         self = .boolean(bool)
     }
     init(_ any: Any?) throws {
+        var diagnostics: [Diagnostic] = []
+        try self.init(any, diagnostics: &diagnostics)
+    }
+    init(_ any: Any?,diagnostics : inout [Diagnostic]) throws {
+        diagnostics.append(Diagnostic(severity: .info, code: .debugTrace, message: "_ any: Any? \(any.debugDescription)", pointer: "(diagnostics.count)", rule: "JSONValueConvertible"))
         switch any {
         case let v as String:
             self = .string(v)
@@ -121,23 +137,24 @@ public extension JSONValue {
         case let v as Bool:
             self = .boolean(v)
         case let v as [Any]:
-            let arr = try v.compactMap { try JSONValue(from: $0) }
+            let arr = try v.compactMap { try JSONValue(from: $0,diagnostics : &diagnostics) }
             guard arr.count == v.count else {
-                throw Self.Errors.notConvertible(v.debugDescription)
+                throw Self.Errors.notConvertible(diagnostics)
             }
             self = .array(arr)
         case let v as [String: Any]:
             var obj: [String: JSONValue] = [:]
             obj.reserveCapacity(v.count)
             for (k, val) in v {
-                let jv = try JSONValue(from: val)
+                let jv = try JSONValue(from: val,diagnostics : &diagnostics)
                 obj[k] = jv
             }
             self = .object(obj)
         case Optional<Any>.none:
             self = .null
+            
         default:
-            throw Self.Errors.notConvertible(String(describing: any))
+            throw Self.Errors.notConvertible(diagnostics)
         }
     }
     init(_ string: String?) {
@@ -147,6 +164,37 @@ public extension JSONValue {
         }
         self = .string(string)
         return
+    }
+    
+    // MARK: - New: Initializers for existential KeyedElement values
+    
+    // Converts an existential KeyedElement by asking it to provide a JSONValue via JSONValueConvertible.
+    // If value is nil, produce .null.
+    init(_ value: (any KeyedElement)?) throws {
+        guard let value else {
+            self = .null
+            return
+        }
+        try self.init(value)
+    }
+    
+    // Converts a non-optional existential KeyedElement.
+    // Strategy:
+    // 1) If it conforms to JSONValueConvertible, use that.
+    // 2) Otherwise, throw a clear error (you can later extend this to support ThrowingHashMapEncodable.toDictionary()).
+    init(_ value: any KeyedElement) throws {
+        if let convertible = value as? JSONValueConvertible {
+            self = try convertible.toJSONValue()
+            return
+        }
+        // Optional future fallback if your models implement ThrowingHashMapEncodable:
+        // if let enc = value as? ThrowingHashMapEncodable {
+        //     self = .object(try enc.toDictionary())
+        //     return
+        // }
+       
+        let diagnostic = Diagnostic(severity: .error, code: .invalidType, message: "KeyedElement of type \(type(of: value)) is not JSONValueConvertible", pointer: "", rule: "JSONValueConvertible")
+        throw Errors.notConvertible( [diagnostic])
     }
 }
 
@@ -163,7 +211,15 @@ public extension JSONValue {
         case .array, .object: return nil
         }
     }
-    
+    var objectValue: [String: JSONValue]? {
+            guard case let .object(value) = self else { return nil }
+            return value
+        }
+
+        var arrayValue: [JSONValue]? {
+            guard case let .array(value) = self else { return nil }
+            return value
+        }
     var intValue: Int? {
         switch self {
         case .integer(let i): return i
@@ -174,7 +230,16 @@ public extension JSONValue {
         case .array, .object: return nil
         }
     }
-    
+    var numberValue: Double? {
+        switch self {
+            case .integer(let i): return Double(i)
+            case .number(let d): return Double(d)
+            case .string(let s): return Double(s)
+            case .boolean(let b): return b ? 1 : 0
+            case .null: return nil
+            case .array, .object: return nil
+            }
+        }
     var doubleValue: Double? {
         switch self {
         case .number(let d): return d
@@ -205,4 +270,8 @@ public extension JSONValue {
         case .array, .object: return nil
         }
     }
+    var isNull: Bool {
+            guard case .null = self else { return false }
+            return true
+        }
 }

@@ -89,10 +89,8 @@ struct OpenAPIJSONPointerTests {
         )
      
         // Compare metatype instead of attempting a runtime cast target
+        #expect(result == .value(JSONValue(string:arg.expectedValue)))
         
-        if let strResult = result as? String {
-            #expect(strResult == arg.expectedValue)
-        }
     }
 
     
@@ -108,7 +106,7 @@ struct OpenAPIJSONPointerTests {
            ref:  "#/paths/~1events/post/responses/201/content/application~1json/schema/$ref"
         )
         
-        #expect((result as? OpenAPISchemaReference)?.reference == "#/components/schemas/EventCreated")
+        #expect( result  == .reference("#/components/schemas/EventCreated"))
     }
 
     @Test
@@ -123,7 +121,7 @@ struct OpenAPIJSONPointerTests {
             ref: "#/components/schemas/EventEnvelope/properties/payload/oneOf/0/$ref"
         )
 
-        #expect((result as? OpenAPISchemaReference)?.reference == "#/components/schemas/UserCreated")
+        #expect(result  ==  .reference("#/components/schemas/UserCreated"))
     }
     
     @Test("Resolve external schema via $ref chain (main -> ext)")
@@ -141,8 +139,10 @@ struct OpenAPIJSONPointerTests {
         
         // EventEnvelope in ext has type: object
         if let nav = resolved as? PointerNavigable,
-           let t = try nav.element(for: "type") as? OpenAPIObjectType {
-            #expect(t.type == "object")
+           case let  .value(jsonvalue) = try nav.element(for: "type"),
+           case let .object(obj) = jsonvalue {
+            #expect(true)
+           
         }  else {
             Issue.record("Resolved schema is not a OpenAPISpecificationType")
         }
@@ -159,12 +159,12 @@ struct OpenAPIJSONPointerTests {
         let ref0 = try await resolver.resolve(
              ref: "#/components/schemas/EventEnvelope/properties/payload/oneOf/0/$ref"
         )
-        #expect((ref0 as? OpenAPISchemaReference)?.reference == "#/components/schemas/UserCreated")
+        #expect(ref0  ==  .reference("#/components/schemas/UserCreated"))
         let ref1 = try await resolver.resolve(
            ref: "#/components/schemas/EventEnvelope/properties/payload/oneOf/1/$ref"
         )
         
-        #expect((ref1 as? OpenAPISchemaReference)?.reference == "#/components/schemas/UserDeleted")
+        #expect(ref1 == .reference( "#/components/schemas/UserDeleted"))
     }
 
     @Test("~0/~1 decoding in component name (user~1admin~0meta)")
@@ -180,9 +180,9 @@ struct OpenAPIJSONPointerTests {
         )
         // Schema name in ext-components.yaml is "user/admin~meta"
             
-        let stringType = try #require(any as? OpenAPIType)
-        guard case .string = stringType else {
-            Issue.record("Failed to extract string type from: \(stringType)")
+        
+         guard case let .value(stringType) = any else {
+            Issue.record("Failed to extract string type")
             return
         }
     }
@@ -200,12 +200,12 @@ struct OpenAPIJSONPointerTests {
         let ct = try await resolver.resolve(
            ref: "#/components/requestBodies/CreateEvent/content/application~1json/encoding/event~1payload/contentType"
         )
-        #expect(ct as? String == "application/json")
+        #expect(ct  == .value(.string("application/json")))
         let ex = try await resolver.resolve(
            ref: "#/components/requestBodies/CreateEvent/content/application~1json/encoding/event~1payload/headers/X-Encoded/example"
         )
         
-        #expect(ex as? String == "1")
+        #expect(ex  == .value(.number(1)))
     }
 
     @Test("Callback key contains '/callbackUrl' inside segment, so segment uses ~1: {$request.body#~1callbackUrl}")
@@ -220,7 +220,7 @@ struct OpenAPIJSONPointerTests {
              ref:"#/components/callbacks/DeliveredCallback/{$request.body#~1callbackUrl}/post/operationId"
         )
        
-        #expect(opId as? String == "delivered")
+        #expect(opId == .value(.string( "delivered")))
     }
 
     @Test("Cross-file ref inside ext schema back to main (UserCreated.errorShape -> main CommonError)")
@@ -241,7 +241,7 @@ struct OpenAPIJSONPointerTests {
         if let nav = backRefAny as? PointerNavigable {
             
              let objectElement = try nav.element(for: "type")
-            #expect(objectElement  is OpenAPIObjectType)
+            #expect(objectElement   == .value(.string("object")))
         } else {
             Issue.record("Resolved back-ref schema has unexpected type")
         }

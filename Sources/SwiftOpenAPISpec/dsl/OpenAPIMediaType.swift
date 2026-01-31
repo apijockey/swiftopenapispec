@@ -67,10 +67,10 @@ public struct OpenAPIMediaType :  KeyedElement , PointerNavigable {
         case Self.SCHEMA_KEY:
             return .navigable(self.schema)
         case Self.EXAMPLES_KEY:
-            return try self.examples.element(for: segmentName)
-        case Self.ENCODING_KEY: return try encoding.element(for: segmentName)
-        case Self.PREFIX_ENCODING_KEY: return try prefixEncoding.element(for: segmentName)
-        case Self.ITEM_ENCODING_KEY: return try itemEncoding.element(for: segmentName)
+            return  .navigableCollection(self.examples)
+        case Self.ENCODING_KEY:return .navigableCollection(encoding)
+        case Self.PREFIX_ENCODING_KEY: return  .navigableCollection(prefixEncoding)
+        case Self.ITEM_ENCODING_KEY: return .navigableCollection(itemEncoding)
         case OpenAPISchemaReference.REF_KEY: return .reference(ref?.reference)
         default:
             if self.key == segmentName { return .navigable(self.schema) }

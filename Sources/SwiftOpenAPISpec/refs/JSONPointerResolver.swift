@@ -41,13 +41,13 @@ public struct JSONPointerResolver : JSONPointerResolving {
     }
     
     static let internalReferencePrefix:String = "#"
-    public init(baseURL : URL,loadDocument: @escaping (URL) async throws -> any PointerNavigable) {
+    public init(baseURL : URL,loadDocument: @escaping (URL) async throws -> OpenAPISpecification) {
         self.loadDocument = loadDocument
         self.baseURL = baseURL
         self.currentURL = baseURL
     }
     public enum Errors :LocalizedError {
-        case missingHash(String), missingSlash(String), externalReference(String), internalReference(String)
+        case missingHash(String), missingSlash(String), externalReference(String), internalReference(String), notFound(String,String), invalidPointer(String)
         
         public var errorDescription: String? {
             switch self {
@@ -59,6 +59,10 @@ public struct JSONPointerResolver : JSONPointerResolving {
                 return "reference in external file \(string)"
             case .internalReference(let string):
                 return "reference in file \(string)"
+            case .notFound(let segment, let traversed):
+                return "segment \(segment) not found in \(traversed)"
+            case .invalidPointer(let refString):
+                return "JSONPointer not found \(refString)"
             }
         }
     }
@@ -67,7 +71,7 @@ public struct JSONPointerResolver : JSONPointerResolving {
     
     /// Load a document from disk/URL into your OpenAPISpecification domain model.
     /// Replace with your real loader.
-    let loadDocument: (URL) async throws -> any PointerNavigable
+    let loadDocument: (URL) async throws -> OpenAPISpecification
     var baseURL : URL
     var currentURL : URL
     
@@ -120,60 +124,49 @@ public struct JSONPointerResolver : JSONPointerResolving {
         
         let rawSegments = pointer.dropFirst().split(separator: "/").map(String.init)
         let segments = rawSegments.map(JSONPointerResolver.decodePointerSegment)
-        let value = try JSONValue(root)
-        var current: NavigationResult = .value(value)
+        
+        var current: NavigationResult = .navigable(root)
         var traversed = ""
          
         for seg in segments {
             
-            traversed += "/\(seg)"
+            
             switch  current {
-            case .navigable(let pointerNavigable):
-                if seg == "$ref",
-                   let pointerNavigable = pointerNavigable{
-                    let result = try pointerNavigable.element(for: seg)
-                    if case let .reference(refString) = result {
-                        return .reference(refString)
+            case .navigable(let currentPointerNavigable):
+                    guard let currentPointerNavigable = currentPointerNavigable else {
+                        throw Self.Errors.notFound(seg, traversed)
                     }
-                    else if let reference =  pointerNavigable as? RefPointerNavigable,
-                            let ref = reference.ref?.reference{
-                        current = try await resolve(ref: ref) //recurse
-                        
-                    }
-                }
-            case .notFound(let string):
-                if traversed == pointer {
-                    return current
-                }
-                
-                if case let .navigable(currentNavigatable) = current,
-                   let currentNavigatable = currentNavigatable {
-                    let next = try currentNavigatable.element(for: seg)
+                    let next = try currentPointerNavigable.element(for: seg)
                         current = next
+                        traversed += "/\(seg)"
                         continue
-                    }
-                    // If resolved is a domain object that can yield "$ref", follow it
-                    throw Validator.Errors.invalidPointer( "Segment '\(seg)' not found at '\(fragment)'")
-                    
+            
+            case .notFound:
+                throw Self.Errors.notFound(seg, traversed)
             case .value(let jSONValue):
+                traversed += "/\(seg)"
                 return .value(jSONValue)
             case .reference(let reference):
                 if let reference = reference {
+                    traversed += "/\(seg)"
                    let resolve = try await resolve(ref: reference)
                 
                     current = resolve
                     if traversed != pointer {
                         continue
                     }
-                    
                 }
+            case .navigableCollection(let navigableCollection):
+               
+                    let next = navigableCollection.element(for: seg)
+                    current = next
+                    traversed += "/\(seg)"
+                    continue
+               
+            case .searchableCollection(let collection):
+                let value = try JSONValue(collection.first(where: { $0.key == seg }))
+                return .value(value)
             }
-           
-           
-            //found the right element, now continue to resolve 
-            // try to resolve References before accessing their properties
-           
-            //default ... walk through the object graph
            
         }
         return current
@@ -199,16 +192,10 @@ public struct JSONPointerResolver : JSONPointerResolving {
             
         }
         
-        let pointerNavigable = try await loadDocument(target.url)
-        // PointerNavigable to NavigationResult
-        let resolved = try await resolve(root: pointerNavigable, fragment: target.fragment)
-      
-//        // Or if resolved is a raw dict
-//        if let dict = resolved as? PointerNavigable,
-//           let innerRef = try dict.element(for: "$ref") as? String {
-//                return try await resolveRefInternal(ref: innerRef, visited: &visited, depth: depth + 1)
-//        }
-//        
+        let specification = try await loadDocument(target.url)
+        
+        let resolved = try await resolve(root: specification, fragment: target.fragment)
         return resolved
+        
     }
 }

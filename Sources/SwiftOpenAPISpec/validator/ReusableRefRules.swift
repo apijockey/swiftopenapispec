@@ -102,10 +102,10 @@ struct ReusableOperationRefRule {
     func check(operation : OpenAPIOperation, ctx: ValidationContext, pointer : String, rule: String) -> [Diagnostic] {
         var diags: [Diagnostic] = []
         let pointer =  "\(pointer)/\(operation.key ?? "")"
-        if operation.ref == nil  && (operation.operationId == nil  && operation.key == nil){
+        if  (operation.operationId == nil  && operation.key == nil){
             let diagnotics = Diagnostic( severity: .error,
                                          code: .missingRequired,
-                                         message: "Operation needs a ref or an operationId or a key",
+                                         message: "Operation needs a an operationId or a key",
                                          pointer: pointer,
                                          rule: rule)
             diags.append(diagnotics)
@@ -139,10 +139,13 @@ struct ReusableOperationRefRule {
 }
 
 
+
+
+
 struct ReusableParameterRefRule {
     func check(parameter: OpenAPIParameter, ctx: ValidationContext, pointer : String, rule: String) -> [Diagnostic] {
         var diags: [Diagnostic] = []
-        let pointer =  "\(pointer)/\(parameter.name ?? "")"
+        let pointer =  "\(pointer)/\(parameter.key ?? "")"
         if parameter.ref == nil  && parameter.schema == nil && parameter.content == nil {
             let diagnotics = Diagnostic( severity: .error,
                                          code: .missingRequired,
@@ -232,10 +235,10 @@ struct ReusableSchemaRefRule {
 }
 
 struct ReusableNamedSchemaRefRule {
-    func check(schema : OpenAPINamedElement<OpenAPISchema>, ctx: ValidationContext, pointer : String, rule: String) -> [Diagnostic] {
+    func check(schema : OpenAPISchema, ctx: ValidationContext, pointer : String, rule: String) -> [Diagnostic] {
         var diags: [Diagnostic] = []
         guard let key = schema.key,
-              let type = schema.element.type else {
+              let type = schema.type else {
             let diagnotics = Diagnostic( severity: .error,
                                      code: .missingRequired,
                                      message: "schema incomplete missing 'name' or 'type'",

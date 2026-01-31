@@ -51,10 +51,10 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
         case Self.EXTERNAL_DOCS_KEY: return .navigable(externalDocs)
         case Self.OP_ID_KEY: return .value(JSONValue(operationId))
         case Self.PARAMETERS_KEY:
-            let value = try JSONValue( parameters.first(where: { $0.name == segmentName }))
-            return  .value(value)
+            return   .searchableCollection(parameters)
+            
         case Self.REQUEST_BODIES_KEY: return .navigable(requestBody)
-        case Self.RESPONSES_KEY: return try responses.element(for: segmentName)
+        case Self.RESPONSES_KEY: return .navigableCollection(responses)
         case Self.SUMMARY_KEY: return  .value(JSONValue(summary))
         case Self.SECURITY_KEY:
             
@@ -63,16 +63,8 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
         case Self.TAGS_KEY:
             let value = try JSONValue(tags)
             return .value(value)
+           
         default:
-            if segmentName.hasPrefix("x-"), let exts = extensions {
-//                if let ext = exts.first(where: { $0.key == segmentName }) {
-//                    // Gib die strukturierte oder einfache Extension zurück
-//                    return ext.structuredExtension?.properties ?? ext.simpleExtensionValue
-//                }
-//               
-                
-                
-            }
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIOperation", segmentName)
         }
     }
@@ -106,7 +98,7 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
     public var extensions : [OpenAPIExtension]?
     public var externalDocs : OpenAPIExternalDocumentation? = nil
   
-    public var ref: OpenAPISchemaReference? { nil}
+   
   
     /// returns an OpenAPIResponse for the given HTTP Status  if declared on the operation or nil.
     public func response(httpstatus  status : String) -> OpenAPIResponse? {

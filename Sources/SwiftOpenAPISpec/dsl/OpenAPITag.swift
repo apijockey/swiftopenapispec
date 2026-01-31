@@ -16,11 +16,11 @@
 //  Created by Patric Dubois on 10.12.25.
 //
 
-public struct OpenAPITag:  ThrowingHashMapInitiable, PointerNavigable {
+public struct OpenAPITag:  KeyedElement, PointerNavigable {
    
     public func element(for segmentName: String) throws -> NavigationResult{
         switch segmentName {
-        case Self.NAME_KEY: return .value(JSONValue(name))
+        case Self.NAME_KEY: return .value(JSONValue(key))
         case Self.SUMMARY_KEY : return .value(JSONValue(summary))
         case Self.DESCRIPTION_KEY : return .value(JSONValue(description))
             case Self.EXTERNAL_DOCS_KEY : return .navigable(externalDocs)
@@ -46,7 +46,7 @@ public struct OpenAPITag:  ThrowingHashMapInitiable, PointerNavigable {
    
 
     public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
-        self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self)
+        self.key = map.readIfPresent(Self.NAME_KEY, valueType: String.self)
         self.summary = map.readIfPresent(Self.SUMMARY_KEY, valueType: String.self)
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self)
         self.parent = map.readIfPresent(Self.PARENT_KEY, valueType: String.self)
@@ -57,7 +57,7 @@ public struct OpenAPITag:  ThrowingHashMapInitiable, PointerNavigable {
     
    
     //https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-01  ("null", "boolean", "object", "array", "number", or "string"), or "integer"
-    public var name : String?
+    public var key : String?
     public var summary : String?
     public var description : String?
     public var externalDocs : OpenAPIExternalDocumentation?
@@ -65,10 +65,10 @@ public struct OpenAPITag:  ThrowingHashMapInitiable, PointerNavigable {
     public var kind : String?
    
     public var extensions : [OpenAPIExtension]?
-    public var ref: OpenAPISchemaReference? { nil}
+  
 }
 public extension Array where Element == OpenAPITag {
     subscript (name name: String) -> OpenAPITag? {
-        return self.first(where: { $0.name == name })
+        return self.first(where: { $0.key == name })
     }
 }

@@ -22,13 +22,6 @@ import Foundation
 public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
    
     
-   
-    
-    
-    
-  
-    
-    
     public  static let CALLBACKS_KEY = "callbacks"
     public static let EXAMPLES_KEY = "examples"
     public static let HEADERS_KEY = "headers"
@@ -47,28 +40,28 @@ public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
             case Self.CALLBACKS_KEY:
             
             if let callbacks = callbacks {
-                return try callbacks.element(for: segmentName)
+                return .navigableCollection(callbacks)
             }
             else {
                 throw OpenAPISpecification.Errors.unsupportedSegment(segmentName, "OpenAPIComponent")
             }
         case Self.EXAMPLES_KEY:
             if let examples =  examples {
-                return try examples.element(for: segmentName)
+                return .navigableCollection(examples)
             }
             else {
                 throw OpenAPISpecification.Errors.unsupportedSegment(segmentName, "OpenAPIComponent")
             }
         case Self.HEADERS_KEY:
             if let headers =  headers {
-                return try headers.element(for: segmentName)
+                return .navigableCollection(headers)
             }
             else {
                 throw OpenAPISpecification.Errors.unsupportedSegment(segmentName, "OpenAPIComponent")
             }
         case Self.LINKS_KEY:
             if let links =  links {
-                return try links.element(for: segmentName)
+                return  .navigableCollection(links)
             }
             else {
                 throw OpenAPISpecification.Errors.unsupportedSegment(segmentName, "OpenAPIComponent")
@@ -82,38 +75,36 @@ public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
             }
         case Self.PATHSITEMS_KEY:
             if let pathItems =  pathItems {
-                return try pathItems.element(for: segmentName)
+                return .navigableCollection(pathItems)
             }
             else {
                 throw OpenAPISpecification.Errors.unsupportedSegment(segmentName, "OpenAPIComponent")
             }
         case Self.PARAMETERS_KEY:
             if let parameters =  parameters {
-                return try .value(JSONValue(parameters.first(where: { $0.name == segmentName })))
+                return try .value(JSONValue(parameters.first(where: { $0.key == segmentName })))
             }
             else {
                 throw OpenAPISpecification.Errors.unsupportedSegment(segmentName, "OpenAPIComponent")
             }
         case Self.REQUEST_BODIES_KEY:
             if let requestBodies =  requestBodies {
-                return try requestBodies.element(for: segmentName)
+                return .navigableCollection(requestBodies)
             }
             else {
                 throw OpenAPISpecification.Errors.unsupportedSegment(segmentName, "OpenAPIComponent")
             }
         case Self.RESPONSES_KEY:
             if let responses =  responses {
-                return try responses.element(for: segmentName)
+                return  .navigableCollection(responses)
             }
             else {
                 throw OpenAPISpecification.Errors.unsupportedSegment(segmentName, "OpenAPIComponent")
             }
         case Self.SCHEMAS_KEY:
             if let schemas =  schemas {
-                let schema = schemas.first(where: { element in
-                    element.key == segmentName
-                })
-                return .navigable(schema)
+                // Expose the whole collection for searching; resolver will pick by key.
+                return .searchableCollection(schemas)
             }
             else {
                 throw OpenAPISpecification.Errors.unsupportedSegment(segmentName, "OpenAPIComponent")
@@ -150,7 +141,7 @@ public init(load map: StringDictionary, _ diagnostics: inout [Diagnostic]) throw
             parameters =   try map.mapListIfPresent(Self.PARAMETERS_KEY, objectType: OpenAPIParameter.self)
             self.requestBodies =   try map.mapListIfPresent(Self.REQUEST_BODIES_KEY, objectType: OpenAPIRequestBody.self)
             responses =  try map.mapListIfPresent(Self.RESPONSES_KEY, objectType: OpenAPIResponse.self)
-            schemas =   try map.mapNamedElementListIfPresent(Self.SCHEMAS_KEY, objectType: OpenAPISchema.self)
+            schemas =   try map.mapListIfPresent(Self.SCHEMAS_KEY, objectType: OpenAPISchema.self)
             self.securitySchemas =   try map.mapListIfPresent(Self.SECURITY_SCHEMES_KEY, objectType:OpenAPISecurityScheme.self)
         
     }
@@ -170,7 +161,7 @@ public init(load map: StringDictionary, _ diagnostics: inout [Diagnostic]) throw
     public var requestBodies : [OpenAPIRequestBody]?
     public var responses : [OpenAPIResponse]?
     public var securitySchemas : [OpenAPISecurityScheme]?
-    public var schemas : [OpenAPINamedElement<OpenAPISchema>]?
+    public var schemas : [OpenAPISchema]?
    
     public var ref : OpenAPISchemaReference? { nil}
     

@@ -31,10 +31,22 @@ import Foundation
 /// ```
 ///
 public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
-    public func element(for segmentName: String) throws -> NavigationResult {
+    
+    public func element(for segmentName : String) throws ->  NavigationResult{
         switch segmentName {
-        default:
-            throw OpenAPISpecification.Errors.unsupportedSegment(segmentName, "OpenAPISpecification")
+            case Self.COMPONENTS_KEY : return .navigable(self.components)
+            case Self.EXTERNAL_DOCS_KEY  : return .navigable(self.externalDocumentation)
+            case Self.INFO_KEY : return .navigable(self.info)
+            case Self.JSON_SCHEMA_DIALECT_KEY : return .value(JSONValue(string:self.jsonSchemaDialect))
+            case Self.OPENAPI_KEY : return .value(JSONValue(string:self.version))
+            case Self.PATHS_KEY : return .navigableCollection(self.paths)
+            case Self.SECURITY_KEY :  return  .searchableCollection(self.securityObjects)
+            case Self.SERVERS_KEY : return  .navigableCollection(self.servers)
+            case Self.TAGS_KEY : return .navigableCollection(self.tags)
+            case Self.SELF_URL_KEY : return .value(JSONValue(string:self.selfUrl))
+        case Self.WEBHOOKS_KEY :return .navigableCollection(self.webhooks)
+            
+            default : throw Self.Errors.unsupportedSegment("OpenAPISpecification", segmentName)
         }
     }
     
@@ -119,11 +131,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     public static func read(url : URL, documentLoader : DocumentLoadable? = YamsDocumentLoader()) async throws -> OpenAPISpecification {
         guard let documentLoader else { fatalError("no documentLoader provided") }
         
-
-        var spec =  try await documentLoader.load(from: url)
-        spec.documentLoader = documentLoader
-        return spec
-        
+        return  try await documentLoader.load(from: url)
         
     }
     
@@ -245,7 +253,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     ///let specFromURL = try await OpenAPISpecification.read(url: url)
     ///let userComponent = specFromURL[schemacomponent: "User"]
     ///```
-    public subscript(schemacomponent component: String) -> OpenAPINamedElement<OpenAPISchema>? {
+    public subscript(schemacomponent component: String) -> OpenAPISchema? {
         return components?.schemas?.first(where: { c in
             c.key == component
         })
@@ -290,7 +298,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     ///```
     public subscript(parametercomponent component: String) -> OpenAPIParameter? {
         return components?.parameters?.first(where: { c in
-            c.name == component
+            c.key == component
         })
     }
     /**
@@ -512,23 +520,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
 
         return result
     }
-    public func element(for segmentName : String) throws -> Any? {
-        switch segmentName {
-            case Self.COMPONENTS_KEY : return self.components
-            case Self.EXTERNAL_DOCS_KEY  : return self.externalDocumentation
-            case Self.INFO_KEY : return self.info
-            case Self.JSON_SCHEMA_DIALECT_KEY : return self.jsonSchemaDialect
-            case Self.OPENAPI_KEY : return self.version
-            case Self.PATHS_KEY : return self.paths
-            case Self.SECURITY_KEY :  return self.securityObjects
-            case Self.SERVERS_KEY : return self.servers
-            case Self.TAGS_KEY : return self.tags
-            case Self.SELF_URL_KEY : return self.selfUrl
-            case Self.WEBHOOKS_KEY :return self.webhooks
-            
-            default : throw Self.Errors.unsupportedSegment("OpenAPISpecification", segmentName)
-        }
-    }
+    
     
   
     public static let COMPONENTS_KEY = "components"
@@ -555,97 +547,9 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     public var externalDocumentation : OpenAPIExternalDocumentation?
     public var tags : [OpenAPITag] = []
     public var extensions : [OpenAPIExtension]?
-    public var ref: OpenAPISchemaReference? { nil}
+   
     
     
 }
-
-//// MARK: - Encoding to StringDictionary
-//
-//extension OpenAPISpecification: ThrowingHashMapEncodable {
-//    public func toDictionary() throws -> StringDictionary {
-//        var dict: StringDictionary = [:]
-//
-//        // Required
-//        dict[Self.OPENAPI_KEY] = version
-//
-//        // info
-//        if let infoEnc = info as? ThrowingHashMapEncodable {
-//            dict[Self.INFO_KEY] = try infoEnc.toDictionary()
-//        } else {
-//            // Fallback: minimal info map
-//            dict[Self.INFO_KEY] = ["title": info?.title, "version": info?.version]
-//        }
-//
-//        // $schema
-//        try encodeKey(Self.JSON_SCHEMA_DIALECT_KEY, value: jsonSchemaDialect, into: &dict)
-//
-//        // $self
-//        try encodeKey(Self.SELF_URL_KEY, value: selfUrl, into: &dict)
-//
-//        // externalDocs
-//        if let ext = externalDocumentation as? ThrowingHashMapEncodable {
-//            _ = try encodeKey(Self.EXTERNAL_DOCS_KEY, encodable: ext, into: &dict)
-//        } else if let extDoc = externalDocumentation {
-//            dict[Self.EXTERNAL_DOCS_KEY] = ["url": extDoc.url, "description": extDoc.description as Any].compactMapValues { $0 }
-//        }
-//
-//        // servers (array of maps)
-//        if let serversEnc = servers as? [ThrowingHashMapEncodable] {
-//            dict[Self.SERVERS_KEY] = try serversEnc.map { try $0.toDictionary() }
-//        } else {
-//            // best-effort: map servers minimally
-//            if !servers.isEmpty {
-//                dict[Self.SERVERS_KEY] = servers.map { ["url": $0.url, "description": $0.description as Any].compactMapValues { $0 } }
-//            }
-//        }
-//
-//        // tags (array of maps)
-//        if let tagsEnc = tags as? [ThrowingHashMapEncodable] {
-//            dict[Self.TAGS_KEY] = try tagsEnc.map { try $0.toDictionary() }
-//        } else if !tags.isEmpty {
-//            dict[Self.TAGS_KEY] = tags.map { tag in
-//                var t: [String: Any] = ["name": tag.name as Any,
-//                                        "summary": tag.summary as Any,
-//                                        "description": tag.description as Any]
-//                // extensions for tags
-//                encodeExtensions(tag.extensions, into: &t)
-//                return t.compactMapValues { $0 }
-//            }
-//        }
-//
-//        // security: [[String: [String]]]
-//        if !securityObjects.isEmpty {
-//            let arr = securityObjects.map { ref -> [String: [String]] in
-//                let name = ref.key ?? ""
-//                return [name: ref.scopes]
-//            }
-//            dict[Self.SECURITY_KEY] = arr
-//        }
-//
-//        // paths: [String: PathItem] Patric: 14.12.2025 für später
-//        //_ = try encodeMapFromKeyedArray(Self.PATHS_KEY, array: paths as? [any (KeyedElement & ThrowingHashMapEncodable)] as? [OpenAPIPathItem], into: &dict)
-//
-//        // paths: [String: PathItem] Patric: 14.12.2025 für später
-//        // webhooks: [String: PathItem]
-//        //_ = try encodeMapFromKeyedArray(Self.WEBHOOKS_KEY, array: webhooks as? [any (KeyedElement & ThrowingHashMapEncodable)] as? [OpenAPIPathItem], into: &dict)
-//
-//        // components
-//        if let comp = components as? ThrowingHashMapEncodable {
-//            dict[Self.COMPONENTS_KEY] = try comp.toDictionary()
-//        } else if components != nil{
-//            // minimal fallback if not encodable yet
-//            let c: [String: Any] = [:]
-//            // You can expand this as soon as OpenAPIComponent conforms to ThrowingHashMapEncodable
-//            dict[Self.COMPONENTS_KEY] = c
-//        }
-//
-//        // x-* extensions at root
-//        encodeExtensions(extensions, into: &dict)
-//
-//        return dict
-//    }
-//}
-
 
 

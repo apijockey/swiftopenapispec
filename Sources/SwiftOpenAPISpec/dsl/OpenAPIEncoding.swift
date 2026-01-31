@@ -39,11 +39,11 @@ public struct OpenAPIEncoding : KeyedElement, PointerNavigable {
     public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
         case Self.CONTENT_TYPE_KEY: return .value(JSONValue(contentType))
-        case Self.HEADERS_KEY: return try headers.element(for: segmentName)
-        case Self.ENCODING_KEY: return try encoding.element(for: segmentName)
-        case Self.PREFIX_ENCODING_KEY: return try prefixEncoding.element(for: segmentName)
-        case Self.ITEM_ENCODING_KEY: return try itemEncoding.element(for: segmentName)
-        case Self.EXTENSIONS_KEY: return try extensions.element(for: segmentName)
+        case Self.HEADERS_KEY: return .navigableCollection(headers)
+        case Self.ENCODING_KEY: return .navigableCollection(encoding)
+        case Self.PREFIX_ENCODING_KEY: return  .navigableCollection(prefixEncoding)
+        case Self.ITEM_ENCODING_KEY: return .navigableCollection(itemEncoding)
+        case Self.EXTENSIONS_KEY: return  .navigableCollection(extensions)
         default:
             // Für x-* Vendor Extensions einzelne Keys erlauben: "x-..." -> passenden Extension-Wert liefern
             if segmentName.hasPrefix("x-") {

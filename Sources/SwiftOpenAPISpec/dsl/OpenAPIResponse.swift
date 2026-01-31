@@ -49,10 +49,10 @@ public struct OpenAPIResponse : KeyedElement, PointerNavigable {
     
     public func element(for segmentName : String) throws -> NavigationResult{
         switch segmentName {
-        case Self.CONTENT_KEY: return try content.element(for: segmentName)
+        case Self.CONTENT_KEY: return  .navigableCollection(self.content)
         case Self.DESCRIPTION_KEY : return .value(JSONValue(description))
-        case Self.HEADERS_KEY: return try self.headers.element(for: segmentName)
-        case Self.LINKS_KEY: return try self.links.element(for: segmentName)
+        case Self.HEADERS_KEY: return .navigableCollection(self.headers)
+        case Self.LINKS_KEY: return  .navigableCollection(self.links)
              
         case Self.SUMMARY_KEY: return .value(JSONValue(self.summary))
         case OpenAPISchemaReference.REF_KEY: return .reference(ref?.reference)

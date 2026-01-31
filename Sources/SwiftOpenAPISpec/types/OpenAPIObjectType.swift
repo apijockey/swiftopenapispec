@@ -93,7 +93,7 @@ public struct OpenAPIObjectType : OpenAPISchemaType,ThrowingHashMapInitiable, Po
     public static let REQUIRED_KEY = "required"
     public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
         self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self)
-        self.properties = try map.mapNamedElementListIfPresent(Self.PROPERTIES_KEY, objectType: OpenAPISchema.self)
+        self.properties = try map.mapListIfPresent(Self.PROPERTIES_KEY, objectType: OpenAPISchema.self)
         
         self.required = map.readListIfPresent(Self.REQUIRED_KEY, valueType: String.self) ?? []
         self.minProperties = map.readIfPresent(Self.MIN_PROPERTIES_KEY, valueType: Int.self)
@@ -106,9 +106,9 @@ public struct OpenAPIObjectType : OpenAPISchemaType,ThrowingHashMapInitiable, Po
     public var dependentRequired : String?
     public var maxProperties : Int?
     public var minProperties : Int?
-    public var properties = [OpenAPINamedElement<OpenAPISchema>]()
+    public var properties = [OpenAPISchema]()
     public var required : [String] = []
     public var unevaluatedProperties : Bool = false
   
-    public var ref: OpenAPISchemaReference? { nil}
+    
 }

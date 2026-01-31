@@ -95,7 +95,7 @@ struct RequiredServerURLRule: Rule {
                 diagnostics.append( .init(severity: .error,
                               code: .missingRequired,
                               message: "Missing required field 'url' in one of the 'servers'.",
-                              pointer: "/servers/\(server.name ?? "")/url",
+                              pointer: "/servers/\(server.key ?? "")/url",
                               rule: name))
             }
         }
@@ -117,7 +117,7 @@ struct RequiredServerVariablesRule: Rule {
                     diagnostics.append(.init(severity: .error,
                                   code: .missingRequired,
                                   message: "Missing required field 'default' in one of the 'servers' variables.",
-                                  pointer: "/servers/\(server.name ?? "")/variables/\(variable.key ?? "")/default",
+                                  pointer: "/servers/\(server.key ?? "")/variables/\(variable.key ?? "")/default",
                                              rule: name))
                                        
                 }
@@ -197,7 +197,7 @@ struct RequiredParameterComponentsNamessRule: Rule {
       
         guard let schemas = spec.components?.parameters else { return diagnostics }
         for schema in schemas {
-            if let key = schema.name {
+            if let key = schema.key {
                 
                     if !key.matches("[a-zA-Z0-9\\.\\-_]+") {
                         diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "/components/parameters/\(key)", rule: name))
@@ -419,7 +419,7 @@ struct ParameterLocationsMustHaveInRule: Rule {
                 let diagnostic = Diagnostic( severity: .error,
                                              code: .missingRequired,
                                              message: "Parameters need a location value.",
-                                             pointer: "/components/parameters/\(parameter.name ?? "")",
+                                             pointer: "/components/parameters/\(parameter.key ?? "")",
                                              rule: name)
                 diags.append(diagnostic)
                 if parameter.location == .path {
@@ -427,7 +427,7 @@ struct ParameterLocationsMustHaveInRule: Rule {
                         let diagnostic = Diagnostic( severity: .error,
                                                      code: .missingRequired,
                                                      message: "Path Parameters MUST BE required.",
-                                                     pointer: "/components/parameters/\(parameter.name ?? "")",
+                                                     pointer: "/components/parameters/\(parameter.key ?? "")",
                                                      rule: name)
                         diags.append(diagnostic)
                     }
@@ -577,11 +577,11 @@ struct TagMustHaveName: Rule {
         var diags: [Diagnostic] = []
        
         for tag in spec.tags {
-            if tag.name == nil || (tag.name ?? "").isEmpty {
+            if tag.key == nil || (tag.key ?? "").isEmpty {
                 let diagnotics = Diagnostic( severity: .error,
                                              code: .missingRequired,
                                              message: "Tag needs an mae",
-                                             pointer: "/tags/\(tag.name ?? "")",
+                                             pointer: "/tags/\(tag.key ?? "")",
                                              rule: name)
                 diags.append(diagnotics)
             }

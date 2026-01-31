@@ -111,5 +111,5 @@ public struct OpenAPIArrayType : OpenAPISchemaType, PointerNavigable{
     public var minContains : Int?
     public var items: OpenAPISchema?
     
-    public var ref: OpenAPISchemaReference? { nil}
+    
 }

@@ -129,7 +129,7 @@ struct FixtureTests {
         
         guard parameters.count == 1,
               let parameter = parameters.first else { Issue.record("one parameter expected"); return }
-        #expect(parameter.name == "id")
+        #expect(parameter.key == "id")
         #expect(parameter.location == SwiftOpenAPISpec.OpenAPIParameter.ParameterLocation.path)
         guard case  .string = parameter.schema?.type   else { Issue.record("string expected"); return }
         
@@ -142,7 +142,7 @@ struct FixtureTests {
         
         
         #expect(parameters.count == 1)
-        let queryParameter = try #require(searchParameters.first { $0.name == "limit" })
+        let queryParameter = try #require(searchParameters.first { $0.key == "limit" })
         
         #expect(queryParameter.location == OpenAPIParameter.ParameterLocation.query)
         let schema = try #require(queryParameter.schema)
@@ -252,14 +252,14 @@ struct FixtureTests {
         guard case let .object(objectType) = try #require(operations.first?.response(httpstatus: "200")?.content.first?.schema?.type ) else { Issue.record(); return }
         #expect(objectType.properties.count == 2)
         let winnerProperty = try #require(objectType.properties.first(where: { $0.key == "winner" }))
-        let schema = winnerProperty.element
+        
         //guard case let .string(stringPropertyInfo) = try #require(schema.type) else { Issue.record(); return }
-        #expect(schema.allowedValues == ["X", "O", "."])
+        #expect(winnerProperty.allowedValues == ["X", "O", "."])
         let boardProperty = try #require(objectType.properties.first(where: { $0.key == "board" }))
         
-        #expect(boardProperty.element.maxItems == 3)
-        #expect(boardProperty.element.minItems == 3)
-        guard case let .array(boardSubItems) = try #require(boardProperty.element.type ) else { Issue.record(); return }
+        #expect(boardProperty.maxItems == 3)
+        #expect(boardProperty.minItems == 3)
+        guard case let .array(boardSubItems) = try #require(boardProperty.type ) else { Issue.record(); return }
         guard case  .array = try #require(boardSubItems.items?.type) else { Issue.record(); return }
 
         
@@ -272,7 +272,7 @@ struct FixtureTests {
             return
         }
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url:"07-refs-circular", documentLoader: YamsDocumentLoader())
-        guard case let .object(nodeObjectComponent) = try #require(apiSpec.components?.schemas?.first).element.type else { Issue.record(); return }
+        guard case let .object(nodeObjectComponent) = try #require(apiSpec.components?.schemas?.first).type else { Issue.record(); return }
         #expect(nodeObjectComponent.properties.count == 1)
         #expect(nodeObjectComponent.properties.first?.key == "next")
     }
@@ -317,7 +317,7 @@ struct FixtureTests {
         #expect(object.properties.contains(where: {$0.key == "note"}))
         let schema = try #require(object.properties.first(where: { $0.key == "note" }))
         //guard case let  .string(noteProperty) = try #require(schema.type) else { Issue.record(); return }
-        #expect(schema.element.pattern == "^[A-Z]+$")
+        #expect(schema.pattern == "^[A-Z]+$")
     }
     @Test("10-servers-variables")
     func serversvariables() async throws {
@@ -338,10 +338,10 @@ struct FixtureTests {
         #expect(selfurlServer.description == "The production API on this device")
         
         let stagingServer =  try #require(apiSpec.servers[url: "https://staging.gigantic-server.com/v1"])
-        #expect(stagingServer.name == "staging")
+        #expect(stagingServer.key == "staging")
         
         let prodServer =  try #require(apiSpec.servers[url: "https://{username}.gigantic-server.com:{port}/{basePath}"])
-        #expect(prodServer.name == "prod")
+        #expect(prodServer.key == "prod")
         let prodServerPortVariable = try #require(prodServer.variables[key: "port"])
         #expect(prodServerPortVariable.defaultValue == "8443")
         #expect(prodServerPortVariable.enumList == ["8443","443"])
@@ -392,20 +392,20 @@ struct FixtureTests {
         }
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url:"21-webhooks-multiple", documentLoader: YamsDocumentLoader())
         let orderCreatedEventComponent = try #require(apiSpec[schemacomponent: "Money"])
-        guard case let .object(object) = try #require(orderCreatedEventComponent.element.type) else {
+        guard case let .object(object) = try #require(orderCreatedEventComponent.type) else {
             Issue.record("Expected to extract an object schema from the Money component")
             return
         }
         #expect(object.properties.contains(where :{$0.key == "currency"}))
         let currencyInfo = try #require(object.properties.first(where: { $0.key == "currency" }))
-        let schema = currencyInfo.element
-        guard case .string = try #require(currencyInfo.element.type) else {
+       
+        guard case .string = try #require(currencyInfo.type) else {
             Issue.record("Expected to extract a string schema for the 'currency' property")
             return
         }
         
-        #expect(schema.minLength == 3)
-        #expect(schema.maxLength == 3)
+        #expect(currencyInfo.minLength == 3)
+        #expect(currencyInfo.maxLength == 3)
     }
     @Test("21-allofcomponents")
     func nestedallofcomponent() async throws {
@@ -415,7 +415,7 @@ struct FixtureTests {
         }
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url:"21-webhooks-multiple", documentLoader: YamsDocumentLoader())
         let orderCreatedEventComponent = try #require(apiSpec[schemacomponent: "OrderCreatedEvent"])
-        guard case .allOf = orderCreatedEventComponent.element.type else {
+        guard case .allOf = orderCreatedEventComponent.type else {
             Issue.record("Expected to extract an allOf schema for the OrderCreatedEvent component")
             return
         }
@@ -443,21 +443,21 @@ struct FixtureTests {
         }
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url:"23-oneOf-Webhooks", documentLoader: YamsDocumentLoader())
         let schemaComponent = try #require(apiSpec[schemacomponent: "EventEnvelope"])
-        guard case let .object(schemaComponentObject) = try #require(schemaComponent.element.type) else {
+        guard case let .object(schemaComponentObject) = try #require(schemaComponent.type) else {
             Issue.record("Expected to extract an object schema for the EventEnvelope component")
             return
         }
         let payloadProperty = try #require(schemaComponentObject.properties.first(where: { $0.key == "payload" }))
-        guard case let .oneOf(OneOfType) = payloadProperty.element.type else {
+        guard case let .oneOf(OneOfType) = payloadProperty.type else {
             Issue.record("Expected to extract an oneOf schema for the payload property of the EventEnvelope component")
             return
         }
         
         
-        #expect(payloadProperty.element.discriminator?.mapping.count == 2)
-        #expect(payloadProperty.element.discriminator?.propertyName == "type")
-        #expect(payloadProperty.element.discriminator?.mapping["user.created"] == "#/components/schemas/UserCreated")
-        #expect(payloadProperty.element.discriminator?.mapping["user.deleted"] == "#/components/schemas/UserDeleted")
+        #expect(payloadProperty.discriminator?.mapping.count == 2)
+        #expect(payloadProperty.discriminator?.propertyName == "type")
+        #expect(payloadProperty.discriminator?.mapping["user.created"] == "#/components/schemas/UserCreated")
+        #expect(payloadProperty.discriminator?.mapping["user.deleted"] == "#/components/schemas/UserDeleted")
         
         
     }
@@ -532,18 +532,27 @@ struct FixtureTests {
 
         let pingOpExtensions = try #require(apiSpec.paths[key: "/ping"]?.operations[operationID: "ping"]?.extensions)
         #expect(pingOpExtensions.count == 1)
-//        #expect(pingOpExtensions[extensionName: "x-operation-rate-limit"]?.structuredExtension?.properties?.count == 2)
-//        let pingOpExtensionsProperties = try #require(pingOpExtensions[extensionName: "x-operation-rate-limit"]?.structuredExtension?.properties)
-//        #expect(pingOpExtensionsProperties["burst"] == "20")
-//        #expect(pingOpExtensionsProperties["sustainedPerMin"] == "120")
-//        let extendedParameter = try #require(apiSpec.paths[key: "/ping"]?.operations[operationID: "ping"]?.parameters.first(where: { $0.name == "verbose" }) )
-//        #expect(extendedParameter.extensions?.count == 1)
-//        #expect(extendedParameter.extensions?[extensionName:"x-parameter-source"]?.simpleExtensionValue == "internal")
-//        let parameterSchema = try #require(extendedParameter.schema)
-//        //#expect(parameterSchema.extensions?.count == 1)
-        //let parameterStructuredExtensionProperties = try #require(parameterSchema.extensions?[extensionName: "x-schema-ui"]?.structuredExtension?.properties)
-        //#expect(parameterStructuredExtensionProperties["widget"] == "toggle")
-        //#expect(parameterStructuredExtensionProperties["defaultLabel"] == "Detailed response")
+        
+        guard case let .object(pingOpeExtensionsObject) = pingOpExtensions[extensionName: "x-operation-rate-limit"]!.value else {
+            Issue.record("object(tagExtensionObject) expected")
+            return
+        }
+        #expect(pingOpeExtensionsObject.count == 2)
+
+        #expect(pingOpeExtensionsObject["burst"] ==  .integer(20))
+        #expect(pingOpeExtensionsObject["sustainedPerMin"] == .integer(120))
+        let extendedParameter = try #require(apiSpec.paths[key: "/ping"]?.operations[operationID: "ping"]?.parameters.first(where: { $0.key == "verbose" }) )
+        #expect(extendedParameter.extensions?.count == 1)
+        
+        #expect(extendedParameter.extensions?[extensionName:"x-parameter-source"]?.value == .string("internal"))
+        let parameterSchema = try #require(extendedParameter.schema)
+       #expect(parameterSchema.extensions?.count == 1)
+        guard case let .object(parameterStructuredExtension) = parameterSchema.extensions?[extensionName: "x-schema-ui"]?.value else {
+            Issue.record("object(tagExtensionObject) expected")
+            return
+        }
+        #expect(parameterStructuredExtension["widget"] == .string("toggle"))
+        #expect(parameterStructuredExtension["defaultLabel"] == .string("Detailed response"))
     }
    
     

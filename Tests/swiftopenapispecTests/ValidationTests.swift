@@ -27,46 +27,49 @@ struct ValidationTests {
         let onlyThese : Bool
     }
 
-    static func fixture(fixtureName: String, subDirectory : String ) ->   ManifestEntry? {
+    static func fixtureManifest(fixtureName: String, subDirectory : String ) ->   ManifestEntry? {
         do {
             let url = try fixtureURL("expectedDiagnostics", subDirectory: subDirectory)
-            let fixtures = try specString(url)["cases"]
-            guard let fixtures = fixtures as? [Any] else {
+            let fixtures = try loadYamlJson(url: url)
+            guard case let .object(fixtureObject) = fixtures,
+                  case let .array(fixtures) = fixtureObject["cases"]
+            else {
                 fatalError("Could not load fixtures")
-                return nil
+                
             }
             
             var entry: ManifestEntry? = nil
-            for fixture in fixtures {
-                var diagnostics: [ExpectedDiagnostic] = []
-                if let dictionary = fixture as? [String: Any] {
-                    let fixturename = dictionary["fixture"] as? String ?? ""
+            for fixtureElement in fixtures {
+                if case let  .object(fixture) = fixtureElement {
+                    var diagnostics: [ExpectedDiagnostic] = []
+                    let fixturename = fixture["fixture"]?.stringValue
                     if fixturename != fixtureName {
                         continue
                     }
-                    let shouldPass = dictionary["shouldPass"] as? Bool ?? false
-                    let expected = dictionary["expected"] as? [Any] ?? []
-                    let onlyThese = dictionary["onlyThese"] as? Bool ?? false
-                    
+                    let shouldPass = fixture["shouldPass"]?.boolValue ?? false
+                    let expected = fixture["expected"]?.arrayValue ?? []
+                    let onlyThese = fixture["onlyThese"]?.boolValue ?? false
                     for expect in expected {
-                        if let entry  = expect as? StringDictionary {
-                            let code =  entry["code"] as? String ?? ""
-                            let pointer =  entry["pointer"] as? String ?? ""
-                            let rule =  entry["rule"] as? String ?? ""
-                            let severity =  entry["severity"] as? String ?? ""
-                            let messageContains =  entry["messageContains"] as? String ?? ""
+                        if let entry  = expect.objectValue {
+                            let code =  entry["code"]?.stringValue ?? ""
+                            let pointer =  entry["pointer"]?.stringValue ?? ""
+                            let rule =  entry["rule"]?.stringValue ?? ""
+                            let severity =  entry["severity"]?.stringValue ?? ""
+                            let messageContains =  entry["messageContains"]?.stringValue ?? ""
                             let entry = ExpectedDiagnostic(code: code, pointer: pointer, rule: rule, severity: severity, messageContains: messageContains)
                             diagnostics.append(entry)
                         }
-                        
+
                     }
                     entry = ManifestEntry(fixture: fixtureName, shouldPass: shouldPass, expected: diagnostics, onlyThese: onlyThese)
                     
                 }
+                
             }
+
             return entry
         } catch {
-            fatalError("Could not load fixtures")
+            fatalError(" Could not load fixtures: \(error)")
            
         }
        
@@ -75,12 +78,17 @@ struct ValidationTests {
         case notFound(String)
         case unreadable(String, Error)
         case notUTF8(String)
+        case JSONConversionError([Diagnostic])
 
         var description: String {
             switch self {
             case .notFound(let name): return "Fixture not found: \(name)"
             case .unreadable(let name, let err): return "Fixture unreadable: \(name) (\(err))"
             case .notUTF8(let name): return "Fixture not UTF-8 encoded: \(name)"
+            case .JSONConversionError(let diagnostics):
+                return """
+                diagnostics.joined(separator: "\\n\")
+                """
             }
         }
     }
@@ -92,18 +100,30 @@ struct ValidationTests {
         }
         return url
     }
-    private static func specString(_ url : URL) throws -> StringDictionary {
-        
+    private static func loadYamlJson(url : URL) throws -> JSONValue {
+        var diagnostics: [Diagnostic] = []
         do {
+            
             let data = try Data(contentsOf: url)
             guard let string = String(data: data, encoding: .utf8),
-                  let map = try Yams.load(yaml: string) as? StringDictionary else {
+                  let map = try Yams.load(yaml: string)   else  {
                 throw Self.Errors.notUTF8(url.absoluteString)
             }
-            return map
+            let jsonValue = try JSONValue(from: map, diagnostics: &diagnostics)
+            return jsonValue
         } catch {
+            print(diagnostics)
             throw Self.Errors.unreadable(url.absoluteString, error)
         }
+    }
+    private static func loadYamlJson(_ resource: String, ext: String = "yaml", subDirectory : String? = nil) throws -> JSONValue {
+        let name = "\(resource).\(ext)"
+
+        guard let url = Bundle.module.url(forResource: resource, withExtension: ext, subdirectory: subDirectory) else {
+            throw Self.Errors.notFound(name)
+        }
+        return try loadYamlJson(url: url)
+        
     }
     @Test("DEBUG.")
     func debug_rules() async throws {
@@ -113,18 +133,13 @@ struct ValidationTests {
         let bundle = Bundle.module
         print("Bundle URL:", bundle.bundleURL.path)
 
-        let resourcesRoot = try #require(bundle.resourceURL)
-        print("Resources root:", resourcesRoot.path)
-        guard let resourceUrl = Bundle.module.url(forResource: fixtureName , withExtension: "yaml", subdirectory: subDirectory) else {
-            throw FixtureErrors.notFound(fixtureName )
-        }
-        let oasYaml = try Self.specString(resourceUrl)
-        let apiSpec = try OpenAPISpecification.read(
-            unflattened: oasYaml,
-            url: fixtureName ,
-            documentLoader: YamsDocumentLoader()
-        )
         
+        guard case let .object(yaml) = try Self.loadYamlJson(fixtureName, subDirectory: subDirectory) else {
+            Issue.record("Expected .object(let)")
+            return
+        }
+        let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url:fixtureName , documentLoader: YamsDocumentLoader())
+        let resourcesRoot = try #require(bundle.resourceURL)
         let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: fixtureName, operationIds: [])
         let runner = RuleRunner.defaultRuleRunner
      
@@ -132,7 +147,7 @@ struct ValidationTests {
         let diags = unfilteredDiags.filter { diagnotics in
             diagnotics.rule == rule
         }
-        guard let fixture = Self.fixture(fixtureName: fixtureName, subDirectory: subDirectory) else {
+        guard let fixture = Self.fixtureManifest(fixtureName: fixtureName, subDirectory: subDirectory) else {
             throw FixtureErrors.notFound(fixtureName )
         }
         #expect(fixture.shouldPass == diags.isEmpty)
@@ -153,19 +168,19 @@ struct ValidationTests {
         let subDirectory = "Resources/3_0/invalid"
         let rule = "OAS.ResolveRefs"
         let bundle = Bundle.module
-        print("Bundle URL:", bundle.bundleURL.path)
+        
 
-        let resourcesRoot = try #require(bundle.resourceURL)
-        print("Resources root:", resourcesRoot.path)
+        
+        
+        guard case let .object(yaml) = try Self.loadYamlJson(fixtureName, subDirectory: subDirectory) else {
+            Issue.record("Expected .object(let)")
+            return
+        }
+        let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url:"02-minimal-31" , documentLoader: YamsDocumentLoader())
+        
         guard let resourceUrl = Bundle.module.url(forResource: fixtureName , withExtension: "yaml", subdirectory: subDirectory) else {
             throw FixtureErrors.notFound(fixtureName )
         }
-        let oasYaml = try Self.specString(resourceUrl)
-        let apiSpec = try OpenAPISpecification.read(
-            unflattened: oasYaml,
-            url: fixtureName ,
-            documentLoader: YamsDocumentLoader()
-        )
         
         let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: fixtureName, operationIds: [])
         let objectLoader = YamsDocumentLoader()
@@ -176,7 +191,7 @@ struct ValidationTests {
         let diags = unfilteredDiags.filter { diagnotics in
             diagnotics.rule == rule
         }
-        guard let fixture = Self.fixture(fixtureName: fixtureName, subDirectory: subDirectory) else {
+        guard let fixture = Self.fixtureManifest(fixtureName: fixtureName, subDirectory: subDirectory) else {
             throw FixtureErrors.notFound(fixtureName )
         }
         #expect(fixture.shouldPass == diags.isEmpty)
@@ -189,18 +204,12 @@ struct ValidationTests {
         ])
     func noSpecRulesHits(resource: String) async throws {
         let subDirectory = "Resources/3_0/valid"
-       guard let resourceUrl = Bundle.module.url(forResource: resource , withExtension: "yaml", subdirectory: subDirectory) else {
-            throw FixtureErrors.notFound(resource )
+        guard case let .object(yaml) = try Self.loadYamlJson(resource, subDirectory: subDirectory) else {
+            Issue.record("Expected .object(let)")
+            return
         }
-       
+        let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url:"02-minimal-31" , documentLoader: YamsDocumentLoader())
         
-              
-        let oasYaml = try Self.specString(resourceUrl)
-        let apiSpec = try OpenAPISpecification.read(
-            unflattened: oasYaml,
-            url:resource ,
-            documentLoader: YamsDocumentLoader()
-        )
         
         let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: resource, operationIds: [])
         let runner = RuleRunner.defaultRuleRunner
@@ -227,16 +236,18 @@ struct ValidationTests {
         }()
     )
     func specRulesHits(setup : (String,String)) async throws {
-            guard let fixture = Self.fixture(fixtureName: setup.0, subDirectory: "Resources/3_0/invalid"),
-                  let resourceUrl = Bundle.module.url(forResource: setup.0 , withExtension: "yaml", subdirectory: "Resources/3_0/invalid") else {
-                throw FixtureErrors.notFound(setup.0 )
-            }
-            let oasYaml = try Self.specString(resourceUrl)
-            let apiSpec = try OpenAPISpecification.read(
-                unflattened: oasYaml,
-                url:setup.0 ,
-                documentLoader: YamsDocumentLoader()
-            )
+        let subDirectory = "Resources/3_0/invalid"
+        guard let fixture = Self.fixtureManifest(fixtureName: setup.0, subDirectory: subDirectory) else {
+            throw FixtureErrors.notFound(setup.0 )
+        }
+        
+       
+        guard case let .object(yaml) = try Self.loadYamlJson(setup.0, subDirectory: subDirectory) else {
+            Issue.record("Expected .object(let)")
+            return
+        }
+        let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url:setup.0 , documentLoader: YamsDocumentLoader())
+        
             
             let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: setup.0, operationIds: [])
             let runner = RuleRunner.defaultRuleRunner

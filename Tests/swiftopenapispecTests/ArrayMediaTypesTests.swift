@@ -115,11 +115,11 @@ struct ArrayMediaTypesTests {
         })
         let nameProperty = objectItems.properties.first(where :{$0.key == "name"})
         
-        guard case .integer = idProperty?.element.type else {
+        guard case .integer = idProperty?.type else {
             Issue.record("Expected integer type for id")
             return
         }
-        guard case  .string = nameProperty?.element.type else {
+        guard case  .string = nameProperty?.type else {
             Issue.record("Expected integer type for id")
             return
         }

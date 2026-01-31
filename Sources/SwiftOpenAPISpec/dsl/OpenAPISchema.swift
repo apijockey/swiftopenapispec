@@ -23,7 +23,9 @@ import Foundation
 
 
 
-public struct OpenAPISchema : ThrowingHashMapInitiable, PointerNavigable {
+public struct OpenAPISchema : KeyedElement, PointerNavigable {
+    public var key: String?
+    
     public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
             case Self.ALLOWED_ELEMENTS_KEY:
@@ -46,7 +48,14 @@ public struct OpenAPISchema : ThrowingHashMapInitiable, PointerNavigable {
             case Self.EXAMPLE_KEY : return .navigable(example)
         case Self.EXCLUSIVE_MAXIMUM_KEY : return .value(JSONValue(bool: exclusiveMaximum))
         case Self.FORMAT_KEY : return .value(JSONValue(string: format))
-            
+        case OpenAPISchemaReference.REF_KEY :
+            if case let .ref(reference) = self.type {
+                return .reference(reference.refString)
+                
+            }
+            else {
+                throw OpenAPISpecification.Errors.notFound(segmentName)
+            }
         case Self.MULTIPLEOF_KEY : return .value(JSONValue(double: multipleOf))
         case Self.MAXIMUM_KEY : return .value(JSONValue(double: maximum))
         case Self.MINIMUM_KEY : return .value(JSONValue(double: minimum))

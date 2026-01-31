@@ -133,7 +133,7 @@ struct OpenAPILegacyPortedTests {
         #expect(emojiPathOperation.parameters.count == 0)
         #expect(greetPathOperation.parameters.count == 1)
         let greetPathParameter = try #require(greetPathOperation.parameters.first)
-        #expect(greetPathParameter.name == "name")
+        #expect(greetPathParameter.key == "name")
         #expect(greetPathParameter.required == false)
         #expect(greetPathParameter.location == OpenAPIParameter.ParameterLocation.query)
         #expect(greetPathParameter.description == "The name used in the returned greeting.")
@@ -173,17 +173,17 @@ struct OpenAPILegacyPortedTests {
         let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
         #expect(apiSpec.components?.schemas?.count == 4)
         let greetingComponent = try #require(apiSpec.components?.schemas?.first { $0.key == "Greeting" })
-        guard case let .object(greetingObject) = try #require(greetingComponent.element.type) else {
+        guard case let .object(greetingObject) = try #require(greetingComponent.type) else {
             #expect(Bool(false), "expected object schema")
             return
         }
         #expect(greetingObject.properties.count == 1)
         let messageProperty = try #require(greetingObject.properties.first)
-        #expect(messageProperty.element.type != nil)
+        #expect(messageProperty.type != nil)
         #expect(greetingObject.required == ["message"])
         
         let generalErrorComponent = try #require(apiSpec[schemacomponent: "GeneralError"])
-        guard case let .object(errorObject) = try #require(generalErrorComponent.element.type) else {
+        guard case let .object(errorObject) = try #require(generalErrorComponent.type) else {
             #expect(Bool(false), "expected object schema")
             return
         }
@@ -205,7 +205,7 @@ struct OpenAPILegacyPortedTests {
             let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
         #expect(apiSpec.components?.parameters?.count == 2)
         let skipParamComponent = try #require(apiSpec[parametercomponent: "skipParam"])
-        #expect(skipParamComponent.name == "skipParam")
+        #expect(skipParamComponent.key == "skipParam")
         #expect(skipParamComponent.location == OpenAPIParameter.ParameterLocation.query)
         #expect(skipParamComponent.description == "number of items to skip")
         #expect(skipParamComponent.required == true)
@@ -402,13 +402,13 @@ struct OpenAPILegacyPortedTests {
         let addressLink = try #require(links.first { $0.key == "address" })
         #expect(addressLink.operationId == "getUserAddress")
         #expect(addressLink.parameters.count == 1)
-        let parameter = addressLink.parameters.first { key, _ in key == "userId" }
-        #expect(parameter?.value == "$request.path.id")
+        let parameter = addressLink.parameters.first { $0.key  == "userId" }
+        #expect(parameter?.key == "$request.path.id")
         let userRepositoriesLink = try #require(links.first { $0.key == "UserRepositories" })
         #expect(userRepositoriesLink.operationRef == "#/paths/~12.0~1repositories~1{username}/get")
         #expect(userRepositoriesLink.parameters.count == 1)
-        let repParameter = userRepositoriesLink.parameters.first { key, _ in key == "username" }
-        #expect(repParameter?.value == "$response.body#/username")
+        let repParameter = userRepositoriesLink.parameters.first { $0.key == "username" }
+        #expect(repParameter?.key == "$response.body#/username")
         #expect(userRepositoriesLink.requestBody == "$response.body#/username")
     }
 

@@ -53,7 +53,6 @@ public struct OpenAPIVariable : KeyedElement , PointerNavigable {
         }
     }
     public var enumList : [String]? = nil
-    public var ref: OpenAPISchemaReference? { nil}
     public var defaultValue : String?
     public var description : String? = nil
     

@@ -86,17 +86,22 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
         case Self.SUMMARY_KEY: return .value(JSONValue(summary))
             case Self.DESCRIPTION_KEY: return .value(JSONValue(description))
         case Self.SERVERS_KEY:
-            let value = servers.first(where: { $0.name == segmentName })
+            let value = servers.first(where: { $0.key == segmentName })
             return .navigable(value)
-        case Self.PARAMETERS_KEY:
-            let value = try JSONValue(parameters.first(where: { $0.name == segmentName }))
-            return  .value(value)
+        case Self.PARAMETERS_KEY: return .navigableCollection(self.parameters)
         case Self.ADDITIONAL_OPERATIONS_KEY: return try additionalOperations.element(for: segmentName)
         case OpenAPISchemaReference.REF_KEY: return .reference(ref?.reference)
             default :
             if let operation = operations[key: segmentName] {
                 return .navigable(operation)
             }
+            if segmentName.hasPrefix("x-") {
+                  if let ext = extensions.first(where: { $0.key == segmentName }) {
+                      let value = try JSONValue(ext)
+                      return .value(value)
+                      
+                  }
+              }
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIPathItem", segmentName)
         }
     }

@@ -64,7 +64,7 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
     public func element(for segmentName: String) throws -> NavigationResult {
        switch segmentName {
        case Self.ALLOW_EMPTYVALUE_KEY:
-           let value = try JSONValue(bool: allowEmptyValue)
+           let value =  JSONValue(bool: allowEmptyValue)
            return .value(value)
        case Self.ALLOW_RESERVED_KEY:
            let value = JSONValue(bool: allowReserved)
@@ -73,11 +73,11 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
        case Self.EXAMPLE_KEY:
            let value = try JSONValue(example)
            return .value(value)
-       case Self.EXAMPLES_KEY: return try examples.element(for: segmentName)
+       case Self.EXAMPLES_KEY: return .navigableCollection(examples)
        case Self.EXPLODE_KEY:
            let value = JSONValue(bool: explode)
            return .value(value)
-       case Self.EXTENSIONS_KEY: return try extensions.element(for: segmentName)
+       case Self.EXTENSIONS_KEY: return .navigableCollection(extensions)
        case Self.DESCRIPTION_KEY:
            let value = JSONValue(description)
            return .value(value)

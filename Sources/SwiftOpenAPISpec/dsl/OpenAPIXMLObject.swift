@@ -66,6 +66,6 @@ public struct OpenAPIXMLObject : PointerNavigable, ThrowingHashMapInitiable {
     public var wrapped : Bool?
     
     public var extensions : [OpenAPIExtension]?
-    public var ref: OpenAPISchemaReference? { nil}
+    
     
 }

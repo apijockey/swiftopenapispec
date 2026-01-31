@@ -53,23 +53,11 @@ public struct SchemaRefCollector {
         return out
     }
     
-    public func collect(from namedSchema :OpenAPINamedElement<OpenAPISchema>, pointer : String) -> [RefOccurrence] {
-        var out: [RefOccurrence] = []
-        
-            out.append(contentsOf:collect(from : namedSchema.element , pointer: pointer))
-            return out
-    }
+  
        
     public func collect(from op : OpenAPIOperation , pointer : String)  -> [RefOccurrence] {
         var out: [RefOccurrence] = []
-        if let r = op.ref?.refString {
-            out.append(.init(
-                refString: r,
-                pointerToDollarRef: JSONPointer.join(pointer, "$ref"),
-                expected: .schemaObject
-            ))
-        }
-        else  {
+       
             
                 for parameter in op.parameters {
                     out.append(contentsOf: collect(from: parameter, pointer: JSONPointer.join(pointer, "parameters")))
@@ -84,7 +72,7 @@ public struct SchemaRefCollector {
                     out.append(contentsOf: collect(from: response, pointer: ptr))
             }
                 
-        }
+        
         return out
     }
     public func collect(from content : OpenAPIMediaType, pointer : String)  -> [RefOccurrence] {
@@ -261,14 +249,7 @@ public struct SchemaRefCollector {
     }
     public func collect(from obj: OpenAPIArrayType, pointer: String) -> [RefOccurrence] {
         var out: [RefOccurrence] = []
-        if let ref = obj.ref {
-            out.append(.init(
-                refString: ref.reference ?? "",
-                pointerToDollarRef: JSONPointer.join(pointer, "/$ref"),
-                expected: .schemaObject
-            ))
-            return out
-        }
+        
         if let items = obj.items {
             
                 let itemPtr = JSONPointer.join(pointer, "items")
@@ -335,7 +316,7 @@ public struct SchemaRefCollector {
         var out: [RefOccurrence] = []
         for prop in obj.properties {
             if let key = prop.key,
-               case let .ref(ref) = prop.element.type {
+               case let .ref(ref) = prop.type {
                 let propPtr = JSONPointer.join(JSONPointer.join(pointer, "properties"), key)
                 out.append(.init(
                     refString: ref.reference ?? "",
@@ -346,7 +327,7 @@ public struct SchemaRefCollector {
             
             else if let key = prop.key{
                 let propPtr = JSONPointer.join(JSONPointer.join(pointer, "properties"), key)
-                out.append(contentsOf: collect(from:  prop.element  , pointer: JSONPointer.join(propPtr, "\(key)/")))
+                out.append(contentsOf: collect(from:  prop  , pointer: JSONPointer.join(propPtr, "\(key)/")))
             }
         }
         return out

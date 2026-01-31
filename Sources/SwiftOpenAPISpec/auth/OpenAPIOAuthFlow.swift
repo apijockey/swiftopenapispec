@@ -79,5 +79,5 @@ public struct OpenAPIOAuthFlow : ThrowingHashMapInitiable, PointerNavigable {
     public var refreshUrl : String? = nil
     public var scopes : [String:String]? = nil
   
-    public var ref: OpenAPISchemaReference? { nil}
+   
 }

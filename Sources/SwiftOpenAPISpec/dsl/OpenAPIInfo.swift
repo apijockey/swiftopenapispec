@@ -73,7 +73,7 @@ public struct OpenAPIInfo : KeyedElement, PointerNavigable {
     public var termsOfService : String? = nil
     public var title : String?
     public var  summary : String?
-    public var ref: OpenAPISchemaReference? { nil}
+   
     public var key: String?
    
     public var version : String?
