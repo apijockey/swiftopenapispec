@@ -51,7 +51,7 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
         case Self.EXTERNAL_DOCS_KEY: return .navigable(externalDocs)
         case Self.OP_ID_KEY: return .value(JSONValue(operationId))
         case Self.PARAMETERS_KEY:
-            return   .searchableCollection(parameters)
+            return   .navigableCollection(parameters)
             
         case Self.REQUEST_BODIES_KEY: return .navigable(requestBody)
         case Self.RESPONSES_KEY: return .navigableCollection(responses)

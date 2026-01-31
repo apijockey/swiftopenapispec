@@ -104,7 +104,7 @@ public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
         case Self.SCHEMAS_KEY:
             if let schemas =  schemas {
                 // Expose the whole collection for searching; resolver will pick by key.
-                return .searchableCollection(schemas)
+                return .navigableCollection(schemas)
             }
             else {
                 throw OpenAPISpecification.Errors.unsupportedSegment(segmentName, "OpenAPIComponent")

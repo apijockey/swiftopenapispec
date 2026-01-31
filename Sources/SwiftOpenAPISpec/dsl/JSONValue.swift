@@ -26,10 +26,8 @@ public enum JSONValue: Equatable, Sendable {
     case null
 }
 
-// MARK: - Protocol to allow model types to provide their own JSONValue
-public protocol JSONValueConvertible {
-    func toJSONValue() throws -> JSONValue
-}
+
+
 
 public extension JSONValue {
     
@@ -178,24 +176,7 @@ public extension JSONValue {
         try self.init(value)
     }
     
-    // Converts a non-optional existential KeyedElement.
-    // Strategy:
-    // 1) If it conforms to JSONValueConvertible, use that.
-    // 2) Otherwise, throw a clear error (you can later extend this to support ThrowingHashMapEncodable.toDictionary()).
-    init(_ value: any KeyedElement) throws {
-        if let convertible = value as? JSONValueConvertible {
-            self = try convertible.toJSONValue()
-            return
-        }
-        // Optional future fallback if your models implement ThrowingHashMapEncodable:
-        // if let enc = value as? ThrowingHashMapEncodable {
-        //     self = .object(try enc.toDictionary())
-        //     return
-        // }
-       
-        let diagnostic = Diagnostic(severity: .error, code: .invalidType, message: "KeyedElement of type \(type(of: value)) is not JSONValueConvertible", pointer: "", rule: "JSONValueConvertible")
-        throw Errors.notConvertible( [diagnostic])
-    }
+   
 }
 
 // MARK: - Extractors for Swift primitive types

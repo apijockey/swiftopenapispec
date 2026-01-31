@@ -40,7 +40,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
             case Self.JSON_SCHEMA_DIALECT_KEY : return .value(JSONValue(string:self.jsonSchemaDialect))
             case Self.OPENAPI_KEY : return .value(JSONValue(string:self.version))
             case Self.PATHS_KEY : return .navigableCollection(self.paths)
-            case Self.SECURITY_KEY :  return  .searchableCollection(self.securityObjects)
+            case Self.SECURITY_KEY :  return  .searchableCollection(self.securityObjects) // searchable
             case Self.SERVERS_KEY : return  .navigableCollection(self.servers)
             case Self.TAGS_KEY : return .navigableCollection(self.tags)
             case Self.SELF_URL_KEY : return .value(JSONValue(string:self.selfUrl))

@@ -44,7 +44,7 @@ public struct OpenAPIRequestBody : KeyedElement , PointerNavigable {
     public var ref : OpenAPISchemaReference? = nil
     public func element(for segmentName : String) throws -> NavigationResult {
         switch segmentName {
-        case Self.CONTENTS_KEY : return try contents.element(for: segmentName)
+        case Self.CONTENTS_KEY : .navigableCollection(contents)
             default : throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIRequestBody", segmentName)
         }
     }

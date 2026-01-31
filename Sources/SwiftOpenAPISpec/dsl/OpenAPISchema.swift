@@ -56,17 +56,46 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
             else {
                 throw OpenAPISpecification.Errors.notFound(segmentName)
             }
-        case Self.MULTIPLEOF_KEY : return .value(JSONValue(double: multipleOf))
-        case Self.MAXIMUM_KEY : return .value(JSONValue(double: maximum))
-        case Self.MINIMUM_KEY : return .value(JSONValue(double: minimum))
-        case Self.MAX_PROPERTIES_KEY : return .value(JSONValue(int: maxProperties))
-        case Self.MIN_PROPERTIES_KEY : return .value(JSONValue(int: minProperties))
-        case Self.MAX_LENGTH_KEY : return .value(JSONValue(int: maxLength))
-        case Self.MIN_LENGTH_KEY : return .value(JSONValue(int: maxLength))
-        case Self.MAX_ITEMS_KEY : return .value(JSONValue(int: maxItems))
-        case Self.MIN_ITEMS_KEY :
-            
-            return .value(JSONValue(int: minItems))
+        case OpenAPIOneOfType.TYPE_KEY:
+            switch self.type {
+                case .oneOf(let openAPIOneOfType):
+                    return .navigable(openAPIOneOfType)
+                case .object(let objectType):
+                return .navigableCollection(objectType.properties)
+            default:  throw OpenAPISpecification.Errors.notFound(segmentName)
+            }
+        case OpenAPIAllOfType.TYPE_KEY:
+            switch self.type {
+                case .allOf(let openAPIOneOfType):
+                    return .navigable(openAPIOneOfType)
+                default:  throw OpenAPISpecification.Errors.notFound(segmentName)
+            }
+        case OpenAPIAnyOfType.TYPE_KEY:
+            switch self.type {
+                case .anyOf(let openAPIOneOfType):
+                    return .navigable(openAPIOneOfType)
+                default:  throw OpenAPISpecification.Errors.notFound(segmentName)
+            }
+        case Self.PROPERTIES_KEY:
+            switch self.type {
+            case .object(let openAPIObjectType):
+                   return  .navigableCollection(openAPIObjectType.properties)
+            case .ref(let reference):
+                return .reference(reference.reference)
+            default:
+                throw OpenAPISpecification.Errors.notFound(segmentName)
+            }
+            case Self.MULTIPLEOF_KEY : return .value(JSONValue(double: multipleOf))
+            case Self.MAXIMUM_KEY : return .value(JSONValue(double: maximum))
+            case Self.MAXIMUM_KEY : return .value(JSONValue(double: maximum))
+            case Self.MINIMUM_KEY : return .value(JSONValue(double: minimum))
+            case Self.MAX_PROPERTIES_KEY : return .value(JSONValue(int: maxProperties))
+            case Self.MIN_PROPERTIES_KEY : return .value(JSONValue(int: minProperties))
+            case Self.MAX_LENGTH_KEY : return .value(JSONValue(int: maxLength))
+            case Self.MIN_LENGTH_KEY : return .value(JSONValue(int: maxLength))
+            case Self.MAX_ITEMS_KEY : return .value(JSONValue(int: maxItems))
+            case Self.MIN_ITEMS_KEY :
+                return .value(JSONValue(int: minItems))
             case Self.NULLABLE_KEY :
             
             let value = try JSONValue(nullable)
@@ -93,6 +122,10 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
         case Self.WRITE_ONLY_KEY : return .value(JSONValue(bool: writeOnly))
             
         default:
+            if case let .object(objectType) = self.type {
+                let properties = objectType.properties
+                return try properties.element(for: segmentName)
+            }
             throw OpenAPISpecification.Errors.notFound(segmentName)
         }
     }
@@ -125,7 +158,7 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
     public static let READ_ONLY_KEY = "readOnly"
     public static let WRITE_ONLY_KEY = "readOnly"
     
-   
+    public static let PROPERTIES_KEY = "properties"
     public static let MAX_PROPERTIES_KEY = "maxProperties"
     public static let MIN_PROPERTIES_KEY = "minProperties"
     

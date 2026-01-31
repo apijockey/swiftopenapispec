@@ -127,52 +127,75 @@ public struct JSONPointerResolver : JSONPointerResolving {
         
         var current: NavigationResult = .navigable(root)
         var traversed = ""
-         
+        
         for seg in segments {
             
             
             switch  current {
             case .navigable(let currentPointerNavigable):
-                    guard let currentPointerNavigable = currentPointerNavigable else {
-                        throw Self.Errors.notFound(seg, traversed)
+                guard let currentPointerNavigable = currentPointerNavigable else {
+                    throw Self.Errors.notFound(seg, traversed)
+                }
+                let next = try currentPointerNavigable.element(for: seg)
+               
+                if case .reference(let reference) = next {
+                    if traversed.appending("/").appending(seg) == pointer,
+                       seg == "$ref" {
+                        return next
                     }
-                    let next = try currentPointerNavigable.element(for: seg)
-                        current = next
+                    else if let reference = reference {
+                        let resolve = try await resolve(ref: reference)
+                        current = resolve
                         traversed += "/\(seg)"
                         continue
-            
+                        
+                    }
+                }
+                else {
+                    current = next
+                    traversed += "/\(seg)"
+                    continue
+                }
+                
             case .notFound:
                 throw Self.Errors.notFound(seg, traversed)
             case .value(let jSONValue):
                 traversed += "/\(seg)"
                 return .value(jSONValue)
-            case .reference(let reference):
-                if let reference = reference {
-                    traversed += "/\(seg)"
-                   let resolve = try await resolve(ref: reference)
                 
-                    current = resolve
-                    if traversed != pointer {
+            case .navigableCollection(let navigableCollection):
+                
+                let next = navigableCollection.element(for: seg)
+                if case .reference(let reference) = next {
+                    if let reference = reference {
+                        let resolve = try await resolve(ref: reference)
+                        current = resolve
+                        traversed += "/\(seg)"
                         continue
+                        
                     }
                 }
-            case .navigableCollection(let navigableCollection):
-               
-                    let next = navigableCollection.element(for: seg)
+                else {
                     current = next
                     traversed += "/\(seg)"
                     continue
-               
+                }
             case .searchableCollection(let collection):
                 let value = try JSONValue(collection.first(where: { $0.key == seg }))
                 return .value(value)
+                
+                
+            case .reference(let reference):
+                if let reference = reference {
+                    let resolve = try await resolve(ref: reference)
+                    current = resolve
+                    traversed += "/\(seg)"
+                    
+                }
             }
-           
         }
         return current
     }
-    
-  
     
     private mutating func resolveRefInternal(
         
