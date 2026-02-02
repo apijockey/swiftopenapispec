@@ -29,7 +29,7 @@ public struct OpenAPIEncoding : KeyedElement, PointerNavigable {
     public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
         extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
         self.contentType = map.readIfPresent(Self.CONTENT_TYPE_KEY, valueType: String.self)
-        self.contentType = map.readIfPresent(Self.HEADERS_KEY, valueType : String.self)
+        self.headers = try map.mapListIfPresent(Self.HEADERS_KEY, objectType: OpenAPIHeader.self)
         self.encoding  = try map.mapListIfPresent(Self.ENCODING_KEY, objectType: OpenAPIEncoding.self)
         self.prefixEncoding = try map.mapListIfPresent(Self.PREFIX_ENCODING_KEY,objectType: OpenAPIEncoding.self)
         self.itemEncoding = try map.mapListIfPresent(Self.PREFIX_ENCODING_KEY,objectType: OpenAPIEncoding.self)
