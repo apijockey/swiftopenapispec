@@ -81,6 +81,11 @@ public struct JSONPointerResolver : JSONPointerResolving {
             .replacingOccurrences(of: "~1", with: "/")
             .replacingOccurrences(of: "~0", with: "~")
     }
+    static func encodePointerSegment(_ segment: String) -> String {
+        segment
+            .replacingOccurrences(of: "/", with: "~1")
+            .replacingOccurrences(of: "~", with: "~0")
+    }
     
     /// Parse a ref string like:
     ///  - "#/components/schemas/X"
@@ -124,12 +129,11 @@ public struct JSONPointerResolver : JSONPointerResolving {
         
         let rawSegments = pointer.dropFirst().split(separator: "/").map(String.init)
         let segments = rawSegments.map(JSONPointerResolver.decodePointerSegment)
-        
+        let decodedPointer = "/".appending(segments.joined(separator: "/"))
         var current: NavigationResult = .navigable(root)
         var traversed = ""
         
         for seg in segments {
-            
             
             switch  current {
             case .navigable(let currentPointerNavigable):
@@ -139,7 +143,7 @@ public struct JSONPointerResolver : JSONPointerResolving {
                 let next = try currentPointerNavigable.element(for: seg)
                
                 if case .reference(let reference) = next {
-                    if traversed.appending("/").appending(seg) == pointer,
+                    if traversed.appending("/").appending(seg) == decodedPointer,
                        seg == "$ref" {
                         return next
                     }

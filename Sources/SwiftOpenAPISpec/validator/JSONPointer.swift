@@ -30,4 +30,9 @@ public enum JSONPointer {
         let t = escape(token)
         return base.isEmpty ? "/\(t)" : "\(base)/\(t)"
     }
+    public static func unescape(_ token: String) -> String {
+        token
+            .replacingOccurrences(of: "~0", with: "~")
+            .replacingOccurrences(of: "~1", with: "/")
+    }
 }
