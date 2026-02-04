@@ -158,12 +158,17 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     ///```
     public static func read(unflattened : StringDictionary, url : String? = nil , documentLoader : DocumentLoadable? = YamsDocumentLoader()) throws -> OpenAPISpecification{
         var diagnostics : [Diagnostic] = []
-        var openapispec = try OpenAPISpecification(load: unflattened, &diagnostics)
-        openapispec.documentLoader = documentLoader
-        if openapispec.key == nil {
-            openapispec.key = url
+        do {
+            var openapispec = try OpenAPISpecification(load: unflattened, &diagnostics)
+            openapispec.documentLoader = documentLoader
+            if openapispec.key == nil {
+                openapispec.key = url
+            }
+            return openapispec
         }
-        return openapispec
+        catch {
+            throw Self.Errors.invalidSpecification(diagnostics.debugDescription, url ?? "")
+        }
     }
     /// Access a specific operation by its operation id
     ///

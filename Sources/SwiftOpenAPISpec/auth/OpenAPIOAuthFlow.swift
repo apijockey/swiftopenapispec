@@ -47,6 +47,14 @@ public struct OpenAPIOAuthFlow : ThrowingHashMapInitiable, PointerNavigable {
         tokenUrl = map.readIfPresent(Self.TOKENURL_KEY, valueType: String.self)
         refreshUrl = map.readIfPresent(Self.REFRESHURL_KEY, valueType: String.self)
         scopes = map.readIfPresent(Self.SCOPES_KEY,valueType:  [String:String].self)
+        if case let .object(scopes) = map[Self.SCOPES_KEY] {
+            self.scopes = [String:String]()
+            for scope in scopes {
+                if case let .string(value) = scope.value {
+                    self.scopes?[scope.key] = value
+                }
+            }
+        }
     }
     
     public func element(for segmentName: String) throws -> NavigationResult {

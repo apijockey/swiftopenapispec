@@ -60,7 +60,7 @@ public actor YamsDocumentLoader : DocumentLoadable {
     }
    
     public func load(from url: URL) async throws -> OpenAPISpecification {
-     
+     var diagnostics = [Diagnostic]()
            
             do {
                 let data = try Data(contentsOf: url)
@@ -68,7 +68,7 @@ public actor YamsDocumentLoader : DocumentLoadable {
                       let map = try Yams.load(yaml: string)  else  {
                     throw Self.Errors.notUTF8(url.absoluteString)
                 }
-                let jsonValue = try JSONValue(from: map)
+                let jsonValue = try JSONValue(from: map,diagnostics:  &diagnostics)
                 guard case let .object(yaml) = jsonValue else {
                     throw Self.Errors.notAnObject(url.absoluteString)
                     
@@ -77,7 +77,7 @@ public actor YamsDocumentLoader : DocumentLoadable {
                 return apiSpec
                 
             } catch {
-                throw Self.Errors.unreadable(url.absoluteString, error)
+                throw Self.Errors.unreadable(diagnostics.debugDescription, error)
             }
     }
 }

@@ -165,9 +165,7 @@ extension StringDictionary {
             for element in objectMap {
                 let value = element.value
                 if case let .object(valueMap) = value {
-                    if element.key == "EventEnvelope" {
-                        print("WAIT")
-                    }
+                    
                     var type = try T.initialize(load:  valueMap, diagnostics: diagnostics).value
                     if type.key == nil {
                         type.key = element.key

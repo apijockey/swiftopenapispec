@@ -79,7 +79,7 @@ public extension JSONValue {
         case Optional<Any>.none:
             self = .null
         default:
-            throw Self.Errors.notConvertible(diagnostics)
+            self = .null
         }
     }
     init(string : String?) {

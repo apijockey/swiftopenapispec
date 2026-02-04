@@ -74,7 +74,7 @@ public struct OpenAPIParameter :  KeyedElement,  PointerNavigable {
         extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
         self.location = ParameterLocation(rawValue: location)
       
-        self.key = map.readIfPresent(Self.NAME_KEY, valueType: String.self)
+        self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self)
         let required = map.readIfPresent(Self.REQUIRED_KEY,valueType: Bool.self)
         self.required = required ?? false
         self.schema = try map.readIfPresent(Self.SCHEMA_KEY, objectType: OpenAPISchema.self)
@@ -129,6 +129,7 @@ public struct OpenAPIParameter :  KeyedElement,  PointerNavigable {
         }
     }
     public var key: String?
+    public var name: String?
     public var ref : OpenAPISchemaReference? = nil
     public var location : ParameterLocation?
     public var required : Bool? 

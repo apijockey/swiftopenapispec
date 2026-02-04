@@ -403,12 +403,12 @@ struct OpenAPILegacyPortedTests {
         #expect(addressLink.operationId == "getUserAddress")
         #expect(addressLink.parameters.count == 1)
         let parameter = addressLink.parameters.first { $0.key  == "userId" }
-        #expect(parameter?.key == "$request.path.id")
+        #expect(parameter?.value == "$request.path.id")
         let userRepositoriesLink = try #require(links.first { $0.key == "UserRepositories" })
         #expect(userRepositoriesLink.operationRef == "#/paths/~12.0~1repositories~1{username}/get")
         #expect(userRepositoriesLink.parameters.count == 1)
         let repParameter = userRepositoriesLink.parameters.first { $0.key == "username" }
-        #expect(repParameter?.key == "$response.body#/username")
+        #expect(repParameter?.value == "$response.body#/username")
         #expect(userRepositoriesLink.requestBody == "$response.body#/username")
     }
 

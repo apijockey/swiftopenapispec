@@ -26,13 +26,13 @@ public struct OpenAPIExample : KeyedElement, RefPointerNavigable {
     public static let EXTERNAL_VALUE_KEY = "externalValue"
     public static let SERIALIZED_VALUE_KEY = "serializedValue"
     public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
-        if let ref  =  try map.readIfPresent(OpenAPISchemaReference.REF_KEY, objectType: OpenAPISchemaReference.self) {
-            self.ref = ref
-            return
+        if case let .string(refKey) = map[OpenAPISchemaReference.REF_KEY]{
+            self.ref = OpenAPISchemaReference(ref: refKey)
         }
+        
         self.summary = map.readIfPresent(Self.SUMMARY_KEY, valueType: String.self)
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self)
-        self.value = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self)
+        self.value = map[Self.VALUE_KEY]
         self.externalValue = map.readIfPresent(Self.EXTERNAL_VALUE_KEY, valueType: String.self)
 
         self.serializedValue = map.readIfPresent(Self.SERIALIZED_VALUE_KEY,valueType: String.self)
@@ -42,7 +42,7 @@ public struct OpenAPIExample : KeyedElement, RefPointerNavigable {
         switch segmentName {
         case Self.SUMMARY_KEY: return .value(JSONValue(self.summary))
         case Self.DESCRIPTION_KEY: return .value(JSONValue(self.description))
-        case Self.VALUE_KEY: return .value(JSONValue(self.value))
+        case Self.VALUE_KEY: return .value(self.value)
         case Self.EXTERNAL_VALUE_KEY: return .value(JSONValue(self.externalValue))
         case OpenAPISchemaReference.REF_KEY: return .reference(ref?.reference)
         default:
@@ -52,7 +52,7 @@ public struct OpenAPIExample : KeyedElement, RefPointerNavigable {
     public var key : String?
     public var summary : String? = nil
     public var description : String? = nil
-    public var value : String? = nil
+    public var value : JSONValue? = nil
     public var dataValue :Data? = nil
     public var serializedValue : String?
     public var externalValue : String? = nil
