@@ -69,8 +69,12 @@ public struct OpenAPISecurityScheme : KeyedElement , PointerNavigable {
    
     public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
        
+        
+        if case let .string(refKey) = map[OpenAPISchemaReference.REF_KEY]{
+                    self.ref = OpenAPISchemaReference(ref: refKey)
+            return
+        }
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self)
-        self.ref =  try map.readIfPresent(OpenAPISchemaReference.REF_KEY, objectType: OpenAPISchemaReference.self)
         if let securityRawType = map.readIfPresent(Self.TYPE_KEY, valueType: String.self),
            let securityType =  SecurityType(rawValue: securityRawType) {
             self.securityType = securityType

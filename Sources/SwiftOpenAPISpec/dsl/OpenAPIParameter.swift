@@ -52,8 +52,8 @@ public struct OpenAPIParameter :  KeyedElement,  PointerNavigable {
     public static let CONTENT_KEY = "content"
     public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
         
-        if let ref  =  try map.readIfPresent(OpenAPISchemaReference.REF_KEY, objectType: OpenAPISchemaReference.self){
-            self.ref = ref
+        if case let .string(refKey) = map[OpenAPISchemaReference.REF_KEY]{
+                    self.ref = OpenAPISchemaReference(ref: refKey)
             return
         }
         guard let location = map.readIfPresent(Self.IN_KEY,valueType:String.self)  else {

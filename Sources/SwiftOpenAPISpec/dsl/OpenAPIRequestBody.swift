@@ -26,7 +26,10 @@ public struct OpenAPIRequestBody : KeyedElement , PointerNavigable {
     public static let CONTENTS_KEY = "content"
     public  init(load map: StringDictionary,_ diagnostics: inout [Diagnostic])  throws {
         
-        self.ref =  try map.readIfPresent(OpenAPISchemaReference.REF_KEY, objectType: OpenAPISchemaReference.self)
+        if case let .string(refKey) = map[OpenAPISchemaReference.REF_KEY]{
+                    self.ref = OpenAPISchemaReference(ref: refKey)
+            return
+        }
         self.contents = try map.mapListIfPresent(Self.CONTENTS_KEY, objectType: OpenAPIMediaType.self)
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self)
         

@@ -270,7 +270,7 @@ public struct SchemaRefCollector {
         }
         if let items = obj.items {
             for (idx, item) in (items.enumerated()) {
-                let itemPtr = JSONPointer.join(JSONPointer.join(pointer, "allOf"), "\(idx)")
+                let itemPtr = JSONPointer.join(pointer, "\(idx)")
                 out.append(contentsOf: collect(from: item, pointer: itemPtr))
             }
         }
@@ -288,7 +288,7 @@ public struct SchemaRefCollector {
         }
         if let items = obj.items {
             for (idx, item) in (items.enumerated()) {
-                let itemPtr = JSONPointer.join(JSONPointer.join(pointer, "allOf"), "\(idx)")
+                let itemPtr = JSONPointer.join(pointer, "\(idx)")
                 out.append(contentsOf: collect(from: item, pointer: itemPtr))
             }
         }
@@ -306,7 +306,7 @@ public struct SchemaRefCollector {
         }
         if let items = obj.items {
             for (idx, item) in (items.enumerated()) {
-                let itemPtr = JSONPointer.join(JSONPointer.join(pointer, "allOf"), "\(idx)")
+                let itemPtr = JSONPointer.join(pointer, "\(idx)")
                 out.append(contentsOf: collect(from: item, pointer: itemPtr))
             }
         }
@@ -338,7 +338,7 @@ public struct SchemaRefCollector {
         case .allOf(let openAPIAllOfType):
             out.append(contentsOf: collect(from: openAPIAllOfType, pointer: JSONPointer.join(pointer, "allOf")))
         case .anyOf(let openAPIAnyOfType):
-            out.append(contentsOf: collect(from: openAPIAnyOfType, pointer: JSONPointer.join(pointer, "allOf")))
+            out.append(contentsOf: collect(from: openAPIAnyOfType, pointer: JSONPointer.join(pointer, "anyOf")))
         case .array(let openAPIArrayType):
             out.append(contentsOf: collect(from: openAPIArrayType, pointer: JSONPointer.join(pointer, "array")))
         case .bool:
@@ -350,7 +350,7 @@ public struct SchemaRefCollector {
         case .object(let openAPIObjectType):
             out.append(contentsOf: collect(from: openAPIObjectType, pointer: pointer))
         case .oneOf(let openAPIOneOfType):
-            out.append(contentsOf: collect(from: openAPIOneOfType, pointer: JSONPointer.join(pointer, "array")))
+            out.append(contentsOf: collect(from: openAPIOneOfType, pointer: JSONPointer.join(pointer, "oneOf")))
         case .string:
             return out
         case .ref(let openAPISchemaReference):
@@ -363,6 +363,8 @@ public struct SchemaRefCollector {
         case .null:
             return []
         case .none:
+            return []
+        case .some(.unknown(_)):
             return []
         }
         return out

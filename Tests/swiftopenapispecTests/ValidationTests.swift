@@ -295,7 +295,7 @@ struct ValidationTests {
        
         let diags = try await Validator.validateRefs(spec: spec, baseURI: resourceUrl.absoluteString, ctx: ctx, resolver: &resolver)
         print(diags)
-        #expect(diags.count == 5)
+        #expect(diags.count == 7)
         
         
         
@@ -324,7 +324,7 @@ struct ValidationTests {
       
        let diags = try await Validator.validateRefs(spec: spec, baseURI: resourceUrl.absoluteString, ctx: ctx, resolver: &resolver)
      
-       #expect(diags.count == 5)
+       #expect(diags.count == 7)
        for diag in diags {
            print("\(diag.pointer) - \(diag.message)")
        }

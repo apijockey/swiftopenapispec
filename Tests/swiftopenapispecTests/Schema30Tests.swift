@@ -184,8 +184,8 @@ struct Schema30ValidationTests {
     }
     @Test("Schema rules for 3.0 hit",arguments: [
         "05-response-invalidType",
-        //"05-response-invalidPropertyType"
-        //"10-schematests-wrongformat"
+        "05-response-invalidPropertyType",
+        "10-schematests-wrongformat"
     ])
     func schemaRulesHit(resource : String) async throws {
     let subDirectory = "Resources/3_0/invalid"

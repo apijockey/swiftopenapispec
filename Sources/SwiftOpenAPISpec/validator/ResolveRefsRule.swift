@@ -42,12 +42,13 @@ public struct ResolveRefsRule {
             do {
                 let resolved = try await resolver.resolve(ref: ref)
 
-                if occ.expected == .schemaObject, (resolved as? PointerNavigable) == nil {
+                if occ.expected == .schemaObject,
+                   case .notFound = resolved  {
                     diags.append(.init(
                         severity: .error,
                         code: .invalidRefTargetType,
-                        message: "Resolved $ref does not point to a schema-like object.",
-                        pointer: occ.refString,
+                        message: "Resolved $ref '\(occ.refString)' does not point to a schema-like object.",
+                        pointer: occ.pointerToDollarRef,
                         rule: name
                     ))
                 }

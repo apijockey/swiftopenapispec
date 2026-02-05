@@ -50,10 +50,10 @@ public struct OpenAPIMediaType :  KeyedElement , PointerNavigable {
     public static let EXTENSIONS_KEY = "extensions"
     public var key : String?
     public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
-            if let ref  =  try map.readIfPresent(OpenAPISchemaReference.REF_KEY, objectType: OpenAPISchemaReference.self) {
-                self.ref = ref
-                return
-            }
+        if case let .string(refKey) = map[OpenAPISchemaReference.REF_KEY]{
+                    self.ref = OpenAPISchemaReference(ref: refKey)
+            return
+        }
         self.schema = try map.readIfPresent(Self.SCHEMA_KEY, objectType: OpenAPISchema.self)
         self.examples = try map.mapListIfPresent(Self.EXAMPLES_KEY, objectType: OpenAPIExample.self)
         self.encoding =  try map.mapListIfPresent(Self.ENCODING_KEY, objectType: OpenAPIEncoding.self)

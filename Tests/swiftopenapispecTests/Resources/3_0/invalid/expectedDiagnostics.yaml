@@ -79,7 +79,7 @@ cases:
         pointer: "/"
         rule: "OAS.OperationMustHaveResponses"
         severity: "error"
-        messageContains: "Operation must define at least one response."
+        messageContains: "The Responses Object MUST contain at least one response code, and it SHOULD be the response for a successful operation call"
   - fixture: "03-minimal-30-invalidHTTPStatus"
     shouldPass: false
     expected:
@@ -103,7 +103,7 @@ cases:
         pointer: "/paths/~1create/operations/responses/201/content/application~1json/schema/type"
         rule: "Schema.SupportedTypes"
         severity: "error"
-        messageContains: "unknown type 'double'"
+        messageContains: "type 'double' not supported or not recognized in OpenAPI 3.0"
   - fixture: "05-response-invalidPropertyType"
     shouldPass: false
     expected:

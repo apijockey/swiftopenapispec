@@ -35,8 +35,8 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
     public static let STYLE_KEY = "style"
    
     public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
-        if let ref  =  try map.readIfPresent(OpenAPISchemaReference.REF_KEY, objectType: OpenAPISchemaReference.self) {
-            self.ref = ref
+        if case let .string(refKey) = map[OpenAPISchemaReference.REF_KEY]{
+                    self.ref = OpenAPISchemaReference(ref: refKey)
             return
         }
         

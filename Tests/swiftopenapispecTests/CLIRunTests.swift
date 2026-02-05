@@ -88,11 +88,10 @@ struct CLIRunTests {
         let app = SwiftOpenAPICLIApp()
         let code = await app.run(args: ["SwiftOpenAPICLI", url.path, "--validate"], stdout: &out, stderr: &err)
 
-        #expect(code == 0)
-        let errString = try #require((err as? StringTextOutputStream)?.string)
+        #expect(code == 1)
+       
         let outString = try #require((out as? StringTextOutputStream)?.string)
-        #expect(errString.isEmpty)
-        #expect(outString.contains("Validation: OK"))
+        #expect(outString.contains("The Responses Object MUST contain at least one response code, and it SHOULD be the response for a successful operation call."))
     }
 
     @Test("CLI with invalid option returns error")

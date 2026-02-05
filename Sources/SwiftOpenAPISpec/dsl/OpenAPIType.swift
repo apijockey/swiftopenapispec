@@ -19,6 +19,7 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
     case string
     case ref(OpenAPISchemaReference)
     case null
+    case unknown(String)
     
     static let NULLABLE_KEY = "nullable"
     public static let TYPE_KEY = "type"
@@ -102,7 +103,7 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
                 rule: "Initialization.OpenAPIType"
             )
             diagnostics.append(diagnostic)
-            self = .null
+            self = .unknown(type ?? "")
         }
     }
     
@@ -129,6 +130,8 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
         case .ref(let openAPISchemaReference):
             return openAPISchemaReference
         case .null:
+            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIType", segmentName)
+        case .unknown(_):
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIType", segmentName)
         }
     }

@@ -49,8 +49,8 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
     /// - Parameter map: Swift dictionary with a Path key and  value elements representing HTTP methods like **GET**, **POST** and **PUT**
     public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
         // one resource may foresee several httpOperations
-        if let ref  =  try map.readIfPresent(OpenAPISchemaReference.REF_KEY, objectType: OpenAPISchemaReference.self) {
-            self.ref = ref
+        if case let .string(refKey) = map[OpenAPISchemaReference.REF_KEY]{
+                    self.ref = OpenAPISchemaReference(ref: refKey)
             return
         }
         //hier selektier ich alle Path-Sub-Elemente nicht nur die Get...

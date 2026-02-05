@@ -373,11 +373,12 @@ struct OperationMustHaveResponsesRule: Rule {
 
         for pathItem in spec.paths {
             for op in pathItem.operations {
+                print((pathItem.key ?? "").appending(op.key ?? "").appending(String(op.responses.count)))
                 guard op.responses.count > 0 else {
                     let diagnotics = Diagnostic( severity: .error,
                                                  code: .missingResponses,
-                                                 message: "Operation must define at least one response.",
-                                                 pointer: JSONPointer.join(pathItem.key ?? "", "responses"),
+                                                 message: "The Responses Object MUST contain at least one response code, and it SHOULD be the response for a successful operation call.",
+                                                 pointer: JSONPointer.join("/paths",JSONPointer.join(pathItem.key ?? "", "responses")),
                                                  rule: name)
                     diags.append(diagnotics)
                     break

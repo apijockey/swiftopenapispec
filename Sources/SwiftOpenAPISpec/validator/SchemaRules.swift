@@ -35,7 +35,7 @@ public struct SchemaRuleRunner  : Sendable{
     public func run(schema: OpenAPISchema, pointer: String,resolver: inout JSONPointerResolver) async throws -> [Diagnostic] {
         if let type =  schema.type {
             var out: [Diagnostic] = []
-            out.append(contentsOf: rules.flatMap { $0.check(schema: schema, ctx: ctx, pointer: JSONPointer.join(pointer,"type")) })
+            out.append(contentsOf: rules.flatMap { $0.check(schema: schema, ctx: ctx, pointer: pointer) })
             
             // Recurse into schemaType (if no $ref on wrapper)
             
@@ -43,7 +43,7 @@ public struct SchemaRuleRunner  : Sendable{
                     for prop in obj.properties {
                         if let key = prop.key{
                             let p = JSONPointer.join(JSONPointer.join(pointer, "properties"), key)
-                            try await out.append(contentsOf: run(schema: schema , pointer: p,resolver: &resolver))
+                            try await out.append(contentsOf: run(schema: prop , pointer: p,resolver: &resolver))
                         }
                         
                     }
@@ -227,7 +227,13 @@ public struct OAS30SupportedTypeRule: SchemaRule {
         }
         else if case .null = schema.type {
             return [.init(severity: .error, code: .invalidType,
-                          message: "Null type not supported in OpenAPI 3.0 (switch to nullable)",
+                          message: "'null' type not supported in OpenAPI 3.0 (switch to nullable)",
+                          pointer: "\(pointer)/type",
+                          rule: "Schema.SupportedTypes")]
+        }
+        else if case .unknown(let type) = schema.type {
+            return [.init(severity: .error, code: .invalidType,
+                          message: "type '\(type)' not supported or not recognized in OpenAPI 3.0",
                           pointer: "\(pointer)/type",
                           rule: "Schema.SupportedTypes")]
         }
