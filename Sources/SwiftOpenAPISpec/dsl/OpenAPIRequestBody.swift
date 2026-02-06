@@ -24,13 +24,13 @@ public struct OpenAPIRequestBody : KeyedElement , PointerNavigable {
     public static let DESCRIPTION_KEY = "description"
     public static let REQUIRED_KEY = "required"
     public static let CONTENTS_KEY = "content"
-    public  init(load map: StringDictionary,_ diagnostics: inout [Diagnostic])  throws {
+    public  init(load map: StringDictionary,diagnostics: inout [Diagnostic])  throws {
         
         if case let .string(refKey) = map[OpenAPISchemaReference.REF_KEY]{
                     self.ref = OpenAPISchemaReference(ref: refKey)
             return
         }
-        self.contents = try map.mapListIfPresent(Self.CONTENTS_KEY, objectType: OpenAPIMediaType.self)
+        self.contents = try map.mapListIfPresent(Self.CONTENTS_KEY, objectType: OpenAPIMediaType.self, diagnostics: &diagnostics)
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self)
         
         self.required = map.readIfPresent(Self.REQUIRED_KEY, valueType: Bool.self) ?? false

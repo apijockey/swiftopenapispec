@@ -22,7 +22,7 @@ struct SupportedVersion3: Rule {
     let name = "OAS.UnsupportedVersion3"
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         guard  let version = spec.version,
-              ["3.0.0","3.0.1","3.0.2","3.0.3","3.0.4"].contains(version) else {
+               ["3.0.0","3.0.1","3.0.2","3.0.3","3.0.4", "3.1.0", "3.1.1","3.1.2", "3.2.0"].contains(version) else {
             return [.init(severity: .error,
                           code: .invalidValue,
                           message: "unsupported Version'\(spec.version ?? "") '",

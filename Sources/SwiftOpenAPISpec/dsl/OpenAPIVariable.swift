@@ -26,7 +26,7 @@ public struct OpenAPIVariable : KeyedElement , PointerNavigable {
     public var key: String?
   
 
-    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+    public init(load map: StringDictionary, diagnostics: inout [Diagnostic]) throws {
         self.enumList = map.readListIfPresent(Self.ENUM_KEY, valueType: String.self)
         self.defaultValue = map.readIfPresent(Self.DEFAULT_KEY,  valueType: String.self)
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self)

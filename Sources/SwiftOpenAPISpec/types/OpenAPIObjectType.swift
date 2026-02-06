@@ -91,9 +91,9 @@ public struct OpenAPIObjectType : OpenAPISchemaType,ThrowingHashMapInitiable, Po
     public static let MIN_PROPERTIES_KEY = "minProperties"
     public static let UNEVALUATEDPROPERTIES_KEY = "unevaluatedProperties"
     public static let REQUIRED_KEY = "required"
-    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+    public init(load map: StringDictionary, diagnostics: inout [Diagnostic]) throws {
         self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self)
-        self.properties = try map.mapListIfPresent(Self.PROPERTIES_KEY, objectType: OpenAPISchema.self)
+        self.properties = try map.mapListIfPresent(Self.PROPERTIES_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics)
         
         self.required = map.readListIfPresent(Self.REQUIRED_KEY, valueType: String.self) ?? []
         self.minProperties = map.readIfPresent(Self.MIN_PROPERTIES_KEY, valueType: Int.self)

@@ -47,32 +47,44 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
     /// "/ping"
     /// inits an instance of ``OpenAPIPath``
     /// - Parameter map: Swift dictionary with a Path key and  value elements representing HTTP methods like **GET**, **POST** and **PUT**
-    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+    public init(load map: StringDictionary,diagnostics: inout [Diagnostic]) throws {
         // one resource may foresee several httpOperations
         if case let .string(refKey) = map[OpenAPISchemaReference.REF_KEY]{
                     self.ref = OpenAPISchemaReference(ref: refKey)
             return
         }
-        //hier selektier ich alle Path-Sub-Elemente nicht nur die Get...
+        
         
         for (key, httpOperation) in map {
             if Self.Operations(rawValue: key) != nil,
                case let .object(dictionary) = httpOperation {
                 
-                var operation = try OpenAPIOperation(load: dictionary, &diagnostics)
+                var operation = try OpenAPIOperation(load: dictionary, diagnostics: &diagnostics)
                 operation.key = key
                 self.operations.append(operation)
             }
-            
+            else {
+                if key != Self.SUMMARY_KEY,
+                   key != Self.DESCRIPTION_KEY,
+                   key != OpenAPISchemaReference.REF_KEY,
+                   key != Self.SERVERS_KEY,
+                   key != Self.PARAMETERS_KEY,
+                   !key.starts(with: "x-") {
+                    let description = "Key \(key) in PathItem is not a valid HTTP method or a valid Path element"
+                    let diagnostic = Diagnostic(severity:  .error, code: .invalidValue , message: description, pointer: "", rule: "OAS.SupportedHTTPMethodRule")
+                    diagnostics.append(diagnostic)
+                }
+            }
+        
         }
        
         self.summary  = map.readIfPresent(Self.SUMMARY_KEY, valueType: String.self)
         self.description  = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self)
-        let servers = try map.mapListIfPresent(OpenAPISpecification.SERVERS_KEY, objectType: OpenAPIServer.self)
+        let servers = try map.mapListIfPresent(OpenAPISpecification.SERVERS_KEY, objectType: OpenAPIServer.self, diagnostics: &diagnostics)
         if servers.count > 0 {
             self.servers = servers
         }
-        let parameters = try map.mapListIfPresent(Self.PARAMETERS_KEY, objectType: OpenAPIParameter.self)
+        let parameters = try map.mapListIfPresent(Self.PARAMETERS_KEY, objectType: OpenAPIParameter.self, diagnostics: &diagnostics)
         if parameters.count > 0 {
             self.parameters = parameters
         }

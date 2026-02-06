@@ -50,7 +50,7 @@ public struct OpenAPIParameter :  KeyedElement,  PointerNavigable {
     public static let EXAMPLE_KEY = "example"
     public static let EXAMPLES_KEY = "examples"
     public static let CONTENT_KEY = "content"
-    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+    public init(load map: StringDictionary,diagnostics: inout [Diagnostic]) throws {
         
         if case let .string(refKey) = map[OpenAPISchemaReference.REF_KEY]{
                     self.ref = OpenAPISchemaReference(ref: refKey)
@@ -70,14 +70,14 @@ public struct OpenAPIParameter :  KeyedElement,  PointerNavigable {
         self.example = map.readIfPresent(Self.EXAMPLE_KEY, valueType: JSONValue.self)
         self.format = map.readIfPresent(Self.FORMAT_KEY, valueType: String.self)
         
-        self.examples  = try map.mapListIfPresent(Self.EXAMPLES_KEY,objectType: OpenAPIExample.self)
+        self.examples  = try map.mapListIfPresent(Self.EXAMPLES_KEY,objectType: OpenAPIExample.self, diagnostics: &diagnostics)
         extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
         self.location = ParameterLocation(rawValue: location)
       
         self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self)
         let required = map.readIfPresent(Self.REQUIRED_KEY,valueType: Bool.self)
         self.required = required ?? false
-        self.schema = try map.readIfPresent(Self.SCHEMA_KEY, objectType: OpenAPISchema.self)
+        self.schema = try map.readIfPresent(Self.SCHEMA_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics)
         if let style = map.readIfPresent(Self.STYLE_KEY, valueType: String.self) {
             self.style = ParameterStyle(rawValue: style)
         }

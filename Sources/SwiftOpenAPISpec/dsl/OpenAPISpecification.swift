@@ -56,7 +56,8 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     /// initializes an OpenAPISpecification
     /// - Parameter unmerged: ``StringDictionary``
     /// public init(load map: StringDictionary throws {
-    public init(load unmerged: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+    public init(load unmerged: StringDictionary,diagnostics: inout [Diagnostic]) throws {
+        self.diagnostics = diagnostics
         guard let dictionary  =  resolveMergeKeys(in: unmerged) as? StringDictionary else {
             throw OpenAPISpecification.Errors.invalidYaml("mergeKeys failed")
         
@@ -64,21 +65,21 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
        
         
         self.version = dictionary.readIfPresent(OpenAPISpecification.OPENAPI_KEY, valueType: String.self)
-        self.info = try dictionary.readIfPresent(OpenAPISpecification.INFO_KEY, objectType: OpenAPIInfo.self)
-        self.components = try dictionary.readIfPresent(OpenAPISpecification.COMPONENTS_KEY, objectType: OpenAPIComponent.self)
+        self.info = try dictionary.readIfPresent(OpenAPISpecification.INFO_KEY, objectType: OpenAPIInfo.self, diagnostics: &diagnostics)
+        self.components = try dictionary.readIfPresent(OpenAPISpecification.COMPONENTS_KEY, objectType: OpenAPIComponent.self, diagnostics: &diagnostics)
         self.selfUrl =  dictionary.readIfPresent(OpenAPISpecification.SELF_URL_KEY, valueType: String.self)
         self.key = selfUrl
-        self.tags = try dictionary.mapListIfPresent(OpenAPISpecification.TAGS_KEY, objectType: OpenAPITag.self)
-        self.externalDocumentation = try dictionary.readIfPresent(OpenAPISpecification.EXTERNAL_DOCS_KEY,objectType: OpenAPIExternalDocumentation.self)
+        self.tags = try dictionary.mapListIfPresent(OpenAPISpecification.TAGS_KEY, objectType: OpenAPITag.self, diagnostics: &diagnostics)
+        self.externalDocumentation = try dictionary.readIfPresent(OpenAPISpecification.EXTERNAL_DOCS_KEY,objectType: OpenAPIExternalDocumentation.self, diagnostics: &diagnostics)
         self.jsonSchemaDialect = dictionary.readIfPresent(OpenAPISpecification.JSON_SCHEMA_DIALECT_KEY, valueType: String.self)
-        let servers =  try dictionary.mapListIfPresent(OpenAPISpecification.SERVERS_KEY, objectType: OpenAPIServer.self)
+        let servers =  try dictionary.mapListIfPresent(OpenAPISpecification.SERVERS_KEY, objectType: OpenAPIServer.self, diagnostics: &diagnostics)
         if servers.count > 0 {
             self.servers = servers
             
         }
-        self.paths   =  try dictionary.mapListIfPresent(OpenAPISpecification.PATHS_KEY, objectType: OpenAPIPathItem.self)
-        self.webhooks = try dictionary.mapListIfPresent(OpenAPISpecification.WEBHOOKS_KEY, objectType: OpenAPIPathItem.self)
-        self.securityObjects = try dictionary.mapListIfPresent(Self.SECURITY_KEY, objectType: OpenAPISecuritySchemeReference.self)
+        self.paths   =  try dictionary.mapListIfPresent(OpenAPISpecification.PATHS_KEY, objectType: OpenAPIPathItem.self, diagnostics: &diagnostics)
+        self.webhooks = try dictionary.mapListIfPresent(OpenAPISpecification.WEBHOOKS_KEY, objectType: OpenAPIPathItem.self, diagnostics: &diagnostics)
+        self.securityObjects = try dictionary.mapListIfPresent(Self.SECURITY_KEY, objectType: OpenAPISecuritySchemeReference.self, diagnostics: &diagnostics)
         
         
         self.extensions = try OpenAPIExtension.extensionElements(dictionary, &diagnostics)
@@ -157,13 +158,14 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     ///let specFromYaml = try OpenAPISpecification.read(unflattened: jsonMap)
     ///```
     public static func read(unflattened : StringDictionary, url : String? = nil , documentLoader : DocumentLoadable? = YamsDocumentLoader()) throws -> OpenAPISpecification{
-        var diagnostics : [Diagnostic] = []
+        var diagnostics: [Diagnostic] = []
         do {
-            var openapispec = try OpenAPISpecification(load: unflattened, &diagnostics)
+            var openapispec = try OpenAPISpecification(load: unflattened, diagnostics: &diagnostics)
             openapispec.documentLoader = documentLoader
             if openapispec.key == nil {
                 openapispec.key = url
             }
+            openapispec.diagnostics = diagnostics
             return openapispec
         }
         catch {
@@ -540,6 +542,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     public static let SELF_URL_KEY = "$self"
     public static let WEBHOOKS_KEY = "webhooks"
     public var version : String? = "3.2.0"
+    public var diagnostics: [Diagnostic] = []
     public var selfUrl : String?
   
     public var jsonSchemaDialect : String?

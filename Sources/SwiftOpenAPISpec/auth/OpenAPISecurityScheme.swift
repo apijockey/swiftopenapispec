@@ -67,7 +67,7 @@ public struct OpenAPISecurityScheme : KeyedElement , PointerNavigable {
         }
     }
    
-    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+    public init(load map: StringDictionary, diagnostics: inout [Diagnostic]) throws {
        
         
         if case let .string(refKey) = map[OpenAPISchemaReference.REF_KEY]{
@@ -89,7 +89,7 @@ public struct OpenAPISecurityScheme : KeyedElement , PointerNavigable {
                 self.httpScheme = map.readIfPresent(Self.SCHEME_KEY,valueType:  String.self)
                 self.httpBearerFormat = map.readIfPresent(Self.BEARER_FORMAT_KEY, valueType: String.self)
             case .oauth2:
-                self.flows = try map.readIfPresent(Self.FLOWS_KEY, objectType: OpenAPIOAuthFlows.self) 
+                self.flows = try map.readIfPresent(Self.FLOWS_KEY, objectType: OpenAPIOAuthFlows.self, diagnostics: &diagnostics)
                 self.oauth2MetadataURL = map.readIfPresent(Self.OAUTH2_METADATA_URL_KEY, valueType: String.self)
             case .openIdConnect:
                 self.openIdConnectURL = map.readIfPresent(Self.OPENID_CONNECT_URL_KEY, valueType: String.self)

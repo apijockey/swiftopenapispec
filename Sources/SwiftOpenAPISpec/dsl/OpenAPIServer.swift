@@ -47,11 +47,11 @@ public struct OpenAPIServer : KeyedElement, PointerNavigable {
     public init(url:String){
         self.url = url
     }
-    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+    public init(load map: StringDictionary, diagnostics: inout [Diagnostic]) throws {
         self.url = map.readIfPresent(Self.URL_KEY, valueType: String.self)
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType:  String.self)
         self.key = map.readIfPresent(Self.NAME_KEY, valueType: String.self)
-        self.variables = try map.mapListIfPresent(Self.VARIABLES_KEY,objectType : OpenAPIVariable.self)
+        self.variables = try map.mapListIfPresent(Self.VARIABLES_KEY,objectType : OpenAPIVariable.self, diagnostics: &diagnostics)
         extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
     }
    

@@ -27,7 +27,7 @@ public struct RuleRunner  : Sendable{
     }
     public static let defaultRuleRunner : RuleRunner =  { ()
         let rules: [Rule] = [
-            //SupportedVersion3(),
+            SupportedVersion3(),
             RequiredOpenAPIFixedFieldsRule(),
             RequiredOpenAPIFixedInfoFieldsRule(),
             RequiredPathsRule(),

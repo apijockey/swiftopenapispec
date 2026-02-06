@@ -111,7 +111,7 @@ cases:
         pointer: "/paths/~1create/operations/responses/201/content/application~1json/schema/properties/id/type"
         rule: "Schema.SupportedTypes"
         severity: "error"
-        messageContains: "unknown type 'double'"
+        messageContains: "type 'double' not supported or not recognized in OpenAPI 3.0"
   - fixture: "06-refcomponentNotResolvable"
     shouldPass: false
     expected:

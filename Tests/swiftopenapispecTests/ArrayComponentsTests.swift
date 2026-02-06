@@ -202,12 +202,12 @@ struct ArrayComponentsTests {
         let comp = try #require(apiSpec[schemacomponent: "ItemsWithoutType"])
         guard case let .array(arrayType) = try #require(comp.type) else {
                 Issue.record(
-                    "Expected .null(let) but got \(comp.type.debugDescription)"
+                    "Expected .array(let) but got \(comp.type.debugDescription)"
             )
             return
         }
         guard let numberType = arrayType.items?.type,
-            case .null = numberType else {
+            case .unknown = numberType else {
             Issue.record(
                 "Expected .number(let) but got \(comp.type.debugDescription)")
             return

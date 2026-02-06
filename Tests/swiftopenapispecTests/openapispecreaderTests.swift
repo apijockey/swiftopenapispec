@@ -133,7 +133,7 @@ struct OpenAPILegacyPortedTests {
         #expect(emojiPathOperation.parameters.count == 0)
         #expect(greetPathOperation.parameters.count == 1)
         let greetPathParameter = try #require(greetPathOperation.parameters.first)
-        #expect(greetPathParameter.key == "name")
+        #expect(greetPathParameter.name == "name")
         #expect(greetPathParameter.required == false)
         #expect(greetPathParameter.location == OpenAPIParameter.ParameterLocation.query)
         #expect(greetPathParameter.description == "The name used in the returned greeting.")

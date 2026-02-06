@@ -32,9 +32,9 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
         self = .null
     }
     
-    public init(load map: StringDictionary, _ diagnostics: inout [Diagnostic]) throws {
+    public init(load map: StringDictionary,  diagnostics: inout [Diagnostic]) throws {
         // Handle $ref first
-        if let reference =  try map.readIfPresent(OpenAPISchemaReference.REF_KEY, objectType: OpenAPISchemaReference.self) {
+        if let reference =  try map.readIfPresent(OpenAPISchemaReference.REF_KEY, objectType: OpenAPISchemaReference.self, diagnostics: &diagnostics) {
             self = .ref(reference)
             return
         }
@@ -55,7 +55,7 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
             self = .array(arrayType)
 
         case .some("object"):
-            let objectType = try OpenAPIObjectType(load: map, &diagnostics)
+            let objectType = try OpenAPIObjectType(load: map, diagnostics: &diagnostics)
             self = .object(objectType)
 
         case .some("boolean"):
@@ -65,7 +65,7 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
             self = .null
         default:
             if map.readIfPresent(OpenAPISchemaReference.REF_KEY, valueType: String.self) != nil{
-                let ref = try OpenAPISchemaReference(load: map, &diagnostics)
+                let ref = try OpenAPISchemaReference(load: map, diagnostics: &diagnostics)
                    self = .ref(ref)
                    return
             }
@@ -74,7 +74,7 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
                 case .array  = oneOfValue  {
                 
                 var localDiagnostics: [Diagnostic] = []
-                let oneOf = try OpenAPIOneOfType(load: map, &localDiagnostics)
+                let oneOf = try OpenAPIOneOfType(load: map, diagnostics: &localDiagnostics)
                 diagnostics.append(contentsOf: localDiagnostics)
                 self = .oneOf(oneOf)
                 return
@@ -89,7 +89,7 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
             }
             if let oneOfValue = map[OpenAPIAllOfType.TYPE_KEY],
                 case .array  = oneOfValue  {
-                let allOf = try OpenAPIAllOfType(load: map, &diagnostics)
+                let allOf = try OpenAPIAllOfType(load: map, diagnostics: &diagnostics)
                 self = .allOf(allOf)
                 return
             }

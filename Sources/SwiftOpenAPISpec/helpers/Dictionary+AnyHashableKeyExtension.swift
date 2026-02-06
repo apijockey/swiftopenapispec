@@ -79,11 +79,11 @@ extension StringDictionary {
         return mapTypes(value: value, valueType: valueType)
     }
     
-    func readIfPresent<V>(_ key : String, objectType : V.Type) throws -> V?  where V : ThrowingHashMapInitiable{
-        var diagnostics: [Diagnostic] = []
+    func readIfPresent<V>(_ key : String, objectType : V.Type, diagnostics : inout [Diagnostic]) throws -> V?  where V : ThrowingHashMapInitiable{
+       
         guard let value = self[key] else { return nil }
         guard case let .object(objectMap) = value else { return nil }
-        return  try  V(load: objectMap,&diagnostics)
+        return  try  V(load: objectMap,diagnostics: &diagnostics)
     }
 //    func readNamedElementIfPresent<V>(_ key : String, objectType : V.Type) throws -> OpenAPINamedElement<V>?  where V : ThrowingHashMapInitiable{
 //        var diagnostics: [Diagnostic] = []
@@ -94,14 +94,14 @@ extension StringDictionary {
 //        return  namedElement
 //    }
     
-    func mapListIfPresent<T>(_ key : String, objectType : T.Type) throws -> [T]  where  T : ThrowingHashMapInitiable{
+    func mapListIfPresent<T>(_ key : String, objectType : T.Type, diagnostics: inout [Diagnostic]) throws -> [T]  where  T : ThrowingHashMapInitiable{
         var elements = [T]()
-        var diagnostics: [Diagnostic] = []
+       
         if case let .object(objectMap)  = self[key]  {
             for element in objectMap {
                 let value = element.value
                 if case let .object(valueMap) = value {
-                    var type = try T.initialize(load:  valueMap, diagnostics: diagnostics).value
+                    var type = try T.initialize(load:  valueMap, diagnostics: &diagnostics).value
                     elements.append(type)
                 }
             }
@@ -109,7 +109,7 @@ extension StringDictionary {
         else if case let .array(array)  = self[key]  {
             for element in array {
                 if case let .object(valueMap) = element {
-                    let element = try T.initialize(load: valueMap, diagnostics: diagnostics).value
+                    let element = try T.initialize(load: valueMap, diagnostics: &diagnostics).value
                     elements.append(element)
                 }
             }
@@ -142,14 +142,14 @@ extension StringDictionary {
 //        }
 //        return elements
 //    }
-    func mapDictionaryfPresent<T>(_ key : String, objectType : T.Type) throws -> [T]  where  T : ThrowingHashMapInitiable{
+    func mapDictionaryfPresent<T>(_ key : String, objectType : T.Type, diagnostics: inout [Diagnostic]) throws -> [T]  where  T : ThrowingHashMapInitiable{
         var elements = [T]()
-        var diagnostics: [Diagnostic] = []
+        
         if case let .object(objectMap)  = self[key]  {
             for element in objectMap {
                 let value = element.value
                 if case let .object(valueMap) = value {
-                    var type = try T.initialize(load:  valueMap, diagnostics: diagnostics).value
+                    var type = try T.initialize(load:  valueMap, diagnostics: &diagnostics).value
                     elements.append(type)
                 }
             }
@@ -157,23 +157,22 @@ extension StringDictionary {
         return elements
     }
     
-    func mapListIfPresent<T>(_ key : String, objectType : T.Type) throws -> [T]  where  T : KeyedElement{
+    func mapListIfPresent<T>(_ key : String, objectType : T.Type , diagnostics: inout [Diagnostic]) throws -> [T]  where  T : KeyedElement{
         var elements = [T]()
-        var diagnostics: [Diagnostic] = []
         if let value = self[key] {
         if case let .object(objectMap)  = value{
             for element in objectMap {
                 let value = element.value
                 if case let .object(valueMap) = value {
                     
-                    var type = try T.initialize(load:  valueMap, diagnostics: diagnostics).value
+                    var type = try T.initialize(load:  valueMap, diagnostics: &diagnostics).value
                     if type.key == nil {
                         type.key = element.key
                     }
                     elements.append(type)
                 }
                 if case .string = value {
-                    var type = try T.initialize(load:  [key:value], diagnostics: diagnostics).value
+                    var type = try T.initialize(load:  [key:value], diagnostics: &diagnostics).value
                     if type.key == nil {
                         type.key = element.key
                     }
@@ -185,7 +184,7 @@ extension StringDictionary {
         if case let .array(arrayList) = value {
             for jsonElement in arrayList {
                 if case let .object(objectElement) = jsonElement {
-                    var type = try T.initialize(load:  objectElement, diagnostics: diagnostics).value
+                    var type = try T.initialize(load:  objectElement, diagnostics: &diagnostics).value
                     if type.key == nil {
                         type.key = objectElement.keys.first
                     }
@@ -206,7 +205,7 @@ extension StringDictionary {
         }
         if case let .object(element)  = value,
            case let .object(elementContent) = element.first?.value{
-            var type = try T.initialize(load: elementContent, diagnostics: diagnostics).value
+            var type = try T.initialize(load: elementContent, diagnostics: &diagnostics).value
             type.key = element.keys.first // the StringDictionary holds one key and the object information in the values
             elements.append(type)
             return elements
@@ -214,7 +213,7 @@ extension StringDictionary {
         if case let .array(list)  = value {
             for element in list {
                 if case let .object(objectElement) = element {
-                    var type = try T.initialize(load: objectElement, diagnostics: diagnostics).value
+                    var type = try T.initialize(load: objectElement, diagnostics: &diagnostics).value
                     if type.key == nil {
                         type.key = objectElement.keys.first
                     }
@@ -232,7 +231,7 @@ extension StringDictionary {
             for element in self {
                 let value = element.value
                 if case let .object(valueMap) = value {
-                    var type = try T.initialize(load: valueMap, diagnostics: diagnostics).value
+                    var type = try T.initialize(load: valueMap, diagnostics: &diagnostics).value
                     
                     elements.append(type)
                 }
@@ -246,7 +245,7 @@ extension StringDictionary {
             for element in self {
                 let value = element.value
                 if case let .object(valueMap) = value {
-                    var type = try T.initialize(load: valueMap, diagnostics: diagnostics).value
+                    var type = try T.initialize(load: valueMap, diagnostics: &diagnostics).value
                     type.key = element.key
                     elements.append(type)
                 }
@@ -254,7 +253,7 @@ extension StringDictionary {
                 else if case .string(let string) = value,
                         string == OpenAPISchemaReference.REF_KEY {
                         let value = element.value
-                        var type = try T.initialize(load: self, diagnostics: diagnostics).value
+                    var type = try T.initialize(load: self, diagnostics: &diagnostics).value
                         type.key = element.key
                         elements.append(type)
                 }

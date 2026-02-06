@@ -73,14 +73,14 @@ public struct InitializationResult<T> {
     public let diagnostics: [Diagnostic]
 }
 public protocol ThrowingHashMapInitiable : Sendable {
-    static func initialize(load map : StringDictionary,diagnostics: [Diagnostic]) throws -> InitializationResult<Self>
-    init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws
+    static func initialize(load map : StringDictionary,diagnostics: inout [Diagnostic]) throws -> InitializationResult<Self>
+    init(load map: StringDictionary, diagnostics: inout [Diagnostic]) throws
 }
 public extension ThrowingHashMapInitiable {
     
-    static func initialize(load map : StringDictionary,diagnostics: [Diagnostic]) throws -> InitializationResult<Self>{
-        var diagnostics = diagnostics
-        let element = try Self(load: map, &diagnostics)
+    static func initialize(load map : StringDictionary,diagnostics:inout [Diagnostic]) throws -> InitializationResult<Self>{
+       
+        let element = try Self(load: map, diagnostics: &diagnostics)
         return InitializationResult(value: element, diagnostics: diagnostics)
     }
     

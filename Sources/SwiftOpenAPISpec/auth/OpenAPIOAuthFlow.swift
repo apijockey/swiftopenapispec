@@ -42,7 +42,7 @@ import Foundation
 public struct OpenAPIOAuthFlow : ThrowingHashMapInitiable, PointerNavigable {
    
    
-    public init(load map: StringDictionary, _ diagnostics: inout [Diagnostic]) throws {
+    public init(load map: StringDictionary,  diagnostics: inout [Diagnostic]) throws {
         authorizationUrl = map.readIfPresent(Self.AUTHORIZATIONURL_KEY,valueType: String.self)
         tokenUrl = map.readIfPresent(Self.TOKENURL_KEY, valueType: String.self)
         refreshUrl = map.readIfPresent(Self.REFRESHURL_KEY, valueType: String.self)

@@ -34,7 +34,7 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
     public static let SCHEMA_KEY = "schema"
     public static let STYLE_KEY = "style"
    
-    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+    public init(load map: StringDictionary, diagnostics: inout [Diagnostic]) throws {
         if case let .string(refKey) = map[OpenAPISchemaReference.REF_KEY]{
                     self.ref = OpenAPISchemaReference(ref: refKey)
             return
@@ -48,13 +48,13 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
         self.allowReserved = map.readIfPresent(Self.ALLOW_RESERVED_KEY,valueType:  Bool.self)
         self.example = map.readIfPresent(Self.EXAMPLE_KEY,valueType:  String.self)
         
-        self.examples  = try map.mapListIfPresent(Self.EXAMPLES_KEY, objectType: OpenAPIExample.self)
-        self.content = try map.readIfPresent(Self.CONTENT_KEY,objectType:  OpenAPIMediaType.self)
+        self.examples  = try map.mapListIfPresent(Self.EXAMPLES_KEY, objectType: OpenAPIExample.self, diagnostics: &diagnostics)
+        self.content = try map.readIfPresent(Self.CONTENT_KEY,objectType:  OpenAPIMediaType.self, diagnostics: &diagnostics)
         extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
      
        
         self.required = map.readIfPresent(Self.REQUIRED_KEY, valueType: Bool.self) ?? false
-        self.schema = try map.readIfPresent(Self.SCHEMA_KEY, objectType: OpenAPISchema.self)
+        self.schema = try map.readIfPresent(Self.SCHEMA_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics)
        
         self.style = map.readIfPresent(Self.STYLE_KEY, valueType: String.self)
        

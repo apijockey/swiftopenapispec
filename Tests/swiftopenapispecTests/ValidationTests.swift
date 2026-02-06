@@ -228,7 +228,6 @@ struct ValidationTests {
                 ("02-minimal-30-missingInfoVersion","OAS.RequiredOpenAPIFixedInfoFields"),
                 ("02-minimal-30-missingInfoTitle","OAS.RequiredOpenAPIFixedInfoFields"),
                 ("03-minimal-30-unsupportedPathName","OAS.PathsMustStartWithSlashRule"),
-                ("03-minimal-30-unsupportedHTTPMethod","OAS.SupportedHTTPMethodRule"),
                 ("03-minimal-30-missingResponse","OAS.OperationMustHaveResponses"),
                 ("03-minimal-30-invalidHTTPStatus","OAS.SupportedHTPStatusRule"),
                 ("03-minimal-30-noDescription","OAS.ReferencesMustHaveRef")
@@ -240,14 +239,11 @@ struct ValidationTests {
         guard let fixture = Self.fixtureManifest(fixtureName: setup.0, subDirectory: subDirectory) else {
             throw FixtureErrors.notFound(setup.0 )
         }
-        
-       
         guard case let .object(yaml) = try Self.loadYamlJson(setup.0, subDirectory: subDirectory) else {
             Issue.record("Expected .object(let)")
             return
         }
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url:setup.0 , documentLoader: YamsDocumentLoader())
-        
             
             let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: setup.0, operationIds: [])
             let runner = RuleRunner.defaultRuleRunner
@@ -268,9 +264,37 @@ struct ValidationTests {
             }
             
         }
-   
-
     
+    @Test("03-minimal-30-unsupportedHTTPMethod")
+    func unsupportedHTTPMethod() async throws{
+        let rule = "OAS.SupportedHTTPMethodRule"
+        let subDirectory = "Resources/3_0/invalid"
+       let setup = "03-minimal-30-unsupportedHTTPMethod"
+       
+        guard case let .object(yaml) = try Self.loadYamlJson(setup, subDirectory: subDirectory) else {
+            Issue.record("Expected .object(let)")
+            return
+        }
+        let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url:setup , documentLoader: YamsDocumentLoader())
+        let unsupportedOperations = apiSpec.diagnostics
+            
+            let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: setup, operationIds: [])
+            let runner = RuleRunner.defaultRuleRunner
+            
+            let unfilteredDiags = runner.run(spec: apiSpec, ctx: ctx)
+            print(unfilteredDiags)
+            #expect(unfilteredDiags.count == 2)
+            let filteredMissingRefs = unfilteredDiags.compactMap { diagnostic in
+                diagnostic.rule == "OAS.ReferencesMustHaveRef"
+            }
+            #expect(filteredMissingRefs.count == 2)
+            #expect(unsupportedOperations.count == 2)
+            let filteredUnsupportedOperations = unsupportedOperations.compactMap { diagnostic in
+                diagnostic.rule == "OAS.SupportedHTTPMethodRule"
+            }
+        #expect(filteredUnsupportedOperations.count == 2)
+
+        }
     
      @Test("All schema $refs resolve")
     func validateRefs() async throws {
@@ -295,7 +319,7 @@ struct ValidationTests {
        
         let diags = try await Validator.validateRefs(spec: spec, baseURI: resourceUrl.absoluteString, ctx: ctx, resolver: &resolver)
         print(diags)
-        #expect(diags.count == 7)
+        #expect(diags.count == 5)
         
         
         
@@ -324,7 +348,7 @@ struct ValidationTests {
       
        let diags = try await Validator.validateRefs(spec: spec, baseURI: resourceUrl.absoluteString, ctx: ctx, resolver: &resolver)
      
-       #expect(diags.count == 7)
+       #expect(diags.count == 5)
        for diag in diags {
            print("\(diag.pointer) - \(diag.message)")
        }

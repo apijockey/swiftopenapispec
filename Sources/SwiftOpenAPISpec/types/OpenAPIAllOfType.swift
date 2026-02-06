@@ -48,10 +48,10 @@ public struct OpenAPIAllOfType : OpenAPISchemaType, ThrowingHashMapInitiable, Po
     public static let DISCRIMINATOR_KEY = "discriminator"
   
 
-    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+    public init(load map: StringDictionary,diagnostics: inout [Diagnostic]) throws {
         self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self)
         
-        self.items = try map.mapListIfPresent("allOf", objectType: OpenAPISchema.self)
+        self.items = try map.mapListIfPresent("allOf", objectType: OpenAPISchema.self, diagnostics: &diagnostics)
        
     }
     

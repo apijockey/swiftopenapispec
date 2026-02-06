@@ -170,14 +170,14 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
     
     public static let REQUIRED_KEY = "required"
     
-    public init(load map: StringDictionary, _ diagnostics: inout [Diagnostic]) throws {
+    public init(load map: StringDictionary,  diagnostics: inout [Diagnostic]) throws {
        
         self.defaultValue =  map[Self.DEFAULT_VALUE_KEY]
         self.deprecated = map.readIfPresent(Self.DEPRECATED_KEY, valueType:  Bool.self)
-        self.discriminator = try map.readIfPresent(Self.DISCRIMINATOR_KEY,  objectType:  OpenAPIDiscriminator.self)
+        self.discriminator = try map.readIfPresent(Self.DISCRIMINATOR_KEY,  objectType:  OpenAPIDiscriminator.self, diagnostics: &diagnostics)
         // Value MUST be a string. Multiple types via an array are not supported.
        
-            self.type = try OpenAPIType(load: map,  &diagnostics)
+        self.type = try OpenAPIType(load: map,  diagnostics: &diagnostics)
        
        
         
@@ -194,8 +194,8 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
         }
         self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
         self.exclusiveMinimum = map.readIfPresent(Self.EXCLUSIVE_MINIMUM_KEY, valueType:  Bool.self)
-        self.externalDocs = try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIExternalDocumentation.self)
-        self.example = try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIExample.self)
+        self.externalDocs = try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIExternalDocumentation.self, diagnostics: &diagnostics)
+        self.example = try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIExample.self, diagnostics: &diagnostics)
         self.exclusiveMaximum = map.readIfPresent(Self.EXCLUSIVE_MAXIMUM_KEY, valueType:  Bool.self)
         self.format = map.readIfPresent(Self.FORMAT_KEY, valueType:  String.self)
         self.multipleOf = map.readIfPresent(Self.TYPE_KEY, valueType:Double.self)
@@ -218,12 +218,12 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
        
         self.uniqueItems = map.readIfPresent(Self.UNIQUE_ITEMS_KEY, valueType:  Bool.self)
         self.writeOnly = map.readIfPresent(Self.WRITE_ONLY_KEY, valueType:  Bool.self)
-        self.xml =  try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIXMLObject.self)
+        self.xml =  try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIXMLObject.self, diagnostics: &diagnostics)
         
     }
     public static func initialize(_ map: StringDictionary) throws -> InitializationResult<OpenAPISchema> {
         var diagnostics: [Diagnostic] = []
-        var openAPISchema: OpenAPISchema = try .init(load: map, &diagnostics)
+        var openAPISchema: OpenAPISchema = try .init(load: map, diagnostics: &diagnostics)
         return InitializationResult(value: openAPISchema, diagnostics: [])
     }
          //self.format30 = map.readIfPresent(Self.FORMAT_KEY, String.self)

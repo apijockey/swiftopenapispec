@@ -28,7 +28,7 @@ public struct OpenAPILink : KeyedElement , PointerNavigable {
     public static let SERVER_KEY = "server"
     
    
-    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+    public init(load map: StringDictionary, diagnostics: inout [Diagnostic]) throws {
         if case let .string(refKey) = map[OpenAPISchemaReference.REF_KEY]{
                     self.ref = OpenAPISchemaReference(ref: refKey)
             return
@@ -37,7 +37,7 @@ public struct OpenAPILink : KeyedElement , PointerNavigable {
         extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
         operationRef = map.readIfPresent(Self.OPERATIION_REF_KEY,valueType:  String.self)
         operationId = map.readIfPresent(Self.OPERATIION_ID_KEY,valueType:  String.self)
-        server = try map.readIfPresent(Self.SERVER_KEY, objectType: OpenAPIServer.self)
+        server = try map.readIfPresent(Self.SERVER_KEY, objectType: OpenAPIServer.self, diagnostics: &diagnostics)
         requestBody = map.readIfPresent(Self.REQUEST_BODY_KEY,valueType:  String.self)
         let parameterData = map[Self.PARAMETERS_KEY]
 

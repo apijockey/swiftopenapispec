@@ -45,13 +45,13 @@ public struct OpenAPITag:  KeyedElement, PointerNavigable {
     
    
 
-    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+    public init(load map: StringDictionary,diagnostics: inout [Diagnostic]) throws {
         self.key = map.readIfPresent(Self.NAME_KEY, valueType: String.self)
         self.summary = map.readIfPresent(Self.SUMMARY_KEY, valueType: String.self)
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self)
         self.parent = map.readIfPresent(Self.PARENT_KEY, valueType: String.self)
         self.kind = map.readIfPresent(Self.KIND_KEY, valueType: String.self)
-        self.externalDocs = try map.readIfPresent(Self.EXTERNAL_DOCS_KEY, objectType: OpenAPIExternalDocumentation.self)
+        self.externalDocs = try map.readIfPresent(Self.EXTERNAL_DOCS_KEY, objectType: OpenAPIExternalDocumentation.self, diagnostics: &diagnostics)
         self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
     }
     

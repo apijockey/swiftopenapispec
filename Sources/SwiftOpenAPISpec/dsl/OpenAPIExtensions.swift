@@ -21,12 +21,14 @@ public enum ExtensionType : Sendable {
    
 }
 public struct OpenAPIExtension : KeyedElement, PointerNavigable  {
+  
+   
     
     public init(key : String, value : JSONValue) {
         self.key = key
         self.value = value
     }
-    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
+    public init(load map: StringDictionary, diagnostics: inout [Diagnostic]) throws {
         fatalError("Not yet implemented init for OpenAPIExtension")
     }
     public func element(for segmentName: String) throws -> NavigationResult {
