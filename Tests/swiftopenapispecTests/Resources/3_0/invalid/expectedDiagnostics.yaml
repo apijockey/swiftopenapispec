@@ -127,15 +127,25 @@ cases:
         pointer: "/components/schema/Credit/properties/price"
         rule: "Schema.SupportedFormat"
         severity: "warning"
-        messageContains: "format not predefined for 'string'"
+        messageContains: "format 'float' not predefined for 'string'"
+      - code: "invalidValue"
+        pointer: "/components/schema/Credit/properties/weight"
+        rule: "Schema.SupportedFormat"
+        severity: "warning"
+        messageContains: "format 'binary' not predefined for 'number'"
   - fixture: "10-schematests-invalidAllOfAnyOf"
     shouldPass: false
     expected:
       - code: "invalidValue"
-        pointer: "/components/schema/Credit/properties/price"
-        rule: "Schema.SupportedFormat"
-        severity: "warning"
-        messageContains: "format not predefined for 'string'"
+        pointer: "/components/schema/Pet/AllOf"
+        rule: "Schema.AnyOneAllWithObjectArray"
+        severity: "error"
+        messageContains: "AllOf must contain an array of objects"
+      - code: "invalidValue"
+        pointer: "/components/schema/Vehicle/AnyOf"
+        rule: "Schema.AnyOneAllWithObjectArray"
+        severity: "error"
+        messageContains: "AnyOf must contain an array of objects"
   - fixture: "10-schematests-wrongformat"
     shouldPass: false
     expected:
@@ -144,3 +154,7 @@ cases:
         rule: "Schema.MultipleOf"
         severity: "error"
         messageContains: "The value of 'multipleOf' MUST be strictly greater than 0"
+  - fixture: "10-schematests-identifiableNullable"
+    shouldPass: true
+    expected:
+    

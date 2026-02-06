@@ -24,15 +24,15 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
     public var key: String?
     public init(load map: StringDictionary,diagnostics: inout [Diagnostic]) throws {
         self.tags = map.readListIfPresent(Self.TAGS_KEY, valueType: String.self)  ?? []
-        self.summary = map.readIfPresent(Self.SUMMARY_KEY, valueType:  String.self)
-        self.description = map.readIfPresent(Self.DESCRIPTION_KEY,valueType:   String.self)
+        self.summary = map.readIfPresent(Self.SUMMARY_KEY, valueType:  String.self, diagnostics : &diagnostics)
+        self.description = map.readIfPresent(Self.DESCRIPTION_KEY,valueType:   String.self, diagnostics : &diagnostics)
         self.externalDocs = try map.readIfPresent(Self.EXTERNAL_DOCS_KEY, objectType:  OpenAPIExternalDocumentation.self, diagnostics: &diagnostics)
-        self.operationId = map.readIfPresent(Self.OP_ID_KEY, valueType:  String.self)
+        self.operationId = map.readIfPresent(Self.OP_ID_KEY, valueType:  String.self, diagnostics : &diagnostics)
         self.parameters = try map.mapListIfPresent(Self.PARAMETERS_KEY, objectType: OpenAPIParameter.self, diagnostics: &diagnostics)
         self.requestBody = try map.readIfPresent(Self.REQUEST_BODIES_KEY, objectType: OpenAPIRequestBody.self, diagnostics: &diagnostics)
         self.responses = try map.mapListIfPresent(Self.RESPONSES_KEY, objectType: OpenAPIResponse.self, diagnostics: &diagnostics)
         self.callbacks =  try map.mapListIfPresent(Self.CALLBACKS_KEY, objectType: OpenAPICallBack.self, diagnostics: &diagnostics)
-        self.deprecated = map.readIfPresent(Self.DEPRECATED_KEY, valueType: Bool.self)
+        self.deprecated = map.readIfPresent(Self.DEPRECATED_KEY, valueType: Bool.self, diagnostics : &diagnostics)
         self.securityObjects = try map.mapListIfPresent(Self.SECURITY_KEY, objectType: OpenAPISecuritySchemeReference.self, diagnostics: &diagnostics)
         self.servers =  try map.mapListIfPresent(OpenAPISpecification.SERVERS_KEY, objectType: OpenAPIServer.self, diagnostics: &diagnostics)
         extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)

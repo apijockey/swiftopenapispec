@@ -30,12 +30,12 @@ public struct OpenAPIExample : KeyedElement, RefPointerNavigable {
             self.ref = OpenAPISchemaReference(ref: refKey)
         }
         
-        self.summary = map.readIfPresent(Self.SUMMARY_KEY, valueType: String.self)
-        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self)
+        self.summary = map.readIfPresent(Self.SUMMARY_KEY, valueType: String.self, diagnostics : &diagnostics)
+        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self, diagnostics : &diagnostics)
         self.value = map[Self.VALUE_KEY]
-        self.externalValue = map.readIfPresent(Self.EXTERNAL_VALUE_KEY, valueType: String.self)
+        self.externalValue = map.readIfPresent(Self.EXTERNAL_VALUE_KEY, valueType: String.self, diagnostics : &diagnostics)
 
-        self.serializedValue = map.readIfPresent(Self.SERIALIZED_VALUE_KEY,valueType: String.self)
+        self.serializedValue = map.readIfPresent(Self.SERIALIZED_VALUE_KEY,valueType: String.self, diagnostics : &diagnostics)
     }
    
     public func element(for segmentName: String) throws -> NavigationResult {

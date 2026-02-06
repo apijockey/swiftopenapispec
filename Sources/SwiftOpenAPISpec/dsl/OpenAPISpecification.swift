@@ -64,14 +64,14 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
         }
        
         
-        self.version = dictionary.readIfPresent(OpenAPISpecification.OPENAPI_KEY, valueType: String.self)
+        self.version = dictionary.readIfPresent(OpenAPISpecification.OPENAPI_KEY, valueType: String.self, diagnostics : &diagnostics)
         self.info = try dictionary.readIfPresent(OpenAPISpecification.INFO_KEY, objectType: OpenAPIInfo.self, diagnostics: &diagnostics)
         self.components = try dictionary.readIfPresent(OpenAPISpecification.COMPONENTS_KEY, objectType: OpenAPIComponent.self, diagnostics: &diagnostics)
-        self.selfUrl =  dictionary.readIfPresent(OpenAPISpecification.SELF_URL_KEY, valueType: String.self)
+        self.selfUrl =  dictionary.readIfPresent(OpenAPISpecification.SELF_URL_KEY, valueType: String.self, diagnostics : &diagnostics)
         self.key = selfUrl
         self.tags = try dictionary.mapListIfPresent(OpenAPISpecification.TAGS_KEY, objectType: OpenAPITag.self, diagnostics: &diagnostics)
         self.externalDocumentation = try dictionary.readIfPresent(OpenAPISpecification.EXTERNAL_DOCS_KEY,objectType: OpenAPIExternalDocumentation.self, diagnostics: &diagnostics)
-        self.jsonSchemaDialect = dictionary.readIfPresent(OpenAPISpecification.JSON_SCHEMA_DIALECT_KEY, valueType: String.self)
+        self.jsonSchemaDialect = dictionary.readIfPresent(OpenAPISpecification.JSON_SCHEMA_DIALECT_KEY, valueType: String.self, diagnostics : &diagnostics)
         let servers =  try dictionary.mapListIfPresent(OpenAPISpecification.SERVERS_KEY, objectType: OpenAPIServer.self, diagnostics: &diagnostics)
         if servers.count > 0 {
             self.servers = servers

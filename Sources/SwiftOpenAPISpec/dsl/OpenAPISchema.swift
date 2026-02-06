@@ -173,7 +173,7 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
     public init(load map: StringDictionary,  diagnostics: inout [Diagnostic]) throws {
        
         self.defaultValue =  map[Self.DEFAULT_VALUE_KEY]
-        self.deprecated = map.readIfPresent(Self.DEPRECATED_KEY, valueType:  Bool.self)
+        self.deprecated = map.readIfPresent(Self.DEPRECATED_KEY, valueType:  Bool.self, diagnostics : &diagnostics)
         self.discriminator = try map.readIfPresent(Self.DISCRIMINATOR_KEY,  objectType:  OpenAPIDiscriminator.self, diagnostics: &diagnostics)
         // Value MUST be a string. Multiple types via an array are not supported.
        
@@ -193,39 +193,35 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
             self.allowedValues = nil
         }
         self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
-        self.exclusiveMinimum = map.readIfPresent(Self.EXCLUSIVE_MINIMUM_KEY, valueType:  Bool.self)
+        self.exclusiveMinimum = map.readIfPresent(Self.EXCLUSIVE_MINIMUM_KEY, valueType:  Bool.self, diagnostics : &diagnostics)
         self.externalDocs = try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIExternalDocumentation.self, diagnostics: &diagnostics)
         self.example = try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIExample.self, diagnostics: &diagnostics)
-        self.exclusiveMaximum = map.readIfPresent(Self.EXCLUSIVE_MAXIMUM_KEY, valueType:  Bool.self)
-        self.format = map.readIfPresent(Self.FORMAT_KEY, valueType:  String.self)
-        self.multipleOf = map.readIfPresent(Self.TYPE_KEY, valueType:Double.self)
-        self.maximum = map.readIfPresent(Self.MAXIMUM_KEY, valueType:  Double.self)
-        self.minimum = map.readIfPresent(Self.MINIMUM_KEY, valueType:  Double.self)
-        self.maxContains = map.readIfPresent(Self.MAX_CONTAINS_KEY, valueType:  Int.self)
-        self.minContains = map.readIfPresent(Self.MIN_CONTAINS_KEY, valueType:  Int.self)
-        self.maxProperties = map.readIfPresent(Self.MAX_PROPERTIES_KEY, valueType:  Int.self)
-        self.maxLength = map.readIfPresent(Self.MAX_LENGTH_KEY,valueType:  Int.self)
-        self.minLength = map.readIfPresent(Self.MIN_LENGTH_KEY,valueType: Int.self)
-        self.minProperties = map.readIfPresent(Self.MIN_PROPERTIES_KEY, valueType:  Int.self)
-        self.maxItems = map.readIfPresent(Self.MAX_ITEMS_KEY, valueType:  Int.self)
-        self.minItems = map.readIfPresent(Self.MIN_ITEMS_KEY, valueType:  Int.self)
-        self.nullable = map.readIfPresent(Self.NULLABLE_KEY, valueType:  Bool.self)
-        self.pattern = map.readIfPresent(Self.PATTERN_KEY,valueType:String.self)
-        self.readOnly = map.readIfPresent(Self.READ_ONLY_KEY, valueType:  Bool.self)
+        self.exclusiveMaximum = map.readIfPresent(Self.EXCLUSIVE_MAXIMUM_KEY, valueType:  Bool.self, diagnostics : &diagnostics)
+        self.format = map.readIfPresent(Self.FORMAT_KEY, valueType:  String.self, diagnostics : &diagnostics)
+        self.multipleOf = map.readIfPresent(Self.MULTIPLEOF_KEY, valueType:Double.self, diagnostics : &diagnostics)
+        self.maximum = map.readIfPresent(Self.MAXIMUM_KEY, valueType:  Double.self, diagnostics : &diagnostics)
+        self.minimum = map.readIfPresent(Self.MINIMUM_KEY, valueType:  Double.self, diagnostics : &diagnostics)
+        self.maxContains = map.readIfPresent(Self.MAX_CONTAINS_KEY, valueType:  Int.self, diagnostics : &diagnostics)
+        self.minContains = map.readIfPresent(Self.MIN_CONTAINS_KEY, valueType:  Int.self, diagnostics : &diagnostics)
+        self.maxProperties = map.readIfPresent(Self.MAX_PROPERTIES_KEY, valueType:  Int.self, diagnostics : &diagnostics)
+        self.maxLength = map.readIfPresent(Self.MAX_LENGTH_KEY,valueType:  Int.self, diagnostics : &diagnostics)
+        self.minLength = map.readIfPresent(Self.MIN_LENGTH_KEY,valueType: Int.self, diagnostics : &diagnostics)
+        self.minProperties = map.readIfPresent(Self.MIN_PROPERTIES_KEY, valueType:  Int.self, diagnostics : &diagnostics)
+        self.maxItems = map.readIfPresent(Self.MAX_ITEMS_KEY, valueType:  Int.self, diagnostics : &diagnostics)
+        self.minItems = map.readIfPresent(Self.MIN_ITEMS_KEY, valueType:  Int.self, diagnostics : &diagnostics)
+        self.nullable = map.readIfPresent(Self.NULLABLE_KEY, valueType:  Bool.self, diagnostics : &diagnostics)
+        self.pattern = map.readIfPresent(Self.PATTERN_KEY,valueType:String.self, diagnostics : &diagnostics)
+        self.readOnly = map.readIfPresent(Self.READ_ONLY_KEY, valueType:  Bool.self, diagnostics : &diagnostics)
         self.required = map.readListIfPresent(Self.REQUIRED_KEY, valueType:  String.self)
-        
-        self.title = map.readIfPresent(OpenAPISchema.TYPE_KEY, valueType:String.self)
+    
+        self.title = map.readIfPresent(OpenAPISchema.TYPE_KEY, valueType:String.self, diagnostics : &diagnostics)
        
-        self.uniqueItems = map.readIfPresent(Self.UNIQUE_ITEMS_KEY, valueType:  Bool.self)
-        self.writeOnly = map.readIfPresent(Self.WRITE_ONLY_KEY, valueType:  Bool.self)
+        self.uniqueItems = map.readIfPresent(Self.UNIQUE_ITEMS_KEY, valueType:  Bool.self, diagnostics : &diagnostics)
+        self.writeOnly = map.readIfPresent(Self.WRITE_ONLY_KEY, valueType:  Bool.self, diagnostics : &diagnostics)
         self.xml =  try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIXMLObject.self, diagnostics: &diagnostics)
         
     }
-    public static func initialize(_ map: StringDictionary) throws -> InitializationResult<OpenAPISchema> {
-        var diagnostics: [Diagnostic] = []
-        var openAPISchema: OpenAPISchema = try .init(load: map, diagnostics: &diagnostics)
-        return InitializationResult(value: openAPISchema, diagnostics: [])
-    }
+   
          //self.format30 = map.readIfPresent(Self.FORMAT_KEY, String.self)
          //extensions = try OpenAPIExtension.extensionElements(map)
     

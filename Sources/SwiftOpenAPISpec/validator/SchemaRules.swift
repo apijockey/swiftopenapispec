@@ -32,6 +32,7 @@ public struct SchemaRuleRunner  : Sendable{
         self.ctx = ctx
     }
     
+    
     public func run(schema: OpenAPISchema, pointer: String,resolver: inout JSONPointerResolver) async throws -> [Diagnostic] {
         if let type =  schema.type {
             var out: [Diagnostic] = []
@@ -81,14 +82,12 @@ public struct SchemaRuleRunner  : Sendable{
                 
                 
             
-            if case let .ref(reference) = type ,
-               let anyType = try await resolver.resolve(ref: reference.refString) as? OpenAPIType {
-                let results = try await run(schema: schema, pointer: pointer,resolver: &resolver)
-                out.append(contentsOf:  results)
+            if case  .ref = type {
+               return out
             }
             return out
         }
-        return []
+       return []
     }
    
     public static func defaultRunner(ctx: ValidationContext) -> SchemaRuleRunner  {
@@ -98,24 +97,25 @@ public struct SchemaRuleRunner  : Sendable{
             rules.append(MultipleOfRule())
             rules.append(OAS30SupportedTypeRule())
             rules.append(RequiredSubsetOfPropertiesRule())
+            rules.append(OneAnyAllMustHaveObjectArrayCompositionRule())
+            rules.append(NonEmptyCompositionRule())
+            
         }
         else {
             rules.append(StringMinMaxLengthRule())
             rules.append(RequiredSubsetOfPropertiesRule())
             rules.append(OAS30SupportedTypeRule())
+            rules.append(OneAnyAllMustHaveObjectArrayCompositionRule())
+            rules.append(NonEmptyCompositionRule())
         }
         return SchemaRuleRunner(rules: rules, ctx: ctx)
-        
-        
     }
-  
 }
-
 /// Rule: anyOf/oneOf/allOf must contain at least one item.
 public struct NonEmptyCompositionRule: SchemaRule {
     
     
-    public let name = "Schema.NonEmptyComposition"
+    public let name = "Schema.AnyOneAllWithObjectArray"
     public init() {}
     
     public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
@@ -127,18 +127,18 @@ public struct NonEmptyCompositionRule: SchemaRule {
             diags.append(.init(
                 severity: .error,
                 code: .schemaViolation,
-                message: "anyOf must contain at least one schema.",
+                message: "anyOf must contain an array of objects.",
                 pointer: JSONPointer.join(pointer, "anyOf"),
                 rule: name
             ))
         }
         
-        if case let .anyOf(ofType) = schema.type,
+        if case let .oneOf(ofType) = schema.type,
             (ofType.items ?? []).isEmpty {
             diags.append(.init(
                 severity: .error,
                 code: .schemaViolation,
-                message: "oneOf must contain at least one schema.",
+                message: "oneOf must contain an array of objects.",
                 pointer: JSONPointer.join(pointer, "oneOf"),
                 rule: name
             ))
@@ -149,10 +149,73 @@ public struct NonEmptyCompositionRule: SchemaRule {
             diags.append(.init(
                 severity: .error,
                 code: .schemaViolation,
-                message: "allOf must contain at least one schema.",
+                message: "allOf must contain an array of objects.",
                 pointer: JSONPointer.join(pointer, "allOf"),
                 rule: name
             ))
+        }
+        
+        return diags
+    }
+   
+}
+
+
+/// Rule: anyOf/oneOf/allOf must contain at least one item.
+public struct OneAnyAllMustHaveObjectArrayCompositionRule: SchemaRule {
+    
+    
+    public let name = "Schema.OneAnyAllMustHaveObjectArray"
+    public init() {}
+    
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        
+        var diags: [Diagnostic] = []
+        
+        if case let .anyOf(ofType) = schema.type {
+            for item in ofType.items  ?? [] {
+                if case .object =  item.type { }
+                else {
+                    diags.append(.init(
+                        severity: .error,
+                        code: .schemaViolation,
+                        message: "anyOf elements must be of type 'object'",
+                        pointer: JSONPointer.join(pointer, "anyOf"),
+                        rule: name
+                    ))
+                }
+            }
+        }
+           
+        
+        if case let .oneOf(ofType) = schema.type {
+            for item in ofType.items  ?? [] {
+                if case .object =  item.type { }
+                else {
+                    diags.append(.init(
+                        severity: .error,
+                        code: .schemaViolation,
+                        message: "oneOf elements must be of type 'object'",
+                        pointer: JSONPointer.join(pointer, "oneOf"),
+                        rule: name
+                    ))
+                }
+            }
+        }
+        
+        if case let .allOf(ofType) = schema.type {
+            for item in ofType.items  ?? [] {
+                if case .object =  item.type { }
+                else {
+                    diags.append(.init(
+                        severity: .error,
+                        code: .schemaViolation,
+                        message: "allOf elements must be of type 'object'",
+                        pointer: JSONPointer.join(pointer, "allOf"),
+                        rule: name
+                    ))
+                }
+            }
         }
         
         return diags
@@ -165,7 +228,7 @@ public struct StringMinMaxLengthRule: SchemaRule {
     public init() {}
     
     public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
-        guard case let .string = schema.type  else { return [] }
+        guard case  .string = schema.type  else { return [] }
         guard let min = schema.minLength,
             let max = schema.maxLength else { return [] }
         if min > max {
@@ -186,7 +249,8 @@ public struct MultipleOfRule: SchemaRule {
     public init() {}
     
     public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
-        guard case let .number = schema.type else {
+        guard case .number = schema.type,
+            schema.multipleOf != nil else {
             return []
         }
         if let doubleValue =  schema.multipleOf,
@@ -219,13 +283,8 @@ public struct OAS30SupportedTypeRule: SchemaRule {
     
     public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
         
-        if case .integer = schema.type {
-            return [.init(severity: .error, code: .invalidType,
-                          message: "unknown type 'integer'",
-                          pointer: "\(pointer)/\("type")",
-                          rule: "Schema.SupportedTypes")]
-        }
-        else if case .null = schema.type {
+        
+        if case .null = schema.type {
             return [.init(severity: .error, code: .invalidType,
                           message: "'null' type not supported in OpenAPI 3.0 (switch to nullable)",
                           pointer: "\(pointer)/type",
@@ -240,6 +299,8 @@ public struct OAS30SupportedTypeRule: SchemaRule {
         return []
     }
 }
+
+
 
 
 /// Rule: for objects, every entry in required must exist as a property key.
@@ -281,13 +342,10 @@ public struct SupportedFormatsRule: SchemaRule {
         if case .string = schema.type {
             if ["byte","binary","", "date","date-time ","password"].contains(schema.format)  || schema.format == nil { return [] }
             else {
-                diags.append(Diagnostic(severity: .warning, code: .invalidValue, message: "format not predefined for 'string'", pointer: pointer, rule: name))
+                diags.append(Diagnostic(severity: .warning, code: .invalidValue, message: "format '\(schema.format ?? "")' not predefined for 'string'", pointer: pointer, rule: name))
             }
         }
-        if case let .array(openAPIArrayType) = schema.type {
-            return []
-        }
-        if case .integer = schema.type {
+        else if case .integer = schema.type {
             if  ["int32","int64"].contains(schema.format) || (schema.format ?? "").isEmpty {
                 return []
             }
@@ -296,12 +354,17 @@ public struct SupportedFormatsRule: SchemaRule {
             }
         }
             
-        if case  .number = schema.type {
+        else if case  .number = schema.type {
         if  ["float","double"].contains(schema.format) || (schema.format ?? "").isEmpty {
                 return []
             }
             else {
                 diags.append(Diagnostic(severity: .warning, code: .invalidValue, message: "format '\(schema.format ?? "")' not predefined for 'String'", pointer: pointer, rule: name))
+            }
+        }
+        else {
+            if !(schema.format ?? "").isEmpty {
+                diags.append(Diagnostic(severity: .warning, code: .invalidValue, message: "format '\(schema.format ?? "")' not expected", pointer: pointer, rule: name))
             }
         }
         

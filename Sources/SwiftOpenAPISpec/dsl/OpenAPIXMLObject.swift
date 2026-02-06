@@ -30,13 +30,13 @@ public struct OpenAPIXMLObject : PointerNavigable, ThrowingHashMapInitiable {
     public static let WRAPPED_KEY = "wrapped"
     
     public init(load map: StringDictionary, diagnostics: inout [Diagnostic]) throws {
-        let nodeType = map.readIfPresent(Self.NODETYPE_KEY,valueType:  String.self)
+        let nodeType = map.readIfPresent(Self.NODETYPE_KEY,valueType:  String.self, diagnostics : &diagnostics)
         self.nodeType = NodeKind(rawValue: nodeType ?? "none")
-        self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self)
-        self.namespace = map.readIfPresent(Self.NAMESPACE_KEY, valueType: String.self)
-        self.prefix = map.readIfPresent(Self.PREFIX_KEY, valueType: String.self)
-        self.attribute = map.readIfPresent(Self.ATTRIBUTE_KEY,valueType:  Bool.self)
-        self.wrapped = map.readIfPresent(Self.WRAPPED_KEY,valueType:  Bool.self)
+        self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self, diagnostics : &diagnostics)
+        self.namespace = map.readIfPresent(Self.NAMESPACE_KEY, valueType: String.self, diagnostics : &diagnostics)
+        self.prefix = map.readIfPresent(Self.PREFIX_KEY, valueType: String.self, diagnostics : &diagnostics)
+        self.attribute = map.readIfPresent(Self.ATTRIBUTE_KEY,valueType:  Bool.self, diagnostics : &diagnostics)
+        self.wrapped = map.readIfPresent(Self.WRAPPED_KEY,valueType:  Bool.self, diagnostics : &diagnostics)
         self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
     }
    

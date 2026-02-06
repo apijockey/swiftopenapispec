@@ -63,7 +63,7 @@ public struct OpenAPIOneOfType : OpenAPISchemaType,ThrowingHashMapInitiable, Poi
     
 
     public init(load map: StringDictionary,diagnostics: inout [Diagnostic]) throws {
-        self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self)  
+        self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self, diagnostics : &diagnostics)
         
        
         

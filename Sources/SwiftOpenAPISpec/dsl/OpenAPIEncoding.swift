@@ -28,7 +28,7 @@ public struct OpenAPIEncoding : KeyedElement, PointerNavigable {
     static let EXTENSIONS_KEY = "extensions"
     public init(load map: StringDictionary, diagnostics: inout [Diagnostic]) throws {
         extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
-        self.contentType = map.readIfPresent(Self.CONTENT_TYPE_KEY, valueType: String.self)
+        self.contentType = map.readIfPresent(Self.CONTENT_TYPE_KEY, valueType: String.self, diagnostics : &diagnostics)
         self.headers = try map.mapListIfPresent(Self.HEADERS_KEY, objectType: OpenAPIHeader.self, diagnostics: &diagnostics)
         self.encoding  = try map.mapListIfPresent(Self.ENCODING_KEY, objectType: OpenAPIEncoding.self, diagnostics: &diagnostics)
         self.prefixEncoding = try map.mapListIfPresent(Self.PREFIX_ENCODING_KEY,objectType: OpenAPIEncoding.self, diagnostics: &diagnostics)

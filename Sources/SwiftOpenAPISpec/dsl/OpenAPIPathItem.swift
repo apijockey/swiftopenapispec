@@ -78,8 +78,8 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
         
         }
        
-        self.summary  = map.readIfPresent(Self.SUMMARY_KEY, valueType: String.self)
-        self.description  = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self)
+        self.summary  = map.readIfPresent(Self.SUMMARY_KEY, valueType: String.self, diagnostics : &diagnostics)
+        self.description  = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self, diagnostics : &diagnostics)
         let servers = try map.mapListIfPresent(OpenAPISpecification.SERVERS_KEY, objectType: OpenAPIServer.self, diagnostics: &diagnostics)
         if servers.count > 0 {
             self.servers = servers

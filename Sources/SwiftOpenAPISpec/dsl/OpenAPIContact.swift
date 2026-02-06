@@ -33,9 +33,9 @@ public struct OpenAPIContact : ThrowingHashMapInitiable , PointerNavigable {
     public static let URL_KEY = "url"
    
     public init(load map: StringDictionary,diagnostics: inout [Diagnostic]) throws {
-        self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self)
-        self.url =  map.readIfPresent(Self.URL_KEY, valueType:  String.self)
-        self.email = map.readIfPresent(Self.EMAIL_KEY,valueType: String.self)
+        self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self, diagnostics : &diagnostics)
+        self.url =  map.readIfPresent(Self.URL_KEY, valueType:  String.self, diagnostics : &diagnostics)
+        self.email = map.readIfPresent(Self.EMAIL_KEY,valueType: String.self, diagnostics : &diagnostics)
         extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
     }
    

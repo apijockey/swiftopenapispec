@@ -37,9 +37,9 @@ public struct OpenAPISchemaReference  : ThrowingHashMapInitiable, PointerNavigab
     public static let DESCRIPTION_KEY = "description"
     
     public init(load map: StringDictionary,diagnostics: inout [Diagnostic]) throws {
-        self.reference = map.readIfPresent(Self.REF_KEY,  valueType: String.self)
-        self.summary = map.readIfPresent(Self.SUMMARY_KEY,valueType:  String.self)
-        self.description = map.readIfPresent(Self.DESCRIPTION_KEY,valueType:  String.self)
+        self.reference = map.readIfPresent(Self.REF_KEY,  valueType: String.self, diagnostics : &diagnostics)
+        self.summary = map.readIfPresent(Self.SUMMARY_KEY,valueType:  String.self, diagnostics : &diagnostics)
+        self.description = map.readIfPresent(Self.DESCRIPTION_KEY,valueType:  String.self, diagnostics : &diagnostics)
         
     }
     public init(ref: String) {

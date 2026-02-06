@@ -39,21 +39,6 @@
 
 
 public struct OpenAPIAnyOfType : OpenAPISchemaType, PointerNavigable {
-    public var nullable: Bool?
-    
-    public var readOnly: Bool?
-    
-    public var writeOnly: Bool?
-    
-    public var xml: OpenAPIXMLObject?
-    
-    public var externalDocs: OpenAPIExternalDocumentation?
-    
-    public var example: OpenAPIExample?
-    
-    public var deprecated: Bool?
-    
-    public var extensions: OpenAPIExtension?
     
    
     
@@ -68,7 +53,7 @@ public struct OpenAPIAnyOfType : OpenAPISchemaType, PointerNavigable {
     
   
     public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
-        self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self)
+        self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self, diagnostics: &diagnostics)
         
 
         

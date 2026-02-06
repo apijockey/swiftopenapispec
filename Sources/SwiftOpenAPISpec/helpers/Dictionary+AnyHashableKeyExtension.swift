@@ -41,30 +41,68 @@
 extension StringDictionary {
     
     
-    func mapTypes<V>(value : JSONValue, valueType : V.Type) -> V? {
-        switch V.self {
+    func mapTypes<V>(value : JSONValue, valueType : V.Type, diagnostics : inout [Diagnostic]) -> V? {
+        switch valueType.self {
         case is String.Type:
-            return (value.stringValue as? V)
+            if let stringValue = value.stringValue as? V {
+                return stringValue
+            }
+            else {
+                let diagnostic = Diagnostic(severity: .warning, code: .invalidType, message: "expected 'String'", pointer: "\(value)", rule: "Schema.DataType")
+                diagnostics.append(diagnostic)
+                return nil
+            }
         case is Int.Type:
-            return (value.intValue as? V)
+            if let intValue = value.intValue as? V {
+                return intValue
+            }
+            else {
+                let diagnostic = Diagnostic(severity: .warning, code: .invalidType, message: "expected 'Integer/Number'", pointer: "\(value)", rule: "Schema.DataType")
+                diagnostics.append(diagnostic)
+                return nil
+            }
         case is Double.Type:
-            return (value.doubleValue as? V)
+            if let doubleValue = value.doubleValue as? V {
+                return doubleValue
+            }
+            else {
+                let diagnostic = Diagnostic(severity: .warning, code: .invalidType, message: "expected 'Double/Number'", pointer: "\(value)", rule: "Schema.DataType")
+                diagnostics.append(diagnostic)
+                return nil
+            }
         case is Float.Type:
-            return (value.floatValue as? V)
+            if let value = value.floatValue as? V {
+                return value
+            }
+            else {
+                let diagnostic = Diagnostic(severity: .warning, code: .invalidType, message: "expected 'Float/Number'", pointer: "\(value)", rule: "Schema.DataType")
+                diagnostics.append(diagnostic)
+                return nil
+            }
         case is Bool.Type:
-            return (value.boolValue as? V)
+            if let bool = value.boolValue as? V {
+                return bool
+            }
+            else {
+                let diagnostic = Diagnostic(severity: .warning, code: .invalidType, message: "expected 'Boolean'", pointer: "\(value)", rule: "Schema.DataType")
+                diagnostics.append(diagnostic)
+                return nil
+            }
         case is JSONValue.Type:
+           
             return (value as? V)
         default:
-            // Fallback: try direct cast (for future types that might already be JSONValue-backed)
+            let diagnostic = Diagnostic(severity: .warning, code: .invalidType, message: "unexpected value type", pointer: "\(value)", rule: "Schema.DataType")
+            diagnostics.append(diagnostic)
             return (value as? V)
         }
     }
     func readListIfPresent<V>(_ key : String, valueType : V.Type) -> [V]? {
+        var diagnostics = [Diagnostic]()
         var typedArray = [V]()
         if case let .array(arrayValue) = self[key] {
             for value in arrayValue {
-                if let typedValue = mapTypes(value: value, valueType: valueType) {
+                if let typedValue = mapTypes(value: value, valueType: valueType, diagnostics: &diagnostics) {
                     typedArray.append(typedValue)
                 }
             }
@@ -74,9 +112,9 @@ extension StringDictionary {
             return nil
         }
     }
-    func readIfPresent<V>(_ key : String, valueType : V.Type) -> V? {
+    func readIfPresent<V>(_ key : String, valueType : V.Type, diagnostics : inout [Diagnostic]) -> V? {
         guard let value = self[key] else { return nil }
-        return mapTypes(value: value, valueType: valueType)
+        return mapTypes(value: value, valueType: valueType, diagnostics: &diagnostics)
     }
     
     func readIfPresent<V>(_ key : String, objectType : V.Type, diagnostics : inout [Diagnostic]) throws -> V?  where V : ThrowingHashMapInitiable{

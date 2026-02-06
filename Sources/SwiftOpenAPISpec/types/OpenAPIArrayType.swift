@@ -41,21 +41,6 @@
 public struct OpenAPIArrayType : OpenAPISchemaType, PointerNavigable{
     public var discriminator: OpenAPIDiscriminator?
     
-    public var nullable: Bool?
-    
-    public var readOnly: Bool?
-    
-    public var writeOnly: Bool?
-    
-    public var xml: OpenAPIXMLObject?
-    
-    public var externalDocs: OpenAPIExternalDocumentation?
-    
-    public var example: OpenAPIExample?
-    
-    public var deprecated: Bool?
-    
-    public var extensions: OpenAPIExtension?
     
     
     
@@ -83,22 +68,19 @@ public struct OpenAPIArrayType : OpenAPISchemaType, PointerNavigable{
     public static let MAX_CONTAINS_KEY = "maxContains"
     public static let MIN_CONTAINS_KEY = "minContains"
     
-    public init(load map: StringDictionary) throws {
-        self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self)
-        self.minItems = map.readIfPresent(Self.MIN_ITEMS_KEY, valueType: Int.self)
-        self.maxItems = map.readIfPresent(Self.MAX_ITEMS_KEY, valueType:  Int.self)
-        self.maxContains = map.readIfPresent(Self.MAX_CONTAINS_KEY, valueType : Int.self)
-        self.minContains = map.readIfPresent(Self.MIN_CONTAINS_KEY, valueType:  Int.self)
-        self.uniqueItems = map.readIfPresent(Self.UNIQE_ITEMS_KEY, valueType:  Bool.self)
+    public init(load map: StringDictionary, diagnostics : inout [Diagnostic]) throws {
+        self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self, diagnostics: &diagnostics)
+        self.minItems = map.readIfPresent(Self.MIN_ITEMS_KEY, valueType: Int.self, diagnostics: &diagnostics)
+        self.maxItems = map.readIfPresent(Self.MAX_ITEMS_KEY, valueType:  Int.self, diagnostics: &diagnostics)
+        self.maxContains = map.readIfPresent(Self.MAX_CONTAINS_KEY, valueType : Int.self, diagnostics: &diagnostics)
+        self.minContains = map.readIfPresent(Self.MIN_CONTAINS_KEY, valueType:  Int.self, diagnostics: &diagnostics)
+        self.uniqueItems = map.readIfPresent(Self.UNIQE_ITEMS_KEY, valueType:  Bool.self, diagnostics: &diagnostics)
          if let list = map[Self.ITEMS_KEY] ,
             case let .object(type) = list {
-             self.items = try OpenAPISchema.initialize(type).value
+             self.items = try OpenAPISchema.initialize(load: type, diagnostics : &diagnostics).value
              }
     }
-    public static func initialize(_ map: StringDictionary) throws ->  InitializationResult<Self> {
-           let element = try Self(load: map)
-           return InitializationResult(value: element, diagnostics: [])
-       }
+   
 
     public func validate() throws {
         

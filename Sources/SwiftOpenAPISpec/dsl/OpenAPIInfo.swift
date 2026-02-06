@@ -30,11 +30,11 @@ public struct OpenAPIInfo : KeyedElement, PointerNavigable {
     static let TITLE_KEY = "title"
     static let VERSION_KEY = "version"
     public init(load map: StringDictionary, diagnostics: inout [Diagnostic]) throws {
-        self.version = map.readIfPresent(Self.VERSION_KEY, valueType: String.self)
-        self.title = map.readIfPresent(Self.TITLE_KEY,valueType: String.self)
-        self.summary = map.readIfPresent(Self.SUMMARY_KEY,valueType: String.self)
-        self.description = map.readIfPresent(Self.DESCRIPTION_KEY,valueType: String.self)
-        self.termsOfService = map.readIfPresent( Self.TERMS_KEY,valueType: String.self)
+        self.version = map.readIfPresent(Self.VERSION_KEY, valueType: String.self, diagnostics : &diagnostics)
+        self.title = map.readIfPresent(Self.TITLE_KEY,valueType: String.self, diagnostics : &diagnostics)
+        self.summary = map.readIfPresent(Self.SUMMARY_KEY,valueType: String.self, diagnostics : &diagnostics)
+        self.description = map.readIfPresent(Self.DESCRIPTION_KEY,valueType: String.self, diagnostics : &diagnostics)
+        self.termsOfService = map.readIfPresent( Self.TERMS_KEY,valueType: String.self, diagnostics : &diagnostics)
         self.contact = try  map.readIfPresent(Self.CONTACT_KEY, objectType: OpenAPIContact.self, diagnostics: &diagnostics)
         self.license = try map.readIfPresent(Self.LICENSE_KEY, objectType: OpenAPILicense.self, diagnostics: &diagnostics)
         extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)

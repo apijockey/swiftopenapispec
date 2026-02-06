@@ -39,7 +39,7 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
             return
         }
       
-        let type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self)
+        let type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self, diagnostics : &diagnostics)
         switch type {
         case .some("string"):
             self = .string
@@ -51,7 +51,7 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
             self = .integer
 
         case .some("array"):
-            let arrayType = try OpenAPIArrayType(load: map)
+            let arrayType = try OpenAPIArrayType(load: map, diagnostics : &diagnostics)
             self = .array(arrayType)
 
         case .some("object"):
@@ -64,7 +64,7 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
         case .some("null"):
             self = .null
         default:
-            if map.readIfPresent(OpenAPISchemaReference.REF_KEY, valueType: String.self) != nil{
+            if map.readIfPresent(OpenAPISchemaReference.REF_KEY, valueType: String.self, diagnostics : &diagnostics) != nil{
                 let ref = try OpenAPISchemaReference(load: map, diagnostics: &diagnostics)
                    self = .ref(ref)
                    return

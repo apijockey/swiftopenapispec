@@ -31,9 +31,9 @@ public struct OpenAPIRequestBody : KeyedElement , PointerNavigable {
             return
         }
         self.contents = try map.mapListIfPresent(Self.CONTENTS_KEY, objectType: OpenAPIMediaType.self, diagnostics: &diagnostics)
-        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self)
+        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self, diagnostics : &diagnostics)
         
-        self.required = map.readIfPresent(Self.REQUIRED_KEY, valueType: Bool.self) ?? false
+        self.required = map.readIfPresent(Self.REQUIRED_KEY, valueType: Bool.self, diagnostics : &diagnostics) ?? false
         
     }
    

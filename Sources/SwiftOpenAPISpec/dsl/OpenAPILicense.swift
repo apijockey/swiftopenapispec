@@ -19,9 +19,9 @@
 import Foundation
 public struct OpenAPILicense : ThrowingHashMapInitiable , PointerNavigable {
     public init(load map: StringDictionary, diagnostics: inout [Diagnostic]) throws {
-        self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self)
-        self.identifier = map.readIfPresent(Self.IDENTIFIER_KEY, valueType: String.self)
-        self.url = map.readIfPresent(Self.URL_KEY, valueType: String.self)
+        self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self, diagnostics : &diagnostics)
+        self.identifier = map.readIfPresent(Self.IDENTIFIER_KEY, valueType: String.self, diagnostics : &diagnostics)
+        self.url = map.readIfPresent(Self.URL_KEY, valueType: String.self, diagnostics : &diagnostics)
         
     }
     

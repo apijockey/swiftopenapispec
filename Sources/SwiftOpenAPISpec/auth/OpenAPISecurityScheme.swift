@@ -74,25 +74,25 @@ public struct OpenAPISecurityScheme : KeyedElement , PointerNavigable {
                     self.ref = OpenAPISchemaReference(ref: refKey)
             return
         }
-        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self)
-        if let securityRawType = map.readIfPresent(Self.TYPE_KEY, valueType: String.self),
+        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self, diagnostics : &diagnostics)
+        if let securityRawType = map.readIfPresent(Self.TYPE_KEY, valueType: String.self, diagnostics : &diagnostics),
            let securityType =  SecurityType(rawValue: securityRawType) {
             self.securityType = securityType
             switch securityType  {
             case .apiKey:
-                self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self)
-                if let locationRawValue = map.readIfPresent(Self.LOCATION_KEY, valueType: String.self),
+                self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self, diagnostics : &diagnostics)
+                if let locationRawValue = map.readIfPresent(Self.LOCATION_KEY, valueType: String.self, diagnostics : &diagnostics),
                    let location = APIKeyLocation(rawValue: locationRawValue) {
                     self.location = location
                 }
             case .http:
-                self.httpScheme = map.readIfPresent(Self.SCHEME_KEY,valueType:  String.self)
-                self.httpBearerFormat = map.readIfPresent(Self.BEARER_FORMAT_KEY, valueType: String.self)
+                self.httpScheme = map.readIfPresent(Self.SCHEME_KEY,valueType:  String.self, diagnostics : &diagnostics)
+                self.httpBearerFormat = map.readIfPresent(Self.BEARER_FORMAT_KEY, valueType: String.self, diagnostics : &diagnostics)
             case .oauth2:
                 self.flows = try map.readIfPresent(Self.FLOWS_KEY, objectType: OpenAPIOAuthFlows.self, diagnostics: &diagnostics)
-                self.oauth2MetadataURL = map.readIfPresent(Self.OAUTH2_METADATA_URL_KEY, valueType: String.self)
+                self.oauth2MetadataURL = map.readIfPresent(Self.OAUTH2_METADATA_URL_KEY, valueType: String.self, diagnostics : &diagnostics)
             case .openIdConnect:
-                self.openIdConnectURL = map.readIfPresent(Self.OPENID_CONNECT_URL_KEY, valueType: String.self)
+                self.openIdConnectURL = map.readIfPresent(Self.OPENID_CONNECT_URL_KEY, valueType: String.self, diagnostics : &diagnostics)
                 
             case .mutualTLS:
                 return

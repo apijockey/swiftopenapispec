@@ -32,8 +32,8 @@ public struct OpenAPIResponse : KeyedElement, PointerNavigable {
                     self.ref = OpenAPISchemaReference(ref: refKey)
             return
         }
-        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType:  String.self)
-        self.summary = map.readIfPresent(Self.SUMMARY_KEY, valueType: String.self)
+        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType:  String.self, diagnostics : &diagnostics)
+        self.summary = map.readIfPresent(Self.SUMMARY_KEY, valueType: String.self, diagnostics : &diagnostics)
         self.content = try map.mapListIfPresent(Self.CONTENT_KEY, objectType: OpenAPIMediaType.self, diagnostics: &diagnostics)
         self.headers = try map.mapListIfPresent(Self.HEADERS_KEY, objectType: OpenAPIHeader.self, diagnostics: &diagnostics)
         self.links =   try map.mapListIfPresent(Self.LINKS_KEY, objectType: OpenAPILink .self, diagnostics: &diagnostics)

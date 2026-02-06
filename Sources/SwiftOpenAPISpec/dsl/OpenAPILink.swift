@@ -33,12 +33,12 @@ public struct OpenAPILink : KeyedElement , PointerNavigable {
                     self.ref = OpenAPISchemaReference(ref: refKey)
             return
         }
-        description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self)
+        description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self, diagnostics : &diagnostics)
         extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
-        operationRef = map.readIfPresent(Self.OPERATIION_REF_KEY,valueType:  String.self)
-        operationId = map.readIfPresent(Self.OPERATIION_ID_KEY,valueType:  String.self)
+        operationRef = map.readIfPresent(Self.OPERATIION_REF_KEY,valueType:  String.self, diagnostics : &diagnostics)
+        operationId = map.readIfPresent(Self.OPERATIION_ID_KEY,valueType:  String.self, diagnostics : &diagnostics)
         server = try map.readIfPresent(Self.SERVER_KEY, objectType: OpenAPIServer.self, diagnostics: &diagnostics)
-        requestBody = map.readIfPresent(Self.REQUEST_BODY_KEY,valueType:  String.self)
+        requestBody = map.readIfPresent(Self.REQUEST_BODY_KEY,valueType:  String.self, diagnostics : &diagnostics)
         let parameterData = map[Self.PARAMETERS_KEY]
 
         if case let .object(value) = parameterData {

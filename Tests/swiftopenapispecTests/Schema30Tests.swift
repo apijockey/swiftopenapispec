@@ -185,7 +185,7 @@ struct Schema30ValidationTests {
     @Test("Schema rules for 3.0 hit",arguments: [
         "05-response-invalidType",
         "05-response-invalidPropertyType",
-        "10-schematests-wrongformat"
+       // "10-schematests-wrongformat"
     ])
     func schemaRulesHit(resource : String) async throws {
     let subDirectory = "Resources/3_0/invalid"
@@ -222,5 +222,41 @@ struct Schema30ValidationTests {
         
     
     }
-   
+    @Test("Schema Warning rules for 3.0 hit",arguments: [
+            "10-schematests-inconsistentformat",
+            "10-schematests-invalidAllOfAnyOf",
+            "10-schematests-identifiableNullable"
+    ])
+    func schemaWarningRulesHit(resource : String) async throws {
+        let subDirectory = "Resources/3_0/invalid"
+        guard let resourceUrl = Bundle.module.url(forResource: resource , withExtension: "yaml", subdirectory: subDirectory) else {
+            throw FixtureErrors.notFound(resource )
+        }
+        
+        
+        guard case let .object(yaml) = try fixtureMap(resource, subDirectory: subDirectory) else {
+            Issue.record("Expected .object(let)")
+            return
+        }
+        let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url:resource , documentLoader: YamsDocumentLoader())
+        let diagnostics = apiSpec.diagnostics
+        print(diagnostics)
+        guard let fixture = Self.fixtureManifest(fixtureName: resource, subDirectory: subDirectory) else {
+            throw FixtureErrors.notFound(resource )
+        }
+        let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: resource, operationIds: [])
+        let objectLoader = YamsDocumentLoader()
+        var resolver = JSONPointerResolver(baseURL: resourceUrl, loadDocument:  objectLoader.load(from:))
+        
+        let diags = try await Validator.validateSchema(spec: apiSpec, ctx: ctx, baseURI: resource, resolver: &resolver)
+      
+       
+        for (error,expected) in zip(diags,fixture.expected) {
+            #expect(error.message.contains(expected.messageContains))
+            #expect(error.pointer == expected.pointer)
+            #expect(error.rule == expected.rule)
+            #expect(error.code.rawValue == expected.code)
+            #expect(error.severity.rawValue == expected.severity)
+        }
+    }
 }

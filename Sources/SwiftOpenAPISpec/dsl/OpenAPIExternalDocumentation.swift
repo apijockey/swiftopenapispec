@@ -37,8 +37,8 @@ public struct OpenAPIExternalDocumentation : ThrowingHashMapInitiable, PointerNa
   
 
     public init(load map: StringDictionary, diagnostics: inout [Diagnostic]) throws {
-        self.url = map.readIfPresent("url", valueType: String.self)
-        self.description = map.readIfPresent("description", valueType: String.self)
+        self.url = map.readIfPresent("url", valueType: String.self, diagnostics : &diagnostics)
+        self.description = map.readIfPresent("description", valueType: String.self, diagnostics : &diagnostics)
     }
     public var description : String? = nil
     public var url : String?
