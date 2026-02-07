@@ -156,7 +156,7 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
     public static let MIN_ITEMS_KEY = "minItems"
     
     public static let READ_ONLY_KEY = "readOnly"
-    public static let WRITE_ONLY_KEY = "readOnly"
+    public static let WRITE_ONLY_KEY = "writeOnly"
     
     public static let PROPERTIES_KEY = "properties"
     public static let MAX_PROPERTIES_KEY = "maxProperties"

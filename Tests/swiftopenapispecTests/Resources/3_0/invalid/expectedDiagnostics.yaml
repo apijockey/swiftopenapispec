@@ -107,7 +107,7 @@ cases:
   - fixture: "05-response-invalidPropertyType"
     shouldPass: false
     expected:
-      - code: "invalidType"
+      - code: "schemaViolation"
         pointer: "/paths/~1create/operations/responses/201/content/application~1json/schema/properties/id/type"
         rule: "Schema.SupportedTypes"
         severity: "error"
@@ -123,12 +123,12 @@ cases:
   - fixture: "10-schematests-inconsistentformat"
     shouldPass: false
     expected:
-      - code: "invalidValue"
+      - code: "schemaViolation"
         pointer: "/components/schema/Credit/properties/price"
         rule: "Schema.SupportedFormat"
         severity: "warning"
         messageContains: "format 'float' not predefined for 'string'"
-      - code: "invalidValue"
+      - code: "schemaViolation"
         pointer: "/components/schema/Credit/properties/weight"
         rule: "Schema.SupportedFormat"
         severity: "warning"
@@ -136,20 +136,20 @@ cases:
   - fixture: "10-schematests-invalidAllOfAnyOf"
     shouldPass: false
     expected:
-      - code: "invalidValue"
-        pointer: "/components/schema/Pet/AllOf"
+      - code: "schemaViolation"
+        pointer: "/components/schema/Pet/allOf"
         rule: "Schema.AnyOneAllWithObjectArray"
         severity: "error"
-        messageContains: "AllOf must contain an array of objects"
-      - code: "invalidValue"
-        pointer: "/components/schema/Vehicle/AnyOf"
+        messageContains: "'AllOf' elements must be of type 'object'"
+      - code: "schemaViolation"
+        pointer: "/components/schema/Vehicle/anyOf"
         rule: "Schema.AnyOneAllWithObjectArray"
         severity: "error"
-        messageContains: "AnyOf must contain an array of objects"
+        messageContains: "'AnyOf' elements must be of type 'object'"
   - fixture: "10-schematests-wrongformat"
     shouldPass: false
     expected:
-      - code: "invalidValue"
+      - code: "schemaViolation"
         pointer: "/components/schema/User/properties/credit/multipleOf"
         rule: "Schema.MultipleOf"
         severity: "error"
@@ -157,4 +157,27 @@ cases:
   - fixture: "10-schematests-identifiableNullable"
     shouldPass: true
     expected:
+  - fixture: "10-schematests-invalidreadwriteonly"
+    shouldPass: false
+    expected:
+      - code: "schemaViolation"
+        pointer: "/components/schema/Acccount/properties/id/readonly"
+        rule: "Schema.ReadOrWriteOnly"
+        severity: "error"
+        messageContains: "A property MUST NOT be marked as both 'readOnly' and 'writeOnly' being 'true'."
+  - fixture: "10-schematests-wrongconstraints"
+    shouldPass: false
+    expected:
+      - code: "schemaViolation"
+        pointer: "/components/schema/Password/maxLength"
+        rule: "Schema.StringMinMaxLength"
+        severity: "error"
+        messageContains: "minLength '10' must be <= maxLength '5'."
+      - code: "schemaViolation"
+        pointer: "/components/schema/Age/maximum"
+        rule: "Schema.StringMinMaxLength"
+        severity: "error"
+        messageContains: "minLength '18' must be <= maxLength '10'."
+    
+               
     

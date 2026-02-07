@@ -225,7 +225,9 @@ struct Schema30ValidationTests {
     @Test("Schema Warning rules for 3.0 hit",arguments: [
             "10-schematests-inconsistentformat",
             "10-schematests-invalidAllOfAnyOf",
-            "10-schematests-identifiableNullable"
+            "10-schematests-identifiableNullable",
+            "10-schematests-invalidreadwriteonly",
+            "10-schematests-wrongconstraints"
     ])
     func schemaWarningRulesHit(resource : String) async throws {
         let subDirectory = "Resources/3_0/invalid"
@@ -249,7 +251,8 @@ struct Schema30ValidationTests {
         var resolver = JSONPointerResolver(baseURL: resourceUrl, loadDocument:  objectLoader.load(from:))
         
         let diags = try await Validator.validateSchema(spec: apiSpec, ctx: ctx, baseURI: resource, resolver: &resolver)
-      
+        print(diags)
+        print(fixture.expected)
        
         for (error,expected) in zip(diags,fixture.expected) {
             #expect(error.message.contains(expected.messageContains))

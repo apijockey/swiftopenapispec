@@ -95,6 +95,7 @@ public struct SchemaRuleRunner  : Sendable{
         if ctx.dialect == .oas30  {
             rules.append(SupportedFormatsRule())
             rules.append(MultipleOfRule())
+            rules.append(SchemaObjectReadOrWriteOnlyRule())
             rules.append(OAS30SupportedTypeRule())
             rules.append(RequiredSubsetOfPropertiesRule())
             rules.append(OneAnyAllMustHaveObjectArrayCompositionRule())
@@ -104,6 +105,7 @@ public struct SchemaRuleRunner  : Sendable{
         else {
             rules.append(StringMinMaxLengthRule())
             rules.append(RequiredSubsetOfPropertiesRule())
+            rules.append(SchemaObjectReadOrWriteOnlyRule())
             rules.append(OAS30SupportedTypeRule())
             rules.append(OneAnyAllMustHaveObjectArrayCompositionRule())
             rules.append(NonEmptyCompositionRule())
@@ -127,7 +129,7 @@ public struct NonEmptyCompositionRule: SchemaRule {
             diags.append(.init(
                 severity: .error,
                 code: .schemaViolation,
-                message: "anyOf must contain an array of objects.",
+                message: "'AnyOf' must contain an array of objects.",
                 pointer: JSONPointer.join(pointer, "anyOf"),
                 rule: name
             ))
@@ -138,7 +140,7 @@ public struct NonEmptyCompositionRule: SchemaRule {
             diags.append(.init(
                 severity: .error,
                 code: .schemaViolation,
-                message: "oneOf must contain an array of objects.",
+                message: "'OneOf' must contain an array of objects.",
                 pointer: JSONPointer.join(pointer, "oneOf"),
                 rule: name
             ))
@@ -149,7 +151,7 @@ public struct NonEmptyCompositionRule: SchemaRule {
             diags.append(.init(
                 severity: .error,
                 code: .schemaViolation,
-                message: "allOf must contain an array of objects.",
+                message: "'AllOf' must contain an array of objects.",
                 pointer: JSONPointer.join(pointer, "allOf"),
                 rule: name
             ))
@@ -179,7 +181,7 @@ public struct OneAnyAllMustHaveObjectArrayCompositionRule: SchemaRule {
                     diags.append(.init(
                         severity: .error,
                         code: .schemaViolation,
-                        message: "anyOf elements must be of type 'object'",
+                        message: "'AnyOf' elements must be of type 'object'",
                         pointer: JSONPointer.join(pointer, "anyOf"),
                         rule: name
                     ))
@@ -195,7 +197,7 @@ public struct OneAnyAllMustHaveObjectArrayCompositionRule: SchemaRule {
                     diags.append(.init(
                         severity: .error,
                         code: .schemaViolation,
-                        message: "oneOf elements must be of type 'object'",
+                        message: "'OneOf' elements must be of type 'object'",
                         pointer: JSONPointer.join(pointer, "oneOf"),
                         rule: name
                     ))
@@ -210,7 +212,7 @@ public struct OneAnyAllMustHaveObjectArrayCompositionRule: SchemaRule {
                     diags.append(.init(
                         severity: .error,
                         code: .schemaViolation,
-                        message: "allOf elements must be of type 'object'",
+                        message: "'AllOf' elements must be of type 'object'",
                         pointer: JSONPointer.join(pointer, "allOf"),
                         rule: name
                     ))
@@ -234,8 +236,8 @@ public struct StringMinMaxLengthRule: SchemaRule {
         if min > max {
             return [.init(
                 severity: .error,
-                code: .invalidValue,
-                message: "minLength (\(min)) must be <= maxLength (\(max)).",
+                code: .schemaViolation,
+                message: "minLength '(\(min))' must be <= maxLength '(\(max))'.",
                 pointer: pointer,
                 rule: name
             )]
@@ -259,11 +261,32 @@ public struct MultipleOfRule: SchemaRule {
         }
         return [.init(
             severity: .error,
-            code: .invalidValue,
+            code: .schemaViolation,
             message: "The value of 'multipleOf' MUST be strictly greater than 0",
             pointer: JSONPointer.join(pointer,"multipleOf"),
             rule: name
         )]
+    }
+}
+
+public struct SchemaObjectReadOrWriteOnlyRule: SchemaRule {
+    public let name = "Schema.ReadOrWriteOnly"
+    public init() {}
+    
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        if schema.readOnly == true && schema.writeOnly == true {
+            return [.init(
+                severity: .error,
+                code: .schemaViolation,
+                message: "A property MUST NOT be marked as both 'readOnly' and 'writeOnly' being 'true'. ",
+                pointer: JSONPointer.join(pointer,"readonly"),
+                rule: name
+            )]
+        }
+        else {
+            return []
+        }
+        
     }
 }
 
@@ -291,7 +314,7 @@ public struct OAS30SupportedTypeRule: SchemaRule {
                           rule: "Schema.SupportedTypes")]
         }
         else if case .unknown(let type) = schema.type {
-            return [.init(severity: .error, code: .invalidType,
+            return [.init(severity: .error, code: .schemaViolation,
                           message: "type '\(type)' not supported or not recognized in OpenAPI 3.0",
                           pointer: "\(pointer)/type",
                           rule: "Schema.SupportedTypes")]
@@ -342,7 +365,7 @@ public struct SupportedFormatsRule: SchemaRule {
         if case .string = schema.type {
             if ["byte","binary","", "date","date-time ","password"].contains(schema.format)  || schema.format == nil { return [] }
             else {
-                diags.append(Diagnostic(severity: .warning, code: .invalidValue, message: "format '\(schema.format ?? "")' not predefined for 'string'", pointer: pointer, rule: name))
+                diags.append(Diagnostic(severity: .warning, code: .schemaViolation, message: "format '\(schema.format ?? "")' not predefined for 'string'", pointer: pointer, rule: name))
             }
         }
         else if case .integer = schema.type {
@@ -350,7 +373,7 @@ public struct SupportedFormatsRule: SchemaRule {
                 return []
             }
             else {
-                diags.append(Diagnostic(severity: .warning, code: .invalidValue, message: "format '\(schema.format ?? "")' not predefined for 'integer'", pointer: pointer, rule: name))
+                diags.append(Diagnostic(severity: .warning, code: .schemaViolation, message: "format '\(schema.format ?? "")' not predefined for 'integer'", pointer: pointer, rule: name))
             }
         }
             
@@ -359,12 +382,12 @@ public struct SupportedFormatsRule: SchemaRule {
                 return []
             }
             else {
-                diags.append(Diagnostic(severity: .warning, code: .invalidValue, message: "format '\(schema.format ?? "")' not predefined for 'String'", pointer: pointer, rule: name))
+                diags.append(Diagnostic(severity: .warning, code: .schemaViolation, message: "format '\(schema.format ?? "")' not predefined for 'String'", pointer: pointer, rule: name))
             }
         }
         else {
             if !(schema.format ?? "").isEmpty {
-                diags.append(Diagnostic(severity: .warning, code: .invalidValue, message: "format '\(schema.format ?? "")' not expected", pointer: pointer, rule: name))
+                diags.append(Diagnostic(severity: .warning, code: .schemaViolation, message: "format '\(schema.format ?? "")' not expected", pointer: pointer, rule: name))
             }
         }
         
