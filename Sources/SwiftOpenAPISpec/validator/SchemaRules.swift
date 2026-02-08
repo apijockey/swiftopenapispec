@@ -99,7 +99,7 @@ public struct SchemaRuleRunner  : Sendable{
             rules.append(OAS30SupportedTypeRule())
             rules.append(RequiredSubsetOfPropertiesRule())
             rules.append(OneAnyAllMustHaveObjectArrayCompositionRule())
-            rules.append(NonEmptyCompositionRule())
+          
             
         }
         else {
@@ -108,58 +108,10 @@ public struct SchemaRuleRunner  : Sendable{
             rules.append(SchemaObjectReadOrWriteOnlyRule())
             rules.append(OAS30SupportedTypeRule())
             rules.append(OneAnyAllMustHaveObjectArrayCompositionRule())
-            rules.append(NonEmptyCompositionRule())
+           
         }
         return SchemaRuleRunner(rules: rules, ctx: ctx)
     }
-}
-/// Rule: anyOf/oneOf/allOf must contain at least one item.
-public struct NonEmptyCompositionRule: SchemaRule {
-    
-    
-    public let name = "Schema.AnyOneAllWithObjectArray"
-    public init() {}
-    
-    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
-        
-        var diags: [Diagnostic] = []
-        
-        if case let .anyOf(ofType) = schema.type,
-            (ofType.items ?? []).isEmpty {
-            diags.append(.init(
-                severity: .error,
-                code: .schemaViolation,
-                message: "'AnyOf' must contain an array of objects.",
-                pointer: JSONPointer.join(pointer, "anyOf"),
-                rule: name
-            ))
-        }
-        
-        if case let .oneOf(ofType) = schema.type,
-            (ofType.items ?? []).isEmpty {
-            diags.append(.init(
-                severity: .error,
-                code: .schemaViolation,
-                message: "'OneOf' must contain an array of objects.",
-                pointer: JSONPointer.join(pointer, "oneOf"),
-                rule: name
-            ))
-        }
-        
-        if case let .allOf(ofType) = schema.type,
-           (ofType.items ?? []).isEmpty {
-            diags.append(.init(
-                severity: .error,
-                code: .schemaViolation,
-                message: "'AllOf' must contain an array of objects.",
-                pointer: JSONPointer.join(pointer, "allOf"),
-                rule: name
-            ))
-        }
-        
-        return diags
-    }
-   
 }
 
 
@@ -174,6 +126,38 @@ public struct OneAnyAllMustHaveObjectArrayCompositionRule: SchemaRule {
         
         var diags: [Diagnostic] = []
         
+        if case let .anyOf(ofType) = schema.type,
+            (ofType.items ?? []).isEmpty {
+            diags.append(.init(
+                severity: .error,
+                code: .schemaViolation,
+                message: "'AnyOf' elements must be of type 'object'.",
+                pointer: JSONPointer.join(pointer, "anyOf"),
+                rule: name
+            ))
+        }
+        
+        if case let .oneOf(ofType) = schema.type,
+            (ofType.items ?? []).isEmpty {
+            diags.append(.init(
+                severity: .error,
+                code: .schemaViolation,
+                message: "'OneOf' elements must be of type 'object'.",
+                pointer: JSONPointer.join(pointer, "oneOf"),
+                rule: name
+            ))
+        }
+        
+        if case let .allOf(ofType) = schema.type,
+           (ofType.items ?? []).isEmpty {
+            diags.append(.init(
+                severity: .error,
+                code: .schemaViolation,
+                message: "'AllOf' elements must be of type 'object'.",
+                pointer: JSONPointer.join(pointer, "allOf"),
+                rule: name
+            ))
+        }
         if case let .anyOf(ofType) = schema.type {
             for item in ofType.items  ?? [] {
                 if case .object =  item.type { }
@@ -181,7 +165,7 @@ public struct OneAnyAllMustHaveObjectArrayCompositionRule: SchemaRule {
                     diags.append(.init(
                         severity: .error,
                         code: .schemaViolation,
-                        message: "'AnyOf' elements must be of type 'object'",
+                        message: "'AnyOf' elements must be of type 'object'.",
                         pointer: JSONPointer.join(pointer, "anyOf"),
                         rule: name
                     ))
@@ -197,7 +181,7 @@ public struct OneAnyAllMustHaveObjectArrayCompositionRule: SchemaRule {
                     diags.append(.init(
                         severity: .error,
                         code: .schemaViolation,
-                        message: "'OneOf' elements must be of type 'object'",
+                        message: "'OneOf' elements must be of type 'object'.",
                         pointer: JSONPointer.join(pointer, "oneOf"),
                         rule: name
                     ))
@@ -212,7 +196,7 @@ public struct OneAnyAllMustHaveObjectArrayCompositionRule: SchemaRule {
                     diags.append(.init(
                         severity: .error,
                         code: .schemaViolation,
-                        message: "'AllOf' elements must be of type 'object'",
+                        message: "'AllOf' elements must be of type 'object'.",
                         pointer: JSONPointer.join(pointer, "allOf"),
                         rule: name
                     ))
@@ -382,7 +366,7 @@ public struct SupportedFormatsRule: SchemaRule {
                 return []
             }
             else {
-                diags.append(Diagnostic(severity: .warning, code: .schemaViolation, message: "format '\(schema.format ?? "")' not predefined for 'String'", pointer: pointer, rule: name))
+                diags.append(Diagnostic(severity: .warning, code: .schemaViolation, message: "format '\(schema.format ?? "")' not predefined for 'number'", pointer: pointer, rule: name))
             }
         }
         else {

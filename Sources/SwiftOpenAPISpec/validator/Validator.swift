@@ -98,7 +98,7 @@ public struct Validator {
         if let schemas = spec.components?.schemas {
             for namedSchema in schemas {
                 
-                    try await diagnostics.append(contentsOf:schemaRuleRunner.run(schema: namedSchema, pointer: "/components/schema/\(namedSchema.key ?? "")", resolver: &resolver))
+                    try await diagnostics.append(contentsOf:schemaRuleRunner.run(schema: namedSchema, pointer: "/components/schemas/\(namedSchema.key ?? "")", resolver: &resolver))
                 
             }
         }

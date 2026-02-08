@@ -18,7 +18,7 @@ cases:
     expected:
       - code: "schemaViolation"
         pointer: "/components/schemas/InvalidSchema/required"
-        rule: "Schema.RequiredPropertiesMustBeDefined"
+        rule: "Schema.RequiredSubsetOfProperties"
         severity: "error"
-        messageContains: "Required property 'missing_required_field' is not defined in properties"
+        messageContains: "Object marks 'missing_required_field' as required, but no such property exists"
     onlyThese: true

@@ -99,7 +99,7 @@ cases:
   - fixture: "05-response-invalidType"
     shouldPass: false
     expected:
-      - code: "invalidType"
+      - code: "schemaViolation"
         pointer: "/paths/~1create/operations/responses/201/content/application~1json/schema/type"
         rule: "Schema.SupportedTypes"
         severity: "error"
@@ -124,12 +124,12 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/components/schema/Credit/properties/price"
+        pointer: "/components/schemas/Product/properties/price"
         rule: "Schema.SupportedFormat"
         severity: "warning"
         messageContains: "format 'float' not predefined for 'string'"
       - code: "schemaViolation"
-        pointer: "/components/schema/Credit/properties/weight"
+        pointer: "/components/schemas/Product/properties/weight"
         rule: "Schema.SupportedFormat"
         severity: "warning"
         messageContains: "format 'binary' not predefined for 'number'"
@@ -137,20 +137,20 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/components/schema/Pet/allOf"
-        rule: "Schema.AnyOneAllWithObjectArray"
+        pointer: "/components/schemas/Pet/allOf"
+        rule: "Schema.OneAnyAllMustHaveObjectArray"
         severity: "error"
-        messageContains: "'AllOf' elements must be of type 'object'"
+        messageContains: "'AllOf' elements must be of type 'object'."
       - code: "schemaViolation"
-        pointer: "/components/schema/Vehicle/anyOf"
-        rule: "Schema.AnyOneAllWithObjectArray"
+        pointer: "/components/schemas/Vehicle/anyOf"
+        rule: "Schema.OneAnyAllMustHaveObjectArray"
         severity: "error"
-        messageContains: "'AnyOf' elements must be of type 'object'"
+        messageContains: "'AnyOf' elements must be of type 'object'."
   - fixture: "10-schematests-wrongformat"
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/components/schema/User/properties/credit/multipleOf"
+        pointer: "/components/schemas/User/properties/credit/multipleOf"
         rule: "Schema.MultipleOf"
         severity: "error"
         messageContains: "The value of 'multipleOf' MUST be strictly greater than 0"
@@ -161,7 +161,7 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/components/schema/Acccount/properties/id/readonly"
+        pointer: "/components/schemas/Acccount/properties/id/readonly"
         rule: "Schema.ReadOrWriteOnly"
         severity: "error"
         messageContains: "A property MUST NOT be marked as both 'readOnly' and 'writeOnly' being 'true'."
@@ -169,12 +169,12 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/components/schema/Password/maxLength"
+        pointer: "/components/schemas/Password/maxLength"
         rule: "Schema.StringMinMaxLength"
         severity: "error"
         messageContains: "minLength '10' must be <= maxLength '5'."
       - code: "schemaViolation"
-        pointer: "/components/schema/Age/maximum"
+        pointer: "/components/schemas/Age/maximum"
         rule: "Schema.StringMinMaxLength"
         severity: "error"
         messageContains: "minLength '18' must be <= maxLength '10'."
@@ -183,9 +183,9 @@ cases:
     expected:
       - code: "schemaViolation"
         pointer: "/components/schemas/InvalidSchema/required"
-        rule: "Schema.RequiredPropertiesMustBeDefined"
+        rule: "Schema.RequiredSubsetOfProperties"
         severity: "error"
-        messageContains: "Required property 'missing_required_field' is not defined in properties"
+        messageContains: "Object marks 'missing_required_field' as required, but no such property exists"
     onlyThese: true
     
                
