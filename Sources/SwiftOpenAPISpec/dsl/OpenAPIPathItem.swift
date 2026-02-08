@@ -47,7 +47,7 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
     /// "/ping"
     /// inits an instance of ``OpenAPIPath``
     /// - Parameter map: Swift dictionary with a Path key and  value elements representing HTTP methods like **GET**, **POST** and **PUT**
-    public init(load map: StringDictionary,diagnostics: inout [Diagnostic]) throws {
+    public init(load map: StringDictionary,diagnostics: inout [Diagnostic],pointer : String) throws {
         // one resource may foresee several httpOperations
         if case let .string(refKey) = map[OpenAPISchemaReference.REF_KEY]{
                     self.ref = OpenAPISchemaReference(ref: refKey)
@@ -59,7 +59,7 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
             if Self.Operations(rawValue: key) != nil,
                case let .object(dictionary) = httpOperation {
                 
-                var operation = try OpenAPIOperation(load: dictionary, diagnostics: &diagnostics)
+                var operation = try OpenAPIOperation(load: dictionary, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, "\(key)"))
                 operation.key = key
                 self.operations.append(operation)
             }
@@ -71,25 +71,25 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
                    key != Self.PARAMETERS_KEY,
                    !key.starts(with: "x-") {
                     let description = "Key \(key) in PathItem is not a valid HTTP method or a valid Path element"
-                    let diagnostic = Diagnostic(severity:  .error, code: .invalidValue , message: description, pointer: "", rule: "OAS.SupportedHTTPMethodRule")
+                    let diagnostic = Diagnostic(severity:  .error, code: .invalidValue , message: description, pointer: JSONPointer.join(pointer, "\(key)"), rule: "OAS.SupportedHTTPMethodRule")
                     diagnostics.append(diagnostic)
                 }
             }
         
         }
        
-        self.summary  = map.readIfPresent(Self.SUMMARY_KEY, valueType: String.self, diagnostics : &diagnostics)
-        self.description  = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self, diagnostics : &diagnostics)
-        let servers = try map.mapListIfPresent(OpenAPISpecification.SERVERS_KEY, objectType: OpenAPIServer.self, diagnostics: &diagnostics)
+        self.summary  = map.readIfPresent(Self.SUMMARY_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.SUMMARY_KEY))
+        self.description  = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.DESCRIPTION_KEY))
+        let servers = try map.mapListIfPresent(OpenAPISpecification.SERVERS_KEY, objectType: OpenAPIServer.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISpecification.SERVERS_KEY))
         if servers.count > 0 {
             self.servers = servers
         }
-        let parameters = try map.mapListIfPresent(Self.PARAMETERS_KEY, objectType: OpenAPIParameter.self, diagnostics: &diagnostics)
+        let parameters = try map.mapListIfPresent(Self.PARAMETERS_KEY, objectType: OpenAPIParameter.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.PARAMETERS_KEY))
         if parameters.count > 0 {
             self.parameters = parameters
         }
-        self.additionalOperations = try map.mapListIfPresent(Self.ADDITIONAL_OPERATIONS_KEY, valueType: OpenAPIOperation.self)
-        self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
+        self.additionalOperations = try map.mapListIfPresent(Self.ADDITIONAL_OPERATIONS_KEY, valueType: OpenAPIOperation.self, pointer: JSONPointer.join(pointer, Self.ADDITIONAL_OPERATIONS_KEY))
+        self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
     }
    
     public func element(for segmentName: String) throws -> NavigationResult{

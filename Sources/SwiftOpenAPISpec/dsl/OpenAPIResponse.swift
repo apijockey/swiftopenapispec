@@ -26,17 +26,17 @@ public struct OpenAPIResponse : KeyedElement, PointerNavigable {
     public static let CONTENT_KEY = "content"
     public static let HEADERS_KEY = "headers"
     public static let LINKS_KEY = "links"
-    public init(load map: StringDictionary, diagnostics: inout [Diagnostic]) throws {
+    public init(load map: StringDictionary, diagnostics: inout [Diagnostic],pointer : String) throws {
      
         if case let .string(refKey) = map[OpenAPISchemaReference.REF_KEY]{
                     self.ref = OpenAPISchemaReference(ref: refKey)
             return
         }
-        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType:  String.self, diagnostics : &diagnostics)
-        self.summary = map.readIfPresent(Self.SUMMARY_KEY, valueType: String.self, diagnostics : &diagnostics)
-        self.content = try map.mapListIfPresent(Self.CONTENT_KEY, objectType: OpenAPIMediaType.self, diagnostics: &diagnostics)
-        self.headers = try map.mapListIfPresent(Self.HEADERS_KEY, objectType: OpenAPIHeader.self, diagnostics: &diagnostics)
-        self.links =   try map.mapListIfPresent(Self.LINKS_KEY, objectType: OpenAPILink .self, diagnostics: &diagnostics)
+        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType:  String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.DESCRIPTION_KEY))
+        self.summary = map.readIfPresent(Self.SUMMARY_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.SUMMARY_KEY))
+        self.content = try map.mapListIfPresent(Self.CONTENT_KEY, objectType: OpenAPIMediaType.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.CONTENT_KEY))
+        self.headers = try map.mapListIfPresent(Self.HEADERS_KEY, objectType: OpenAPIHeader.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.HEADERS_KEY))
+        self.links =   try map.mapListIfPresent(Self.LINKS_KEY, objectType: OpenAPILink .self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.LINKS_KEY))
       
     }
    

@@ -34,29 +34,29 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
     public static let SCHEMA_KEY = "schema"
     public static let STYLE_KEY = "style"
    
-    public init(load map: StringDictionary, diagnostics: inout [Diagnostic]) throws {
+    public init(load map: StringDictionary, diagnostics: inout [Diagnostic],pointer : String) throws {
         if case let .string(refKey) = map[OpenAPISchemaReference.REF_KEY]{
                     self.ref = OpenAPISchemaReference(ref: refKey)
             return
         }
         
-        self.description =  map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self, diagnostics : &diagnostics)
-        self.deprecated =  map.readIfPresent(Self.DEPRECATED_KEY, valueType: Bool.self, diagnostics : &diagnostics)
-        self.allowEmptyValue = map.readIfPresent(Self.ALLOW_EMPTYVALUE_KEY, valueType: Bool.self, diagnostics : &diagnostics)
+        self.description =  map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: pointer)
+        self.deprecated =  map.readIfPresent(Self.DEPRECATED_KEY, valueType: Bool.self, diagnostics : &diagnostics, pointer: pointer)
+        self.allowEmptyValue = map.readIfPresent(Self.ALLOW_EMPTYVALUE_KEY, valueType: Bool.self, diagnostics : &diagnostics, pointer: pointer)
        
-        self.explode = map.readIfPresent(Self.EXPLODE_KEY, valueType: Bool.self, diagnostics : &diagnostics)
-        self.allowReserved = map.readIfPresent(Self.ALLOW_RESERVED_KEY,valueType:  Bool.self, diagnostics : &diagnostics)
-        self.example = map.readIfPresent(Self.EXAMPLE_KEY,valueType:  String.self, diagnostics : &diagnostics)
+        self.explode = map.readIfPresent(Self.EXPLODE_KEY, valueType: Bool.self, diagnostics : &diagnostics, pointer: pointer)
+        self.allowReserved = map.readIfPresent(Self.ALLOW_RESERVED_KEY,valueType:  Bool.self, diagnostics : &diagnostics, pointer: pointer)
+        self.example = map.readIfPresent(Self.EXAMPLE_KEY,valueType:  String.self, diagnostics : &diagnostics, pointer: pointer)
         
-        self.examples  = try map.mapListIfPresent(Self.EXAMPLES_KEY, objectType: OpenAPIExample.self, diagnostics: &diagnostics)
-        self.content = try map.readIfPresent(Self.CONTENT_KEY,objectType:  OpenAPIMediaType.self, diagnostics: &diagnostics)
-        extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
+        self.examples  = try map.mapListIfPresent(Self.EXAMPLES_KEY, objectType: OpenAPIExample.self, diagnostics: &diagnostics, pointer: pointer)
+        self.content = try map.readIfPresent(Self.CONTENT_KEY,objectType:  OpenAPIMediaType.self, diagnostics: &diagnostics, pointer: pointer)
+        extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
      
        
-        self.required = map.readIfPresent(Self.REQUIRED_KEY, valueType: Bool.self, diagnostics : &diagnostics) ?? false
-        self.schema = try map.readIfPresent(Self.SCHEMA_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics)
+        self.required = map.readIfPresent(Self.REQUIRED_KEY, valueType: Bool.self, diagnostics : &diagnostics, pointer: pointer) ?? false
+        self.schema = try map.readIfPresent(Self.SCHEMA_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: pointer)
        
-        self.style = map.readIfPresent(Self.STYLE_KEY, valueType: String.self, diagnostics : &diagnostics)
+        self.style = map.readIfPresent(Self.STYLE_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: pointer)
        
     }
    

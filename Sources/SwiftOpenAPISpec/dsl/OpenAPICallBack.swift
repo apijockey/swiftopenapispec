@@ -38,16 +38,16 @@ public struct OpenAPICallBack : KeyedElement,PointerNavigable{
     }
     
     
-    public init(load map: StringDictionary,diagnostics: inout [Diagnostic]) throws {
+    public init(load map: StringDictionary,diagnostics: inout [Diagnostic],pointer : String) throws {
         
         if case let .string(refKey) = map[OpenAPISchemaReference.REF_KEY]{
                     self.ref = OpenAPISchemaReference(ref: refKey)
             return
         }
-        extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
+        extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
         if map.count > 0 {
             pathItems = []
-            self.pathItems =  try map.mapListIfPresent(objectType: OpenAPIPathItem.self)
+            self.pathItems =  try map.mapListIfPresent(objectType: OpenAPIPathItem.self, pointer: JSONPointer.join(pointer, "callback"))
         }
      
     }

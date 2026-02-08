@@ -128,21 +128,21 @@ public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
    
    
     
-    public init(load map: StringDictionary, diagnostics: inout [Diagnostic]) throws {
+    public init(load map: StringDictionary, diagnostics: inout [Diagnostic],pointer : String) throws {
         
-            self.callbacks = try map.mapListIfPresent(Self.CALLBACKS_KEY, objectType: OpenAPICallBack.self, diagnostics: &diagnostics)
-            self.mediaTypes = try map.mapListIfPresent(Self.ENCODINGS_KEY, objectType: OpenAPIMediaType.self, diagnostics: &diagnostics)
-            self.examples =  try map.mapListIfPresent(Self.EXAMPLES_KEY, objectType: OpenAPIExample.self, diagnostics: &diagnostics)
-            extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
-            self.headers =  try map.mapListIfPresent(Self.HEADERS_KEY, objectType: OpenAPIHeader.self, diagnostics: &diagnostics)
-            self.links =   try map.mapListIfPresent(Self.LINKS_KEY, objectType: OpenAPILink.self, diagnostics: &diagnostics)
-            self.mediaTypes =  try map.mapListIfPresent(Self.MEDIATYPES_KEY, objectType: OpenAPIMediaType.self, diagnostics: &diagnostics)
-            self.pathItems =   try map.mapListIfPresent(Self.PATHSITEMS_KEY, objectType: OpenAPIPathItem.self, diagnostics: &diagnostics)
-            parameters =   try map.mapListIfPresent(Self.PARAMETERS_KEY, objectType: OpenAPIParameter.self, diagnostics: &diagnostics)
-            self.requestBodies =   try map.mapListIfPresent(Self.REQUEST_BODIES_KEY, objectType: OpenAPIRequestBody.self, diagnostics: &diagnostics)
-            responses =  try map.mapListIfPresent(Self.RESPONSES_KEY, objectType: OpenAPIResponse.self, diagnostics: &diagnostics)
-            schemas =   try map.mapListIfPresent(Self.SCHEMAS_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics)
-            self.securitySchemas =   try map.mapListIfPresent(Self.SECURITY_SCHEMES_KEY, objectType:OpenAPISecurityScheme.self, diagnostics: &diagnostics)
+        self.callbacks = try map.mapListIfPresent(Self.CALLBACKS_KEY, objectType: OpenAPICallBack.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.CALLBACKS_KEY))
+            self.mediaTypes = try map.mapListIfPresent(Self.ENCODINGS_KEY, objectType: OpenAPIMediaType.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.ENCODINGS_KEY))
+            self.examples =  try map.mapListIfPresent(Self.EXAMPLES_KEY, objectType: OpenAPIExample.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXAMPLES_KEY))
+            extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
+            self.headers =  try map.mapListIfPresent(Self.HEADERS_KEY, objectType: OpenAPIHeader.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.HEADERS_KEY))
+            self.links =   try map.mapListIfPresent(Self.LINKS_KEY, objectType: OpenAPILink.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.LINKS_KEY))
+            self.mediaTypes =  try map.mapListIfPresent(Self.MEDIATYPES_KEY, objectType: OpenAPIMediaType.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.MEDIATYPES_KEY))
+            self.pathItems =   try map.mapListIfPresent(Self.PATHSITEMS_KEY, objectType: OpenAPIPathItem.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.PATHSITEMS_KEY))
+            parameters =   try map.mapListIfPresent(Self.PARAMETERS_KEY, objectType: OpenAPIParameter.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.PARAMETERS_KEY))
+            self.requestBodies =   try map.mapListIfPresent(Self.REQUEST_BODIES_KEY, objectType: OpenAPIRequestBody.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.REQUEST_BODIES_KEY))
+            responses =  try map.mapListIfPresent(Self.RESPONSES_KEY, objectType: OpenAPIResponse.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.RESPONSES_KEY))
+            schemas =   try map.mapListIfPresent(Self.SCHEMAS_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.SCHEMAS_KEY))
+            self.securitySchemas =   try map.mapListIfPresent(Self.SECURITY_SCHEMES_KEY, objectType:OpenAPISecurityScheme.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.SECURITY_SCHEMES_KEY))
         
     }
    

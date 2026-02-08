@@ -52,11 +52,12 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     
     public var key: String?
     public var documentLoader : DocumentLoadable?
+    public static let SCHEMA_DATA_TYPE = "Schema.DataType"
     
     /// initializes an OpenAPISpecification
     /// - Parameter unmerged: ``StringDictionary``
     /// public init(load map: StringDictionary throws {
-    public init(load unmerged: StringDictionary,diagnostics: inout [Diagnostic]) throws {
+    public init(load unmerged: StringDictionary,diagnostics: inout [Diagnostic],pointer : String) throws {
         self.diagnostics = diagnostics
         guard let dictionary  =  resolveMergeKeys(in: unmerged) as? StringDictionary else {
             throw OpenAPISpecification.Errors.invalidYaml("mergeKeys failed")
@@ -64,25 +65,25 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
         }
        
         
-        self.version = dictionary.readIfPresent(OpenAPISpecification.OPENAPI_KEY, valueType: String.self, diagnostics : &diagnostics)
-        self.info = try dictionary.readIfPresent(OpenAPISpecification.INFO_KEY, objectType: OpenAPIInfo.self, diagnostics: &diagnostics)
-        self.components = try dictionary.readIfPresent(OpenAPISpecification.COMPONENTS_KEY, objectType: OpenAPIComponent.self, diagnostics: &diagnostics)
-        self.selfUrl =  dictionary.readIfPresent(OpenAPISpecification.SELF_URL_KEY, valueType: String.self, diagnostics : &diagnostics)
+        self.version = dictionary.readIfPresent(OpenAPISpecification.OPENAPI_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISpecification.OPENAPI_KEY) )
+        self.info = try dictionary.readIfPresent(OpenAPISpecification.INFO_KEY, objectType: OpenAPIInfo.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISpecification.INFO_KEY))
+        self.components = try dictionary.readIfPresent(OpenAPISpecification.COMPONENTS_KEY, objectType: OpenAPIComponent.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISpecification.COMPONENTS_KEY))
+        self.selfUrl =  dictionary.readIfPresent(OpenAPISpecification.SELF_URL_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISpecification.SELF_URL_KEY))
         self.key = selfUrl
-        self.tags = try dictionary.mapListIfPresent(OpenAPISpecification.TAGS_KEY, objectType: OpenAPITag.self, diagnostics: &diagnostics)
-        self.externalDocumentation = try dictionary.readIfPresent(OpenAPISpecification.EXTERNAL_DOCS_KEY,objectType: OpenAPIExternalDocumentation.self, diagnostics: &diagnostics)
-        self.jsonSchemaDialect = dictionary.readIfPresent(OpenAPISpecification.JSON_SCHEMA_DIALECT_KEY, valueType: String.self, diagnostics : &diagnostics)
-        let servers =  try dictionary.mapListIfPresent(OpenAPISpecification.SERVERS_KEY, objectType: OpenAPIServer.self, diagnostics: &diagnostics)
+        self.tags = try dictionary.mapListIfPresent(OpenAPISpecification.TAGS_KEY, objectType: OpenAPITag.self, diagnostics: &diagnostics, pointer:JSONPointer.join(pointer, OpenAPISpecification.TAGS_KEY))
+        self.externalDocumentation = try dictionary.readIfPresent(OpenAPISpecification.EXTERNAL_DOCS_KEY,objectType: OpenAPIExternalDocumentation.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISpecification.EXTERNAL_DOCS_KEY))
+        self.jsonSchemaDialect = dictionary.readIfPresent(OpenAPISpecification.JSON_SCHEMA_DIALECT_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISpecification.JSON_SCHEMA_DIALECT_KEY))
+        let servers =  try dictionary.mapListIfPresent(OpenAPISpecification.SERVERS_KEY, objectType: OpenAPIServer.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISpecification.SERVERS_KEY))
         if servers.count > 0 {
             self.servers = servers
             
         }
-        self.paths   =  try dictionary.mapListIfPresent(OpenAPISpecification.PATHS_KEY, objectType: OpenAPIPathItem.self, diagnostics: &diagnostics)
-        self.webhooks = try dictionary.mapListIfPresent(OpenAPISpecification.WEBHOOKS_KEY, objectType: OpenAPIPathItem.self, diagnostics: &diagnostics)
-        self.securityObjects = try dictionary.mapListIfPresent(Self.SECURITY_KEY, objectType: OpenAPISecuritySchemeReference.self, diagnostics: &diagnostics)
+        self.paths   =  try dictionary.mapListIfPresent(OpenAPISpecification.PATHS_KEY, objectType: OpenAPIPathItem.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISpecification.PATHS_KEY))
+        self.webhooks = try dictionary.mapListIfPresent(OpenAPISpecification.WEBHOOKS_KEY, objectType: OpenAPIPathItem.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISpecification.WEBHOOKS_KEY))
+        self.securityObjects = try dictionary.mapListIfPresent(Self.SECURITY_KEY, objectType: OpenAPISecuritySchemeReference.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.SECURITY_KEY))
         
         
-        self.extensions = try OpenAPIExtension.extensionElements(dictionary, &diagnostics)
+        self.extensions = try OpenAPIExtension.extensionElements(dictionary, &diagnostics, pointer: JSONPointer.join(pointer, "extensions"))
 
        
         
@@ -160,7 +161,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     public static func read(unflattened : StringDictionary, url : String? = nil , documentLoader : DocumentLoadable? = YamsDocumentLoader()) throws -> OpenAPISpecification{
         var diagnostics: [Diagnostic] = []
         do {
-            var openapispec = try OpenAPISpecification(load: unflattened, diagnostics: &diagnostics)
+            var openapispec = try OpenAPISpecification(load: unflattened, diagnostics: &diagnostics, pointer: "")
             openapispec.documentLoader = documentLoader
             if openapispec.key == nil {
                 openapispec.key = url

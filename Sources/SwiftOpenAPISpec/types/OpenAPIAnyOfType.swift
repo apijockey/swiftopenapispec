@@ -52,13 +52,13 @@ public struct OpenAPIAnyOfType : OpenAPISchemaType, PointerNavigable {
     }
     
   
-    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic]) throws {
-        self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self, diagnostics: &diagnostics)
+    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic], pointer : String) throws {
+        self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self, diagnostics: &diagnostics, pointer: pointer)
         
 
         
         
-        self.items = try map.mapListIfPresent(objectType: OpenAPISchema.self )
+        self.items = try map.mapListIfPresent(objectType: OpenAPISchema.self, pointer: pointer)
     }
     
     public func validate() throws {

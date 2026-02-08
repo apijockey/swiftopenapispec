@@ -91,14 +91,14 @@ public struct OpenAPIObjectType : OpenAPISchemaType,ThrowingHashMapInitiable, Po
     public static let MIN_PROPERTIES_KEY = "minProperties"
     public static let UNEVALUATEDPROPERTIES_KEY = "unevaluatedProperties"
     public static let REQUIRED_KEY = "required"
-    public init(load map: StringDictionary, diagnostics: inout [Diagnostic]) throws {
-        self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self, diagnostics : &diagnostics)
-        self.properties = try map.mapListIfPresent(Self.PROPERTIES_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics)
+    public init(load map: StringDictionary, diagnostics: inout [Diagnostic],pointer : String) throws {
+        self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: pointer)
+        self.properties = try map.mapListIfPresent(Self.PROPERTIES_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: pointer)
         
-        self.required = map.readListIfPresent(Self.REQUIRED_KEY, valueType: String.self) ?? []
-        self.minProperties = map.readIfPresent(Self.MIN_PROPERTIES_KEY, valueType: Int.self, diagnostics : &diagnostics)
-        self.maxProperties = map.readIfPresent(Self.MAX_PROPERTIES_KEY, valueType:Int.self, diagnostics : &diagnostics)
-        self.dependentRequired = map.readIfPresent(Self.DEPENDENT_REQUIRED_KEY, valueType: String.self, diagnostics : &diagnostics)
+        self.required = map.readListIfPresent(Self.REQUIRED_KEY, valueType: String.self, diagnostics: &diagnostics) ?? []
+        self.minProperties = map.readIfPresent(Self.MIN_PROPERTIES_KEY, valueType: Int.self, diagnostics : &diagnostics, pointer: pointer)
+        self.maxProperties = map.readIfPresent(Self.MAX_PROPERTIES_KEY, valueType:Int.self, diagnostics : &diagnostics, pointer: pointer)
+        self.dependentRequired = map.readIfPresent(Self.DEPENDENT_REQUIRED_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: pointer)
     }
     
     

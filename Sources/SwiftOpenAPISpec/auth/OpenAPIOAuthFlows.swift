@@ -69,11 +69,11 @@ public struct OpenAPIOAuthFlows : ThrowingHashMapInitiable, PointerNavigable {
     public static let CLIENT_CREDENTIALS_KEY  = "clientCredentials"
     public static let AUTHORIZATION_CODE_KEY  = "authorizationCode"
     public static let DEVICE_AUTHORIZATION_KEY  = "deviceAuthorization"
-    public init(load map: StringDictionary, diagnostics: inout [Diagnostic]) throws {
-        self.implicit = try map.readIfPresent(Self.IMPLICIT_KEY, objectType: OpenAPIOAuthFlow.self, diagnostics: &diagnostics)
-        self.password = try map.readIfPresent(Self.PASSWORD_KEY, objectType: OpenAPIOAuthFlow.self, diagnostics: &diagnostics)
-        self.clienCredentials = try map.readIfPresent(Self.CLIENT_CREDENTIALS_KEY, objectType: OpenAPIOAuthFlow.self, diagnostics: &diagnostics)
-        self.authorizationCode = try map.readIfPresent(Self.AUTHORIZATION_CODE_KEY, objectType: OpenAPIOAuthFlow.self, diagnostics: &diagnostics)
+    public init(load map: StringDictionary, diagnostics: inout [Diagnostic],pointer : String) throws {
+        self.implicit = try map.readIfPresent(Self.IMPLICIT_KEY, objectType: OpenAPIOAuthFlow.self, diagnostics: &diagnostics, pointer: pointer)
+        self.password = try map.readIfPresent(Self.PASSWORD_KEY, objectType: OpenAPIOAuthFlow.self, diagnostics: &diagnostics, pointer: pointer)
+        self.clienCredentials = try map.readIfPresent(Self.CLIENT_CREDENTIALS_KEY, objectType: OpenAPIOAuthFlow.self, diagnostics: &diagnostics, pointer: pointer)
+        self.authorizationCode = try map.readIfPresent(Self.AUTHORIZATION_CODE_KEY, objectType: OpenAPIOAuthFlow.self, diagnostics: &diagnostics, pointer: pointer)
     }
    
     public var implicit : OpenAPIOAuthFlow? = nil

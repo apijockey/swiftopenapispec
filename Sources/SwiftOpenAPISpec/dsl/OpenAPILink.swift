@@ -28,17 +28,17 @@ public struct OpenAPILink : KeyedElement , PointerNavigable {
     public static let SERVER_KEY = "server"
     
    
-    public init(load map: StringDictionary, diagnostics: inout [Diagnostic]) throws {
+    public init(load map: StringDictionary, diagnostics: inout [Diagnostic],pointer : String) throws {
         if case let .string(refKey) = map[OpenAPISchemaReference.REF_KEY]{
                     self.ref = OpenAPISchemaReference(ref: refKey)
             return
         }
-        description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self, diagnostics : &diagnostics)
-        extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
-        operationRef = map.readIfPresent(Self.OPERATIION_REF_KEY,valueType:  String.self, diagnostics : &diagnostics)
-        operationId = map.readIfPresent(Self.OPERATIION_ID_KEY,valueType:  String.self, diagnostics : &diagnostics)
-        server = try map.readIfPresent(Self.SERVER_KEY, objectType: OpenAPIServer.self, diagnostics: &diagnostics)
-        requestBody = map.readIfPresent(Self.REQUEST_BODY_KEY,valueType:  String.self, diagnostics : &diagnostics)
+        description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.DESCRIPTION_KEY))
+        extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
+        operationRef = map.readIfPresent(Self.OPERATIION_REF_KEY,valueType:  String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.OPERATIION_REF_KEY))
+        operationId = map.readIfPresent(Self.OPERATIION_ID_KEY,valueType:  String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.OPERATIION_ID_KEY))
+        server = try map.readIfPresent(Self.SERVER_KEY, objectType: OpenAPIServer.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.SERVER_KEY))
+        requestBody = map.readIfPresent(Self.REQUEST_BODY_KEY,valueType:  String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.REQUEST_BODY_KEY))
         let parameterData = map[Self.PARAMETERS_KEY]
 
         if case let .object(value) = parameterData {

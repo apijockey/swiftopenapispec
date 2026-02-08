@@ -42,11 +42,11 @@ import Foundation
 public struct OpenAPIOAuthFlow : ThrowingHashMapInitiable, PointerNavigable {
    
    
-    public init(load map: StringDictionary,  diagnostics: inout [Diagnostic]) throws {
-        authorizationUrl = map.readIfPresent(Self.AUTHORIZATIONURL_KEY,valueType: String.self, diagnostics : &diagnostics)
-        tokenUrl = map.readIfPresent(Self.TOKENURL_KEY, valueType: String.self, diagnostics : &diagnostics)
-        refreshUrl = map.readIfPresent(Self.REFRESHURL_KEY, valueType: String.self, diagnostics : &diagnostics)
-        scopes = map.readIfPresent(Self.SCOPES_KEY,valueType:  [String:String].self, diagnostics : &diagnostics)
+    public init(load map: StringDictionary,  diagnostics: inout [Diagnostic],pointer : String) throws {
+        authorizationUrl = map.readIfPresent(Self.AUTHORIZATIONURL_KEY,valueType: String.self, diagnostics : &diagnostics, pointer: pointer)
+        tokenUrl = map.readIfPresent(Self.TOKENURL_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: pointer)
+        refreshUrl = map.readIfPresent(Self.REFRESHURL_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: pointer)
+        scopes = map.readIfPresent(Self.SCOPES_KEY,valueType:  [String:String].self, diagnostics : &diagnostics, pointer: pointer)
         if case let .object(scopes) = map[Self.SCOPES_KEY] {
             self.scopes = [String:String]()
             for scope in scopes {

@@ -62,12 +62,12 @@ public struct OpenAPIOneOfType : OpenAPISchemaType,ThrowingHashMapInitiable, Poi
     public static let DISCRIMINATOR_KEY = "discriminator"
     
 
-    public init(load map: StringDictionary,diagnostics: inout [Diagnostic]) throws {
-        self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self, diagnostics : &diagnostics)
+    public init(load map: StringDictionary,diagnostics: inout [Diagnostic],pointer : String) throws {
+        self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: pointer)
         
        
         
-        self.items = try map.mapListIfPresent("oneOf",objectType: OpenAPISchema.self, diagnostics: &diagnostics)
+        self.items = try map.mapListIfPresent("oneOf",objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer : pointer)
     }
    
     public let type : String?

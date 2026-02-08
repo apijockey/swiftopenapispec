@@ -68,16 +68,16 @@ public struct OpenAPIArrayType : OpenAPISchemaType, PointerNavigable{
     public static let MAX_CONTAINS_KEY = "maxContains"
     public static let MIN_CONTAINS_KEY = "minContains"
     
-    public init(load map: StringDictionary, diagnostics : inout [Diagnostic]) throws {
-        self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self, diagnostics: &diagnostics)
-        self.minItems = map.readIfPresent(Self.MIN_ITEMS_KEY, valueType: Int.self, diagnostics: &diagnostics)
-        self.maxItems = map.readIfPresent(Self.MAX_ITEMS_KEY, valueType:  Int.self, diagnostics: &diagnostics)
-        self.maxContains = map.readIfPresent(Self.MAX_CONTAINS_KEY, valueType : Int.self, diagnostics: &diagnostics)
-        self.minContains = map.readIfPresent(Self.MIN_CONTAINS_KEY, valueType:  Int.self, diagnostics: &diagnostics)
-        self.uniqueItems = map.readIfPresent(Self.UNIQE_ITEMS_KEY, valueType:  Bool.self, diagnostics: &diagnostics)
+    public init(load map: StringDictionary, diagnostics : inout [Diagnostic], pointer : String) throws {
+        self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self, diagnostics: &diagnostics, pointer: pointer)
+        self.minItems = map.readIfPresent(Self.MIN_ITEMS_KEY, valueType: Int.self, diagnostics: &diagnostics, pointer: pointer)
+        self.maxItems = map.readIfPresent(Self.MAX_ITEMS_KEY, valueType:  Int.self, diagnostics: &diagnostics, pointer: pointer)
+        self.maxContains = map.readIfPresent(Self.MAX_CONTAINS_KEY, valueType : Int.self, diagnostics: &diagnostics, pointer: pointer)
+        self.minContains = map.readIfPresent(Self.MIN_CONTAINS_KEY, valueType:  Int.self, diagnostics: &diagnostics, pointer: pointer)
+        self.uniqueItems = map.readIfPresent(Self.UNIQE_ITEMS_KEY, valueType:  Bool.self, diagnostics: &diagnostics, pointer: pointer)
          if let list = map[Self.ITEMS_KEY] ,
             case let .object(type) = list {
-             self.items = try OpenAPISchema.initialize(load: type, diagnostics : &diagnostics).value
+             self.items = try OpenAPISchema.initialize(load: type, diagnostics : &diagnostics, pointer: pointer).value
              }
     }
    

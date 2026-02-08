@@ -32,14 +32,14 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
         self = .null
     }
     
-    public init(load map: StringDictionary,  diagnostics: inout [Diagnostic]) throws {
+    public init(load map: StringDictionary,  diagnostics: inout [Diagnostic],pointer : String) throws {
         // Handle $ref first
-        if let reference =  try map.readIfPresent(OpenAPISchemaReference.REF_KEY, objectType: OpenAPISchemaReference.self, diagnostics: &diagnostics) {
+        if let reference =  try map.readIfPresent(OpenAPISchemaReference.REF_KEY, objectType: OpenAPISchemaReference.self, diagnostics: &diagnostics, pointer: pointer) {
             self = .ref(reference)
             return
         }
-      
-        let type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self, diagnostics : &diagnostics)
+        let pointer = JSONPointer.join(pointer, Self.TYPE_KEY)
+        let type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self, diagnostics : &diagnostics, pointer:  pointer)
         switch type {
         case .some("string"):
             self = .string
@@ -51,11 +51,11 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
             self = .integer
 
         case .some("array"):
-            let arrayType = try OpenAPIArrayType(load: map, diagnostics : &diagnostics)
+            let arrayType = try OpenAPIArrayType(load: map, diagnostics : &diagnostics, pointer: pointer)
             self = .array(arrayType)
 
         case .some("object"):
-            let objectType = try OpenAPIObjectType(load: map, diagnostics: &diagnostics)
+            let objectType = try OpenAPIObjectType(load: map, diagnostics: &diagnostics, pointer : pointer)
             self = .object(objectType)
 
         case .some("boolean"):
@@ -64,8 +64,8 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
         case .some("null"):
             self = .null
         default:
-            if map.readIfPresent(OpenAPISchemaReference.REF_KEY, valueType: String.self, diagnostics : &diagnostics) != nil{
-                let ref = try OpenAPISchemaReference(load: map, diagnostics: &diagnostics)
+            if map.readIfPresent(OpenAPISchemaReference.REF_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: pointer) != nil{
+                let ref = try OpenAPISchemaReference(load: map, diagnostics: &diagnostics,pointer :pointer)
                    self = .ref(ref)
                    return
             }
@@ -74,7 +74,7 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
                 case .array  = oneOfValue  {
                 
                 var localDiagnostics: [Diagnostic] = []
-                let oneOf = try OpenAPIOneOfType(load: map, diagnostics: &localDiagnostics)
+                let oneOf = try OpenAPIOneOfType(load: map, diagnostics: &localDiagnostics,pointer : pointer)
                 diagnostics.append(contentsOf: localDiagnostics)
                 self = .oneOf(oneOf)
                 return
@@ -83,13 +83,13 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
             if let oneOfValue = map[OpenAPIAnyOfType.TYPE_KEY],
                 case .array  = oneOfValue  {
                 // OpenAPIAnyOfType has a different initializer style
-                let anyOf = try OpenAPIAnyOfType(load: map,  &diagnostics)
+                let anyOf = try OpenAPIAnyOfType(load: map,  &diagnostics, pointer: pointer)
                 self = .anyOf(anyOf)
                 return
             }
             if let oneOfValue = map[OpenAPIAllOfType.TYPE_KEY],
                 case .array  = oneOfValue  {
-                let allOf = try OpenAPIAllOfType(load: map, diagnostics: &diagnostics)
+                let allOf = try OpenAPIAllOfType(load: map, diagnostics: &diagnostics,pointer : pointer)
                 self = .allOf(allOf)
                 return
             }
@@ -99,7 +99,7 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
                 severity: .error,
                 code: .missingRequired,
                 message: "unsupported or missing type info",
-                pointer: "",
+                pointer: pointer,
                 rule: "Initialization.OpenAPIType"
             )
             diagnostics.append(diagnostic)

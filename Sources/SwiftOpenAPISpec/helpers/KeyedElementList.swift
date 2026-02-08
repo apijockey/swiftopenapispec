@@ -14,13 +14,13 @@ public struct KeyedElementList<T> where T :  KeyedElement {
     /// - Returns: a list of elements or throws an error if any element  of type `T` cannot be created
     
     @available(*, deprecated, message: "use StringDictionary.readIfPresent")
-    static func map(_ elements : StringDictionary) throws -> InitializationResult<[T]> {
+    static func map(_ elements : StringDictionary,pointer : String) throws -> InitializationResult<[T]> {
         var types = [T]()
         var diagnostics: [Diagnostic] = []
         for element in elements {
             let value = element.value
             if case let .object(valueMap) = value {
-                var initializationResult = try T.initialize(load: valueMap, diagnostics: &diagnostics)
+                var initializationResult = try T.initialize(load: valueMap, diagnostics: &diagnostics, pointer: pointer)
                 initializationResult.value.key = element.key
                 diagnostics.append(contentsOf:initializationResult.diagnostics)
                 types.append(initializationResult.value)

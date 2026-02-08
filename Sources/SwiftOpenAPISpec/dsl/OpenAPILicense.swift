@@ -18,10 +18,10 @@
 
 import Foundation
 public struct OpenAPILicense : ThrowingHashMapInitiable , PointerNavigable {
-    public init(load map: StringDictionary, diagnostics: inout [Diagnostic]) throws {
-        self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self, diagnostics : &diagnostics)
-        self.identifier = map.readIfPresent(Self.IDENTIFIER_KEY, valueType: String.self, diagnostics : &diagnostics)
-        self.url = map.readIfPresent(Self.URL_KEY, valueType: String.self, diagnostics : &diagnostics)
+    public init(load map: StringDictionary, diagnostics: inout [Diagnostic],pointer : String) throws {
+        self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.NAME_KEY))
+        self.identifier = map.readIfPresent(Self.IDENTIFIER_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.IDENTIFIER_KEY))
+        self.url = map.readIfPresent(Self.URL_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.URL_KEY))
         
     }
     

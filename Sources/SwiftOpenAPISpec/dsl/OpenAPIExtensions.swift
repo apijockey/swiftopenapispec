@@ -28,7 +28,7 @@ public struct OpenAPIExtension : KeyedElement, PointerNavigable  {
         self.key = key
         self.value = value
     }
-    public init(load map: StringDictionary, diagnostics: inout [Diagnostic]) throws {
+    public init(load map: StringDictionary, diagnostics: inout [Diagnostic],pointer : String) throws {
         fatalError("Not yet implemented init for OpenAPIExtension")
     }
     public func element(for segmentName: String) throws -> NavigationResult {
@@ -65,7 +65,7 @@ public struct OpenAPIExtension : KeyedElement, PointerNavigable  {
    
     
     
-    public static func extensionElements(_ map : StringDictionary, _ diagnostics :  inout [Diagnostic]) throws -> [OpenAPIExtension] {
+    public static func extensionElements(_ map : StringDictionary, _ diagnostics :  inout [Diagnostic], pointer : String) throws -> [OpenAPIExtension] {
         var extensionList = [OpenAPIExtension]()
         let filteredKeys =  map.keys.filter { name in
             name.starts(with: "x-")
@@ -84,7 +84,7 @@ public struct OpenAPIExtension : KeyedElement, PointerNavigable  {
                     
                     extensionList.append(extensionElement)
                 case .null:
-                    continue
+                    diagnostics.append(Diagnostic(severity: .warning, code: .invalidValue, message: "null not supported for extension: '\(key)'", pointer: JSONPointer.join(pointer, key), rule: "OAS.INIT"))
                 }
                 
                 

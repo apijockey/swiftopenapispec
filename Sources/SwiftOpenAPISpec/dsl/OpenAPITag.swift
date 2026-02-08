@@ -45,14 +45,14 @@ public struct OpenAPITag:  KeyedElement, PointerNavigable {
     
    
 
-    public init(load map: StringDictionary,diagnostics: inout [Diagnostic]) throws {
-        self.key = map.readIfPresent(Self.NAME_KEY, valueType: String.self, diagnostics : &diagnostics)
-        self.summary = map.readIfPresent(Self.SUMMARY_KEY, valueType: String.self, diagnostics : &diagnostics)
-        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self, diagnostics : &diagnostics)
-        self.parent = map.readIfPresent(Self.PARENT_KEY, valueType: String.self, diagnostics : &diagnostics)
-        self.kind = map.readIfPresent(Self.KIND_KEY, valueType: String.self, diagnostics : &diagnostics)
-        self.externalDocs = try map.readIfPresent(Self.EXTERNAL_DOCS_KEY, objectType: OpenAPIExternalDocumentation.self, diagnostics: &diagnostics)
-        self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
+    public init(load map: StringDictionary,diagnostics: inout [Diagnostic],pointer : String) throws {
+        self.key = map.readIfPresent(Self.NAME_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.NAME_KEY))
+        self.summary = map.readIfPresent(Self.SUMMARY_KEY, valueType: String.self, diagnostics : &diagnostics, pointer:JSONPointer.join(pointer, OpenAPISpecification.TAGS_KEY))
+        self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.DESCRIPTION_KEY))
+        self.parent = map.readIfPresent(Self.PARENT_KEY, valueType: String.self, diagnostics : &diagnostics, pointer:JSONPointer.join(pointer, Self.PARENT_KEY))
+        self.kind = map.readIfPresent(Self.KIND_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.KIND_KEY))
+        self.externalDocs = try map.readIfPresent(Self.EXTERNAL_DOCS_KEY, objectType: OpenAPIExternalDocumentation.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXTERNAL_DOCS_KEY))
+        self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
     }
     
    

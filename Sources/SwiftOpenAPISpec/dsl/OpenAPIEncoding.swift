@@ -26,13 +26,13 @@ public struct OpenAPIEncoding : KeyedElement, PointerNavigable {
     static let PREFIX_ENCODING_KEY = "prefixEncoding"
     static let ITEM_ENCODING_KEY = "itemEncoding"
     static let EXTENSIONS_KEY = "extensions"
-    public init(load map: StringDictionary, diagnostics: inout [Diagnostic]) throws {
-        extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
-        self.contentType = map.readIfPresent(Self.CONTENT_TYPE_KEY, valueType: String.self, diagnostics : &diagnostics)
-        self.headers = try map.mapListIfPresent(Self.HEADERS_KEY, objectType: OpenAPIHeader.self, diagnostics: &diagnostics)
-        self.encoding  = try map.mapListIfPresent(Self.ENCODING_KEY, objectType: OpenAPIEncoding.self, diagnostics: &diagnostics)
-        self.prefixEncoding = try map.mapListIfPresent(Self.PREFIX_ENCODING_KEY,objectType: OpenAPIEncoding.self, diagnostics: &diagnostics)
-        self.itemEncoding = try map.mapListIfPresent(Self.PREFIX_ENCODING_KEY,objectType: OpenAPIEncoding.self, diagnostics: &diagnostics)
+    public init(load map: StringDictionary, diagnostics: inout [Diagnostic],pointer : String) throws {
+        extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
+        self.contentType = map.readIfPresent(Self.CONTENT_TYPE_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.CONTENT_TYPE_KEY))
+        self.headers = try map.mapListIfPresent(Self.HEADERS_KEY, objectType: OpenAPIHeader.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.HEADERS_KEY))
+        self.encoding  = try map.mapListIfPresent(Self.ENCODING_KEY, objectType: OpenAPIEncoding.self, diagnostics: &diagnostics, pointer:JSONPointer.join(pointer, Self.ENCODING_KEY))
+        self.prefixEncoding = try map.mapListIfPresent(Self.PREFIX_ENCODING_KEY,objectType: OpenAPIEncoding.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.PREFIX_ENCODING_KEY))
+        self.itemEncoding = try map.mapListIfPresent(Self.PREFIX_ENCODING_KEY,objectType: OpenAPIEncoding.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.PREFIX_ENCODING_KEY))
         
     }
    

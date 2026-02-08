@@ -170,14 +170,14 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
     
     public static let REQUIRED_KEY = "required"
     
-    public init(load map: StringDictionary,  diagnostics: inout [Diagnostic]) throws {
+    public init(load map: StringDictionary,  diagnostics: inout [Diagnostic],pointer : String) throws {
        
         self.defaultValue =  map[Self.DEFAULT_VALUE_KEY]
-        self.deprecated = map.readIfPresent(Self.DEPRECATED_KEY, valueType:  Bool.self, diagnostics : &diagnostics)
-        self.discriminator = try map.readIfPresent(Self.DISCRIMINATOR_KEY,  objectType:  OpenAPIDiscriminator.self, diagnostics: &diagnostics)
+        self.deprecated = map.readIfPresent(Self.DEPRECATED_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: pointer)
+        self.discriminator = try map.readIfPresent(Self.DISCRIMINATOR_KEY,  objectType:  OpenAPIDiscriminator.self, diagnostics: &diagnostics, pointer: pointer)
         // Value MUST be a string. Multiple types via an array are not supported.
        
-        self.type = try OpenAPIType(load: map,  diagnostics: &diagnostics)
+        self.type = try OpenAPIType(load: map,  diagnostics: &diagnostics, pointer: pointer)
        
        
         
@@ -192,33 +192,33 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
         } else {
             self.allowedValues = nil
         }
-        self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
-        self.exclusiveMinimum = map.readIfPresent(Self.EXCLUSIVE_MINIMUM_KEY, valueType:  Bool.self, diagnostics : &diagnostics)
-        self.externalDocs = try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIExternalDocumentation.self, diagnostics: &diagnostics)
-        self.example = try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIExample.self, diagnostics: &diagnostics)
-        self.exclusiveMaximum = map.readIfPresent(Self.EXCLUSIVE_MAXIMUM_KEY, valueType:  Bool.self, diagnostics : &diagnostics)
-        self.format = map.readIfPresent(Self.FORMAT_KEY, valueType:  String.self, diagnostics : &diagnostics)
-        self.multipleOf = map.readIfPresent(Self.MULTIPLEOF_KEY, valueType:Double.self, diagnostics : &diagnostics)
-        self.maximum = map.readIfPresent(Self.MAXIMUM_KEY, valueType:  Double.self, diagnostics : &diagnostics)
-        self.minimum = map.readIfPresent(Self.MINIMUM_KEY, valueType:  Double.self, diagnostics : &diagnostics)
-        self.maxContains = map.readIfPresent(Self.MAX_CONTAINS_KEY, valueType:  Int.self, diagnostics : &diagnostics)
-        self.minContains = map.readIfPresent(Self.MIN_CONTAINS_KEY, valueType:  Int.self, diagnostics : &diagnostics)
-        self.maxProperties = map.readIfPresent(Self.MAX_PROPERTIES_KEY, valueType:  Int.self, diagnostics : &diagnostics)
-        self.maxLength = map.readIfPresent(Self.MAX_LENGTH_KEY,valueType:  Int.self, diagnostics : &diagnostics)
-        self.minLength = map.readIfPresent(Self.MIN_LENGTH_KEY,valueType: Int.self, diagnostics : &diagnostics)
-        self.minProperties = map.readIfPresent(Self.MIN_PROPERTIES_KEY, valueType:  Int.self, diagnostics : &diagnostics)
-        self.maxItems = map.readIfPresent(Self.MAX_ITEMS_KEY, valueType:  Int.self, diagnostics : &diagnostics)
-        self.minItems = map.readIfPresent(Self.MIN_ITEMS_KEY, valueType:  Int.self, diagnostics : &diagnostics)
-        self.nullable = map.readIfPresent(Self.NULLABLE_KEY, valueType:  Bool.self, diagnostics : &diagnostics)
-        self.pattern = map.readIfPresent(Self.PATTERN_KEY,valueType:String.self, diagnostics : &diagnostics)
-        self.readOnly = map.readIfPresent(Self.READ_ONLY_KEY, valueType:  Bool.self, diagnostics : &diagnostics)
-        self.required = map.readListIfPresent(Self.REQUIRED_KEY, valueType:  String.self)
+        self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
+        self.exclusiveMinimum = map.readIfPresent(Self.EXCLUSIVE_MINIMUM_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.EXCLUSIVE_MINIMUM_KEY))
+        self.externalDocs = try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIExternalDocumentation.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXAMPLE_KEY))
+        self.example = try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIExample.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXAMPLE_KEY))
+        self.exclusiveMaximum = map.readIfPresent(Self.EXCLUSIVE_MAXIMUM_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.EXCLUSIVE_MAXIMUM_KEY))
+        self.format = map.readIfPresent(Self.FORMAT_KEY, valueType:  String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.FORMAT_KEY))
+        self.multipleOf = map.readIfPresent(Self.MULTIPLEOF_KEY, valueType:Double.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.MULTIPLEOF_KEY))
+        self.maximum = map.readIfPresent(Self.MAXIMUM_KEY, valueType:  Double.self, diagnostics : &diagnostics, pointer:JSONPointer.join(pointer, Self.MAXIMUM_KEY))
+        self.minimum = map.readIfPresent(Self.MINIMUM_KEY, valueType:  Double.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.MINIMUM_KEY))
+        self.maxContains = map.readIfPresent(Self.MAX_CONTAINS_KEY, valueType:  Int.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.MAX_CONTAINS_KEY))
+        self.minContains = map.readIfPresent(Self.MIN_CONTAINS_KEY, valueType:  Int.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.MIN_CONTAINS_KEY))
+        self.maxProperties = map.readIfPresent(Self.MAX_PROPERTIES_KEY, valueType:  Int.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.MAX_PROPERTIES_KEY))
+        self.maxLength = map.readIfPresent(Self.MAX_LENGTH_KEY,valueType:  Int.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.MAX_LENGTH_KEY))
+        self.minLength = map.readIfPresent(Self.MIN_LENGTH_KEY,valueType: Int.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.MIN_LENGTH_KEY))
+        self.minProperties = map.readIfPresent(Self.MIN_PROPERTIES_KEY, valueType:  Int.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.MIN_PROPERTIES_KEY))
+        self.maxItems = map.readIfPresent(Self.MAX_ITEMS_KEY, valueType:  Int.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.MAX_ITEMS_KEY))
+        self.minItems = map.readIfPresent(Self.MIN_ITEMS_KEY, valueType:  Int.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.MIN_ITEMS_KEY))
+        self.nullable = map.readIfPresent(Self.NULLABLE_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.NULLABLE_KEY))
+        self.pattern = map.readIfPresent(Self.PATTERN_KEY,valueType:String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.PATTERN_KEY))
+        self.readOnly = map.readIfPresent(Self.READ_ONLY_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.READ_ONLY_KEY))
+        self.required = map.readListIfPresent(Self.REQUIRED_KEY, valueType:  String.self, diagnostics: &diagnostics)
     
-        self.title = map.readIfPresent(OpenAPISchema.TYPE_KEY, valueType:String.self, diagnostics : &diagnostics)
+        self.title = map.readIfPresent(OpenAPISchema.TYPE_KEY, valueType:String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISchema.TYPE_KEY))
        
-        self.uniqueItems = map.readIfPresent(Self.UNIQUE_ITEMS_KEY, valueType:  Bool.self, diagnostics : &diagnostics)
-        self.writeOnly = map.readIfPresent(Self.WRITE_ONLY_KEY, valueType:  Bool.self, diagnostics : &diagnostics)
-        self.xml =  try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIXMLObject.self, diagnostics: &diagnostics)
+        self.uniqueItems = map.readIfPresent(Self.UNIQUE_ITEMS_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.UNIQUE_ITEMS_KEY))
+        self.writeOnly = map.readIfPresent(Self.WRITE_ONLY_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.WRITE_ONLY_KEY))
+        self.xml =  try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIXMLObject.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXAMPLE_KEY))
         
     }
    

@@ -29,15 +29,15 @@ public struct OpenAPIXMLObject : PointerNavigable, ThrowingHashMapInitiable {
     public static let ATTRIBUTE_KEY = "attribute"
     public static let WRAPPED_KEY = "wrapped"
     
-    public init(load map: StringDictionary, diagnostics: inout [Diagnostic]) throws {
-        let nodeType = map.readIfPresent(Self.NODETYPE_KEY,valueType:  String.self, diagnostics : &diagnostics)
+    public init(load map: StringDictionary, diagnostics: inout [Diagnostic],pointer : String) throws {
+        let nodeType = map.readIfPresent(Self.NODETYPE_KEY,valueType:  String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.NODETYPE_KEY))
         self.nodeType = NodeKind(rawValue: nodeType ?? "none")
-        self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self, diagnostics : &diagnostics)
-        self.namespace = map.readIfPresent(Self.NAMESPACE_KEY, valueType: String.self, diagnostics : &diagnostics)
-        self.prefix = map.readIfPresent(Self.PREFIX_KEY, valueType: String.self, diagnostics : &diagnostics)
-        self.attribute = map.readIfPresent(Self.ATTRIBUTE_KEY,valueType:  Bool.self, diagnostics : &diagnostics)
-        self.wrapped = map.readIfPresent(Self.WRAPPED_KEY,valueType:  Bool.self, diagnostics : &diagnostics)
-        self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics)
+        self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.NAME_KEY))
+        self.namespace = map.readIfPresent(Self.NAMESPACE_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.NAMESPACE_KEY))
+        self.prefix = map.readIfPresent(Self.PREFIX_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.PREFIX_KEY))
+        self.attribute = map.readIfPresent(Self.ATTRIBUTE_KEY,valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.ATTRIBUTE_KEY))
+        self.wrapped = map.readIfPresent(Self.WRAPPED_KEY,valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.WRAPPED_KEY))
+        self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
     }
    
     public func element(for segmentName: String) throws -> NavigationResult {

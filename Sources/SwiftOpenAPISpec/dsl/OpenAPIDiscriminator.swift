@@ -39,8 +39,8 @@ public struct OpenAPIDiscriminator :  ThrowingHashMapInitiable, PointerNavigable
     
     
     
-    public init(load map: StringDictionary, diagnostics: inout [Diagnostic]) throws {
-        self.propertyName = map.readIfPresent(Self.PROPERTY_NAME_KEY, valueType: String.self, diagnostics : &diagnostics)
+    public init(load map: StringDictionary, diagnostics: inout [Diagnostic],pointer : String) throws {
+        self.propertyName = map.readIfPresent(Self.PROPERTY_NAME_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: pointer)
         if case let .object(mappings) = map[Self.MAPPING_KEY] {
             
             for mapping in mappings {
@@ -49,7 +49,7 @@ public struct OpenAPIDiscriminator :  ThrowingHashMapInitiable, PointerNavigable
                 }
             }
         }
-        self.defaultMapping = map.readIfPresent(Self.DEFAULT_MAPPING_KEY, valueType: String.self, diagnostics : &diagnostics)
+        self.defaultMapping = map.readIfPresent(Self.DEFAULT_MAPPING_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.DEFAULT_MAPPING_KEY))
         
     }
     
