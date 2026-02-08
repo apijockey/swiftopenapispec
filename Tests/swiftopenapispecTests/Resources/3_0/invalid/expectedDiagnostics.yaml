@@ -178,6 +178,15 @@ cases:
         rule: "Schema.StringMinMaxLength"
         severity: "error"
         messageContains: "minLength '18' must be <= maxLength '10'."
+  - fixture: "invalid_schema"
+    shouldPass: false
+    expected:
+      - code: "schemaViolation"
+        pointer: "/components/schemas/InvalidSchema/required"
+        rule: "Schema.RequiredPropertiesMustBeDefined"
+        severity: "error"
+        messageContains: "Required property 'missing_required_field' is not defined in properties"
+    onlyThese: true
     
                
     
