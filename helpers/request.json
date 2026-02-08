@@ -1,0 +1,6 @@
+{
+  "method": "POST",
+  "path": "/pets",
+  "headers": {"Content-Type": "application/json"},
+  "body": {"id": 1, "name": "Dog"}
+}
