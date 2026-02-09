@@ -27,7 +27,7 @@ public struct OpenAPIVariable : KeyedElement , PointerNavigable {
   
 
     public init(load map: StringDictionary, diagnostics: inout [Diagnostic],pointer : String) throws {
-        self.enumList = map.readListIfPresent(Self.ENUM_KEY, valueType: String.self, diagnostics: &diagnostics, pointer: pointer)
+        self.enumList = try map.mapListIfPresent(Self.ENUM_KEY, objectType: OpenAPIType.self, diagnostics: &diagnostics, pointer: pointer)
         self.defaultValue = map.readIfPresent(Self.DEFAULT_KEY,  valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.DEFAULT_KEY))
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.DESCRIPTION_KEY))
         self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
@@ -52,7 +52,7 @@ public struct OpenAPIVariable : KeyedElement , PointerNavigable {
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIVariable", segmentName)
         }
     }
-    public var enumList : [String]? = nil
+    public var enumList : [OpenAPIType]? = nil
     public var defaultValue : String?
     public var description : String? = nil
     

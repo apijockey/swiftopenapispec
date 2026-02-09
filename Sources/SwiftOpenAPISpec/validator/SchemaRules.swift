@@ -99,6 +99,7 @@ public struct SchemaRuleRunner  : Sendable{
             rules.append(MultipleOfRule())
             rules.append(SchemaObjectReadOrWriteOnlyRule())
             rules.append(OAS30SupportedTypeRule())
+            rules.append(OAS30SupportedRegexRule())
             rules.append(RequiredSubsetOfPropertiesRule())
             rules.append(OneAnyAllMustHaveObjectArrayCompositionRule())
           
@@ -110,6 +111,7 @@ public struct SchemaRuleRunner  : Sendable{
             rules.append(RequiredSubsetOfPropertiesRule())
             rules.append(SchemaObjectReadOrWriteOnlyRule())
             rules.append(OAS31SupportedTypeRule())
+            rules.append(OAS30SupportedRegexRule())
             rules.append(OneAnyAllMustHaveObjectArrayCompositionRule())
            
         }
@@ -235,6 +237,184 @@ public struct StringMinMaxLengthRule: SchemaRule {
 
 
 /// Rule: for strings, minLength <= maxLength (when both present).
+public struct ArrayMinItemsRule: SchemaRule {
+    public let name = "Schema.ArrayMinItems"
+    public init() {}
+    
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        guard case  .array = schema.type,
+              let minItems = schema.minItems else { return [] }
+        if minItems < 0 {
+            return [.init(severity: .error, code: .invalidValue, 
+                          message: "minItems must be 0 or higher, is \(minItems)",
+                          pointer: JSONPointer.join(pointer, "minItems"), rule: self.name)]
+        }
+        return []
+    }
+}
+
+
+/// Rule: for strings, minLength <= maxLength (when both present).
+public struct ArrayMaxItemsRule: SchemaRule {
+    public let name = "Schema.ArrayMaxItems"
+    public init() {}
+    
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        guard case  .array = schema.type,
+              let maxItems = schema.maxItems else { return [] }
+        if maxItems < 0 {
+            return [.init(severity: .error, code: .invalidValue,
+                          message: "maxItems must be 0 or higher, is \(maxItems)",
+                          pointer: JSONPointer.join(pointer, "maxItems"), rule: self.name)]
+        }
+        return []
+    }
+}
+
+/// Rule: for strings, minLength <= maxLength (when both present).
+public struct ArrayMinMaxItemsRule: SchemaRule {
+    public let name = "Schema.ArrayMinMaxItems"
+    public init() {}
+    
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        guard case  .array = schema.type,
+              let minItems = schema.minItems,
+              let maxItems = schema.maxItems else { return [] }
+        if minItems > maxItems{
+            return [.init(severity: .error, code: .invalidValue,
+                          message: "minItems \(minItems) must <= maxItems '\(maxItems)'",
+                          pointer: JSONPointer.join(pointer, "maxItems"), rule: self.name)]
+        }
+        return []
+    }
+}
+
+/// Rule: for strings, minLength <= maxLength (when both present).
+public struct ObjectMinPropertiesRule: SchemaRule {
+    public let name = "Schema.ObjectMinProperties"
+    public init() {}
+    
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        guard case  .object = schema.type,
+              let minProperties = schema.minProperties else { return [] }
+        if minProperties < 0 {
+            return [.init(severity: .error, code: .invalidValue,
+                          message: "minProperties must be 0 or higher, is \(minProperties)",
+                          pointer: JSONPointer.join(pointer, "minProperties"), rule: self.name)]
+        }
+        return []
+    }
+}
+
+
+/// Rule: for strings, minLength <= maxLength (when both present).
+public struct ObjectMaxPropertiesRule: SchemaRule {
+    public let name = "Schema.ObjectMaxProperties"
+    public init() {}
+    
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        guard case  .object = schema.type,
+              let maxProperties = schema.maxProperties else { return [] }
+        if maxProperties < 0 {
+            return [.init(severity: .error, code: .invalidValue,
+                          message: "maxProperties must be 0 or higher, is \( maxProperties)",
+                          pointer: JSONPointer.join(pointer, "maxProperties"), rule: self.name)]
+        }
+        return []
+    }
+}
+
+/// Rule: for strings, minLength <= maxLength (when both present).
+public struct ObjectPatternPropertiesRule: SchemaRule {
+    public let name = "Schema.ObjectPatternProperties"
+    public init() {}
+    
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        var diagnostics = [Diagnostic]()
+        guard case  .object(let objectElement) = schema.type else {
+            return []
+        }
+        let patternProperties = objectElement.patternProperties
+        for property in patternProperties {
+            if let key = property.key,
+               !key.isValidRegex() {
+                diagnostics.append(.init(severity: .error, code: .invalidValue, message: "Pattern properties must be named with a regular expression", pointer: JSONPointer.join(pointer, key), rule: self.name))
+            }
+        }
+            
+        return diagnostics
+    }
+}
+
+
+/// Rule: for strings, minLength <= maxLength (when both present).
+public struct ObjectDependenciesRule: SchemaRule {
+    public let name = "Schema.ObjectDependencies"
+    public init() {}
+    
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        var diagnostics = [Diagnostic]()
+        guard case  .object(let objectElement) = schema.type else {
+            return []
+        }
+       
+        
+            
+        return diagnostics
+    }
+}
+
+public struct ObjectAdditionalPropertiesRule: SchemaRule {
+    public let name = "Schema.ObjectAdditionalProperties"
+    public init() {}
+    
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        var diagnostics = [Diagnostic]()
+        guard case  .object(let objectElement) = schema.type else {
+            return []
+        }
+        if let validAdditionalProperties = objectElement.additionalPropertiesValid {
+            if validAdditionalProperties == true {
+                return []
+            }
+            if validAdditionalProperties == false {
+                if objectElement.additionalPropertiesObject == nil {
+                    return []
+                }
+                else {
+                    diagnostics.append(.init(severity: .error, code: .invalidValue, message: "AdditionalProperties are set to fals, but additionProperties-Object is not empty", pointer: JSONPointer.join(pointer, "additionProperties"), rule: self.name))
+                }
+            }
+        }
+        
+        
+            
+        return diagnostics
+    }
+}
+
+/// Rule: for strings, minLength <= maxLength (when both present).
+public struct ObjectMinMaxPropertiesRule: SchemaRule {
+    public let name = "Schema.ObjectMinMaxProperties"
+    public init() {}
+    
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        guard case  .object = schema.type,
+              let minProperties = schema.minProperties,
+              let maxProperties = schema.maxProperties else { return [] }
+        if minProperties > maxProperties{
+            return [.init(severity: .error, code: .invalidValue,
+                          message: "minProperties \(minProperties) must <= maxProperties '\( maxProperties)'",
+                          pointer: JSONPointer.join(pointer, "maxProperties"), rule: self.name)]
+        }
+        return []
+    }
+}
+
+
+
+
+/// Rule: for strings, minLength <= maxLength (when both present).
 public struct StringNumberMinimumMaximumhRule: SchemaRule {
     public let name = "Schema.NumberMinimumMaximum"
     public init() {}
@@ -313,12 +493,23 @@ public struct SchemaObjectReadOrWriteOnlyRule: SchemaRule {
 }
 
 public struct OAS30SupportedRegexRule: SchemaRule {
-    public let name = "Schema.SupportedTypes"
+    public let name = "Schema.SupportedRegex"
     public init() {}
     
     public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        guard let regex = schema.pattern else {
+            return []
+        }
+        if regex.isValidRegex() {
+            return []
+        }
+        else {
+            return [.init(severity: .error, code: .invalidValue,
+                         message: "'\(regex) is not a supportedRegex",
+                         pointer: "\(pointer)/type",
+                         rule: self.name)]
+        }
         
-        return []
     }
 }
 
