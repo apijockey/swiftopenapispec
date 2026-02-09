@@ -102,6 +102,15 @@ public struct SchemaRuleRunner  : Sendable{
             rules.append(OAS30SupportedRegexRule())
             rules.append(RequiredSubsetOfPropertiesRule())
             rules.append(OneAnyAllMustHaveObjectArrayCompositionRule())
+            rules.append(ArrayMinItemsRule())
+            rules.append(ArrayMaxItemsRule())
+            rules.append(ArrayMinMaxItemsRule())
+            rules.append(ObjectMinPropertiesRule())
+            rules.append(ObjectMaxPropertiesRule())
+            rules.append(ObjectMinMaxPropertiesRule())
+            rules.append(ObjectPatternPropertiesRule())
+            rules.append(ObjectAdditionalPropertiesRule())
+            rules.append(ObjectDependenciesRule())
           
             
         }
@@ -113,6 +122,15 @@ public struct SchemaRuleRunner  : Sendable{
             rules.append(OAS31SupportedTypeRule())
             rules.append(OAS30SupportedRegexRule())
             rules.append(OneAnyAllMustHaveObjectArrayCompositionRule())
+            rules.append(ArrayMinItemsRule())
+            rules.append(ArrayMaxItemsRule())
+            rules.append(ArrayMinMaxItemsRule())
+            rules.append(ObjectMinPropertiesRule())
+            rules.append(ObjectMaxPropertiesRule())
+            rules.append(ObjectMinMaxPropertiesRule())
+            rules.append(ObjectPatternPropertiesRule())
+            rules.append(ObjectAdditionalPropertiesRule())
+            rules.append(ObjectDependenciesRule())
            
         }
         return SchemaRuleRunner(rules: rules, ctx: ctx)

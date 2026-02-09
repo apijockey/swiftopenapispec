@@ -331,7 +331,14 @@ struct FixtureTests {
         let regionServer = try #require(apiSpec.servers[url: "https://{region}.api.example.com/{basePath}"])
         let regionVariable = try #require(regionServer.variables[key: "region"])
         #expect(regionVariable.defaultValue == "eu")
-        #expect(regionVariable.enumList == ["eu", "us"])
+        #expect(
+            regionVariable.enumList?.compactMap { element in
+                if case let .string(value) = element {
+                    return value
+                }
+                return nil
+            } == ["eu", "us"]
+        )
         let baseVariable = try #require(apiSpec.servers.first?.variables[key: "basePath"])
         #expect(baseVariable.defaultValue == "v1")
         let selfurlServer =  try #require(apiSpec.servers[url: "."])
@@ -344,7 +351,12 @@ struct FixtureTests {
         #expect(prodServer.key == "prod")
         let prodServerPortVariable = try #require(prodServer.variables[key: "port"])
         #expect(prodServerPortVariable.defaultValue == "8443")
-        #expect(prodServerPortVariable.enumList == ["8443","443"])
+        #expect(prodServerPortVariable.enumList?.compactMap({ element in
+            if case let .string(value) = element {
+                return value
+            }
+            return nil
+        }) == ["8443","443"])
         
     }
     @Test("11-contenttype-vendor-json")

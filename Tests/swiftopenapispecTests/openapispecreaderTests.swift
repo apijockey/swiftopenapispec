@@ -67,8 +67,20 @@ struct OpenAPILegacyPortedTests {
         }
         #expect(portVariable.defaultValue == "8443")
         #expect(portVariable.enumList?.count == 2)
-        #expect(portVariable.enumList?.contains("8443") == true)
-        #expect(portVariable.enumList?.contains("443") == true)
+        #expect(portVariable.enumList?.contains (where:{ type in
+            if case let .string(stringValue) = type {
+                return stringValue == "8443"
+            }
+            return false
+        }) == true)
+        #expect(portVariable.enumList?.contains (where:{ type in
+            if case let .string(stringValue) = type {
+                return stringValue == "443"
+            }
+            return false
+        }) == true)
+        
+       
     }
     
     @Test
