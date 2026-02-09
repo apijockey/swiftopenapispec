@@ -23,7 +23,7 @@ import Foundation
 public struct OpenAPIOperation : KeyedElement, PointerNavigable {
     public var key: String?
     public init(load map: StringDictionary,diagnostics: inout [Diagnostic],pointer : String) throws {
-        self.tags = map.readListIfPresent(Self.TAGS_KEY, valueType: String.self, diagnostics: &diagnostics)  ?? []
+        self.tags = map.readListIfPresent(Self.TAGS_KEY, valueType: String.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.TAGS_KEY))  ?? []
         self.summary = map.readIfPresent(Self.SUMMARY_KEY, valueType:  String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.SUMMARY_KEY))
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY,valueType:   String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.DESCRIPTION_KEY))
         self.externalDocs = try map.readIfPresent(Self.EXTERNAL_DOCS_KEY, objectType:  OpenAPIExternalDocumentation.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXTERNAL_DOCS_KEY))

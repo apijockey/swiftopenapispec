@@ -41,7 +41,7 @@
 extension StringDictionary {
     
     
-    func mapTypes<V>(value : JSONValue, valueType : V.Type, diagnostics : inout [Diagnostic]) -> V? {
+    func mapTypes<V>(value : JSONValue, valueType : V.Type, diagnostics : inout [Diagnostic], pointer : String) -> V? {
         switch valueType.self {
         case is String.Type:
             if case let .string(value) =  value,
@@ -49,7 +49,7 @@ extension StringDictionary {
                 return stringValue
             }
             else {
-                let diagnostic = Diagnostic(severity: .error, code: .invalidType, message: "expected 'String'", pointer: "\(value)", rule: "Schema.DataType")
+                let diagnostic = Diagnostic(severity: .error, code: .schemaViolation, message: "expected 'String' instead of '\(value.debugDescription)'", pointer: pointer , rule: "Schema.DataType")
                 diagnostics.append(diagnostic)
                 return nil
             }
@@ -58,7 +58,7 @@ extension StringDictionary {
                 return intValue
             }
             else {
-                let diagnostic = Diagnostic(severity: .error, code: .invalidType, message: "expected 'Integer/Number'", pointer: "\(value)", rule: "Schema.DataType")
+                let diagnostic = Diagnostic(severity: .error, code: .schemaViolation, message: "expected 'Integer/Number instead of '\(value.debugDescription)'", pointer: pointer , rule: "Schema.DataType")
                 diagnostics.append(diagnostic)
                 return nil
             }
@@ -67,7 +67,7 @@ extension StringDictionary {
                 return doubleValue
             }
             else {
-                let diagnostic = Diagnostic(severity: .error, code: .invalidType, message: "expected 'Double/Number'", pointer: "\(value)", rule: "Schema.DataType")
+                let diagnostic = Diagnostic(severity: .error, code: .schemaViolation, message: "expected 'Double/Number' instead of '\(value.debugDescription)'", pointer: pointer , rule: "Schema.DataType")
                 diagnostics.append(diagnostic)
                 return nil
             }
@@ -76,7 +76,7 @@ extension StringDictionary {
                 return value
             }
             else {
-                let diagnostic = Diagnostic(severity: .error, code: .invalidType, message: "expected 'Float/Number'", pointer: "\(value)", rule: "Schema.DataType")
+                let diagnostic = Diagnostic(severity: .error, code: .schemaViolation, message: "expected 'Float/Number' instead of '\(value.debugDescription)'", pointer: pointer , rule: "Schema.DataType")
                 diagnostics.append(diagnostic)
                 return nil
             }
@@ -86,7 +86,7 @@ extension StringDictionary {
                 return boolValue
             }
             else {
-                let diagnostic = Diagnostic(severity: .error, code: .invalidType, message: "expected 'Boolean'", pointer: "\(value)", rule: "Schema.DataType")
+                let diagnostic = Diagnostic(severity: .error, code: .schemaViolation, message: "expected 'Boolean' instead of '\(value.debugDescription)'", pointer: pointer , rule: "Schema.DataType")
                 diagnostics.append(diagnostic)
                 return nil
             }
@@ -94,17 +94,17 @@ extension StringDictionary {
            
             return (value as? V)
         default:
-            let diagnostic = Diagnostic(severity: .warning, code: .invalidType, message: "unexpected value type", pointer: "\(value)", rule: "Schema.DataType")
+            let diagnostic = Diagnostic(severity: .warning, code: .schemaViolation, message: "unexpected value type '\(value.debugDescription)'", pointer: pointer , rule: "Schema.DataType")
             diagnostics.append(diagnostic)
             return (value as? V)
         }
     }
-    func readListIfPresent<V>(_ key : String, valueType : V.Type, diagnostics : inout [Diagnostic]) -> [V]? {
+    func readListIfPresent<V>(_ key : String, valueType : V.Type, diagnostics : inout [Diagnostic], pointer : String) -> [V]? {
         
         var typedArray = [V]()
         if case let .array(arrayValue) = self[key] {
             for value in arrayValue {
-                if let typedValue = mapTypes(value: value, valueType: valueType, diagnostics: &diagnostics) {
+                if let typedValue = mapTypes(value: value, valueType: valueType, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, key)) {
                     typedArray.append(typedValue)
                 }
             }
@@ -116,7 +116,7 @@ extension StringDictionary {
     }
     func readIfPresent<V>(_ key : String, valueType : V.Type, diagnostics : inout [Diagnostic], pointer : String) -> V? {
         guard let value = self[key] else { return nil }
-        return mapTypes(value: value, valueType: valueType, diagnostics: &diagnostics)
+        return mapTypes(value: value, valueType: valueType, diagnostics: &diagnostics, pointer: pointer)
     }
     
     func readIfPresent<V>(_ key : String, objectType : V.Type, diagnostics : inout [Diagnostic], pointer : String) throws -> V?  where V : ThrowingHashMapInitiable{
@@ -141,7 +141,7 @@ extension StringDictionary {
             for element in objectMap {
                 let value = element.value
                 if case let .object(valueMap) = value {
-                    var type = try T.initialize(load:  valueMap, diagnostics: &diagnostics, pointer: pointer).value
+                    var type = try T.initialize(load:  valueMap, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, element.key)).value
                     elements.append(type)
                 }
             }
@@ -189,7 +189,7 @@ extension StringDictionary {
             for element in objectMap {
                 let value = element.value
                 if case let .object(valueMap) = value {
-                    var type = try T.initialize(load:  valueMap, diagnostics: &diagnostics, pointer: pointer).value
+                    var type = try T.initialize(load:  valueMap, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, element.key)).value
                     elements.append(type)
                 }
             }
@@ -205,7 +205,7 @@ extension StringDictionary {
                 let value = element.value
                 if case let .object(valueMap) = value {
                     
-                    var type = try T.initialize(load:  valueMap, diagnostics: &diagnostics, pointer: pointer).value
+                    var type = try T.initialize(load:  valueMap, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, element.key)).value
                     if type.key == nil {
                         type.key = element.key
                     }
@@ -222,9 +222,9 @@ extension StringDictionary {
             }
         }
         if case let .array(arrayList) = value {
-            for jsonElement in arrayList {
+            for (index,jsonElement) in arrayList.enumerated() {
                 if case let .object(objectElement) = jsonElement {
-                    var type = try T.initialize(load:  objectElement, diagnostics: &diagnostics, pointer: pointer).value
+                    var type = try T.initialize(load:  objectElement, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, String(index))).value
                     if type.key == nil {
                         type.key = objectElement.keys.first
                     }
@@ -251,9 +251,9 @@ extension StringDictionary {
             return elements
         }
         if case let .array(list)  = value {
-            for element in list {
+            for (index,element) in list.enumerated() {
                 if case let .object(objectElement) = element {
-                    var type = try T.initialize(load: objectElement, diagnostics: &diagnostics, pointer: pointer).value
+                    var type = try T.initialize(load: objectElement, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, String(index))).value
                     if type.key == nil {
                         type.key = objectElement.keys.first
                     }
@@ -271,7 +271,7 @@ extension StringDictionary {
             for element in self {
                 let value = element.value
                 if case let .object(valueMap) = value {
-                    var type = try T.initialize(load: valueMap, diagnostics: &diagnostics, pointer: pointer).value
+                    var type = try T.initialize(load: valueMap, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, element.key)).value
                     
                     elements.append(type)
                 }
@@ -285,7 +285,7 @@ extension StringDictionary {
             for element in self {
                 let value = element.value
                 if case let .object(valueMap) = value {
-                    var type = try T.initialize(load: valueMap, diagnostics: &diagnostics, pointer : pointer).value
+                    var type = try T.initialize(load: valueMap, diagnostics: &diagnostics, pointer : JSONPointer.join(pointer, element.key)).value
                     type.key = element.key
                     elements.append(type)
                 }

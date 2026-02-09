@@ -38,7 +38,7 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
             self = .ref(reference)
             return
         }
-        let pointer = JSONPointer.join(pointer, Self.TYPE_KEY)
+        
         let type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self, diagnostics : &diagnostics, pointer:  pointer)
         switch type {
         case .some("string"):
@@ -72,7 +72,7 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
             // Try composite constructs if type is missing
             if let oneOfValue = map[OpenAPIOneOfType.TYPE_KEY],
                 case .array  = oneOfValue  {
-                
+                let pointer = JSONPointer.join(pointer, "oneOf")
                 var localDiagnostics: [Diagnostic] = []
                 let oneOf = try OpenAPIOneOfType(load: map, diagnostics: &localDiagnostics,pointer : pointer)
                 diagnostics.append(contentsOf: localDiagnostics)
@@ -82,6 +82,7 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
            
             if let oneOfValue = map[OpenAPIAnyOfType.TYPE_KEY],
                 case .array  = oneOfValue  {
+                let pointer = JSONPointer.join(pointer, "oneOf")
                 // OpenAPIAnyOfType has a different initializer style
                 let anyOf = try OpenAPIAnyOfType(load: map,  &diagnostics, pointer: pointer)
                 self = .anyOf(anyOf)
@@ -89,6 +90,7 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
             }
             if let oneOfValue = map[OpenAPIAllOfType.TYPE_KEY],
                 case .array  = oneOfValue  {
+                let pointer = JSONPointer.join(pointer, "allOf")
                 let allOf = try OpenAPIAllOfType(load: map, diagnostics: &diagnostics,pointer : pointer)
                 self = .allOf(allOf)
                 return

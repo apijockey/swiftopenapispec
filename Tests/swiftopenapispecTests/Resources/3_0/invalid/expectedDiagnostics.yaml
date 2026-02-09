@@ -101,7 +101,7 @@ cases:
     expected:
       - code: "schemaViolation"
         pointer: "/paths/~1create/operations/responses/201/content/application~1json/schema/type"
-        rule: "Schema.SupportedTypes"
+        rule: "OAS30.SupportedTypes"
         severity: "error"
         messageContains: "type 'double' not supported or not recognized in OpenAPI 3.0"
   - fixture: "05-response-invalidPropertyType"
@@ -109,7 +109,7 @@ cases:
     expected:
       - code: "schemaViolation"
         pointer: "/paths/~1create/operations/responses/201/content/application~1json/schema/properties/id/type"
-        rule: "Schema.SupportedTypes"
+        rule: "OAS30.SupportedTypes"
         severity: "error"
         messageContains: "type 'double' not supported or not recognized in OpenAPI 3.0"
   - fixture: "06-refcomponentNotResolvable"
@@ -124,12 +124,12 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/components/schemas/Product/properties/price"
+        pointer: "/components/schemas/Product/properties/price/format"
         rule: "Schema.SupportedFormat"
         severity: "warning"
         messageContains: "format 'float' not predefined for 'string'"
       - code: "schemaViolation"
-        pointer: "/components/schemas/Product/properties/weight"
+        pointer: "/components/schemas/Product/properties/weight/format"
         rule: "Schema.SupportedFormat"
         severity: "warning"
         messageContains: "format 'binary' not predefined for 'number'"
@@ -154,14 +154,39 @@ cases:
         rule: "Schema.MultipleOf"
         severity: "error"
         messageContains: "The value of 'multipleOf' MUST be strictly greater than 0"
+      - code: "schemaViolation"
+        pointer: "/components/schemas/User/properties/uuid/format"
+        rule: "Schema.SupportedFormat"
+        severity: "warning"
+        messageContains: "format 'uuid' not predefined for 'string'"
+      - code: "schemaViolation"
+        pointer: "/components/schemas/User/properties/email/format"
+        rule: "Schema.SupportedFormat"
+        severity: "warning"
+        messageContains: "format 'email' not predefined for 'string'"
+      - code: "schemaViolation"
+        pointer: "/components/schemas/User/properties/birthday/format"
+        rule: "Schema.SupportedFormat"
+        severity: "warning"
+        messageContains: "format 'date-time' not predefined for 'string'"
   - fixture: "10-schematests-identifiableNullable"
-    shouldPass: true
+    shouldPass: false
     expected:
+      - code: "schemaViolation"
+        pointer: "/components/schemas/User/properties/email/format"
+        rule: "Schema.SupportedFormat"
+        severity: "warning"
+        messageContains: "format 'email' not predefined for 'string'"
+      - code: "schemaViolation"
+        pointer: "/components/schemas/User/properties/name/nullable"
+        rule: "Schema.DataType"
+        severity: "error"
+        messageContains: "expected 'Boolean' instead of 'string(yes)'"
   - fixture: "10-schematests-invalidreadwriteonly"
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/components/schemas/Acccount/properties/id/readonly"
+        pointer: "/components/schemas/Account/properties/id/readonly"
         rule: "Schema.ReadOrWriteOnly"
         severity: "error"
         messageContains: "A property MUST NOT be marked as both 'readOnly' and 'writeOnly' being 'true'."
@@ -175,9 +200,9 @@ cases:
         messageContains: "minLength '10' must be <= maxLength '5'."
       - code: "schemaViolation"
         pointer: "/components/schemas/Age/maximum"
-        rule: "Schema.StringMinMaxLength"
+        rule: "Schema.NumberMinimumMaximum"
         severity: "error"
-        messageContains: "minLength '18' must be <= maxLength '10'."
+        messageContains: "minimum '18' must be <= maximum '10'."
   - fixture: "invalid_schema"
     shouldPass: false
     expected:
@@ -187,6 +212,24 @@ cases:
         severity: "error"
         messageContains: "Object marks 'missing_required_field' as required, but no such property exists"
     onlyThese: true
+  - fixture: "10-schematests-wrongNullableComposition"
+    shouldPass: false
+    expected:
+      - code: "invalidType"
+        pointer: "/components/schemas/Pet/oneOf/1/type"
+        rule: "OAS30.SupportedTypes"
+        severity: "error"
+        messageContains: "'null' type not supported in OpenAPI 3.0 (switch to nullable)"
+      - code: "schemaViolation"
+        pointer: "/components/schemas/Pet/oneOf"
+        rule: "Schema.OneAnyAllMustHaveObjectArray"
+        severity: "error"
+        messageContains: "'OneOf' elements must be of type 'object'."
+      - code: "schemaViolation"
+        pointer: "/components/schemas/Address/properties/city/nullable"
+        rule: "Schema.DataType"
+        severity: "error"
+        messageContains: "expected 'Boolean' instead of 'string(yes)'"
     
                
     

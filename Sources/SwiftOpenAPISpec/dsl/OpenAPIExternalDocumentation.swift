@@ -22,7 +22,7 @@ import Foundation
 public struct OpenAPIExternalDocumentation : ThrowingHashMapInitiable, PointerNavigable {
     
     public static let URL_KEY = "url"
-    public static let DESCRIPTION_KEY = "desccription"
+    public static let DESCRIPTION_KEY = "description"
     
     public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {

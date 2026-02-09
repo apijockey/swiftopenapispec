@@ -53,11 +53,16 @@ public struct OpenAPIAnyOfType : OpenAPISchemaType, PointerNavigable {
     
   
     public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic], pointer : String) throws {
-        self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self, diagnostics: &diagnostics, pointer: pointer)
-        
-
-        
-        
+        if case .array = map[Self.TYPE_KEY] {
+            self.type = "array"
+        }
+        else {
+            self.type = "unknown"
+            diagnostics.append(Diagnostic(severity: .error,
+                                          code: .schemaViolation,
+                                          message: "anyOf' must contain an array of 'object'.",
+                                          pointer: JSONPointer.join(pointer, "type"), rule: "Schema.OneAnyAllMustHaveObjectArray"))
+        }
         self.items = try map.mapListIfPresent(objectType: OpenAPISchema.self, pointer: pointer)
     }
     

@@ -16,7 +16,7 @@ struct Schema30ValidationTests {
 
     @Test("DEBUG.")
     func debug_schemarules() async throws {
-        let fixtureName = "10-schematests-wrongformat"
+        let fixtureName = "10-schematests-wrongNullableComposition"
         let subDirectory = "Resources/3_0/invalid"
         let rule = "OAS.ReferencesMustHaveRef"
         let bundle = Bundle.module
@@ -77,7 +77,8 @@ struct Schema30ValidationTests {
         "10-schematests-invalidAllOfAnyOf",
         "10-schematests-identifiableNullable",
         "10-schematests-invalidreadwriteonly",
-        "10-schematests-wrongconstraints"
+        "10-schematests-wrongconstraints",
+        "10-schematests-wrongformat"
     ])
     func schemaWarningRulesHit(resource: String) async throws {
         let subDirectory = "Resources/3_0/invalid"

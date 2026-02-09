@@ -59,7 +59,7 @@ public struct SchemaRuleRunner  : Sendable{
             if case let .anyOf(openAPIAnyOfType) = type,
                let items = openAPIAnyOfType.items {
                     for (idx, item) in items.enumerated() {
-                        try await out.append(contentsOf: run(schema: item, pointer: JSONPointer.join(JSONPointer.join(pointer, "items"), "\(idx)"),resolver: &resolver))
+                        try await out.append(contentsOf: run(schema: item, pointer: JSONPointer.join(JSONPointer.join(pointer, "anyOf"), "\(idx)"),resolver: &resolver))
                     }
                     
                 }
@@ -67,7 +67,7 @@ public struct SchemaRuleRunner  : Sendable{
             if case let .oneOf(openAPIAnyOfType) = type ,
                let items = openAPIAnyOfType.items {
                     for (idx, item) in items.enumerated() {
-                        try await out.append(contentsOf: run(schema: item, pointer: JSONPointer.join(JSONPointer.join(pointer, "items"), "\(idx)"),resolver: &resolver))
+                        try await out.append(contentsOf: run(schema: item, pointer: JSONPointer.join(JSONPointer.join(pointer, "oneOf"), "\(idx)"),resolver: &resolver))
                     }
                     
                 }
@@ -75,7 +75,7 @@ public struct SchemaRuleRunner  : Sendable{
             if case let .allOf(openAPIAnyOfType) = type,
                let items = openAPIAnyOfType.items {
                     for (idx, item) in items.enumerated() {
-                        try await out.append(contentsOf: run(schema: item, pointer: JSONPointer.join(JSONPointer.join(pointer, "items"), "\(idx)"),resolver: &resolver))
+                        try await out.append(contentsOf: run(schema: item, pointer: JSONPointer.join(JSONPointer.join(pointer, "allOf"), "\(idx)"),resolver: &resolver))
                     }
                     
                 }
@@ -93,6 +93,8 @@ public struct SchemaRuleRunner  : Sendable{
     public static func defaultRunner(ctx: ValidationContext) -> SchemaRuleRunner  {
         var rules = [SchemaRule]()
         if ctx.dialect == .oas30  {
+            rules.append(StringMinMaxLengthRule())
+            rules.append(StringNumberMinimumMaximumhRule())
             rules.append(SupportedFormatsRule())
             rules.append(MultipleOfRule())
             rules.append(SchemaObjectReadOrWriteOnlyRule())
@@ -104,9 +106,10 @@ public struct SchemaRuleRunner  : Sendable{
         }
         else {
             rules.append(StringMinMaxLengthRule())
+            rules.append(StringNumberMinimumMaximumhRule())
             rules.append(RequiredSubsetOfPropertiesRule())
             rules.append(SchemaObjectReadOrWriteOnlyRule())
-            rules.append(OAS30SupportedTypeRule())
+            rules.append(OAS31SupportedTypeRule())
             rules.append(OneAnyAllMustHaveObjectArrayCompositionRule())
            
         }
@@ -221,14 +224,49 @@ public struct StringMinMaxLengthRule: SchemaRule {
             return [.init(
                 severity: .error,
                 code: .schemaViolation,
-                message: "minLength '(\(min))' must be <= maxLength '(\(max))'.",
-                pointer: pointer,
+                message: "minLength '\(min)' must be <= maxLength '\(max)'.",
+                pointer: JSONPointer.join(pointer, "maxLength"),
                 rule: name
             )]
         }
         return []
     }
 }
+
+
+/// Rule: for strings, minLength <= maxLength (when both present).
+public struct StringNumberMinimumMaximumhRule: SchemaRule {
+    public let name = "Schema.NumberMinimumMaximum"
+    public init() {}
+    
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+       
+        
+        guard let min = schema.minimum,
+            let max = schema.maximum else { return [] }
+        if case .integer = schema.type,
+           Int(min) > Int(max) {
+            return [.init(
+                severity: .error,
+                code: .schemaViolation,
+                message: "minimum '\(Int(min))' must be <= maximum '\(Int(max))'.",
+                pointer: JSONPointer.join(pointer, "maximum"),
+                rule: name
+            )]
+        }
+        else if case .number = schema.type {
+            return [.init(
+                severity: .error,
+                code: .schemaViolation,
+                message: "mininum '\(min)' must be <= maximum '\(max)'.",
+                pointer: JSONPointer.join(pointer, "maximum"),
+                rule: name
+            )]
+        }
+        return []
+    }
+}
+
 
 public struct MultipleOfRule: SchemaRule {
     public let name = "Schema.MultipleOf"
@@ -285,7 +323,7 @@ public struct OAS30SupportedRegexRule: SchemaRule {
 }
 
 public struct OAS30SupportedTypeRule: SchemaRule {
-    public let name = "Schema.SupportedTypes"
+    public let name = "OAS30.SupportedTypes"
     public init() {}
     
     public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
@@ -295,13 +333,30 @@ public struct OAS30SupportedTypeRule: SchemaRule {
             return [.init(severity: .error, code: .invalidType,
                           message: "'null' type not supported in OpenAPI 3.0 (switch to nullable)",
                           pointer: "\(pointer)/type",
-                          rule: "Schema.SupportedTypes")]
+                          rule: self.name)]
         }
         else if case .unknown(let type) = schema.type {
             return [.init(severity: .error, code: .schemaViolation,
                           message: "type '\(type)' not supported or not recognized in OpenAPI 3.0",
                           pointer: "\(pointer)/type",
-                          rule: "Schema.SupportedTypes")]
+                          rule: self.name)]
+        }
+        return []
+    }
+}
+
+public struct OAS31SupportedTypeRule: SchemaRule {
+    public let name = "OAS31.SupportedTypes"
+    public init() {}
+    
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        
+        
+       if case .unknown(let type) = schema.type {
+            return [.init(severity: .error, code: .schemaViolation,
+                          message: "type '\(type)' not supported or not recognized in OpenAPI 3.1",
+                          pointer: "\(pointer)/type",
+                          rule: self.name)]
         }
         return []
     }
@@ -349,7 +404,7 @@ public struct SupportedFormatsRule: SchemaRule {
         if case .string = schema.type {
             if ["byte","binary","", "date","date-time ","password"].contains(schema.format)  || schema.format == nil { return [] }
             else {
-                diags.append(Diagnostic(severity: .warning, code: .schemaViolation, message: "format '\(schema.format ?? "")' not predefined for 'string'", pointer: pointer, rule: name))
+                diags.append(Diagnostic(severity: .warning, code: .schemaViolation, message: "format '\(schema.format ?? "")' not predefined for 'string'", pointer: JSONPointer.join(pointer, "format"), rule: name))
             }
         }
         else if case .integer = schema.type {
@@ -357,7 +412,7 @@ public struct SupportedFormatsRule: SchemaRule {
                 return []
             }
             else {
-                diags.append(Diagnostic(severity: .warning, code: .schemaViolation, message: "format '\(schema.format ?? "")' not predefined for 'integer'", pointer: pointer, rule: name))
+                diags.append(Diagnostic(severity: .warning, code: .schemaViolation, message: "format '\(schema.format ?? "")' not predefined for 'integer'", pointer:  JSONPointer.join(pointer, "format"), rule: name))
             }
         }
             
@@ -366,12 +421,12 @@ public struct SupportedFormatsRule: SchemaRule {
                 return []
             }
             else {
-                diags.append(Diagnostic(severity: .warning, code: .schemaViolation, message: "format '\(schema.format ?? "")' not predefined for 'number'", pointer: pointer, rule: name))
+                diags.append(Diagnostic(severity: .warning, code: .schemaViolation, message: "format '\(schema.format ?? "")' not predefined for 'number'", pointer:  JSONPointer.join(pointer, "format"), rule: name))
             }
         }
         else {
             if !(schema.format ?? "").isEmpty {
-                diags.append(Diagnostic(severity: .warning, code: .schemaViolation, message: "format '\(schema.format ?? "")' not expected", pointer: pointer, rule: name))
+                diags.append(Diagnostic(severity: .warning, code: .schemaViolation, message: "format '\(schema.format ?? "")' not expected", pointer:  JSONPointer.join(pointer, "format"), rule: name))
             }
         }
         

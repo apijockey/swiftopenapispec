@@ -27,7 +27,7 @@ public struct OpenAPIVariable : KeyedElement , PointerNavigable {
   
 
     public init(load map: StringDictionary, diagnostics: inout [Diagnostic],pointer : String) throws {
-        self.enumList = map.readListIfPresent(Self.ENUM_KEY, valueType: String.self, diagnostics: &diagnostics)
+        self.enumList = map.readListIfPresent(Self.ENUM_KEY, valueType: String.self, diagnostics: &diagnostics, pointer: pointer)
         self.defaultValue = map.readIfPresent(Self.DEFAULT_KEY,  valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.DEFAULT_KEY))
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.DESCRIPTION_KEY))
         self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))

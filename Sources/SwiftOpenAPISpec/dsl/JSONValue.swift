@@ -181,7 +181,19 @@ public extension JSONValue {
 
 // MARK: - Extractors for Swift primitive types
 
-public extension JSONValue {
+extension JSONValue : CustomDebugStringConvertible {
+    public var debugDescription: String {
+        switch self {
+        case .string(let s): return "string(\(s))"
+        case .integer(let i): return "integer(\(String(i))"
+        case .number(let d): return  "number(\(String(d))"
+        case .boolean(let b): return "boolean(\(String(b))"
+        case .null: return "null"
+        case .array: return "array"
+        case .object: return "object"
+        }
+    }
+    
     var stringValue: String? {
         switch self {
         case .string(let s): return s
@@ -192,6 +204,8 @@ public extension JSONValue {
         case .array, .object: return nil
         }
     }
+    
+    
     var objectValue: [String: JSONValue]? {
             guard case let .object(value) = self else { return nil }
             return value

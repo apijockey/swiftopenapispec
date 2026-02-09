@@ -212,7 +212,7 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
         self.nullable = map.readIfPresent(Self.NULLABLE_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.NULLABLE_KEY))
         self.pattern = map.readIfPresent(Self.PATTERN_KEY,valueType:String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.PATTERN_KEY))
         self.readOnly = map.readIfPresent(Self.READ_ONLY_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.READ_ONLY_KEY))
-        self.required = map.readListIfPresent(Self.REQUIRED_KEY, valueType:  String.self, diagnostics: &diagnostics)
+        self.required = map.readListIfPresent(Self.REQUIRED_KEY, valueType:  String.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.REQUIRED_KEY))
     
         self.title = map.readIfPresent(OpenAPISchema.TYPE_KEY, valueType:String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISchema.TYPE_KEY))
        

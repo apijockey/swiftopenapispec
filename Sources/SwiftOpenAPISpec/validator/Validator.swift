@@ -27,7 +27,12 @@ public struct Validator {
     }
     public static func validate(spec: OpenAPISpecification, baseURI: String, ctx: ValidationContext, resolver:  inout  JSONPointerResolver) async throws -> [Diagnostic] {
         let runner = RuleRunner.defaultRuleRunner
-        return runner.run(spec: spec, ctx: ctx)
+        var diagnostics = runner.run(spec: spec, ctx: ctx)
+        let schemaDiagnostics: [Diagnostic] = spec.diagnostics.filter { diagnostic in
+            diagnostic.rule.starts(with: "OAS")
+        }
+        diagnostics.append(contentsOf: schemaDiagnostics)
+        return diagnostics
     }
     
     public static func findOccurrences(spec: OpenAPISpecification, baseURI: String, ctx: ValidationContext, resolver:  inout  JSONPointerResolver) -> [RefOccurrence] {
@@ -120,6 +125,10 @@ public struct Validator {
                 }
             }
         }
+        let schemaDiagnostics: [Diagnostic] = spec.diagnostics.filter { diagnostic in
+            diagnostic.rule.starts(with: "Schema")
+        }
+        diagnostics.append(contentsOf: schemaDiagnostics)
         return diagnostics
     }
 }

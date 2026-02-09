@@ -202,7 +202,7 @@ struct TestHelpers {
         let errors = try await Validator.validateSchema(spec: apiSpec, ctx: ctx, baseURI: resourceUrl.absoluteString, resolver: &resolver)
         #expect(errors.count == fixture.expected.count, "Expected \(fixture.expected.count) errors, got \(errors.count)")
         let sortedErrors = errors.sorted { lhs, rhs in lhs.pointer < rhs.pointer }
-        let sortedExpected = fixture.expected.sorted { lhs, rhs in lhs.pointer < lhs.pointer}
+        let sortedExpected = fixture.expected.sorted { lhs, rhs in lhs.pointer < rhs.pointer}
         for (error, expected) in zip(sortedErrors, sortedExpected) {
             #expect(error.message.contains(expected.messageContains), "Error message should contain '\(expected.messageContains)', got: \(error.message)")
             #expect(error.pointer == expected.pointer, "Error pointer should be '\(expected.pointer)', got: '\(error.pointer)'")
