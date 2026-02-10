@@ -14,56 +14,30 @@
  * limitations under the License.
  */
 
-/*
- * Copyright 2025 
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-//
-//  OpenAPIDefaultSchemaType 2.swift
-//  SwiftOpenAPISpec
-//
-//  Created by Patric Dubois on 07.12.25.
-//
 
 
-public struct OpenAPIAllOfType : OpenAPIValidatableSchemaType, PointerNavigable {
-    public static func == (lhs: OpenAPIAllOfType, rhs: OpenAPIAllOfType) -> Bool {
-        // 1) einfache Felder
-        guard lhs.type == rhs.type else { return false }
-
-        // 2) items per isEqual(to:) vergleichen (existential-sicher)
-        switch (lhs.items, rhs.items) {
-        case (nil, nil):
-            return true
-        case let (l?, r?):
-            guard l.count == r.count else { return false }
-            for (le, re) in zip(l, r) {
-                if !le.isEqual(to: re) { return false }
-            }
-            return true
-        default:
-            return false
-        }
-    }
+public struct OpenAPIAllOfType : OpenAPISchemaType, ThrowingHashMapInitiable, PointerNavigable {
+  
+    public let type : String?
+    public var items: [OpenAPISchema]?
+   
+  
     
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult{
         if let index = Int(segmentName) {
-            return self.items?[index]
+            return .navigable(self.items?[index])
         }
         if segmentName ==  OpenAPISchemaReference.REF_KEY {
-            return ref
+            return .reference( ref?.reference)
+        }
+        if segmentName == OpenAPISchemaReference.REF_KEY {
+            if let reference = ref {
+                return .reference(reference.refString)
+                
+            }
+            else {
+                throw OpenAPISpecification.Errors.notFound(segmentName)
+            }
         }
         throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIOneOfType",segmentName)
     }
@@ -71,19 +45,28 @@ public struct OpenAPIAllOfType : OpenAPIValidatableSchemaType, PointerNavigable 
     public var ref: OpenAPISchemaReference?
    
     public static let TYPE_KEY = "allOf"
-    public init(_ map: [String : Any]) throws {
-        self.type = map[Self.TYPE_KEY] as? String
-        guard let list = (map["allOf"] as? [Any]) else {
-            return
+    public static let DISCRIMINATOR_KEY = "discriminator"
+  
+
+    public init(load map: StringDictionary,diagnostics: inout [Diagnostic],pointer : String) throws {
+        if case .array = map[Self.TYPE_KEY] {
+            self.type = "array"
         }
-        self.items = try list.asValidatableSchemaType()
+        else {
+            self.type = "unknown"
+            diagnostics.append(Diagnostic(severity: .error,
+                                          code: .schemaViolation,
+                                          message: "allOf' must contain an array of 'object'.",
+                                          pointer: JSONPointer.join(pointer, "type"), rule: "Schema.OneAnyAllMustHaveObjectArray"))
+        }
+        self.items = try map.mapListIfPresent("allOf", objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: pointer)
+       
     }
     
     public func validate() throws {
         
     }
-
-    public let type : String?
-    public var items: [any OpenAPIValidatableSchemaType]?
+   
+   
   
 }

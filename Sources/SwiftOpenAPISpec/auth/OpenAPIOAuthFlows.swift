@@ -40,13 +40,23 @@
 import Foundation
 
 public struct OpenAPIOAuthFlows : ThrowingHashMapInitiable, PointerNavigable {
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
-            case Self.IMPLICIT_KEY: return self.implicit as Any?
-            case Self.PASSWORD_KEY: return self.password as Any?
-            case Self.CLIENT_CREDENTIALS_KEY: return self.clienCredentials as Any?
-            case Self.AUTHORIZATION_CODE_KEY: return self.authorizationCode as Any?
-            case Self.DEVICE_AUTHORIZATION_KEY: return self.deviceAuthorization as Any?
+        case Self.IMPLICIT_KEY:
+            let value  = try JSONValue(self.implicit)
+            return .value(value)
+            case Self.PASSWORD_KEY:
+            let value = try JSONValue(self.password)
+            return .value(value)
+            case Self.CLIENT_CREDENTIALS_KEY:
+            let value = try JSONValue(clienCredentials)
+            return .value(value)
+            case Self.AUTHORIZATION_CODE_KEY:
+            let value = try JSONValue(self.authorizationCode)
+            return .value(value)
+            case Self.DEVICE_AUTHORIZATION_KEY:
+            let value = try JSONValue(self.deviceAuthorization )
+            return .value(value)
         default:
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIOAuthFlows", segmentName)
         }
@@ -59,17 +69,18 @@ public struct OpenAPIOAuthFlows : ThrowingHashMapInitiable, PointerNavigable {
     public static let CLIENT_CREDENTIALS_KEY  = "clientCredentials"
     public static let AUTHORIZATION_CODE_KEY  = "authorizationCode"
     public static let DEVICE_AUTHORIZATION_KEY  = "deviceAuthorization"
-    public init(_ map: [String : Any]) throws {
-        self.implicit = try map.mapIfPresent(Self.IMPLICIT_KEY, OpenAPIOAuthFlow.self)
-        self.password = try map.mapIfPresent(Self.PASSWORD_KEY, OpenAPIOAuthFlow.self)
-        self.clienCredentials = try map.mapIfPresent(Self.CLIENT_CREDENTIALS_KEY, OpenAPIOAuthFlow.self)
-        self.authorizationCode = try map.mapIfPresent(Self.AUTHORIZATION_CODE_KEY, OpenAPIOAuthFlow.self)
+    public init(load map: StringDictionary, diagnostics: inout [Diagnostic],pointer : String) throws {
+        self.implicit = try map.readIfPresent(Self.IMPLICIT_KEY, objectType: OpenAPIOAuthFlow.self, diagnostics: &diagnostics, pointer: pointer)
+        self.password = try map.readIfPresent(Self.PASSWORD_KEY, objectType: OpenAPIOAuthFlow.self, diagnostics: &diagnostics, pointer: pointer)
+        self.clienCredentials = try map.readIfPresent(Self.CLIENT_CREDENTIALS_KEY, objectType: OpenAPIOAuthFlow.self, diagnostics: &diagnostics, pointer: pointer)
+        self.authorizationCode = try map.readIfPresent(Self.AUTHORIZATION_CODE_KEY, objectType: OpenAPIOAuthFlow.self, diagnostics: &diagnostics, pointer: pointer)
     }
+   
     public var implicit : OpenAPIOAuthFlow? = nil
     public var password : OpenAPIOAuthFlow? = nil
     public var clienCredentials : OpenAPIOAuthFlow? = nil
     public var authorizationCode : OpenAPIOAuthFlow? = nil
     public var deviceAuthorization : OpenAPIOAuthFlow? = nil
    
-    public var ref: OpenAPISchemaReference? { nil}
+   
 }

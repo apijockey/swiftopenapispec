@@ -38,7 +38,272 @@
 //
 
 
-extension Dictionary where Key == String, Value == Any {
+extension StringDictionary {
+    
+    
+    func mapTypes<V>(value : JSONValue, valueType : V.Type, diagnostics : inout [Diagnostic], pointer : String) -> V? {
+        switch valueType.self {
+        case is String.Type:
+            if case let .string(value) =  value,
+                let stringValue = value as? V{
+                return stringValue
+            }
+            else {
+                let diagnostic = Diagnostic(severity: .error, code: .schemaViolation, message: "expected 'String' instead of '\(value.debugDescription)'", pointer: pointer , rule: "Schema.DataType")
+                diagnostics.append(diagnostic)
+                return nil
+            }
+        case is Int.Type:
+            if let intValue = value.intValue as? V {
+                return intValue
+            }
+            else {
+                let diagnostic = Diagnostic(severity: .error, code: .schemaViolation, message: "expected 'Integer/Number instead of '\(value.debugDescription)'", pointer: pointer , rule: "Schema.DataType")
+                diagnostics.append(diagnostic)
+                return nil
+            }
+        case is Double.Type:
+            if let doubleValue = value.doubleValue as? V {
+                return doubleValue
+            }
+            else {
+                let diagnostic = Diagnostic(severity: .error, code: .schemaViolation, message: "expected 'Double/Number' instead of '\(value.debugDescription)'", pointer: pointer , rule: "Schema.DataType")
+                diagnostics.append(diagnostic)
+                return nil
+            }
+        case is Float.Type:
+            if let value = value.floatValue as? V {
+                return value
+            }
+            else {
+                let diagnostic = Diagnostic(severity: .error, code: .schemaViolation, message: "expected 'Float/Number' instead of '\(value.debugDescription)'", pointer: pointer , rule: "Schema.DataType")
+                diagnostics.append(diagnostic)
+                return nil
+            }
+        case is Bool.Type:
+            if case let .boolean(value) = value,
+            let boolValue = value as? V{
+                return boolValue
+            }
+            else {
+                let diagnostic = Diagnostic(severity: .error, code: .schemaViolation, message: "expected 'Boolean' instead of '\(value.debugDescription)'", pointer: pointer , rule: "Schema.DataType")
+                diagnostics.append(diagnostic)
+                return nil
+            }
+        case is JSONValue.Type:
+           
+            return (value as? V)
+        default:
+            let diagnostic = Diagnostic(severity: .warning, code: .schemaViolation, message: "unexpected value type '\(value.debugDescription)'", pointer: pointer , rule: "Schema.DataType")
+            diagnostics.append(diagnostic)
+            return (value as? V)
+        }
+    }
+    func readListIfPresent<V>(_ key : String, valueType : V.Type, diagnostics : inout [Diagnostic], pointer : String) -> [V]? {
+        
+        var typedArray = [V]()
+        if case let .array(arrayValue) = self[key] {
+            for value in arrayValue {
+                if let typedValue = mapTypes(value: value, valueType: valueType, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, key)) {
+                    typedArray.append(typedValue)
+                }
+            }
+            return typedArray
+        }
+        else {
+            return nil
+        }
+    }
+    func readIfPresent<V>(_ key : String, valueType : V.Type, diagnostics : inout [Diagnostic], pointer : String) -> V? {
+        guard let value = self[key] else { return nil }
+        return mapTypes(value: value, valueType: valueType, diagnostics: &diagnostics, pointer: pointer)
+    }
+    
+    func readIfPresent<V>(_ key : String, objectType : V.Type, diagnostics : inout [Diagnostic], pointer : String) throws -> V?  where V : ThrowingHashMapInitiable{
+       
+        guard let value = self[key] else { return nil }
+        guard case let .object(objectMap) = value else { return nil }
+        return  try  V(load: objectMap,diagnostics: &diagnostics, pointer: pointer)
+    }
+//    func readNamedElementIfPresent<V>(_ key : String, objectType : V.Type) throws -> OpenAPINamedElement<V>?  where V : ThrowingHashMapInitiable{
+//        var diagnostics: [Diagnostic] = []
+//        guard let value = self[key] else { return nil }
+//        guard case let .object(objectMap) = value else { return nil }
+//        var namedElement = try OpenAPINamedElement<V>(load: objectMap, objectType: V.self, &diagnostics)
+//        
+//        return  namedElement
+//    }
+    
+    func mapListIfPresent<T>(_ key : String, objectType : T.Type, diagnostics: inout [Diagnostic], pointer: String) throws -> [T]  where  T : ThrowingHashMapInitiable{
+        var elements = [T]()
+       
+        if case let .object(objectMap)  = self[key]  {
+            for element in objectMap {
+                let value = element.value
+                if case let .object(valueMap) = value {
+                    let type = try T.initialize(load:  valueMap, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, element.key)).value
+                    elements.append(type)
+                }
+            }
+        }
+        else if case let .array(array)  = self[key]  {
+            for element in array {
+                if case let .object(valueMap) = element {
+                    let element = try T.initialize(load: valueMap, diagnostics: &diagnostics, pointer: pointer).value
+                    elements.append(element)
+                }
+            }
+        }
+        return elements
+    }
+    
+//    func mapNamedElementListIfPresent<T>(_ key : String, objectType : T.Type) throws -> [OpenAPINamedElement<T>]  where  T : ThrowingHashMapInitiable, T : PointerNavigable{
+//        // I have a list, this list may contain one element only.
+//        var elements = [OpenAPINamedElement<T>]()
+//        var diagnostics: [Diagnostic] = []
+//        if case let .object(objectMap)  = self[key]  {
+//            for element in objectMap {
+//                let value = element.value
+//                if case let .object(valueMap) = value {
+//                    var namedElement = try OpenAPINamedElement<T>(load: valueMap, objectType: T.self, &diagnostics)
+//                    namedElement.key = element.key
+//                    elements.append(namedElement)
+//                }
+//            }
+//        }
+//        else if case let .array(array)  = self[key]  {
+//            for element in array {
+//                if case let .object(valueMap) = element {
+//                    var namedElement = try OpenAPINamedElement<T>(load: valueMap, objectType: T.self, &diagnostics)
+//                    namedElement.key = "Hallo"
+//                    elements.append(namedElement)
+//                }
+//            }
+//        }
+//        return elements
+//    }
+    func mapDictionaryfPresent<T>(_ key : String, objectType : T.Type, diagnostics: inout [Diagnostic], pointer : String) throws -> [T]  where  T : ThrowingHashMapInitiable{
+        var elements = [T]()
+        
+        if case let .object(objectMap)  = self[key]  {
+            for element in objectMap {
+                let value = element.value
+                if case let .object(valueMap) = value {
+                    let type = try T.initialize(load:  valueMap, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, element.key)).value
+                    elements.append(type)
+                }
+            }
+        }
+        return elements
+    }
+    
+    func mapListIfPresent<T>(_ key : String, objectType : T.Type , diagnostics: inout [Diagnostic], pointer : String) throws -> [T]  where  T : KeyedElement{
+        var elements = [T]()
+        if let value = self[key] {
+        if case let .object(objectMap)  = value{
+            for element in objectMap {
+                let value = element.value
+                if case let .object(valueMap) = value {
+                    
+                    var type = try T.initialize(load:  valueMap, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, element.key)).value
+                    if type.key == nil {
+                        type.key = element.key
+                    }
+                    elements.append(type)
+                }
+                if case .string = value {
+                    var type = try T.initialize(load:  [key:value], diagnostics: &diagnostics, pointer: pointer).value
+                    if type.key == nil {
+                        type.key = element.key
+                    }
+                    elements.append(type)
+                    
+                }
+            }
+        }
+        if case let .array(arrayList) = value {
+            for (index,jsonElement) in arrayList.enumerated() {
+                if case let .object(objectElement) = jsonElement {
+                    var type = try T.initialize(load:  objectElement, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, String(index))).value
+                    if type.key == nil {
+                        type.key = objectElement.keys.first
+                    }
+                    elements.append(type)
+                    
+                    
+                }
+            }
+        }
+        }
+        return elements
+    }
+    func mapListIfPresent<T>(_ key : String, valueType : T.Type, pointer : String) throws -> [T]  where  T : KeyedElement{
+        var elements = [T]()
+        var diagnostics: [Diagnostic] = []
+        guard let value = self[key] else {
+            return elements
+        }
+        if case let .object(element)  = value,
+           case let .object(elementContent) = element.first?.value{
+            var type = try T.initialize(load: elementContent, diagnostics: &diagnostics, pointer: pointer).value
+            type.key = element.keys.first // the StringDictionary holds one key and the object information in the values
+            elements.append(type)
+            return elements
+        }
+        if case let .array(list)  = value {
+            for (index,element) in list.enumerated() {
+                if case let .object(objectElement) = element {
+                    var type = try T.initialize(load: objectElement, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, String(index))).value
+                    if type.key == nil {
+                        type.key = objectElement.keys.first
+                    }
+                    elements.append(type)
+                }
+                
+            }
+            return elements
+        }
+        return elements
+    }
+    func mapListIfPresent<T>(objectType : T.Type, pointer : String) throws -> [T]  where  T : ThrowingHashMapInitiable{
+        var elements = [T]()
+        var diagnostics: [Diagnostic] = []
+            for element in self {
+                let value = element.value
+                if case let .object(valueMap) = value {
+                    let type = try T.initialize(load: valueMap, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, element.key)).value
+                    
+                    elements.append(type)
+                }
+            }
+        
+        return elements
+    }
+    func mapListIfPresent<T>(objectType : T.Type, pointer : String) throws -> [T]  where  T : KeyedElement{
+        var elements = [T]()
+        var diagnostics: [Diagnostic] = []
+            for element in self {
+                let value = element.value
+                if case let .object(valueMap) = value {
+                    var type = try T.initialize(load: valueMap, diagnostics: &diagnostics, pointer : JSONPointer.join(pointer, element.key)).value
+                    type.key = element.key
+                    elements.append(type)
+                }
+                //this must be a reference
+                else if case .string(let string) = value,
+                        string == OpenAPISchemaReference.REF_KEY {
+                        
+                    var type = try T.initialize(load: self, diagnostics: &diagnostics, pointer: pointer).value
+                        type.key = element.key
+                        elements.append(type)
+                }
+            }
+        
+        return elements
+    }
+}
+
+extension Dictionary where Key == String, Value == JSONValue {
     
     /**
        creates an instance of type V if the dictionary value for *key* corresponds to a type that can be initiated by the value. Use, if the dictionary key is mandatory and the value must not be null
@@ -63,14 +328,14 @@ extension Dictionary where Key == String, Value == Any {
     /// - type: The expected typ to create
     /// - root: Additional information about the context like parent element
     /// - Returns: An Instance of type V, which implements `ThrowingHashMapInitiable` or throws if the value is not a `StringDictionary` or inita
-    func tryMap<V>(_ key : String ,root: String,_ result : V.Type) throws -> V  where V : ThrowingHashMapInitiable{
-        if let value = self[key] as? StringDictionary {
-            return try V.init(value)
-        }
-        else {
-            throw OpenAPISpecification.Errors.invalidSpecification(root, key.description)
-        }
-    }
+//    func tryMap<V>(_ key : String ,root: String,_ result : V.Type) throws -> V  where V : ThrowingHashMapInitiable{
+//        if let value = self[key] as? StringDictionary {
+//            return try V.initialize( value).value
+//        }
+//        else {
+//            throw OpenAPISpecification.Errors.invalidSpecification(root, key.description)
+//        }
+//    }
     /**
      creates an instance of type V if the dictionary value for *key* corresponds to.
      
@@ -80,14 +345,14 @@ extension Dictionary where Key == String, Value == Any {
      - type: The expected typ to create
      - Returns: An instance of type V  or nil
      */
-    func readIfPresent<V>(_ key : String, _ type : V.Type) -> V? {
-        if let value = self[key] as? V {
-            return value
-        }
-        else {
-            return nil
-        }
-    }
+//    func readIfPresent<V>(_ key : String, _ type : V.Type) -> V? {
+//        if let value = self[key] as? V {
+//            return value
+//        }
+//        else {
+//            return nil
+//        }
+//    }
     /**
      creates an instance of type V if the dictionary value for *key* corresponds to.
      
@@ -97,14 +362,14 @@ extension Dictionary where Key == String, Value == Any {
         - type: The expected type to create
      - Returns: An instance of type V  or nil
      */
-    func mapIfPresent<V>(_ key : String, _ type : V.Type) throws -> V?  where V: ThrowingHashMapInitiable{
-        if let mapValue = readIfPresent(key, StringDictionary.self){
-            return try V.init(mapValue)
-        }
-        else {
-            return nil
-        }
-    }
+//    func mapIfPresent<V>(_ key : String, _ type : V.Type) throws -> V?  where V: ThrowingHashMapInitiable{
+//       if let mapValue = readIfPresent(key, StringDictionary.self){
+//            return try V.initialize( mapValue).value
+//        }
+//        else {
+//            return nil
+//        }
+//    }
     
    
     
@@ -115,60 +380,35 @@ extension Dictionary where Key == String, Value == Any {
     ///  - key: the key to use in the dictionary
     ///   - result: the expected type to create
     /// - Returns:  An instance of type V  if the value is not nil, throws if V.init(value) throws and error
-    func MapIfPresent<V>(_ key : String ,_ result : V.Type) throws -> V?  where V : ThrowingHashMapInitiable{
-        if let value = self[key] as? StringDictionary {
-            return try V.init(value)
-        }
-        else {
-            return nil
-        }
-    }
-    ///creates a list of  type V instance if the dictionary value for *key* is of type `StringDictionary`
-    ///
-    ///Use, if the dictionary key is not mandatory or  the value may be be null
-    ///
-    /// - Parameters:
-    ///   - key: dictionary key
-    ///   - root: Used to improve error output in `OpenAPISpecification/UserInfo`
-    ///   - result: expected type to init from the Dictionary
-    /// - Returns: returns the list or throws if the key does not exist, does not point to an [AnyHashable:Any]  or the list cannot be mapped to [V]
-    func tryList<V>(_ key : String,root: String,_ result : V.Type) throws -> [V]  where V : KeyedElement{
-        if let list = self[key] as? StringDictionary {
-            return try KeyedElementList.map(list)
-        }
-        else {
-            throw OpenAPISpecification.Errors.invalidSpecification(root, key)
-        }
-    }
-    
-    func tryList<V>(_ key : String,root: String,_ result : V.Type) throws -> [V]  where V : ThrowingHashMapInitiable{
-        if let list = self[key] as? [Any] {
-            return try HashmapInitializableList.map(list)
-        }
-        else {
-            throw OpenAPISpecification.Errors.invalidSpecification(root, key)
-        }
-    }
-    func tryOptionalList<V>(_ key : String,root: String,_ result : V.Type) throws -> [V]  where V : ThrowingHashMapInitiable{
-        guard let list = self[key] as? [Any] else {
-            return []
-        }
-        return try HashmapInitializableList.map(list)
-    }
-    
+//    func MapIfPresent<V>(_ key : String ,_ result : V.Type) throws -> V?  where V : ThrowingHashMapInitiable{
+//        if let value = self[key] as? StringDictionary {
+//            return try V.initialize( value).value
+//        }
+//        else {
+//            return nil
+//        }
+//    }
+
+//    func tryOptionalList<V>(_ key : String,root: String,_ result : V.Type) throws -> [V]  where V : ThrowingHashMapInitiable{
+//        guard let list = self[key] as? [Any] else {
+//            return []
+//        }
+//        return try HashmapInitializableList.map(list).value
+//    }
+//    
     
     
     /**
         Reads an optional sequence for give key and maps the contents to the given type
           Returns an empty list, if the key cannot be found or the key does not point to an [Any]
         Throws if the list cannot be mapped to [V]
-     */
-    func tryListIfPresent<V>(_ key : String,root: String,_ result : V.Type) throws -> [V]  where V : ThrowingHashMapInitiable{
-        guard let list = self[key] as? [Any] else {
-            return []
-        }
-        return try HashmapInitializableList.map(list)
-    }
+//     */
+//    func tryListIfPresent<V>(_ key : String,root: String,_ result : V.Type) throws -> [V]  where V : ThrowingHashMapInitiable{
+//        guard let list = self[key] as? [Any] else {
+//            return []
+//        }
+//        return try HashmapInitializableList.map(list).value
+//    }
     
     /// Reads a dictionary value and transforms it to the specified type.
     /// - Parameters:
@@ -176,44 +416,31 @@ extension Dictionary where Key == String, Value == Any {
     ///   - type: The expected typ to create
     ///   - root: Additional information about the context like parent element
     /// - Returns:  An instance of type T or ni, the value does not exist or does not evaluate to type *T*
-    func tryReadIfPresent<T>(_ key : String, _ type : T.Type,root: String) -> T? {
-        if let value = self[key] as? T {
-            return value
-        }
-        else {
-            return nil
-        }
-    }
-    func mapListIfPresent<T>(_ key : String) throws -> [T]  where  T : KeyedElement{
-        var openAPIOperations = [T]()
-        if let map = self[key] as? StringDictionary {
-            for element in map {
-                let value = element.value
-                if let valueMap = value as? StringDictionary{
-                    var type = try T(valueMap)
-                    type.key = key
-                    openAPIOperations.append(type)
-                }
-            }
-        }
-        return openAPIOperations
-    }
+//    func tryReadIfPresent<T>(_ key : String, _ type : T.Type,root: String) -> T? {
+//        if let value = self[key] as? T {
+//            return value
+//        }
+//        else {
+//            return nil
+//        }
+//    }
+    
     /// Inits an instance of Type *V* by loading the value from the current Dictionary with the given *key*
     /// - Parameters:
     ///   - key: dictionary key
     ///   - root: Used to improve error output in `OpenAPISpecification/UserInfo`
     ///   - result: expected type to init from the Dictionary
     /// - Returns: an instance of type *V*, if the key exists and maps to  a Dictionary of StringDictionary
-    func tryMapIfPresent<V>(_ key : String,root: String,_ result : V.Type) throws -> V?  where V : ThrowingHashMapInitiable{
-        if let value = self[key] as? StringDictionary {
-            let v = try V.init(value)
-           return v
-            
-        }
-        else {
-            return nil
-        }
-    }
+//    func tryMapIfPresent<V>(_ key : String,root: String,_ result : V.Type) throws -> V?  where V : ThrowingHashMapInitiable{
+//        if let value = self[key] as? StringDictionary {
+//            let v = try V.initialize( value)
+//           return v
+//            
+//        }
+//        else {
+//            return nil
+//        }
+//    }
     
    
 //    func tryMap<V>(_ key : AnyHashable ,root: String,_ result : V.Type) throws -> V  where V : KeyValueObjectInitializer{

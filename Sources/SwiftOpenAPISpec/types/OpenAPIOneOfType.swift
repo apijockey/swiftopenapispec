@@ -38,50 +38,45 @@
 //
 
 
-public struct OpenAPIOneOfType : OpenAPIValidatableSchemaType,PointerNavigable {
-    public static func == (lhs: OpenAPIOneOfType, rhs: OpenAPIOneOfType) -> Bool {
-        guard lhs.type == rhs.type else { return false }
-        switch (lhs.items, rhs.items) {
-        case (nil, nil):
-            return true
-        case let (l?, r?):
-            guard l.count == r.count else { return false }
-            for (le, re) in zip(l, r) {
-                if !le.isEqual(to: re) { return false }
-            }
-            return true
-        default:
-            return false
-        }
-    }
+public struct OpenAPIOneOfType : OpenAPISchemaType,ThrowingHashMapInitiable, PointerNavigable {
     
-    public func element(for segmentName: String) throws -> Any? {
+    
+   
+    
+    public func element(for segmentName: String) throws -> NavigationResult {
         if let index = Int(segmentName),
            index >= 0,
            let itemsCount = self.items?.count,
-           index < itemsCount{
-            return self.items?[index]
+           index < itemsCount,
+            items != nil{
+            return .navigable (self.items?[index])
         }
         if segmentName ==  OpenAPISchemaReference.REF_KEY {
-            return ref
+            return .reference( ref?.reference)
         }
         throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIOneOfType",segmentName)
     }
     
     
     public static let TYPE_KEY = "oneOf"
-   
-    public init(_ map: [String : Any]) throws {
-        self.type = map[Self.TYPE_KEY] as? String
-        guard let list = (map["oneOf"] as? [Any]) else {
-            return
+    public static let DISCRIMINATOR_KEY = "discriminator"
+    
+
+    public init(load map: StringDictionary,diagnostics: inout [Diagnostic],pointer : String) throws {
+        if case .array = map[Self.TYPE_KEY] {
+            self.type = "array"
         }
-        self.items = try list.asValidatableSchemaType()
+        else {
+            self.type = "unknown"
+            diagnostics.append(Diagnostic(severity: .error,
+                                          code: .schemaViolation,
+                                          message: "oneOf' must contain an array of 'object'.",
+                                          pointer: JSONPointer.join(pointer, "type"), rule: "Schema.OneAnyAllMustHaveObjectArray"))
+        }
+        self.items = try map.mapListIfPresent("oneOf",objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer : pointer)
     }
-    public func validate() throws {
-    }
+   
     public let type : String?
-    public var items: [any OpenAPIValidatableSchemaType]?
-  
-    public var ref: OpenAPISchemaReference? { nil}
+    public var items: [OpenAPISchema]?
+  public var ref: OpenAPISchemaReference? { nil}
 }

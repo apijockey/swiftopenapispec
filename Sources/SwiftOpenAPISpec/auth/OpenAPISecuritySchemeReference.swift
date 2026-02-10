@@ -39,7 +39,18 @@
 
 import Foundation
 
-public struct OpenAPISecuritySchemeReference  : Sendable {
+public struct OpenAPISecuritySchemeReference  : KeyedElement, Sendable {
+    public init(load map: StringDictionary,diagnostics: inout [Diagnostic],pointer : String) throws {
+        if case let .array(scopes) = map.first?.value {
+            for scope in scopes {
+                if case let .string(scopeValue) = scope {
+                    self.scopes.append(scopeValue)
+                }
+            }
+        }
+       
+    }
+    
     public var key : String? = nil
     public var scopes : [String] = []
    

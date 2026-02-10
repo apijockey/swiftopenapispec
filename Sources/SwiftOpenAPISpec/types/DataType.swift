@@ -37,9 +37,7 @@
 //  Created by Patric Dubois on 16.12.25.
 //
 
-public enum DataType : String, CaseIterable {
-        case null, boolean, object, array, number, string, integer
-    }
+
 public enum DateFormatType : String, CaseIterable {
     case datetime = "date-time", date,time, duration
 }

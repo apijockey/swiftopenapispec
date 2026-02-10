@@ -1,0 +1,439 @@
+/*
+ * Copyright 2025 CgSe Computergrafik und Softwareentwicklung GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import Yams
+import Foundation
+import Testing
+@testable import SwiftOpenAPISpec
+
+@Suite("OpenAPI Spec (legacy XCTest -> Swift Testing)")
+struct OpenAPILegacyPortedTests {
+    
+    @Test
+    func testBasics() async throws {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
+            #expect(Bool(false), "no openapi")
+            return
+        }
+        let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
+        
+        #expect(apiSpec.version == "3.1.0")
+        #expect(apiSpec.info?.title == "GreetingService")
+        #expect(apiSpec.info?.version == "1.0.0")
+        #expect(apiSpec.info?.summary == "Prints a greeting on GET request")
+        #expect(apiSpec.info?.termsOfService == "Displayss the terms of services")
+        #expect((apiSpec.info?.contact?.name ?? "") == "API Support")
+        #expect((apiSpec.info?.contact?.url ?? "") == "https://www.example.com/support")
+        #expect((apiSpec.info?.contact?.email ?? "") == "support@example.com")
+        #expect((apiSpec.info?.license?.name ?? "") == "Apache 2.0")
+        #expect((apiSpec.info?.license?.url ?? "") == "https://www.apache.org/licenses/LICENSE-2.0.html")
+    }
+    
+    @Test
+    func testServers() async throws {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
+            #expect(Bool(false), "no openapi")
+            return
+        }
+        let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
+        #expect(apiSpec.servers.count == 3)
+        #expect(apiSpec.servers[0].url == "https://example.com/api")
+        #expect(apiSpec.servers[0].description == "Example service deployment.")
+        #expect(apiSpec.servers[1].url == "http://127.0.0.1:8080/api")
+        #expect(apiSpec.servers[1].description == "Localhost deployment.")
+        #expect(apiSpec.servers[2].variables.count == 3)
+        
+        guard let usernameVariable = apiSpec.servers[2].variables.first(where: { $0.key == "username" }) else {
+            #expect(Bool(false), "no username variable"); return
+        }
+        #expect(usernameVariable.defaultValue == "demo")
+        #expect(usernameVariable.description == "this value is assigned by the service provider, in this example `gigantic-server.com`")
+        #expect(usernameVariable.enumList == nil)
+        
+        guard let portVariable = apiSpec.servers[2].variables.first(where: { $0.key == "port" }) else {
+            #expect(Bool(false), "no port variable"); return
+        }
+        #expect(portVariable.defaultValue == "8443")
+        #expect(portVariable.enumList?.count == 2)
+        #expect(portVariable.enumList?.contains (where:{ type in
+            if case let .string(stringValue) = type {
+                return stringValue == "8443"
+            }
+            return false
+        }) == true)
+        #expect(portVariable.enumList?.contains (where:{ type in
+            if case let .string(stringValue) = type {
+                return stringValue == "443"
+            }
+            return false
+        }) == true)
+        
+       
+    }
+    
+    @Test
+    func testPathInfo() async throws {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
+            #expect(Bool(false), "no openapi")
+            return
+        }
+        let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
+        #expect(apiSpec.paths.count == 4)
+        
+        let getGreetPath = try #require(apiSpec.paths.first { $0.key == "/greet" })
+        #expect(getGreetPath.operations.count == 1)
+        let getEmojiPath = try #require(apiSpec.paths.first { $0.key == "/emoji" })
+        let getClipPath = try #require(apiSpec.paths.first { $0.key == "/clip" })
+        #expect(getGreetPath.operations.count == 1)
+        #expect(getEmojiPath.operations.count == 1)
+        #expect(getClipPath.operations.count == 1)
+        
+        let emojiPathOperation = try #require(getEmojiPath.operations.first)
+        #expect(emojiPathOperation.responses.count == 1)
+        #expect(emojiPathOperation.key == "get")
+        
+        let clipPathOperation = try #require(getClipPath.operations.first)
+        #expect(clipPathOperation.key == "get")
+        
+        let greetingPathOperation = try #require(getGreetPath.operations.first)
+        #expect(greetingPathOperation.key == "get")
+    }
+    
+    @Test
+    func testOperations() async throws {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
+            #expect(Bool(false), "no openapi")
+            return
+        }
+        let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
+        let getClipPath = try #require(apiSpec.paths.first { $0.key == "/clip" })
+        let clipPathOperation = try #require(getClipPath.operations.first)
+        #expect(clipPathOperation.key == "get")
+        #expect(clipPathOperation.responses.count == 1)
+        #expect(clipPathOperation.operationId == "getClip")
+        let response  = try #require(clipPathOperation.responses.first)
+        #expect(response.description == "Returns a cat video! 😽")
+        #expect(response.key == "200")
+    }
+    
+    @Test
+    func testParameters() async throws {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
+            #expect(Bool(false), "no openapi")
+            return
+        }
+        let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
+        let getGreetPath = try #require(apiSpec.paths.first { $0.key == "/greet" })
+        let getEmojiPath = try #require(apiSpec.paths.first { $0.key == "/emoji" })
+        let getClipPath = try #require(apiSpec.paths.first { $0.key == "/clip" })
+        let clipPathOperation = try #require(getClipPath.operations.first)
+        let emojiPathOperation = try #require(getEmojiPath.operations.first)
+        let greetPathOperation = try #require(getGreetPath.operations.first)
+        #expect(clipPathOperation.parameters.count == 0)
+        #expect(emojiPathOperation.parameters.count == 0)
+        #expect(greetPathOperation.parameters.count == 1)
+        let greetPathParameter = try #require(greetPathOperation.parameters.first)
+        #expect(greetPathParameter.name == "name")
+        #expect(greetPathParameter.required == false)
+        #expect(greetPathParameter.location == OpenAPIParameter.ParameterLocation.query)
+        #expect(greetPathParameter.description == "The name used in the returned greeting.")
+        //#expect(greetPathParameter.schema?.type is OpenAPIStringType)
+        #expect(greetPathParameter.allowEmptyValue == nil)
+    }
+    
+    @Test
+    func testResponses() async throws {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
+            #expect(Bool(false), "no openapi")
+            return
+        }
+        let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
+        let getGreetPath = try #require(apiSpec.paths.first { $0.key == "/greet" })
+        let greetPathOperation = try #require(getGreetPath.operations.first)
+        let response = try #require(greetPathOperation.responses.first)
+        #expect(response.key == "200")
+        #expect(response.content.count == 1)
+        let content = try #require(response.content.first)
+        #expect(content.key == "application/json")
+        guard case let .ref(ref) = content.schema?.type else {
+            #expect(Bool(false), "expected ref")
+            return
+        }
+        
+        
+        #expect(ref.refString == "#/components/schemas/Greeting")
+    }
+    
+    @Test
+    func testSchemaComponents() async throws {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
+            #expect(Bool(false), "no openapi")
+            return
+        }
+        let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
+        #expect(apiSpec.components?.schemas?.count == 4)
+        let greetingComponent = try #require(apiSpec.components?.schemas?.first { $0.key == "Greeting" })
+        guard case let .object(greetingObject) = try #require(greetingComponent.type) else {
+            #expect(Bool(false), "expected object schema")
+            return
+        }
+        #expect(greetingObject.properties.count == 1)
+        let messageProperty = try #require(greetingObject.properties.first)
+        #expect(messageProperty.type != nil)
+        #expect(greetingObject.required == ["message"])
+        
+        let generalErrorComponent = try #require(apiSpec[schemacomponent: "GeneralError"])
+        guard case let .object(errorObject) = try #require(generalErrorComponent.type) else {
+            #expect(Bool(false), "expected object schema")
+            return
+        }
+        #expect(errorObject.properties.count == 2)
+        let errorMessageCodeProperty = errorObject.properties.first(where: {$0.key == "code"})
+    //#expect(errorMessageCodeProperty?.schema?.type is OpenAPIIntegerType)
+        let errorMessageMessageProperty = errorObject.properties.first(where: {$0.key == "message"})
+        //#expect(errorMessageMessageProperty?.schema?.type is OpenAPIStringType)
+        #expect(errorObject.required.count == 0)
+    }
+
+    @Test
+    func testParameterComponents() async throws {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
+           
+                #expect(Bool(false), "no openapi")
+                return
+            }
+            let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
+        #expect(apiSpec.components?.parameters?.count == 2)
+        let skipParamComponent = try #require(apiSpec[parametercomponent: "skipParam"])
+        #expect(skipParamComponent.key == "skipParam")
+        #expect(skipParamComponent.location == OpenAPIParameter.ParameterLocation.query)
+        #expect(skipParamComponent.description == "number of items to skip")
+        #expect(skipParamComponent.required == true)
+        //#expect(skipParamComponent.schema?.type is OpenAPIIntegerType)
+    }
+
+    @Test
+    func testResponsesComponents() async throws {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
+           
+            #expect(Bool(false), "no openapi")
+                return
+            }
+            let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
+        #expect(apiSpec.components?.responses?.count == 4)
+
+        let notFoundResponse = try #require(apiSpec.components?.responses?.first(where: { $0.key == "NotFound" }))
+        #expect(notFoundResponse.description == "Entity not found.")
+
+        let imageResponse = try #require(apiSpec.components?.responses?.first(where: { $0.key == "ImageResponse" }))
+        #expect(imageResponse.description == "An image.")
+
+        let illegalInput = try #require(apiSpec.components?.responses?.first(where: { $0.key == "IllegalInput" }))
+        #expect(illegalInput.description == "Illegal input for operation.")
+
+        let generalError = try #require(apiSpec.components?.responses?.first(where: { $0.key == "GeneralError" }))
+        #expect(generalError.description == "General Error")
+        #expect(generalError.content.count == 1)
+        let jsonContent = try #require(generalError.content.first { $0.key == "application/json" })
+        guard case let .ref(ref) = jsonContent.schema?.type else {
+            #expect(Bool(false), "Expected reference schema")
+            return 
+        }
+        #expect(ref.refString == "#/components/schemas/GeneralError")
+    }
+
+    @Test
+    func testRequestBody() async throws {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
+            #expect(Bool(false), "no openapi")
+            return
+        }
+        let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
+        #expect(apiSpec.paths.count == 4)
+        let getPetsPath = try #require(apiSpec.paths.first { $0.key == "/pets" })
+        let postOperation = try #require(getPetsPath.operations.first { $0.key == "post" })
+        #expect(postOperation.requestBody?.description == "Optional description in *Markdown*")
+        #expect(postOperation.requestBody?.required == true)
+        #expect(postOperation.requestBody?.contents.count == 4)
+    }
+
+    @Test
+    func testOneOfSchema() async throws {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
+            #expect(Bool(false), "no openapi")
+            return
+        }
+        let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
+        
+        #expect(apiSpec.paths.count == 4)
+        let getPetsPath = try #require(apiSpec.paths.first { $0.key == "/pets" })
+        #expect(getPetsPath.operations.count == 3)
+        let patchOperation = try #require(getPetsPath.operations.first { $0.key == "patch" })
+        #expect(patchOperation.requestBody?.required == false)
+        let jsonContent = try #require(patchOperation.requestBody?.contents.first(where: { $0.key == "application/json" }))
+        guard case let .oneOf(oneOfSchema) = jsonContent.schema?.type else {
+            Issue.record("Expected oneOf schema but got \(String(describing: jsonContent.schema))")
+            return
+        }
+
+        #expect(oneOfSchema.items?.count == 2)
+    }
+
+    @Test
+    func testOperationSecurityScheme() async throws {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
+        
+                #expect(Bool(false), "no openapi")
+                return
+            }
+            let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
+        #expect(apiSpec.paths.count == 4)
+        let getGreetPath = try #require(apiSpec.paths.first { $0.key == "/greet" })
+        let getOperation = try #require(getGreetPath.operations.first { $0.key == "get" })
+        #expect(getOperation.securityObjects.count == 2)
+        let petStoreAuth = try #require(getOperation.securityObjects.first { $0.key == "petstore_auth" })
+        #expect(petStoreAuth.scopes.contains("write:pets"))
+        #expect(petStoreAuth.scopes.contains("read:pets"))
+        let clipStoreAuth = try #require(getOperation.securityObjects.first { $0.key == "clip_auth" })
+        #expect(clipStoreAuth.scopes.contains("write:clips"))
+        #expect(clipStoreAuth.scopes.contains("read:clips"))
+    }
+
+    @Test
+    func testSecurityComponents() async throws {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
+            
+                #expect(Bool(false), "no openapi")
+                return
+            }
+            let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
+        #expect(apiSpec.components?.securitySchemas?.count == 5)
+
+        let httpKeySecurityScheme = try #require(apiSpec.components?.securitySchemas?.first{ $0.key == "http_Key"})
+        #expect(httpKeySecurityScheme.securityType == .http)
+        #expect(httpKeySecurityScheme.httpScheme == "basic")
+
+        let apiKeySecurityScheme = try #require(apiSpec.components?.securitySchemas?.first{ $0.key == "api_key"})
+        #expect(apiKeySecurityScheme.securityType == .apiKey)
+        #expect(apiKeySecurityScheme.name == "api_key")
+        #expect(apiKeySecurityScheme.location == .header)
+
+        let bearerKeySecurityScheme = try #require(apiSpec.components?.securitySchemas?.first{ $0.key == "bearer_key"})
+        #expect(bearerKeySecurityScheme.securityType == .http)
+        #expect(bearerKeySecurityScheme.httpScheme == "bearer")
+        #expect(bearerKeySecurityScheme.httpBearerFormat == "JWT")
+
+        let petStoreOAuth2KeySecurityScheme = try #require(apiSpec.components?.securitySchemas?.first{ $0.key == "petstore_auth"})
+        #expect(petStoreOAuth2KeySecurityScheme.securityType == .oauth2)
+        #expect(petStoreOAuth2KeySecurityScheme.flows?.implicit != nil)
+        let flowImplicit = try #require(petStoreOAuth2KeySecurityScheme.flows?.implicit)
+        #expect(flowImplicit.authorizationUrl == "https://example.org/api/oauth/dialog")
+        #expect(flowImplicit.scopes?.count == 2)
+        #expect(flowImplicit.scopes?.contains(where: { k, _ in k == "write:pets" }) == true)
+        #expect(flowImplicit.scopes?.contains(where: { k, _ in k == "read:pets" }) == true)
+
+        let clipStoreOAuth2KeySecurityScheme = try #require(apiSpec.components?.securitySchemas?.first{ $0.key == "clip_auth"})
+        #expect(clipStoreOAuth2KeySecurityScheme.securityType == .oauth2)
+        #expect(clipStoreOAuth2KeySecurityScheme.flows?.implicit != nil)
+        let clipflowImplicit = try #require(clipStoreOAuth2KeySecurityScheme.flows?.implicit)
+        #expect(clipflowImplicit.authorizationUrl == "https://example.com/api/oauth/dialog")
+        #expect(clipStoreOAuth2KeySecurityScheme.flows?.authorizationCode != nil)
+        let clipflowAuthorizationCode = try #require(clipStoreOAuth2KeySecurityScheme.flows?.authorizationCode)
+        #expect(clipflowAuthorizationCode.authorizationUrl == "https://example.com/api/oauth/dialog")
+        #expect(clipflowAuthorizationCode.tokenUrl == "https://example.com/api/oauth/token")
+        #expect(clipflowAuthorizationCode.scopes?.count == 2)
+        #expect(clipflowAuthorizationCode.scopes?.contains(where: { k, _ in k == "write:clips" }) == true)
+        #expect(clipflowAuthorizationCode.scopes?.contains(where: { k, _ in k == "read:clips" }) == true)
+    }
+
+    @Test
+    func testExamples() async throws {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
+            
+                #expect(Bool(false), "no openapi")
+                return
+            }
+            let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
+        #expect(apiSpec.paths.count == 4)
+        let getPetsPath = try #require(apiSpec.paths.first { $0.key == "/pets" })
+        #expect(getPetsPath.operations.count == 3)
+        let postOperation = try #require(getPetsPath.operations.first { $0.key == "post" })
+        let mediatype = try #require(postOperation.requestBody?.contents.first(where: { $0.key == "text/plain" }))
+        #expect(mediatype.examples.count == 3)
+        let userExample = mediatype.examples[key: "user"]
+        #expect(userExample?.summary == "User example in Plain text")
+        #expect(userExample?.externalValue == "https://foo.bar/examples/user-example.txt")
+        let fooExample = mediatype.examples.first { $0.key == "foo"}
+        #expect(fooExample?.summary == "A foo example")
+        #expect(fooExample?.value != nil)
+        let barExample = mediatype.examples.first { $0.key == "bar"}
+        #expect(barExample?.summary == "A bar example")
+        #expect(barExample?.value != nil)
+    }
+
+    @Test
+    func testExamplesRef() async throws {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
+            #expect(Bool(false), "no openapi")
+            return
+        }
+        let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
+        #expect(apiSpec.paths.count == 4)
+        let getPetsPath = try #require(apiSpec.paths.first { $0.key == "/pets" })
+        #expect(getPetsPath.operations.count == 3)
+        let patchOperation = try #require(getPetsPath.operations.first { $0.key == "patch" })
+        let mediatype = try #require(patchOperation.requestBody?.contents.first(where: { $0.key == "application/json" }))
+        #expect(mediatype.examples.count == 1)
+        let refExample = try #require(mediatype.examples[key:"confirmation-success"])
+        #expect(refExample.ref?.reference == "#/components/examples/confirmation-success")
+    }
+
+    @Test
+    func testLinks() async throws {
+        guard let settingsURL = Bundle.module.url(forResource: "openapi", withExtension: "yaml", subdirectory: "Resources/3_1/valid") else {
+            #expect(Bool(false), "no openapi")
+            return
+        }
+        let apiSpec = try await OpenAPISpecification.read(url: settingsURL)
+        let getPetsPath = try #require(apiSpec.paths.first { $0.key == "/pets" })
+        let patchOperation = try #require(getPetsPath.operations.first { $0.key == "patch" })
+        let links = try #require(patchOperation.responses.first(where: { $0.key == "200" })?.links)
+        #expect(links.count == 2)
+        let addressLink = try #require(links.first { $0.key == "address" })
+        #expect(addressLink.operationId == "getUserAddress")
+        #expect(addressLink.parameters.count == 1)
+        let parameter = addressLink.parameters.first { $0.key  == "userId" }
+        #expect(parameter?.value == "$request.path.id")
+        let userRepositoriesLink = try #require(links.first { $0.key == "UserRepositories" })
+        #expect(userRepositoriesLink.operationRef == "#/paths/~12.0~1repositories~1{username}/get")
+        #expect(userRepositoriesLink.parameters.count == 1)
+        let repParameter = userRepositoriesLink.parameters.first { $0.key == "username" }
+        #expect(repParameter?.value == "$response.body#/username")
+        #expect(userRepositoriesLink.requestBody == "$response.body#/username")
+    }
+
+    @Test
+    func testDynamicMemberLookup() throws {
+        let person = Person()
+        let age: Int = person.age
+        let name: String = person.name
+        _ = name
+        _ = age
+        let addressedPerson = AddressedPerson()
+        addressedPerson.printAddress("Gernlindener Weg 23")
+    }
+
+    
+}

@@ -1,0 +1,182 @@
+# Copyright 2025 CgSe Computergrafik und Softwareentwicklung GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.example.com/authorize
+          tokenUrl: https://auth.example.com/token
+          scopes:
+            read:pets: Read pets
+            write:pets: Write pets
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  callbacks:
+    PetEventCallback:
+      '{$request.query.callbackUrl}':
+        post:
+          requestBody:
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/PetEvent'
+          responses:
+            '204':
+              description: Event received
+
+  encodings:
+    PhotoEncoding:
+      contentType: image/png
+      headers:
+        X-Image-Source:
+          $ref: '#/components/headers/XImageSource'
+
+  examples:
+    BadRequestExample:
+      summary: Bad request example
+      value:
+        code: BAD_REQUEST
+        message: Invalid filter
+    PetCreatedExample:
+      summary: Pet created example
+      value:
+        id: "abc123"
+        name: "Fluffy"
+        photo: "iVBORw0KGgoAAAANSUhEUg..." # base64 snippet
+
+  headers:
+    XErrorCode:
+      description: Application error code
+      schema:
+        type: string
+    XImageSource:
+      description: Source of uploaded image
+      schema:
+        type: string
+
+  links:
+    GetFirstPet:
+      operationId: getPet
+      parameters:
+        petId: '$response.body#/pets/0/id'
+      description: Follow to retrieve the first pet from the list
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+
+    Pet:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        photo:
+          type: string
+          format: byte
+        owner:
+          $ref: '#/components/schemas/Owner'   # Property-Ref
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'   # Array-Items-Ref
+      example:
+        id: "abc123"
+        name: "Fluffy"
+
+    Owner:
+      type: object
+      properties:
+        id:
+          type: string
+        displayName:
+          type: string
+
+    Tag:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+
+    PetEvent:
+      type: object
+      properties:
+        type:
+          type: string
+        payload:
+          $ref: '#/components/schemas/Pet'     # Ref innerhalb eines anderen Schemas
+
+  requestBodies:
+    CreatePetBody:
+      description: Body to create a pet
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Pet'
+          examples:
+            sample:
+              $ref: '#/components/examples/PetCreatedExample'
+
+  responses:
+    PetsListResponse:
+      description: A list of pets
+      headers:
+        X-Request-Id:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              pets:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pet'
+          examples:
+            listExample:
+              value:
+                pets:
+                  - id: "1"
+                    name: "Milo"
+                  - id: "2"
+                    name: "Otis"
+
+  parameters:
+    RequestIdHeader:
+      name: X-Request-Id
+      in: header
+      required: false
+      schema:
+        type: string
+
+  headers:
+    RequestId:
+      description: Echoed request id
+      schema:
+        type: string
