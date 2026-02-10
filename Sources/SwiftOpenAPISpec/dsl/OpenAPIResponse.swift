@@ -19,13 +19,54 @@
 import Foundation
 
 
-/// An OpenAPIResponse is a child of ``OpenAPIOperation`` and can be identified by its unique ``key``, being an HTTP status, like '200'
+/// A structure representing a response in an OpenAPI operation.
+///
+/// `OpenAPIResponse` defines the structure of a response that an API operation can return.
+/// Each response is associated with an HTTP status code (e.g., "200", "404", "500")
+/// and describes the response body, headers, and other metadata.
+///
+/// Responses are essential for documenting what clients can expect from API operations,
+/// including success cases, error cases, and the structure of returned data.
+///
+/// ## Key Components
+///
+/// - `description`: A description of the response (required)
+/// - `content`: The media types and schemas of the response body
+/// - `headers`: Response headers that may be included
+/// - `links`: Links to related operations or resources
+/// - `summary`: A short summary of the response
+///
+/// ## Example Usage
+///
+/// ```swift
+/// // Creating a successful response
+/// let successResponse = OpenAPIResponse(
+///     key: "200",
+///     description: "Successful operation",
+///     content: [
+///         OpenAPIMediaType(
+///             mediaType: "application/json",
+///             schema: OpenAPISchema(schemaType: OpenAPIObjectType(...))
+///         )
+///     ]
+/// )
+/// ```
 public struct OpenAPIResponse : KeyedElement, PointerNavigable {
     public static let DESCRIPTION_KEY = "description"
     public static let SUMMARY_KEY = "summary"
     public static let CONTENT_KEY = "content"
     public static let HEADERS_KEY = "headers"
     public static let LINKS_KEY = "links"
+    /// Creates an `OpenAPIResponse` instance from a dictionary representation.
+    ///
+    /// - Parameters:
+    ///   - map: A dictionary containing the OpenAPI response data
+    ///   - diagnostics: An array to collect any diagnostic messages during parsing
+    ///   - pointer: A JSON pointer indicating the location in the source document
+    /// - Throws: An error if the input data is invalid or required fields are missing
+    ///
+    /// This initializer can handle both direct response definitions and references to responses
+    /// defined in the components section of the OpenAPI specification.
     public init(load map: StringDictionary, diagnostics: inout [Diagnostic],pointer : String) throws {
      
         if case let .string(refKey) = map[OpenAPISchemaReference.REF_KEY]{

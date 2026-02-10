@@ -17,6 +17,12 @@
 //
 
 import Foundation
+/// A structure representing the metadata information about an OpenAPI specification.
+///
+/// The `OpenAPIInfo` object provides metadata about the API, including its title, version, description,
+/// terms of service, contact information, license information, and version of the OpenAPI specification.
+///
+/// This information is typically used to provide context and documentation about the API itself.
 public struct OpenAPIInfo : KeyedElement, PointerNavigable {
   
     
@@ -29,6 +35,13 @@ public struct OpenAPIInfo : KeyedElement, PointerNavigable {
     static let TERMS_KEY = "termsOfService"
     static let TITLE_KEY = "title"
     static let VERSION_KEY = "version"
+    /// Creates an `OpenAPIInfo` instance from a dictionary representation.
+    ///
+    /// - Parameters:
+    ///   - map: A dictionary containing the OpenAPI info data
+    ///   - diagnostics: An array to collect any diagnostic messages during parsing
+    ///   - pointer: A JSON pointer indicating the location in the source document
+    /// - Throws: An error if the input data is invalid or required fields are missing
     public init(load map: StringDictionary, diagnostics: inout [Diagnostic],pointer : String) throws {
         self.version = map.readIfPresent(Self.VERSION_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.VERSION_KEY))
         self.title = map.readIfPresent(Self.TITLE_KEY,valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.TITLE_KEY))
@@ -41,6 +54,11 @@ public struct OpenAPIInfo : KeyedElement, PointerNavigable {
         
     }
    
+    /// Navigates to a specific element within the OpenAPI info structure.
+    ///
+    /// - Parameter segmentName: The name of the element to navigate to
+    /// - Returns: A `NavigationResult` containing either the requested value or a navigable element
+    /// - Throws: An error if the requested element does not exist
     public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
         case Self.CONTACT_KEY: return .navigable(contact)

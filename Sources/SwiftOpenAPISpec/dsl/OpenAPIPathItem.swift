@@ -20,13 +20,30 @@
 import Foundation
 
 
-/**
-  Struct containing an **OpenAPI Path** containing endpoints and their ``operations``
-   
-   The ``OpenAPIPathItem`` provides a set of convenient getter subscripts to filter for specific operations
- 
-   
- */
+/// A structure representing a path in an OpenAPI specification and its associated operations.
+///
+/// `OpenAPIPathItem` represents a single path in an API (e.g., `/users`, `/products/{id}`)
+/// and contains the HTTP operations (GET, POST, PUT, etc.) that can be performed on that path.
+///
+/// Each path item can have multiple operations, each corresponding to a different HTTP method.
+/// The structure also includes path-level metadata like summary, description, and parameters
+/// that apply to all operations on this path.
+///
+/// ## Features
+///
+/// - **Operation Access**: Provides convenient subscript access to filter operations by HTTP method
+/// - **Path Parameters**: Contains parameters that apply to all operations on this path
+/// - **Metadata**: Includes summary and description for documenting the path
+/// - **Servers**: Can specify alternative servers for this specific path
+///
+/// ## Example Usage
+///
+/// ```swift
+/// // Accessing a specific operation on a path
+/// if let getOperation = pathItem[.get] {
+///     print("GET operation found: \(getOperation.summary ?? "No summary")")
+/// }
+/// ```
 public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
    
     

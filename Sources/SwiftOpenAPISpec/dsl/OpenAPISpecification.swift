@@ -16,22 +16,65 @@
 
 import Foundation
 
-/// The OpenAPISpecification struct serves as an entry point to read your specification written in YAML or JSON
+/// The root structure representing an OpenAPI specification document.
 ///
-/// To consume a Yaml/JSON representation of an OpenAPI specification, call the static `read` function:
+/// `OpenAPISpecification` serves as the entry point for working with OpenAPI specifications
+/// written in YAML or JSON format. It provides the complete structure of an OpenAPI document,
+/// including metadata, paths, components, security requirements, and other specification elements.
+///
+/// ## Usage Example
+///
+/// To parse an OpenAPI specification from a YAML or JSON string:
+///
 /// ```swift
-/// let text = """
-///openapi: 3.1.0
-///info:
-///  title: A minimal OpenAPI Description
-///  version: 0.0.1
-///paths: {}
+/// let yamlText = """
+/// openapi: 3.1.0
+/// info:
+///   title: My API
+///   version: 1.0.0
+/// paths:
+///   /users:
+///     get:
+///       summary: Get all users
+///       responses:
+///         '200':
+///           description: Successful response
 /// """
-/// let apiSpec = try OpenAPISpec.read(text: string)
+///
+/// do {
+///     let apiSpec = try OpenAPISpecification.read(text: yamlText)
+///     print("Loaded API: \(apiSpec.info.title) version \(apiSpec.info.version)")
+/// } catch {
+///     print("Error loading specification: \(error)")
+/// }
 /// ```
 ///
+/// ## Key Components
+///
+/// - `info`: Metadata about the API (title, version, description, etc.)
+/// - `paths`: Available paths and operations for the API
+/// - `components`: Reusable objects like schemas, parameters, and responses
+/// - `security`: Global security requirements
+/// - `servers`: Information about available API servers
+/// - `tags`: Metadata for organizing operations
+///
+/// The specification conforms to `KeyedElement` and `PointerNavigable` protocols, enabling
+/// navigation through the specification structure using JSON pointers.
 public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     
+    /// Navigates to a specific element within the OpenAPI specification structure.
+    ///
+    /// This method implements the `PointerNavigable` protocol, allowing navigation through
+    /// the specification using JSON pointer segments. It's used internally for resolving
+    /// JSON pointers and references within the specification.
+    ///
+    /// - Parameter segmentName: The name of the element to navigate to (e.g., "paths", "components", "info")
+    /// - Returns: A `NavigationResult` containing either:
+    ///   - `.navigable`: For complex objects that can be further navigated
+    ///   - `.navigableCollection`: For collections of navigable objects
+    ///   - `.searchableCollection`: For collections that can be searched
+    ///   - `.value`: For simple values
+    /// - Throws: `Errors.unsupportedSegment` if the requested segment name is not valid
     public func element(for segmentName : String) throws ->  NavigationResult{
         switch segmentName {
             case Self.COMPONENTS_KEY : return .navigable(self.components)

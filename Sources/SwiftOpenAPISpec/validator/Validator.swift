@@ -20,11 +20,83 @@
 import Foundation
 
 
+/// A validator for OpenAPI specifications that checks for compliance with the OpenAPI standard.
+///
+/// The `Validator` struct provides functionality to validate OpenAPI specifications against
+/// the OpenAPI standard and detect issues such as:
+/// - Structural problems
+/// - Schema validation errors
+/// - Reference resolution issues
+/// - Rule violations
+///
+/// Validation helps ensure that OpenAPI specifications are well-formed and can be reliably
+/// used for code generation, documentation, and other purposes.
+///
+/// ## Features
+///
+/// - **Rule-based Validation**: Applies a comprehensive set of validation rules
+/// - **Schema Validation**: Validates schemas against JSON Schema standards
+/// - **Reference Resolution**: Checks that all references can be resolved
+/// - **Diagnostic Reporting**: Provides detailed error and warning messages
+///
+/// ## Example Usage
+///
+/// ```swift
+/// let spec = try OpenAPISpecification.read(text: yamlText)
+/// var resolver = JSONPointerResolver()
+/// let ctx = ValidationContext()
+/// 
+/// do {
+///     let diagnostics = try await Validator.validate(
+///         spec: spec,
+///         baseURI: "https://example.com/api",
+///         ctx: ctx,
+///         resolver: &resolver
+///     )
+///     
+///     if diagnostics.isEmpty {
+///         print("Specification is valid!")
+///     } else {
+///         for diagnostic in diagnostics {
+///             print("Issue: \(diagnostic.message) at \(diagnostic.pointer)")
+///         }
+///     }
+/// } catch {
+///     print("Validation error: \(error)")
+/// }
+/// ```
 public struct Validator {
    
+    /// Errors that can occur during validation.
+    ///
+    /// - `invalidPointer`: The JSON pointer is invalid or cannot be parsed
+    /// - `maxRecursion`: Maximum recursion depth exceeded while resolving references
+    /// - `resolveError`: Error occurred while resolving a reference
     public enum Errors : LocalizedError {
         case invalidPointer(String), maxRecursion(String,Int), resolveError(String)
     }
+    /// Validates an OpenAPI specification against the OpenAPI standard.
+    ///
+    /// This method performs comprehensive validation of the OpenAPI specification, including:
+    /// - Applying all validation rules from the rule runner
+    /// - Checking schema-related diagnostics
+    /// - Resolving and validating references
+    ///
+    /// - Parameters:
+    ///   - spec: The OpenAPI specification to validate
+    ///   - baseURI: The base URI for resolving relative references
+    ///   - ctx: The validation context containing configuration and state
+    ///   - resolver: The JSON pointer resolver for resolving references
+    /// - Returns: An array of diagnostics (errors and warnings) found during validation
+    /// - Throws: `Errors` if critical validation errors occur
+    ///
+    /// ## Validation Process
+    ///
+    /// 1. Runs all validation rules using the default rule runner
+    /// 2. Collects schema-specific diagnostics from the specification
+    /// 3. Returns combined diagnostics for analysis
+    ///
+    /// Empty diagnostics array indicates a valid specification.
     public static func validate(spec: OpenAPISpecification, baseURI: String, ctx: ValidationContext, resolver:  inout  JSONPointerResolver) async throws -> [Diagnostic] {
         let runner = RuleRunner.defaultRuleRunner
         var diagnostics = runner.run(spec: spec, ctx: ctx)
@@ -35,6 +107,30 @@ public struct Validator {
         return diagnostics
     }
     
+    /// Finds all reference occurrences in an OpenAPI specification.
+    ///
+    /// This method scans the specification for references to reusable components and returns
+    /// information about where each reference is used. This is useful for:
+    /// - Understanding component usage
+    /// - Detecting circular references
+    /// - Analyzing specification structure
+    ///
+    /// - Parameters:
+    ///   - spec: The OpenAPI specification to analyze
+    ///   - baseURI: The base URI for resolving relative references
+    ///   - ctx: The validation context (currently unused in this method)
+    ///   - resolver: The JSON pointer resolver (currently unused in this method)
+    /// - Returns: An array of `RefOccurrence` objects describing where references are used
+    ///
+    /// ## Scanned Components
+    ///
+    /// The method scans these component types for references:
+    /// - Schemas in the components/schemas section
+    /// - Request bodies in the components/requestBodies section
+    /// - Responses in the components/responses section
+    ///
+    /// Each occurrence includes the JSON pointer to the component and information about
+    /// the references found within it.
     public static func findOccurrences(spec: OpenAPISpecification, baseURI: String, ctx: ValidationContext, resolver:  inout  JSONPointerResolver) -> [RefOccurrence] {
         var occurrences = [RefOccurrence]()
         for (schema) in (spec.components?.schemas ?? []){

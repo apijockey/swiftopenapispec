@@ -20,8 +20,22 @@
 
 import Foundation
 
+/// A structure representing a single operation in an OpenAPI specification.
+///
+/// An `OpenAPIOperation` describes a single API operation on a path, including its parameters,
+/// request body, responses, security requirements, and other operation-specific information.
+///
+/// Operations are the core building blocks of an OpenAPI specification, defining what actions
+/// can be performed on API endpoints and how they should behave.
 public struct OpenAPIOperation : KeyedElement, PointerNavigable {
     public var key: String?
+    /// Creates an `OpenAPIOperation` instance from a dictionary representation.
+    ///
+    /// - Parameters:
+    ///   - map: A dictionary containing the OpenAPI operation data
+    ///   - diagnostics: An array to collect any diagnostic messages during parsing
+    ///   - pointer: A JSON pointer indicating the location in the source document
+    /// - Throws: An error if the input data is invalid or required fields are missing
     public init(load map: StringDictionary,diagnostics: inout [Diagnostic],pointer : String) throws {
         self.tags = map.readListIfPresent(Self.TAGS_KEY, valueType: String.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.TAGS_KEY))  ?? []
         self.summary = map.readIfPresent(Self.SUMMARY_KEY, valueType:  String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.SUMMARY_KEY))
@@ -41,6 +55,11 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
         
     }
    
+    /// Navigates to a specific element within the OpenAPI operation structure.
+    ///
+    /// - Parameter segmentName: The name of the element to navigate to
+    /// - Returns: A `NavigationResult` containing either the requested value or a navigable element
+    /// - Throws: An error if the requested element does not exist
     public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
             

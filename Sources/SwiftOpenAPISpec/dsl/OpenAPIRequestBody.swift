@@ -19,12 +19,53 @@
 //
 
 import Foundation
+/// A structure representing the request body of an OpenAPI operation.
+///
+/// `OpenAPIRequestBody` defines the structure and content of the body that can be sent
+/// with an HTTP request. It specifies the media types, schemas, and other metadata
+/// related to the request payload.
+///
+/// Request bodies are used in operations that send data to the server, such as POST,
+/// PUT, and PATCH operations. They describe what data the client should send and
+/// in what format.
+///
+/// ## Key Components
+///
+/// - `description`: A description of the request body
+/// - `required`: Whether the request body is required (default: false)
+/// - `contents`: The media types and schemas that define the structure of the request body
+///
+/// ## Example Usage
+///
+/// ```swift
+/// // Creating a JSON request body
+/// let requestBody = OpenAPIRequestBody(
+///     description: "User data to create",
+///     required: true,
+///     contents: [
+///         OpenAPIMediaType(
+///             mediaType: "application/json",
+///             schema: OpenAPISchema(schemaType: OpenAPIObjectType(...))
+///         )
+///     ]
+/// )
+/// ```
 public struct OpenAPIRequestBody : KeyedElement , PointerNavigable {
    
     public static let DESCRIPTION_KEY = "description"
     public static let REQUIRED_KEY = "required"
     public static let CONTENTS_KEY = "content"
-    public  init(load map: StringDictionary,diagnostics: inout [Diagnostic],pointer : String)  throws {
+    /// Creates an `OpenAPIRequestBody` instance from a dictionary representation.
+    ///
+    /// - Parameters:
+    ///   - map: A dictionary containing the OpenAPI request body data
+    ///   - diagnostics: An array to collect any diagnostic messages during parsing
+    ///   - pointer: A JSON pointer indicating the location in the source document
+    /// - Throws: An error if the input data is invalid or required fields are missing
+    ///
+    /// This initializer can handle both direct request body definitions and references to request bodies
+    /// defined in the components section of the OpenAPI specification.
+    public init(load map: StringDictionary,diagnostics: inout [Diagnostic],pointer : String)  throws {
         
         if case let .string(refKey) = map[OpenAPISchemaReference.REF_KEY]{
                     self.ref = OpenAPISchemaReference(ref: refKey)
@@ -45,6 +86,11 @@ public struct OpenAPIRequestBody : KeyedElement , PointerNavigable {
     public var contents : [OpenAPIMediaType] = []
    
     public var ref : OpenAPISchemaReference? = nil
+    /// Navigates to a specific element within the request body structure.
+    ///
+    /// - Parameter segmentName: The name of the element to navigate to
+    /// - Returns: A `NavigationResult` containing either the requested value or a navigable element
+    /// - Throws: An error if the requested element does not exist
     public func element(for segmentName : String) throws -> NavigationResult {
         switch segmentName {
         case Self.CONTENTS_KEY : .navigableCollection(contents)

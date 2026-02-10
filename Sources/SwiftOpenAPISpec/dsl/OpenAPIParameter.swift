@@ -21,17 +21,57 @@
 import Foundation
 
 
-/**
- /**
-  A unique parameter is defined by a combination of a name and location.
-  */
- */
+/// A structure representing a parameter in an OpenAPI operation.
+///
+/// `OpenAPIParameter` defines a single parameter that can be used in OpenAPI operations.
+/// Parameters are uniquely identified by their name and location (query, header, path, or cookie).
+///
+/// Parameters describe the inputs to API operations and include metadata such as:
+/// - Name and location of the parameter
+/// - Data type and format
+/// - Whether the parameter is required
+/// - Description and examples
+/// - Validation constraints
+///
+/// ## Parameter Locations
+///
+/// - `query`: Parameters in the query string (e.g., `?param=value`)
+/// - `header`: Parameters in HTTP headers
+/// - `path`: Parameters in the URL path (e.g., `/users/{id}`)
+/// - `cookie`: Parameters in HTTP cookies
+///
+/// ## Example Usage
+///
+/// ```swift
+/// // Creating a path parameter
+/// let param = OpenAPIParameter(
+///     name: "userId",
+///     location: .path,
+///     schema: OpenAPISchema(schemaType: OpenAPIStringType(format: .uuid)),
+///     required: true,
+///     description: "The unique identifier of the user"
+/// )
+/// ```
 public struct OpenAPIParameter :  KeyedElement,  PointerNavigable {
     
     
+    /// The location of a parameter in a request.
+    ///
+    /// - `cookie`: Parameter is passed in an HTTP cookie
+    /// - `query`: Parameter is passed in the query string
+    /// - `queryString`: Alternative name for query parameters
+    /// - `header`: Parameter is passed in an HTTP header
+    /// - `path`: Parameter is part of the URL path (e.g., `/users/{id}`)
     public enum ParameterLocation : String, Codable, CaseIterable, Sendable {
         case cookie, query, queryString, header ,path
     }
+    
+    /// The style of parameter serialization.
+    ///
+    /// - `simple`: Simple style (default for most locations)
+    /// - `form`: Form style (used for query parameters and cookies)
+    /// - `label`: Label style (used for path parameters)
+    /// - `matrix`: Matrix style (used for path parameters)
     public enum ParameterStyle : String, Codable, CaseIterable, Sendable {
         case simple,form, label, matrix
     }
