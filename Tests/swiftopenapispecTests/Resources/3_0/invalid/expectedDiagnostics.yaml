@@ -236,8 +236,8 @@ cases:
   - fixture: "10-schematests-array-minitems-negative"
     shouldPass: false
     expected:
-      - code: "invalidValue"
-        pointer: "/paths/~1test/responses/200/content/application~1json/schema/minItems"
+      - code: "schemaViolation"
+        pointer: "/paths/~1test/get/responses/200/content/application~1json/schema/minItems"
         rule: "Schema.ArrayMinItems"
         severity: "error"
         messageContains: "minItems must be 0 or higher, is -5"
@@ -246,8 +246,8 @@ cases:
   - fixture: "10-schematests-array-maxitems-negative"
     shouldPass: false
     expected:
-      - code: "invalidValue"
-        pointer: "/paths/~1test/responses/200/content/application~1json/schema/maxItems"
+      - code: "schemaViolation"
+        pointer: "/paths/~1test/get/responses/200/content/application~1json/schema/maxItems"
         rule: "Schema.ArrayMaxItems"
         severity: "error"
         messageContains: "maxItems must be 0 or higher, is -10"
@@ -256,8 +256,8 @@ cases:
   - fixture: "10-schematests-array-minmaxitems-inconsistent"
     shouldPass: false
     expected:
-      - code: "invalidValue"
-        pointer: "/paths/~1test/responses/200/content/application~1json/schema/maxItems"
+      - code: "schemaViolation"
+        pointer: "/paths/~1test/get/responses/200/content/application~1json/schema/maxItems"
         rule: "Schema.ArrayMinMaxItems"
         severity: "error"
         messageContains: "minItems 10 must <= maxItems '5'"
@@ -266,8 +266,8 @@ cases:
   - fixture: "10-schematests-object-minproperties-negative"
     shouldPass: false
     expected:
-      - code: "invalidValue"
-        pointer: "/paths/~1test/responses/200/content/application~1json/schema/minProperties"
+      - code: "schemaViolation"
+        pointer: "/paths/~1test/get/responses/200/content/application~1json/schema/minProperties"
         rule: "Schema.ObjectMinProperties"
         severity: "error"
         messageContains: "minProperties must be 0 or higher, is -3"
@@ -276,8 +276,8 @@ cases:
   - fixture: "10-schematests-object-maxproperties-negative"
     shouldPass: false
     expected:
-      - code: "invalidValue"
-        pointer: "/paths/~1test/responses/200/content/application~1json/schema/maxProperties"
+      - code: "schemaViolation"
+        pointer: "/paths/~1test/get/responses/200/content/application~1json/schema/maxProperties"
         rule: "Schema.ObjectMaxProperties"
         severity: "error"
         messageContains: "maxProperties must be 0 or higher, is -10"
@@ -286,8 +286,8 @@ cases:
   - fixture: "10-schematests-object-minmaxproperties-inconsistent"
     shouldPass: false
     expected:
-      - code: "invalidValue"
-        pointer: "/paths/~1test/responses/200/content/application~1json/schema/maxProperties"
+      - code: "schemaViolation"
+        pointer: "/paths/~1test/get/responses/200/content/application~1json/schema/maxProperties"
         rule: "Schema.ObjectMinMaxProperties"
         severity: "error"
         messageContains: "minProperties 10 must <= maxProperties '5'"
@@ -296,8 +296,8 @@ cases:
   - fixture: "10-schematests-object-patternproperties-invalid"
     shouldPass: false
     expected:
-      - code: "invalidValue"
-        pointer: "/paths/~1test/responses/200/content/application~1json/schema/patternProperties/[invalid-regex"
+      - code: "schemaViolation"
+        pointer: "/paths/~1test/get/responses/200/content/application~1json/schema/patternProperties/[invalid-regex"
         rule: "Schema.ObjectPatternProperties"
         severity: "error"
         messageContains: "Pattern properties must be named with a regular expression"
@@ -306,19 +306,80 @@ cases:
   - fixture: "10-schematests-object-additionalproperties-inconsistent"
     shouldPass: false
     expected:
-      - code: "invalidValue"
-        pointer: "/paths/~1test/responses/200/content/application~1json/schema/additionProperties"
+      - code: "schemaViolation"
+        pointer: "/paths/~1test/get/responses/200/content/application~1json/schema/additionProperties"
         rule: "Schema.ObjectAdditionalProperties"
         severity: "error"
-        messageContains: "AdditionalProperties are set to fals, but additionProperties-Object is not empty"
+        messageContains: "AdditionalProperties are set to false, but additionProperties-Object is not empty"
     onlyThese: true
 
   - fixture: "10-schematests-enum-invalid"
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/paths/~1test/responses/200/content/application~1json/schema/enum"
-        rule: "Schema.DataType"
+        pointer: "/paths/~1test/get/responses/200/content/application~1json/schema/enum/3"
+        rule: "OAS30.EnumAllowedValues"
+        severity: "warning"
+        messageContains: "mixed elements are not suported and must match the schema type 'string', got: 'integer(123)'"
+    onlyThese: true
+
+  # Dependencies validation tests
+  - fixture: "15-dependencies-invalid-empty-array"
+    shouldPass: false
+    expected:
+      - code: "schemaViolation"
+        pointer: "/paths/~1invalid-dependencies/post/requestBody/content/application~1json/schema/dependencies/name"
+        rule: "Schema.ObjectDependencies"
         severity: "error"
-        messageContains: "expected 'string' instead of 'integer(123)'"
+        messageContains: "dependency array must have at least one element"
+    onlyThese: true
+
+  - fixture: "15-dependencies-invalid-non-unique"
+    shouldPass: false
+    expected:
+      - code: "schemaViolation"
+        pointer: "/paths/~1invalid-dependencies/post/requestBody/content/application~1json/schema/dependencies/name/1"
+        rule: "Schema.ObjectDependencies"
+        severity: "error"
+        messageContains: "dependency array elements must be unique"
+    onlyThese: true
+
+  - fixture: "15-dependencies-invalid-non-string"
+    shouldPass: false
+    expected:
+      - code: "schemaViolation"
+        pointer: "/paths/~1invalid-dependencies/post/requestBody/content/application~1json/schema/dependencies/name/0"
+        rule: "Schema.ObjectDependencies"
+        severity: "error"
+        messageContains: "dependency array elements must be strings"
+      - code: "schemaViolation"
+        pointer: "/paths/~1invalid-dependencies/post/requestBody/content/application~1json/schema/dependencies/name/1"
+        rule: "Schema.ObjectDependencies"
+        severity: "error"
+        messageContains: "dependency array elements must be strings"
+      - code: "schemaViolation"
+        pointer: "/paths/~1invalid-dependencies/post/requestBody/content/application~1json/schema/dependencies/name/2"
+        rule: "Schema.ObjectDependencies"
+        severity: "error"
+        messageContains: "dependency array elements must be strings"
+    onlyThese: true
+
+  - fixture: "15-dependencies-invalid-wrong-type"
+    shouldPass: false
+    expected:
+      - code: "schemaViolation"
+        pointer: "/paths/~1invalid-dependencies/post/requestBody/content/application~1json/schema/dependencies/name"
+        rule: "Schema.ObjectDependencies"
+        severity: "error"
+        messageContains: "dependency value must be an object or array, not string"
+      - code: "schemaViolation"
+        pointer: "/paths/~1invalid-dependencies/post/requestBody/content/application~1json/schema/dependencies/credit_card"
+        rule: "Schema.ObjectDependencies"
+        severity: "error"
+        messageContains: "dependency value must be an object or array, not integer"
+      - code: "schemaViolation"
+        pointer: "/paths/~1invalid-dependencies/post/requestBody/content/application~1json/schema/dependencies/billing_address"
+        rule: "Schema.ObjectDependencies"
+        severity: "error"
+        messageContains: "dependency value must be an object or array, not boolean"
     onlyThese: true

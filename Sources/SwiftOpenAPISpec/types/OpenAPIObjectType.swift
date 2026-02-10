@@ -58,6 +58,13 @@ public struct OpenAPIObjectType : OpenAPISchemaType,ThrowingHashMapInitiable, Po
         case Self .REQUIRED_KEY:
             let value = try JSONValue(self.required)
             return  .value(value)
+        case Self.DEPENDENCIES_KEY:
+            if let dependencies = self.dependencies {
+                let value = try JSONValue(dependencies)
+                return .value(value)
+            } else {
+                return .value(.null)
+            }
         default:
             if let prop = self.properties.first(where: { element in
                 element.key == segmentName
@@ -69,6 +76,7 @@ public struct OpenAPIObjectType : OpenAPISchemaType,ThrowingHashMapInitiable, Po
         }
     }
     public static let DEPENDENT_REQUIRED_KEY = "dependentRequired"
+    public static let DEPENDENCIES_KEY = "dependencies"
     public static let TYPE_KEY = "type"
     public static let PROPERTIES_KEY = "properties"
     public static let PATTERNPROPERTIES_KEY = "patternProperties"
@@ -85,23 +93,60 @@ public struct OpenAPIObjectType : OpenAPISchemaType,ThrowingHashMapInitiable, Po
         self.minProperties = map.readIfPresent(Self.MIN_PROPERTIES_KEY, valueType: Int.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.MIN_PROPERTIES_KEY))
         self.maxProperties = map.readIfPresent(Self.MAX_PROPERTIES_KEY, valueType:Int.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.MAX_PROPERTIES_KEY))
         self.dependentRequired = map.readIfPresent(Self.DEPENDENT_REQUIRED_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.DEPENDENT_REQUIRED_KEY))
-        if let additionalPropertiesBool = map.readIfPresent(Self.ADDITIONAL_PROPERTIES_KEY, valueType: Bool.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.ADDITIONAL_PROPERTIES_KEY)) {
-            self.additionalPropertiesValid = additionalPropertiesBool
+        
+        // Parse dependencies
+        if let dependenciesValue = map[Self.DEPENDENCIES_KEY] {
+            if case let .object(dependenciesObj) = dependenciesValue {
+                self.dependencies = dependenciesObj
+            } else {
+                diagnostics.append(.init(
+                    severity: .error,
+                    code: .schemaViolation,
+                    message: "dependencies must be an object",
+                    pointer: JSONPointer.join(pointer, Self.DEPENDENCIES_KEY),
+                    rule: "Schema.ObjectDependencies"
+                ))
+            }
         }
-        if let additionalPropertiesObject = try? map.readIfPresent(Self.ADDITIONAL_PROPERTIES_KEY, objectType: OpenAPIType.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.ADDITIONAL_PROPERTIES_KEY)) {
-            self.additionalPropertiesObject = additionalPropertiesObject
+        if case .object = map[Self.ADDITIONAL_PROPERTIES_KEY] {
+            self.additionalPropertiesObject = try map.mapListIfPresent(Self.ADDITIONAL_PROPERTIES_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.ADDITIONAL_PROPERTIES_KEY))
         }
+        else if case let .boolean(boolValue) = map[Self.ADDITIONAL_PROPERTIES_KEY] {
+            self.additionalPropertiesValid = boolValue
+        }
+        
+    //        if let additionalPropertiesBool = map[Self.ADDITIONAL_PROPERTIES_KEY] .readIfPresent(Self.ADDITIONAL_PROPERTIES_KEY, valueType: Bool.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.ADDITIONAL_PROPERTIES_KEY)) {
+    //            self.additionalPropertiesValid = additionalPropertiesBool
+    //        }
+//        else {
+//            let value =  map[Self.ADDITIONAL_PROPERTIES_KEY]
+//            if case .object(let value) = value {
+//                self.additionalPropertiesObject = try? OpenAPIType(load: value, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.ADDITIONAL_PROPERTIES_KEY))
+//            }
+//            else {
+//                diagnostics.append(.init(
+//                    severity: .error,
+//                    code: .schemaViolation,
+//                    message: "he value of 'additionalProperties' MUST be a boolean or a schema.",
+//                    pointer: JSONPointer.join(pointer, Self.DEPENDENCIES_KEY),
+//                    rule: "Schema.ObjectAdditionalProperties"
+//                ))
+//            }
+//        }
+        
+      
     }
     
     
     public let type : String?
     public var dependentRequired : String?
+    public var dependencies : [String: JSONValue]?
     public var maxProperties : Int?
     public var minProperties : Int?
     public var properties = [OpenAPISchema]()
     public var patternProperties = [OpenAPISchema]()
     public var additionalPropertiesValid : Bool?
-    public var additionalPropertiesObject : OpenAPIType?
+    public var additionalPropertiesObject = [OpenAPISchema]()
     public var required : [String] = []
     public var unevaluatedProperties : Bool = false
     public var discriminator: OpenAPIDiscriminator?

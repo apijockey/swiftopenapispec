@@ -48,6 +48,13 @@ public struct SchemaRuleRunner  : Sendable{
                         }
                         
                     }
+                    for prop in obj.additionalPropertiesObject {
+                        if let key = prop.key{
+                            let p = JSONPointer.join(JSONPointer.join(pointer, "additionalProperties"), key)
+                            try await out.append(contentsOf: run(schema: prop , pointer: p,resolver: &resolver))
+                        }
+                        
+                    }
                 }
                 
             if case let .array(arr) = type ,
@@ -109,7 +116,7 @@ public struct SchemaRuleRunner  : Sendable{
             rules.append(ObjectMaxPropertiesRule())
             rules.append(ObjectMinMaxPropertiesRule())
             rules.append(ObjectPatternPropertiesRule())
-            rules.append(ObjectAdditionalPropertiesRule())
+           
             rules.append(ObjectDependenciesRule())
           
             
@@ -129,7 +136,7 @@ public struct SchemaRuleRunner  : Sendable{
             rules.append(ObjectMaxPropertiesRule())
             rules.append(ObjectMinMaxPropertiesRule())
             rules.append(ObjectPatternPropertiesRule())
-            rules.append(ObjectAdditionalPropertiesRule())
+            
             rules.append(ObjectDependenciesRule())
            
         }
@@ -263,7 +270,7 @@ public struct ArrayMinItemsRule: SchemaRule {
         guard case  .array = schema.type,
               let minItems = schema.minItems else { return [] }
         if minItems < 0 {
-            return [.init(severity: .error, code: .invalidValue, 
+            return [.init(severity: .error, code: .schemaViolation, 
                           message: "minItems must be 0 or higher, is \(minItems)",
                           pointer: JSONPointer.join(pointer, "minItems"), rule: self.name)]
         }
@@ -281,7 +288,7 @@ public struct ArrayMaxItemsRule: SchemaRule {
         guard case  .array = schema.type,
               let maxItems = schema.maxItems else { return [] }
         if maxItems < 0 {
-            return [.init(severity: .error, code: .invalidValue,
+            return [.init(severity: .error, code: .schemaViolation,
                           message: "maxItems must be 0 or higher, is \(maxItems)",
                           pointer: JSONPointer.join(pointer, "maxItems"), rule: self.name)]
         }
@@ -299,7 +306,7 @@ public struct ArrayMinMaxItemsRule: SchemaRule {
               let minItems = schema.minItems,
               let maxItems = schema.maxItems else { return [] }
         if minItems > maxItems{
-            return [.init(severity: .error, code: .invalidValue,
+            return [.init(severity: .error, code: .schemaViolation,
                           message: "minItems \(minItems) must <= maxItems '\(maxItems)'",
                           pointer: JSONPointer.join(pointer, "maxItems"), rule: self.name)]
         }
@@ -316,7 +323,7 @@ public struct ObjectMinPropertiesRule: SchemaRule {
         guard case  .object = schema.type,
               let minProperties = schema.minProperties else { return [] }
         if minProperties < 0 {
-            return [.init(severity: .error, code: .invalidValue,
+            return [.init(severity: .error, code: .schemaViolation,
                           message: "minProperties must be 0 or higher, is \(minProperties)",
                           pointer: JSONPointer.join(pointer, "minProperties"), rule: self.name)]
         }
@@ -334,7 +341,7 @@ public struct ObjectMaxPropertiesRule: SchemaRule {
         guard case  .object = schema.type,
               let maxProperties = schema.maxProperties else { return [] }
         if maxProperties < 0 {
-            return [.init(severity: .error, code: .invalidValue,
+            return [.init(severity: .error, code: .schemaViolation,
                           message: "maxProperties must be 0 or higher, is \( maxProperties)",
                           pointer: JSONPointer.join(pointer, "maxProperties"), rule: self.name)]
         }
@@ -356,7 +363,7 @@ public struct ObjectPatternPropertiesRule: SchemaRule {
         for property in patternProperties {
             if let key = property.key,
                !key.isValidRegex() {
-                diagnostics.append(.init(severity: .error, code: .invalidValue, message: "Pattern properties must be named with a regular expression", pointer: JSONPointer.join(pointer, key), rule: self.name))
+                diagnostics.append(.init(severity: .error, code: .schemaViolation, message: "Pattern properties must be named with a regular expression", pointer: JSONPointer.join(JSONPointer.join(pointer,"patternProperties"), key), rule: self.name))
             }
         }
             
@@ -375,39 +382,61 @@ public struct ObjectDependenciesRule: SchemaRule {
         guard case  .object(let objectElement) = schema.type else {
             return []
         }
-       
-        
+        let dependencies = objectElement.dependencies
+        for (key, value) in (dependencies ?? [:]){
+            if case .array(let array) = value {
+                if array.isEmpty {
+                    diagnostics.append(.init(severity: .error, code: .schemaViolation, message: "dependency array must have at least one element", pointer: JSONPointer.join(JSONPointer.join(pointer,"dependencies"), key), rule: self.name))
+                }
+                var uniqueElements = Set<String>()
+                for (index,element) in array.enumerated() {
+                    if case .string(let string) = element {
+                        if uniqueElements.contains(string) {
+                            diagnostics.append(.init(severity: .error, code: .schemaViolation, message: "dependency array elements must be unique", pointer: JSONPointer.join(JSONPointer.join(JSONPointer.join(pointer,"dependencies"), key),String(index)), rule: self.name))
+                            return diagnostics
+                        }
+                        else {
+                            uniqueElements.insert(string)
+                        }
+                    }
+                    else {
+                        diagnostics.append(.init(severity: .error, code: .schemaViolation, message: "dependency array elements must be strings", pointer: JSONPointer.join(JSONPointer.join(JSONPointer.join(pointer,"dependencies"), key),String(index)), rule: self.name))
+                    }
+                    
+                }
+                return diagnostics
+            }
+            else if case .object(let dictionary) = value {
+                if dictionary.isEmpty {
+                    diagnostics.append(.init(severity: .error, code: .schemaViolation, message: "Object dependencies must map to a non-empty array", pointer: JSONPointer.join(JSONPointer.join(pointer,"dependencies"), key), rule: self.name))
+                    return diagnostics
+                }
+                
+                
+            }
+            else if case .boolean = value {
+                diagnostics.append(.init(severity: .error, code: .schemaViolation, message: "dependency value must be an object or array, not boolean", pointer: JSONPointer.join(JSONPointer.join(pointer,"dependencies"),key), rule: self.name))
+                    
+            }
+            else if case .integer = value {
+                diagnostics.append(.init(severity: .error, code: .schemaViolation, message: "dependency value must be an object or array, not integer", pointer: JSONPointer.join(JSONPointer.join(pointer,"dependencies"),key), rule: self.name))
+            }
+            else if case .number = value {
+                diagnostics.append(.init(severity: .error, code: .schemaViolation, message: "dependency value must be an object or array, not number", pointer: JSONPointer.join(JSONPointer.join(pointer,"dependencies"),key), rule: self.name))
+            }
+            else if case .string = value {
+                diagnostics.append(.init(severity: .error, code: .schemaViolation, message: "dependency value must be an object or array, not string", pointer: JSONPointer.join(JSONPointer.join(pointer,"dependencies"),key), rule: self.name))
+            }
+            else if case .null = value {
+                diagnostics.append(.init(severity: .error, code: .schemaViolation, message: "dependency value must be an object or array, not null", pointer: JSONPointer.join(JSONPointer.join(pointer,"dependencies"),key), rule: self.name))
+            }
+            else {
+                diagnostics.append(.init(severity: .error, code: .schemaViolation, message: "dependency value must be an object or array, is undefined", pointer: JSONPointer.join(JSONPointer.join(pointer,"dependencies"),key), rule: self.name))
+            }
             
+            }
         return diagnostics
-    }
-}
 
-public struct ObjectAdditionalPropertiesRule: SchemaRule {
-    public let name = "Schema.ObjectAdditionalProperties"
-    public init() {}
-    
-    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
-        var diagnostics = [Diagnostic]()
-        guard case  .object(let objectElement) = schema.type else {
-            return []
-        }
-        if let validAdditionalProperties = objectElement.additionalPropertiesValid {
-            if validAdditionalProperties == true {
-                return []
-            }
-            if validAdditionalProperties == false {
-                if objectElement.additionalPropertiesObject == nil {
-                    return []
-                }
-                else {
-                    diagnostics.append(.init(severity: .error, code: .invalidValue, message: "AdditionalProperties are set to fals, but additionProperties-Object is not empty", pointer: JSONPointer.join(pointer, "additionProperties"), rule: self.name))
-                }
-            }
-        }
-        
-        
-            
-        return diagnostics
     }
 }
 
@@ -421,7 +450,7 @@ public struct ObjectMinMaxPropertiesRule: SchemaRule {
               let minProperties = schema.minProperties,
               let maxProperties = schema.maxProperties else { return [] }
         if minProperties > maxProperties{
-            return [.init(severity: .error, code: .invalidValue,
+            return [.init(severity: .error, code: .schemaViolation,
                           message: "minProperties \(minProperties) must <= maxProperties '\( maxProperties)'",
                           pointer: JSONPointer.join(pointer, "maxProperties"), rule: self.name)]
         }
@@ -600,7 +629,10 @@ public struct RequiredSubsetOfPropertiesRule: SchemaRule {
         }
         return diags
     }
+
 }
+
+
 
 /// Rule: for objects, every entry in required must exist as a property key.
 public struct SupportedFormatsRule: SchemaRule {

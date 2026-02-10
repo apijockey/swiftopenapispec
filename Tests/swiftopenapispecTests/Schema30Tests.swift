@@ -164,6 +164,36 @@ struct Schema30ValidationTests {
         )
     }
 
+    @Test("Schema Dependencies rules for 3.0 hit", arguments: [
+        "15-dependencies-invalid-empty-array",
+        "15-dependencies-invalid-non-unique",
+        "15-dependencies-invalid-non-string",
+        "15-dependencies-invalid-wrong-type"
+    ])
+    func schemaDependenciesRulesHit(resource: String) async throws {
+        let subDirectory = "Resources/3_0/invalid"
+        
+        guard let resourceUrl = Bundle.module.url(forResource: resource, withExtension: "yaml", subdirectory: subDirectory) else {
+            throw FixtureErrors.notFound(resource)
+        }
+        
+        let dict = try TestHelpers.loadFixtureDictionary(resource, subDirectory: subDirectory)
+        let apiSpec = try OpenAPISpecification.read(unflattened: dict, url: resource, documentLoader: YamsDocumentLoader())
+        
+        guard let fixture = TestHelpers.fixtureManifest(fixtureName: resource, subDirectory: subDirectory) else {
+            throw FixtureErrors.notFound(resource)
+        }
+        
+        try await TestHelpers.validateSchemaAndCompare(
+            apiSpec: apiSpec,
+            fixture: fixture,
+            resourceUrl: resourceUrl,
+            resourceName: resource,
+            version: ValidationContext.OASVersion.v30,
+            dialect: ConverterConfig.Dialect.oas30
+        )
+    }
+
     @Test("Schema Enum rules for 3.0 hit", arguments: [
         "10-schematests-enum-invalid"
     ])

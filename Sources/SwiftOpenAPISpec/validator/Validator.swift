@@ -119,7 +119,7 @@ public struct Validator {
                 for response in (op.responses) {
                     for content in response.content {
                         if let schema = content.schema  {
-                            try await diagnostics.append(contentsOf:schemaRuleRunner.run(schema: schema, pointer: "/paths/\(JSONPointer.escape(path.key ?? ""))/operations/responses/\(response.key ?? "")/content/\(JSONPointer.escape(content.key ?? ""))/schema", resolver: &resolver))
+                            try await diagnostics.append(contentsOf:schemaRuleRunner.run(schema: schema, pointer: "/paths/\(JSONPointer.escape(path.key ?? ""))/\(op.key ?? op.operationId ?? "")/responses/\(response.key ?? "")/content/\(JSONPointer.escape(content.key ?? ""))/schema", resolver: &resolver))
                         }
                     }
                 }
@@ -128,7 +128,9 @@ public struct Validator {
         let schemaDiagnostics: [Diagnostic] = spec.diagnostics.filter { diagnostic in
             diagnostic.rule.starts(with: "Schema")
         }
+        
         diagnostics.append(contentsOf: schemaDiagnostics)
+        diagnostics.append(contentsOf: spec.diagnostics.filter{$0.code == .schemaViolation})
         return diagnostics
     }
 }

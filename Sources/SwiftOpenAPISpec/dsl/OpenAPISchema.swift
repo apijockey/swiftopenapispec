@@ -182,15 +182,54 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
        
         
         if case let .array(allowedElements)  = map[Self.ALLOWED_ELEMENTS_KEY]  {
-            var collected: Set<String> = []
-            for value in allowedElements {
-                if case let .string(text) = value {
-                    collected.insert(text)
+            var collected: [JSONValue] = []
+            for (index,value) in allowedElements.enumerated() {
+                switch value {
+                case .object:
+                    diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "for enums, object elements are not suported, only only primitive types (String, Number, Boolean, Null, Integer)", pointer: JSONPointer.join(JSONPointer.join(pointer, "enum"),String(index)),rule: "OAS30.EnumAllowedValues"))
+                case .array:
+                    diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "for enums, array elements are not suported, only only primitive types (String, Number, Boolean, Null, Integer)", pointer: JSONPointer.join(JSONPointer.join(pointer, "enum"),String(index)),rule: "OAS30.EnumAllowedValues"))
+                case .string:
+                    if case .string = type {
+                        collected.append(value)
+                    }
+                    else {
+                        diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "mixed elements are not suported and must match the schema type '\(self.type.debugDescription)', got: '\(value.debugDescription)'", pointer: JSONPointer.join(JSONPointer.join(pointer, "enum"),String(index)),rule: "OAS30.EnumAllowedValues"))
+                    }
+                case .number:
+                    if case .number = type {
+                        collected.append(value)
+                    }
+                    else {
+                        diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "mixed elements are not suported and must match the schema type '\(self.type.debugDescription)', got: '\(value.debugDescription)'", pointer: JSONPointer.join(JSONPointer.join(pointer, "enum"),String(index)),rule: "OAS30.EnumAllowedValues"))
+                    }
+                case .integer:
+                    if case .number = type{
+                        collected.append(value)
+                    }
+                    else if case .integer = type {
+                        collected.append(value)
+                    }
+                    else {
+                        diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "mixed elements are not suported and must match the schema type '\(self.type.debugDescription)', got: '\(value.debugDescription)'", pointer: JSONPointer.join(JSONPointer.join(pointer, "enum"),String(index)),rule: "OAS30.EnumAllowedValues"))
+                    }
+                case .boolean:
+                    if case .bool = type {
+                        collected.append(value)
+                    }
+                    else {
+                        diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "mixed elements are not suported and must match the schema type '\(self.type.debugDescription)', got: '\(value.debugDescription)'", pointer: JSONPointer.join(JSONPointer.join(pointer, "enum"),String(index)),rule: "OAS30.EnumAllowedValues"))
+                    }
+                case .null:
+                    if self.nullable == false {
+                        diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "nullable is set to 'false', 'null' is not an allowed value", pointer: JSONPointer.join(JSONPointer.join(pointer, "enum"),value.debugDescription),rule: "OAS30.EnumAllowedValues"))
+                    }
                 }
             }
-            self.allowedValues = collected.isEmpty ? nil : collected
+            
+            self.allowedValues = collected
         } else {
-            self.allowedValues = nil
+            self.allowedValues = []
         }
         self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
         self.exclusiveMinimum = map.readIfPresent(Self.EXCLUSIVE_MINIMUM_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.EXCLUSIVE_MINIMUM_KEY))
@@ -225,7 +264,7 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
          //self.format30 = map.readIfPresent(Self.FORMAT_KEY, String.self)
          //extensions = try OpenAPIExtension.extensionElements(map)
     
-    public var allowedValues: Set<String>?
+    public var allowedValues: [JSONValue]
     public var defaultValue : JSONValue?
     public var deprecated: Bool?
     public var discriminator: OpenAPIDiscriminator?

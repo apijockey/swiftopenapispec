@@ -330,6 +330,23 @@ public struct SchemaRefCollector {
                 out.append(contentsOf: collect(from:  prop  , pointer: JSONPointer.join(propPtr, "\(key)/")))
             }
         }
+        
+        for prop in obj.additionalPropertiesObject {
+            if let key = prop.key,
+               case let .ref(ref) = prop.type {
+                let propPtr = JSONPointer.join(JSONPointer.join(pointer, "additionalProperties"), key)
+                out.append(.init(
+                    refString: ref.reference ?? "",
+                    pointerToDollarRef: JSONPointer.join(propPtr, "\(key)/$ref"),
+                    expected: .schemaObject
+                ))
+            }
+            
+            else if let key = prop.key{
+                let propPtr = JSONPointer.join(JSONPointer.join(pointer, "properties"), key)
+                out.append(contentsOf: collect(from:  prop  , pointer: JSONPointer.join(propPtr, "\(key)/")))
+            }
+        }
         return out
     }
     public func collect(from schema: OpenAPISchema, pointer: String) -> [RefOccurrence] {

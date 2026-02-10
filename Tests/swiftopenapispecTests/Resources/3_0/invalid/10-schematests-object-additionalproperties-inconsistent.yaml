@@ -27,8 +27,13 @@ paths:
               schema:
                 type: object
                 properties:
-                  name:
-                    type: string
-                additionalProperties: false
-                additionalPropertiesObject:
-                  type: string
+                  firstname:
+                    type: object
+                    additionalProperties:
+                      age:
+                        type : double
+                  lastname:
+                    type: object
+                    additionalProperties:
+                      age:
+                        type : string

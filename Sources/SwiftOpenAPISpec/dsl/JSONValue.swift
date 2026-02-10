@@ -185,9 +185,9 @@ extension JSONValue : CustomDebugStringConvertible {
     public var debugDescription: String {
         switch self {
         case .string(let s): return "string(\(s))"
-        case .integer(let i): return "integer(\(String(i))"
-        case .number(let d): return  "number(\(String(d))"
-        case .boolean(let b): return "boolean(\(String(b))"
+        case .integer(let i): return "integer(\(String(i)))"
+        case .number(let d): return  "number(\(String(d)))"
+        case .boolean(let b): return "boolean(\(String(b)))"
         case .null: return "null"
         case .array: return "array"
         case .object: return "object"

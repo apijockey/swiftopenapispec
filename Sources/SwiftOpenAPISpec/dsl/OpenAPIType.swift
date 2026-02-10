@@ -138,3 +138,43 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
         }
     }
 }
+extension  OpenAPIType : CustomDebugStringConvertible {
+    public var debugDescription: String {
+        switch self {
+        case .allOf:
+            return "allOf"
+        case .anyOf:
+            return "anyOf"
+        case .array:
+            return "array"
+        case .bool:
+            return "bool"
+        case .integer:
+            return "integer"
+        case .number:
+            return "number"
+        case .object:
+            return "object"
+        case .oneOf:
+            return "oneOf"
+        case .string:
+            return "string"
+        case .ref(let openAPISchemaReference):
+            return "ref(\(openAPISchemaReference.reference ?? ""))"
+        case .null:
+            return "null"
+        case .unknown(let string):
+            return "unknown(\(string))"
+        }
+    }
+}
+extension Optional where Wrapped == OpenAPIType {
+    public var debugDescription: String {
+        if let wrapped = self {
+            return wrapped.debugDescription
+        } else {
+                return "nil"
+        }
+    }
+    
+}
