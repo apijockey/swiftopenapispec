@@ -203,7 +203,7 @@ struct OpenAPIJSONPointerTests {
         let ct = try await resolver.resolve(
            ref: "#/components/requestBodies/CreateEvent/content/application~1json/encoding/event~1payload/contentType"
         )
-        print(ct)
+        
         #expect(ct  == .value(.string("application/json")))
         let ex = try await resolver.resolve(
            ref: "#/components/requestBodies/CreateEvent/content/application~1json/encoding/event~1payload/headers/X-Encoded/example"

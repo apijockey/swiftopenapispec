@@ -32,11 +32,42 @@
 
 public struct Diagnostic: Sendable, Equatable, CustomDebugStringConvertible, CustomStringConvertible {
     public var debugDescription: String {
-        return "severity: \(severity.rawValue), code: \(code.rawValue), message: \(message), pointer: \(pointer), rule: \(rule)"
+        return formattedDescription()
     }
     
     public var description: String {
-        return "severity: \(severity.rawValue), code: \(code.rawValue), message: \(message), pointer: \(pointer), rule: \(rule)"
+        return formattedDescription()
+    }
+    
+    private func formattedDescription() -> String {
+        // Begrenzung der Länge für rule auf 40 Zeichen
+        let truncatedRule = String(rule.prefix(40))
+        
+        // Farbcodes basierend auf der Schwere
+        let severityColor: String
+        let resetColor = "\u{001B}[0m"
+        
+        switch severity {
+        case .error:
+            severityColor = "\u{001B}[31m" // Rot
+        case .warning:
+            severityColor = "\u{001B}[33m" // Gelb
+        case .info:
+            severityColor = "\u{001B}[90m" // Grau
+        }
+        
+        // Formatierte Ausgabe mit festen Spaltenbreiten
+        let severityStr = String(format: "%-12@", severity.rawValue) // 12 Zeichen breit
+        let codeStr = String(format: "%-25@", code.rawValue) // 25 Zeichen breit
+        let ruleStr = String(format: "%-60@", truncatedRule) // 60 Zeichen breit
+        
+        // Zweizeilige Ausgabe für bessere Lesbarkeit
+        let line1 = String(format: "%@%@%@ %@ %@", 
+                          severityColor, severityStr, resetColor,
+                          codeStr, ruleStr)
+        let line2 = String(format: "  %@ %@", pointer, message)
+        
+        return "\(line1)\n\(line2)"
     }
     
     public enum Severity : String, Sendable { case warning, error,info }
@@ -69,9 +100,38 @@ public struct Diagnostic: Sendable, Equatable, CustomDebugStringConvertible, Cus
 
 extension Array where Element == Diagnostic {
     public var description: String {
-        self.map(\.description).joined(separator: "\n")
+        let sortedDiagnostics = self.sorted {
+            // Zuerst nach severity sortieren (error > warning > info)
+            if $0.severity != $1.severity {
+                let order0 = severityOrder($0.severity)
+                let order1 = severityOrder($1.severity)
+                return order0 > order1
+            }
+            // Dann nach pointer sortieren
+            return $0.pointer < $1.pointer
+        }
+        return sortedDiagnostics.map(\.description).joined(separator: "\n")
     }
+    
     public var debugDescription: String {
-        self.map(\.debugDescription).joined(separator: "\n")
+        let sortedDiagnostics = self.sorted {
+            // Zuerst nach severity sortieren (error > warning > info)
+            if $0.severity != $1.severity {
+                let order0 = severityOrder($0.severity)
+                let order1 = severityOrder($1.severity)
+                return order0 > order1
+            }
+            // Dann nach pointer sortieren
+            return $0.pointer < $1.pointer
+        }
+        return sortedDiagnostics.map(\.debugDescription).joined(separator: "\n")
+    }
+    
+    private func severityOrder(_ severity: Diagnostic.Severity) -> Int {
+        switch severity {
+        case .error: return 3
+        case .warning: return 2
+        case .info: return 1
+        }
     }
 }

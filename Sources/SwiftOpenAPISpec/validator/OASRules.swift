@@ -373,7 +373,7 @@ struct OperationMustHaveResponsesRule: Rule {
 
         for pathItem in spec.paths {
             for op in pathItem.operations {
-                print((pathItem.key ?? "").appending(op.key ?? "").appending(String(op.responses.count)))
+                
                 guard op.responses.count > 0 else {
                     let diagnotics = Diagnostic( severity: .error,
                                                  code: .missingResponses,
@@ -712,7 +712,7 @@ extension String {
     func isValidRegex() -> Bool {
         
         if #available(macOS 13.0, *) {
-            guard let regex = try? Regex(self) else { return false }
+            guard ((try? Regex(self) ) != nil) else { return false }
             return true
         }
         else {

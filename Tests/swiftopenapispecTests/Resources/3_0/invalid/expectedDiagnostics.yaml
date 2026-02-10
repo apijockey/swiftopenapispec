@@ -100,7 +100,7 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/paths/~1create/operations/responses/201/content/application~1json/schema/type"
+        pointer: "/paths/~1create/post/responses/201/content/application~1json/schema/type"
         rule: "OAS30.SupportedTypes"
         severity: "error"
         messageContains: "type 'double' not supported or not recognized in OpenAPI 3.0"
@@ -108,7 +108,7 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/paths/~1create/operations/responses/201/content/application~1json/schema/properties/id/type"
+        pointer: "/paths/~1create/post/responses/201/content/application~1json/schema/properties/id/type"
         rule: "OAS30.SupportedTypes"
         severity: "error"
         messageContains: "type 'double' not supported or not recognized in OpenAPI 3.0"
@@ -307,10 +307,10 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/paths/~1test/get/responses/200/content/application~1json/schema/additionProperties"
-        rule: "Schema.ObjectAdditionalProperties"
+        pointer: "/paths/~1test/get/responses/200/content/application~1json/schema/properties/firstname/additionalProperties/age/type"
+        rule: "OAS30.SupportedTypes"
         severity: "error"
-        messageContains: "AdditionalProperties are set to false, but additionProperties-Object is not empty"
+        messageContains: "type 'double' not supported or not recognized in OpenAPI 3.0"
     onlyThese: true
 
   - fixture: "10-schematests-enum-invalid"

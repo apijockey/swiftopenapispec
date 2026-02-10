@@ -93,6 +93,21 @@ struct CLIRunTests {
         let outString = try #require((out as? StringTextOutputStream)?.string)
         #expect(outString.contains("The Responses Object MUST contain at least one response code, and it SHOULD be the response for a successful operation call."))
     }
+    
+    @Test("CLI --validate returns OK for a valid spec")
+    func testCLIValidateWithErrorsOK() async throws {
+        let url = try fixtureURL("01-minimal-30-missingInfo", ext: "yaml", subdirectory: "Resources/3_0/invalid")
+        var out: (any TextOutputStream) = StringTextOutputStream()
+        var err: (any TextOutputStream) = StringTextOutputStream()
+        let app = SwiftOpenAPICLIApp()
+        let code = await app.run(args: ["SwiftOpenAPICLI", url.path, "--validate"], stdout: &out, stderr: &err)
+
+        #expect(code == 1)
+       
+        let outString = try #require((out as? StringTextOutputStream)?.string)
+        
+        
+    }
 
     @Test("CLI with invalid option returns error")
     func testCLIInvalidOption() async throws {

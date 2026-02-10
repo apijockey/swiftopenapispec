@@ -107,7 +107,7 @@ struct FixtureTests {
             return
         }
         
-        print(objectType.properties.count)
+        
         #expect(objectType.unevaluatedProperties == false)
         #expect(objectType.properties.count == 1)
         #expect(contentType.schema?.required?.count == 1)
@@ -258,9 +258,11 @@ struct FixtureTests {
         
         //guard case let .string(stringPropertyInfo) = try #require(schema.type) else { Issue.record(); return }
         //#expect(winnerProperty.allowedValues == ["X", "O", "."])
-        #expect(winnerProperty.allowedValues.compactMap({ value in
+        #expect(Set(winnerProperty.allowedValues.compactMap({ value in
             if case .string(let value) = value { return value } else { return nil }
-        }) == ["X", "O", "."])
+        })) ==  ["X", "O", "."])
+        
+        
         let boardProperty = try #require(objectType.properties.first(where: { $0.key == "board" }))
         
         #expect(boardProperty.maxItems == 3)

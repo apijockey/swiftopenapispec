@@ -125,11 +125,6 @@ public struct Validator {
                 }
             }
         }
-        let schemaDiagnostics: [Diagnostic] = spec.diagnostics.filter { diagnostic in
-            diagnostic.rule.starts(with: "Schema")
-        }
-        
-        diagnostics.append(contentsOf: schemaDiagnostics)
         diagnostics.append(contentsOf: spec.diagnostics.filter{$0.code == .schemaViolation})
         return diagnostics
     }

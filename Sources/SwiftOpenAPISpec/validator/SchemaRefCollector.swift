@@ -166,7 +166,7 @@ public struct SchemaRefCollector {
         ))
     }
         else {
-            for header in (encoding.headers ?? []) {
+            for header in (encoding.headers ) {
                 let ptr = pointer + "encoding/" + (header.key ?? "")
                 out.append(contentsOf: collect(from: header, pointer: ptr))
             }

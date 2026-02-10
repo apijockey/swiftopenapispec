@@ -141,7 +141,7 @@ extension StringDictionary {
             for element in objectMap {
                 let value = element.value
                 if case let .object(valueMap) = value {
-                    var type = try T.initialize(load:  valueMap, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, element.key)).value
+                    let type = try T.initialize(load:  valueMap, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, element.key)).value
                     elements.append(type)
                 }
             }
@@ -189,7 +189,7 @@ extension StringDictionary {
             for element in objectMap {
                 let value = element.value
                 if case let .object(valueMap) = value {
-                    var type = try T.initialize(load:  valueMap, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, element.key)).value
+                    let type = try T.initialize(load:  valueMap, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, element.key)).value
                     elements.append(type)
                 }
             }
@@ -271,7 +271,7 @@ extension StringDictionary {
             for element in self {
                 let value = element.value
                 if case let .object(valueMap) = value {
-                    var type = try T.initialize(load: valueMap, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, element.key)).value
+                    let type = try T.initialize(load: valueMap, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, element.key)).value
                     
                     elements.append(type)
                 }
@@ -292,7 +292,7 @@ extension StringDictionary {
                 //this must be a reference
                 else if case .string(let string) = value,
                         string == OpenAPISchemaReference.REF_KEY {
-                        let value = element.value
+                        
                     var type = try T.initialize(load: self, diagnostics: &diagnostics, pointer: pointer).value
                         type.key = element.key
                         elements.append(type)

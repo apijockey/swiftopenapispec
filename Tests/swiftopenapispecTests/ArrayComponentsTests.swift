@@ -129,7 +129,7 @@ struct ArrayComponentsTests {
             return
         }
         let inner = try #require(outer.items)
-        print(inner)
+        
         //#expect((inner.items as? OpenAPIStringType) != nil)
     }
 

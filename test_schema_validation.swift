@@ -54,7 +54,7 @@ func testSchemaValidation() async {
             print("  ❌ Error running test: \(error)")
         }
         
-        print()
+      
     }
 }
 
