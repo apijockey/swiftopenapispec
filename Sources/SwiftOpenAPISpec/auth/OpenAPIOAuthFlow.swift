@@ -40,17 +40,38 @@
 import Foundation
 
 public struct OpenAPIOAuthFlow : ThrowingHashMapInitiable, PointerNavigable {
-    public func element(for segmentName: String) throws -> Any? {
+   
+   
+    public init(load map: StringDictionary,  diagnostics: inout [Diagnostic],pointer : String) throws {
+        authorizationUrl = map.readIfPresent(Self.AUTHORIZATIONURL_KEY,valueType: String.self, diagnostics : &diagnostics, pointer: pointer)
+        tokenUrl = map.readIfPresent(Self.TOKENURL_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: pointer)
+        refreshUrl = map.readIfPresent(Self.REFRESHURL_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: pointer)
+        scopes = map.readIfPresent(Self.SCOPES_KEY,valueType:  [String:String].self, diagnostics : &diagnostics, pointer: pointer)
+        if case let .object(scopes) = map[Self.SCOPES_KEY] {
+            self.scopes = [String:String]()
+            for scope in scopes {
+                if case let .string(value) = scope.value {
+                    self.scopes?[scope.key] = value
+                }
+            }
+        }
+    }
+    
+    public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
-        case Self.AUTHORIZATIONURL_KEY: return authorizationUrl
-        case Self.DEVICE_AUTHORIZATIONURL_KEY: return deviceAuthorizationUrl
-        case Self.TOKENURL_KEY: return tokenUrl
-        case Self.REFRESHURL_KEY : return refreshUrl
-            case Self.SCOPES_KEY : return scopes
+        case Self.AUTHORIZATIONURL_KEY: return .value(JSONValue(string: authorizationUrl))
+        case Self.DEVICE_AUTHORIZATIONURL_KEY: return .value(JSONValue(string: deviceAuthorizationUrl))
+        case Self.TOKENURL_KEY: return .value(JSONValue(string: tokenUrl))
+        case Self.REFRESHURL_KEY : return .value(JSONValue(string: refreshUrl))
+        case Self.SCOPES_KEY :
+            let value = try JSONValue(scopes)
+            return  .value(value)
         default:
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIOAuthFlow", segmentName)
         }
     }
+    
+   
     
    
     
@@ -59,17 +80,12 @@ public struct OpenAPIOAuthFlow : ThrowingHashMapInitiable, PointerNavigable {
     public static let TOKENURL_KEY = "tokenUrl"
     public static let REFRESHURL_KEY = "refreshUrl"
     public static let SCOPES_KEY = "scopes"
-    public init(_ map: [String : Any]) throws {
-        authorizationUrl = map.readIfPresent(Self.AUTHORIZATIONURL_KEY, String.self)
-        tokenUrl = map.readIfPresent(Self.TOKENURL_KEY, String.self)
-        refreshUrl = map.readIfPresent(Self.REFRESHURL_KEY, String.self)
-        scopes = map.readIfPresent(Self.SCOPES_KEY, [String:String].self)
-    }
+   
     public var authorizationUrl : String? = nil
     public var deviceAuthorizationUrl : String? = nil
     public var tokenUrl : String? = nil
     public var refreshUrl : String? = nil
     public var scopes : [String:String]? = nil
   
-    public var ref: OpenAPISchemaReference? { nil}
+   
 }
