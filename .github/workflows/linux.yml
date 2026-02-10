@@ -21,8 +21,7 @@ permissions:
   contents: read
 on:
   push:
-    branches:
-      - main
+    branches: ["main"]
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -30,6 +29,8 @@ jobs:
   linux:
     if: vars.RUN_LINUX_TESTS == 'true'
     runs-on: ubuntu-latest
+    container:
+      image: swift:6.0.3-jammy
     needs: [soundness]
     steps:
       - uses: actions/checkout@v4
