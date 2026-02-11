@@ -31,9 +31,9 @@ paths:
                     type: object
                     additionalProperties:
                       age:
-                        type : double
+                        type: double
                   lastname:
                     type: object
                     additionalProperties:
                       age:
-                        type : string
+                        type: string

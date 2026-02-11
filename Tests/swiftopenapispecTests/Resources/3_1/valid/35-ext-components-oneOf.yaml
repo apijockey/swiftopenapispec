@@ -34,5 +34,3 @@ components:
               user.created: "#/components/schemas/UserCreated"
               user.deleted: "#/components/schemas/UserDeleted"
       required: [type, payload]
-
-

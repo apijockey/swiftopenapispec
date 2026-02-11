@@ -230,9 +230,6 @@ cases:
         rule: "Schema.DataType"
         severity: "error"
         messageContains: "expected 'Boolean' instead of 'string(yes)'"
-    
-               
-    
   - fixture: "10-schematests-array-minitems-negative"
     shouldPass: false
     expected:

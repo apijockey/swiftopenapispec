@@ -51,8 +51,3 @@ components:
           type: number
           readOnly: true
           required: true
-          
-          
-          
-          
-               
