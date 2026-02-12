@@ -38,7 +38,6 @@ paths:
           schema: {type: string}
       responses:
         "200": {description: ok}
-    #introduced in 3.2
     additionalOperations:
       COPY:
         description: Copies pet information based on ID
