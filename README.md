@@ -7,7 +7,86 @@ Use SwiftOpenAPISpec, if you want to read and write OpenAPI specifications writt
 Basis of the implementation is the specification on [OpenAPI Specification v3.2.0](https://spec.openapis.org/oas/v3.2.0.html)
 
 This Swift library reads OpenAPI specifications (OAS) written in Yaml and JSON when they conform to OAS version 3.0.0 or higher, otherwise eventually fail.
-The library makes no other assumptions on spec versions. 
+The library makes no other assumptions on spec versions.
+
+Run your validation with a simple command line tool.
+
+## Command Line Interface
+
+As part of SwiftOpenAPISpec, SwiftOpenAPICLI is a command line tool available for macOS, Linux and Windows systems. 
+It is a simple executable that runs in a shell, terminal or PowerShell environment. 
+The validation includes OAS 3.0 and JSONSchema validation with the limitations for OAS 3.0.
+
+The tool provides basic functionality for:
+- Loading and parsing OpenAPI specifications
+- Validating OpenAPI documents against the specification rules
+- Displaying basic information about OpenAPI files
+
+## Usage Examples
+
+### Basic Usage
+
+Display basic information about an OpenAPI specification:
+
+```bash
+$ ./SwiftOpenAPICLI path/to/your/openapi.yaml
+OpenAPI: 3.1.0
+Title: My API
+```
+
+### Version Information
+
+Check the installed version of the CLI:
+
+```bash
+$ ./SwiftOpenAPICLI path/to/openapi.yaml --version
+0.1.0
+```
+
+### Validation
+
+Validate an OpenAPI specification against the rules:
+
+```bash
+$ ./SwiftOpenAPICLI path/to/openapi.yaml --validate
+Validation: OK
+```
+
+Or with validation errors:
+
+```bash
+$ ./SwiftOpenAPICLI path/to/invalid-openapi.yaml --validate
+The Responses Object MUST contain at least one response code, and it SHOULD be the response for a successful operation call.
+```
+
+## Error Handling
+
+The CLI returns appropriate exit codes:
+- `0` for success
+- `1` for errors
+
+### Missing Argument
+
+```bash
+$ ./SwiftOpenAPICLI
+Error: Usage: SwiftOpenAPICLI <path-to-openapi.(yaml|yml|json)>
+```
+
+### Invalid Option
+
+```bash
+$ ./SwiftOpenAPICLI openapi.yaml --unknown
+Error: Invalid option: --unknown
+```
+
+### File Not Found
+
+```bash
+$ ./SwiftOpenAPICLI nonexistent.yaml
+Error: File not found: nonexistent.yaml
+```
+
+ 
 
 ## Getting Started
 
@@ -97,6 +176,10 @@ will print:
 Simple API overview
 2.0.0
 ```
+
+
+
+
 ## 🌍 Github Pages repo docs
 👉 [view on GitHub Pages](https://apijockey.github.io/swiftopenapispec/)
 
