@@ -38,39 +38,21 @@
 //
 
 
-public struct OpenAPIArrayType : OpenAPIValidatableSchemaType, PointerNavigable{
-    public static func == (lhs: OpenAPIArrayType, rhs: OpenAPIArrayType) -> Bool {
-        // 1) einfache skalare Felder vergleichen
-        guard lhs.type == rhs.type,
-              lhs.maxItems == rhs.maxItems,
-              lhs.minItems == rhs.minItems,
-              lhs.uniqueItems == rhs.uniqueItems,
-              lhs.maxContains == rhs.maxContains,
-              lhs.minContains == rhs.minContains
-        else { return false }
-
-        // 2) items (Existential) über isEqual(to:) vergleichen
-        switch (lhs.items, rhs.items) {
-        case (nil, nil):
-            return true
-        case let (li?, ri?):
-            
-                return true
-
-        default:
-            return false
-        }
-    }
+public struct OpenAPIArrayType : OpenAPISchemaType, PointerNavigable{
+    public var discriminator: OpenAPIDiscriminator?
     
-    public func element(for segmentName: String) throws -> Any? {
+    
+    
+    
+    public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
-        case Self.ITEMS_KEY: return self.items
-        case Self.ARRAY_TYPE_KEY: return self.type
-        case Self.MAX_ITEMS_KEY : return maxItems
-        case Self.MIN_ITEMS_KEY : return minItems
-        case Self.UNIQE_ITEMS_KEY : return uniqueItems
-        case Self.MAX_CONTAINS_KEY : return maxContains
-        case Self.MIN_CONTAINS_KEY : return minContains
+        case Self.ITEMS_KEY: return .navigable(self.items)
+        case Self.ARRAY_TYPE_KEY: return .value(JSONValue(string: self.type))
+        case Self.MAX_ITEMS_KEY : return .value(JSONValue(int: maxItems))
+        case Self.MIN_ITEMS_KEY : return .value(JSONValue(int: minItems))
+        case Self.UNIQE_ITEMS_KEY : return .value(JSONValue(bool: uniqueItems))
+        case Self.MAX_CONTAINS_KEY : return .value(JSONValue(int: maxContains))
+        case Self.MIN_CONTAINS_KEY : return .value(JSONValue(int: minContains))
         default:
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIArrayType", segmentName)
         }
@@ -86,20 +68,20 @@ public struct OpenAPIArrayType : OpenAPIValidatableSchemaType, PointerNavigable{
     public static let MAX_CONTAINS_KEY = "maxContains"
     public static let MIN_CONTAINS_KEY = "minContains"
     
-    public init(_ map: [String : Any]) throws {
-        self.type = map[Self.TYPE_KEY] as? String
-        self.minItems = map[Self.MIN_ITEMS_KEY] as? Int
-        self.maxItems = map[Self.MAX_ITEMS_KEY] as? Int
-        self.maxContains = map[Self.MAX_CONTAINS_KEY] as? Int
-        self.minContains = map[Self.MIN_CONTAINS_KEY] as? Int
-        self.uniqueItems = map[Self.UNIQE_ITEMS_KEY] as? Bool
-         if let list = (map[Self.ITEMS_KEY] as? StringDictionary),
-            let type = list[Self.TYPE_KEY] as? String,
-            let validatableType = OpenAPISchemaType.validatableType(type) {
-                self.items = try validatableType.init(list)
+    public init(load map: StringDictionary, diagnostics : inout [Diagnostic], pointer : String) throws {
+        self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self, diagnostics: &diagnostics, pointer: pointer)
+        self.minItems = map.readIfPresent(Self.MIN_ITEMS_KEY, valueType: Int.self, diagnostics: &diagnostics, pointer: pointer)
+        self.maxItems = map.readIfPresent(Self.MAX_ITEMS_KEY, valueType:  Int.self, diagnostics: &diagnostics, pointer: pointer)
+        self.maxContains = map.readIfPresent(Self.MAX_CONTAINS_KEY, valueType : Int.self, diagnostics: &diagnostics, pointer: pointer)
+        self.minContains = map.readIfPresent(Self.MIN_CONTAINS_KEY, valueType:  Int.self, diagnostics: &diagnostics, pointer: pointer)
+        self.uniqueItems = map.readIfPresent(Self.UNIQE_ITEMS_KEY, valueType:  Bool.self, diagnostics: &diagnostics, pointer: pointer)
+         if let list = map[Self.ITEMS_KEY] ,
+            case let .object(type) = list {
+             self.items = try OpenAPISchema.initialize(load: type, diagnostics : &diagnostics, pointer: pointer).value
              }
     }
    
+
     public func validate() throws {
         
     }
@@ -109,8 +91,7 @@ public struct OpenAPIArrayType : OpenAPIValidatableSchemaType, PointerNavigable{
     public var uniqueItems : Bool?
     public var maxContains : Int?
     public var minContains : Int?
-    public var items: (any OpenAPIValidatableSchemaType)?
+    public var items: OpenAPISchema?
     
-    public var ref: OpenAPISchemaReference? { nil}
+    
 }
-

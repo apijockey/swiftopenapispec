@@ -38,10 +38,15 @@ Package.pins
 Package.resolved
 *.xcodeproj
 .swiftpm
-
+.DS_Store
+.venv
+path/
+helpers/
 # Xcode automatically generates this directory with a .xcworkspacedata file and xcuserdata
 # hence it is not needed unless you have added a package configuration file to your project
  .swiftpm
-
+.venv
+>>>>>>> refs/remotes/origin/main
 .build/
 docs/
+.DS_Store

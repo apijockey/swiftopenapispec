@@ -38,52 +38,57 @@
 //
 
 
-public struct OpenAPIAnyOfType : OpenAPIValidatableSchemaType, PointerNavigable {
-    public static func == (lhs: OpenAPIAnyOfType, rhs: OpenAPIAnyOfType) -> Bool {
-        guard lhs.type == rhs.type else { return false }
-        switch (lhs.items, rhs.items) {
-        case (nil, nil):
-            return true
-        case let (l?, r?):
-            guard l.count == r.count else { return false }
-            for (le, re) in zip(l, r) {
-                if !le.isEqual(to: re) { return false }
-            }
-            return true
-        default:
-            return false
-        }
-    }
+public struct OpenAPIAnyOfType : OpenAPISchemaType, PointerNavigable {
+    
+   
     
     public var ref: OpenAPISchemaReference? { nil}
-    
+    public static let DISCRIMINATOR_KEY = "discriminator"
     public static let TYPE_KEY = "anyOf"
    
-    public init(types :[any OpenAPIValidatableSchemaType]) {
+    public init(types :[OpenAPISchema]) {
         self.items = types
         self.type = "anyOf"
     }
-    public init(_ map: [String : Any]) throws {
-        self.type = map[Self.TYPE_KEY] as? String
-        guard let list = (map["anyOf"] as? [Any]) else {
-            return
+    
+  
+    public init(load map: StringDictionary,_ diagnostics: inout [Diagnostic], pointer : String) throws {
+        if case .array = map[Self.TYPE_KEY] {
+            self.type = "array"
         }
-        self.items = try list.asValidatableSchemaType()
+        else {
+            self.type = "unknown"
+            diagnostics.append(Diagnostic(severity: .error,
+                                          code: .schemaViolation,
+                                          message: "anyOf' must contain an array of 'object'.",
+                                          pointer: JSONPointer.join(pointer, "type"), rule: "Schema.OneAnyAllMustHaveObjectArray"))
+        }
+        self.items = try map.mapListIfPresent(objectType: OpenAPISchema.self, pointer: pointer)
     }
     
     public func validate() throws {
         
     }
-    public func element(for segmentName: String) throws -> Any? {
+    public func element(for segmentName: String) throws -> NavigationResult {
         if let index = Int(segmentName) {
-            return self.items?[index]
+            return .navigable(self.items?[index])
         }
         if segmentName ==  OpenAPISchemaReference.REF_KEY {
-            return ref
+            return .reference(ref?.reference)
+        }
+        if segmentName == OpenAPISchemaReference.REF_KEY {
+            if let reference = ref {
+                return .reference(reference.refString)
+                
+            }
+            else {
+                throw OpenAPISpecification.Errors.notFound(segmentName)
+            }
         }
         throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIAnyOfType",segmentName)
     }
     public let type : String?
-    public var items: [any OpenAPIValidatableSchemaType]?
+    public var items: [OpenAPISchema]?
+   
     
 }
