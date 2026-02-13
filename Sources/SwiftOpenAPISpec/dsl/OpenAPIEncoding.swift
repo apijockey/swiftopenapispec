@@ -21,6 +21,9 @@ public struct OpenAPIEncoding : KeyedElement, PointerNavigable {
    
     
     static let CONTENT_TYPE_KEY = "contentType"
+    static let STYLE_KEY = "style"
+    static let EXPLODE_KEY = "explode"
+    static let ALLOW_RESERVED_KEY = "allowReserved"
     static let HEADERS_KEY = "headers"
     static let ENCODING_KEY = "encoding"
     static let PREFIX_ENCODING_KEY = "prefixEncoding"
@@ -33,6 +36,9 @@ public struct OpenAPIEncoding : KeyedElement, PointerNavigable {
         self.encoding  = try map.mapListIfPresent(Self.ENCODING_KEY, objectType: OpenAPIEncoding.self, diagnostics: &diagnostics, pointer:JSONPointer.join(pointer, Self.ENCODING_KEY))
         self.prefixEncoding = try map.mapListIfPresent(Self.PREFIX_ENCODING_KEY,objectType: OpenAPIEncoding.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.PREFIX_ENCODING_KEY))
         self.itemEncoding = try map.mapListIfPresent(Self.PREFIX_ENCODING_KEY,objectType: OpenAPIEncoding.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.PREFIX_ENCODING_KEY))
+        self.style = map.readIfPresent(Self.STYLE_KEY, valueType: String.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.STYLE_KEY))
+        self.explode = map.readIfPresent(Self.EXPLODE_KEY, valueType: Bool.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXPLODE_KEY))
+        self.allowReserved = map.readIfPresent(Self.ALLOW_RESERVED_KEY, valueType: Bool.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXPLODE_KEY))
         
     }
    
@@ -60,7 +66,9 @@ public struct OpenAPIEncoding : KeyedElement, PointerNavigable {
     public var encoding :[OpenAPIEncoding] = []
     public var prefixEncoding :[OpenAPIEncoding] = []
     public var itemEncoding :[OpenAPIEncoding] = []
-   
+    public var style : String? = nil
+    public var explode : Bool? = nil
+    public var allowReserved : Bool? = nil
     public var key: String?
    
     public var ref : OpenAPISchemaReference? { nil}

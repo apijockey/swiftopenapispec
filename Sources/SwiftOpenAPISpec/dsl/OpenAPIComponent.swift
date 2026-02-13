@@ -162,7 +162,7 @@ public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
     public var responses : [OpenAPIResponse]?
     public var securitySchemas : [OpenAPISecurityScheme]?
     public var schemas : [OpenAPISchema]?
-   
+    
     public var ref : OpenAPISchemaReference? { nil}
     
     

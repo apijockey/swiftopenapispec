@@ -81,7 +81,7 @@ public struct OpenAPIResponse : KeyedElement, PointerNavigable {
       
     }
    
-
+    
     public var summary : String?
     public var description : String?
     public var content: [OpenAPIMediaType] = []

@@ -45,6 +45,7 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
         self.parameters = try map.mapListIfPresent(Self.PARAMETERS_KEY, objectType: OpenAPIParameter.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.PARAMETERS_KEY))
         self.requestBody = try map.readIfPresent(Self.REQUEST_BODIES_KEY, objectType: OpenAPIRequestBody.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.REQUEST_BODIES_KEY))
         self.responses = try map.mapListIfPresent(Self.RESPONSES_KEY, objectType: OpenAPIResponse.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.RESPONSES_KEY))
+        self.defaultResponse = try map.readIfPresent(Self.RESPONSES_KEY, objectType: OpenAPIResponse.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.DEFAULT_RESPONSE_KEY))
         self.callbacks =  try map.mapListIfPresent(Self.CALLBACKS_KEY, objectType: OpenAPICallBack.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.CALLBACKS_KEY))
         self.deprecated = map.readIfPresent(Self.DEPRECATED_KEY, valueType: Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.DEPRECATED_KEY))
         self.securityObjects = try map.mapListIfPresent(Self.SECURITY_KEY, objectType: OpenAPISecuritySchemeReference.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.SECURITY_KEY))
@@ -88,6 +89,7 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
         }
     }
     public static let DEPRECATED_KEY = "deprecated"
+    public static let DEFAULT_RESPONSE_KEY = "default"
     public static let CALLBACKS_KEY = "callbacks"
     public static let DESCRIPTION_KEY = "description"
     public static let EXTERNAL_DOCS_KEY = "externalDocs"
@@ -110,6 +112,7 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
    
     public var callbacks : [OpenAPICallBack] = []
     public var responses : [OpenAPIResponse] = []
+    public var defaultResponse : OpenAPIResponse? = nil
     public var parameters : [OpenAPIParameter] = []
     public var servers : [OpenAPIServer] = [OpenAPIServer(url: "/")]
     //Lists the required security schemes to execute this operation. The name used for each property MUST correspond to a security scheme declared in the Security Schemes under the Components Object.

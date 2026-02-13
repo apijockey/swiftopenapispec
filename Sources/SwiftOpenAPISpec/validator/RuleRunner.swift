@@ -60,10 +60,13 @@ public struct RuleRunner  : Sendable{
     /// - Schema validation
     /// - Reference validation
     /// - And other core OpenAPI requirements
-    public static let defaultRuleRunner : RuleRunner =  { ()
+    private static let oas30RuleRunner : RuleRunner =  { ()
+        
+        
         let rules: [Rule] = [
             SupportedVersion3(),
-            RequiredOpenAPIFixedFieldsRule(),
+            WebhookSupport30Rule(),
+            RequiredOpenAPI30FixedFieldsRule(),
             RequiredOpenAPIFixedInfoFieldsRule(),
             RequiredPathsRule(),
             SupportedHTTPMethodRule(),
@@ -91,4 +94,57 @@ public struct RuleRunner  : Sendable{
         ]
         return RuleRunner(rules: rules)
     }()
+    
+    /// The default RuleRunner with the standard set of validation rules.
+    ///
+    /// This includes rules for:
+    /// - Version validation
+    /// - Structural validation
+    /// - Schema validation
+    /// - Reference validation
+    /// - And other core OpenAPI requirements
+    private static let oas31RuleRunner : RuleRunner =  { ()
+        
+        
+        let rules: [Rule] = [
+            SupportedVersion3(),
+            RequiredOpenAPI31FixedFieldsRule(),
+            RequiredOpenAPIFixedInfoFieldsRule(),
+            RequiredPathsRule(),
+            SupportedHTTPMethodRule(),
+            PathsMustStartWithSlashRule(),
+            RequiredLicenseNameRule(),
+            SupportedHTPStatusRule(),
+            ValidComponentNamesRule(),
+            RequiredServerURLRule(),
+            RequiredServerVariablesRule(),
+            RequiredSchemaComponentNamessRule(),
+            RequiredResponsesComponentNamessRule(),
+            RequiredExamplesComponentNamessRule(),
+            RequiredRequestBodiesComponentsNamessRule(),
+            RequiredsHeaderComponentsNamessRule(),
+            RequiredSecuritySchemeComponentsNamessRule(),
+            RequiredLinksComponentsNamessRule(),
+            RequiredCallBackomponentsNamessRule(),
+            OperationMustHaveResponsesRule(),
+            ExternalDocumentationMustHaveURLRule(),
+            ParameterLocationsMustHaveInRule(),
+            RequestBodiesMustHaveContentRule(),
+            ResponsesMustHaveDesccriptionRule(),
+            LinkMustHaveRefOrIdentifier(),
+            TagMustHaveName(),
+            ReferencesMustHaveRefRule()
+        ]
+        return RuleRunner(rules: rules)
+    }()
+    public init(version: ValidationContext.OASVersion) {
+        switch version {
+        case .v30:
+           self = Self.oas30RuleRunner
+        case .v31:
+            self = Self.oas31RuleRunner
+        case .v32:
+            self = Self.oas31RuleRunner
+        }
+    }
 }

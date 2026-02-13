@@ -115,7 +115,7 @@ public struct Validator {
 
 
     public static func validate(spec: OpenAPISpecification, baseURI: String, ctx: ValidationContext, resolver:  inout  JSONPointerResolver) async throws -> [Diagnostic] {
-        let runner = RuleRunner.defaultRuleRunner
+        let runner = RuleRunner(version: ctx.version)
         var diagnostics = runner.run(spec: spec, ctx: ctx)
         let schemaDiagnostics: [Diagnostic] = spec.diagnostics.filter { diagnostic in
             diagnostic.rule.starts(with: "OAS")

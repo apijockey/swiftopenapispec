@@ -155,7 +155,7 @@ struct ValidationTests {
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url:fixtureName , documentLoader: YamsDocumentLoader())
         let resourcesRoot = try #require(bundle.resourceURL)
         let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: fixtureName, operationIds: [])
-        let runner = RuleRunner.defaultRuleRunner
+        let runner = RuleRunner(version: ctx.version)
      
         let unfilteredDiags = runner.run(spec: apiSpec, ctx: ctx)
         let diags = unfilteredDiags.filter { diagnotics in
@@ -226,7 +226,7 @@ struct ValidationTests {
         
         
         let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: resource, operationIds: [])
-        let runner = RuleRunner.defaultRuleRunner
+        let runner = RuleRunner(version: ctx.version)
         let diags = runner.run(spec: apiSpec, ctx: ctx)
         #expect(diags.isEmpty)
         
@@ -248,7 +248,7 @@ struct ValidationTests {
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url:setup.0 , documentLoader: YamsDocumentLoader())
             
             let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: setup.0, operationIds: [])
-            let runner = RuleRunner.defaultRuleRunner
+        let runner = RuleRunner(version: ctx.version)
             
             let unfilteredDiags = runner.run(spec: apiSpec, ctx: ctx)
         let diags = unfilteredDiags.filter { diagnotics in
@@ -281,7 +281,7 @@ struct ValidationTests {
         let unsupportedOperations = apiSpec.diagnostics
             
             let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: setup, operationIds: [])
-            let runner = RuleRunner.defaultRuleRunner
+        let runner = RuleRunner(version: ctx.version)
             
             let unfilteredDiags = runner.run(spec: apiSpec, ctx: ctx)
             print(unfilteredDiags)

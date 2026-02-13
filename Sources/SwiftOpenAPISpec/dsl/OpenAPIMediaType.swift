@@ -56,6 +56,7 @@ public struct OpenAPIMediaType :  KeyedElement , PointerNavigable {
         }
         self.schema = try map.readIfPresent(Self.SCHEMA_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.SCHEMA_KEY))
         self.examples = try map.mapListIfPresent(Self.EXAMPLES_KEY, objectType: OpenAPIExample.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXAMPLES_KEY))
+        self.example = map[Self.EXAMPLE_KEY] 
         self.encoding =  try map.mapListIfPresent(Self.ENCODING_KEY, objectType: OpenAPIEncoding.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.ENCODING_KEY))
         self.prefixEncoding = try map.mapListIfPresent(Self.PREFIX_ENCODING_KEY, objectType: OpenAPIEncoding.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.PREFIX_ENCODING_KEY))
         self.itemEncoding =  try map.mapListIfPresent(Self.ITEM_ENCODING_KEY, objectType: OpenAPIEncoding.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.ITEM_ENCODING_KEY))
@@ -80,7 +81,7 @@ public struct OpenAPIMediaType :  KeyedElement , PointerNavigable {
     public var schema : OpenAPISchema? = nil
     public var itemSchema : OpenAPISchema? = nil
     public var examples : [OpenAPIExample] = []
-   
+    public var example : JSONValue?
     public var encoding :[OpenAPIEncoding] = []
     public var prefixEncoding :[OpenAPIEncoding] = []
     public var itemEncoding :[OpenAPIEncoding] = []

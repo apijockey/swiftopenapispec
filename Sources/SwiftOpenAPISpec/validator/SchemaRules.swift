@@ -102,7 +102,7 @@ public struct SchemaRuleRunner  : Sendable{
         if ctx.dialect == .oas30  {
             rules.append(StringMinMaxLengthRule())
             rules.append(StringNumberMinimumMaximumhRule())
-            rules.append(SupportedFormatsRule())
+            rules.append(SupportedOAS30FormatsRule())
             rules.append(MultipleOfRule())
             rules.append(SchemaObjectReadOrWriteOnlyRule())
             rules.append(OAS30SupportedTypeRule())
@@ -635,7 +635,7 @@ public struct RequiredSubsetOfPropertiesRule: SchemaRule {
 
 
 /// Rule: for objects, every entry in required must exist as a property key.
-public struct SupportedFormatsRule: SchemaRule {
+public struct SupportedOAS30FormatsRule: SchemaRule {
     public let name = "Schema.SupportedFormat"
     public init() {}
     
@@ -674,4 +674,44 @@ public struct SupportedFormatsRule: SchemaRule {
         return diags
     }
 }
-
+//TODO: JSONSchema
+/// Rule: for objects, every entry in required must exist as a property key.
+public struct SupportedOAS31FormatsRule: SchemaRule {
+    public let name = "Schema.SupportedFormat"
+    public init() {}
+    
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        var diags: [Diagnostic] = []
+        
+        if case .string = schema.type {
+            if ["byte","binary","", "date","date-time ","password"].contains(schema.format)  || schema.format == nil { return [] }
+            else {
+                diags.append(Diagnostic(severity: .warning, code: .schemaViolation, message: "format '\(schema.format ?? "")' not predefined for 'string'", pointer: JSONPointer.join(pointer, "format"), rule: name))
+            }
+        }
+        else if case .integer = schema.type {
+            if  ["int32","int64"].contains(schema.format) || (schema.format ?? "").isEmpty {
+                return []
+            }
+            else {
+                diags.append(Diagnostic(severity: .warning, code: .schemaViolation, message: "format '\(schema.format ?? "")' not predefined for 'integer'", pointer:  JSONPointer.join(pointer, "format"), rule: name))
+            }
+        }
+            
+        else if case  .number = schema.type {
+        if  ["float","double"].contains(schema.format) || (schema.format ?? "").isEmpty {
+                return []
+            }
+            else {
+                diags.append(Diagnostic(severity: .warning, code: .schemaViolation, message: "format '\(schema.format ?? "")' not predefined for 'number'", pointer:  JSONPointer.join(pointer, "format"), rule: name))
+            }
+        }
+        else {
+            if !(schema.format ?? "").isEmpty {
+                diags.append(Diagnostic(severity: .warning, code: .schemaViolation, message: "format '\(schema.format ?? "")' not expected", pointer:  JSONPointer.join(pointer, "format"), rule: name))
+            }
+        }
+        
+        return diags
+    }
+}

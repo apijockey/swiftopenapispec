@@ -32,7 +32,7 @@ struct SupportedVersion3: Rule {
         return []
     }
 }
-struct RequiredOpenAPIFixedFieldsRule: Rule {
+struct RequiredOpenAPI30FixedFieldsRule: Rule {
     let name = "OAS.RequiredOpenAPIFixedFields"
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         guard spec.info != nil,
@@ -41,6 +41,22 @@ struct RequiredOpenAPIFixedFieldsRule: Rule {
             return [.init(severity: .error,
                           code: .missingRequired,
                           message: "openapi, info, and paths are required",
+                          pointer: "/",
+                          rule: name)]
+        }
+        return []
+    }
+}
+
+struct RequiredOpenAPI31FixedFieldsRule: Rule {
+    let name = "OAS.RequiredOpenAPIFixedFields"
+    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
+        guard spec.info != nil,
+              spec.version != nil,
+              spec.paths.isEmpty == false && spec.webhooks.isEmpty &&   spec.components == nil else {
+            return [.init(severity: .error,
+                          code: .missingRequired,
+                          message: "openapi, info, and paths or components or webhooks are required",
                           pointer: "/",
                           rule: name)]
         }
@@ -104,9 +120,23 @@ struct RequiredServerURLRule: Rule {
     
     
 }
-
+struct  ValidComponentNamesRule: Rule {
+    let name = "SupportedComponentNamesRule"
+    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
+        var diagnostics: [Diagnostic] = []
+        for schema in (spec.components?.schemas ?? []) {
+            if let key = schema.key {
+                if !key.matches("^[a-zA-Z0-9\\.\\-_]+$") {
+                    diagnostics.append(.init(severity: .error, code: .invalidValue, message: name, pointer: "/components/schemas/\(key)", rule: self.name))
+                }
+            }
+        }
+        return diagnostics
+    }
+}
 struct RequiredServerVariablesRule: Rule {
     let name = "OAS.ServerVariables"
+    
     
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         var diagnostics: [Diagnostic] = []
@@ -363,8 +393,23 @@ struct SupportedHTTPMethodRule: Rule {
         return diagnostics
     }
 }
-
-
+struct WebhookSupport30Rule: Rule {
+    let name = "OASWebhookSupport"
+    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
+        var diags: [Diagnostic] = []
+        if spec.webhooks.count > 0 {
+            let diagnotic = Diagnostic( severity: .error,
+                                         code: .invalidElement,
+            message: "Webhooks are not supported in OAS 3.0",
+            pointer: "/webhooks",
+            rule: name)
+            diags.append(diagnotic)
+        }
+        
+        return diags
+    }
+    
+}
 struct OperationMustHaveResponsesRule: Rule {
     let name = "OAS.OperationMustHaveResponses"
 
@@ -419,7 +464,7 @@ struct ParameterLocationsMustHaveInRule: Rule {
             if parameter.location == nil {
                 let diagnostic = Diagnostic( severity: .error,
                                              code: .missingRequired,
-                                             message: "Parameters need a location value.",
+                                             message: "Parameters must be one of: 'query','queryString','header','path',cookie'.",
                                              pointer: "/components/parameters/\(parameter.key ?? "")",
                                              rule: name)
                 diags.append(diagnostic)
@@ -692,9 +737,7 @@ struct RequiredPathsRule: Rule {
 }
 
 extension String {
-    // Prüft, ob der gesamte String dem Regex-Pattern entspricht (plattformneutral, Swift Regex).
-    // Ungültige Patterns führen zu false.
-    
+    // Checks if the whole string is matched by the pattern
     func matches(_ pattern: String) -> Bool {
         if #available(macOS 13.0, *) {
             guard let regex = try? Regex(pattern) else { return false }

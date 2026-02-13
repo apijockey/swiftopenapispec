@@ -73,7 +73,7 @@ public struct OpenAPIParameter :  KeyedElement,  PointerNavigable {
     /// - `label`: Label style (used for path parameters)
     /// - `matrix`: Matrix style (used for path parameters)
     public enum ParameterStyle : String, Codable, CaseIterable, Sendable {
-        case simple,form, label, matrix
+        case simple,form, label, matrix, spaceDelimited,pipeDelimited, deepObject
     }
     public static let FORMAT_KEY = "format"
     public static let NAME_KEY = "name"
@@ -119,7 +119,7 @@ public struct OpenAPIParameter :  KeyedElement,  PointerNavigable {
         self.required = required ?? false
         self.schema = try map.readIfPresent(Self.SCHEMA_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.SCHEMA_KEY))
         if let style = map.readIfPresent(Self.STYLE_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.STYLE_KEY)){
-            self.style = ParameterStyle(rawValue: style)
+            self.style = style
         }
         
        
@@ -148,7 +148,7 @@ public struct OpenAPIParameter :  KeyedElement,  PointerNavigable {
            
            return .navigable(schema)
        case Self.STYLE_KEY:
-           let value = try JSONValue(style)
+           let value = JSONValue(string:style)
            return .value(value)
        case Self.EXPLODE_KEY:
            let value = try JSONValue(explode)
@@ -178,7 +178,7 @@ public struct OpenAPIParameter :  KeyedElement,  PointerNavigable {
     public var allowEmptyValue : Bool? = nil
     public var schema :  OpenAPISchema? = nil
     //https://learn.openapis.org/specification/parameters.html
-    public var style : ParameterStyle? = nil
+    public var style : String? = nil
     public var explode : Bool? = nil
     public var allowReserved : Bool? = nil
     public var example : JSONValue? = nil

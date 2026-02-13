@@ -77,6 +77,7 @@ public struct Diagnostic: Sendable, Equatable, CustomDebugStringConvertible, Cus
         case schemaViolation
         case missingRequired
         case missingResponses
+        case invalidElement
         case invalidValue
         case invalidType
         case debugTrace
