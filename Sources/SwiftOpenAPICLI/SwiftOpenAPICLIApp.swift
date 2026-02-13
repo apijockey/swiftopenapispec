@@ -1,43 +1,61 @@
-//
-//  SwiftOpenAPICLIError.swift
-//  SwiftOpenAPISpec
-//
-//  Created by Patric Dubois on 01.01.26.
-//
-
+/* Copyright 2025 CgSe Computergrafik und Softwareentwicklung GmbH
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 import Foundation
 import SwiftOpenAPISpec
 import Yams
 
-public enum SwiftOpenAPICLIError: LocalizedError {
-    case missingArgument
-    case fileNotFound(String)
-    case invalidURL(String)
-    case loadFailed(String)
-    case invalidOption(String)
 
-    public var errorDescription: String? {
-        switch self {
-        case .missingArgument:
-            return "Usage: SwiftOpenAPICLI <path-to-openapi.(yaml|yml|json)>"
-        case .fileNotFound(let path):
-            return "File not found: \(path)"
-        case .invalidURL(let path):
-            return "Invalid URL or path: \(path)"
-        case .loadFailed(let reason):
-            return "Failed to load specification: \(reason)"
-        case .invalidOption(let option):
-            return "Invalid option: \(option)"
-        }
-    }
-}
-
-/// Testbare CLI-Logik: gibt 0 bei Erfolg, !=0 bei Fehlern zurück.
-/// Erwartet mindestens ein Argument: Pfad zur OpenAPI-Datei.
+/// The main logic of the SwiftOpenAPI CLI.
+/// 
+/// This structure implements the core functionality of the CLI and is responsible for:
+/// - Parsing command line arguments
+/// - Loading and processing OpenAPI specifications
+/// - Validating OpenAPI documents
+/// - Outputting information and error messages
+///
+/// The structure is designed to be testable and returns exit codes:
+/// - `0` for success
+/// - `1` for errors
+///
+/// - Example:
+/// ```swift
+/// let app = SwiftOpenAPICLIApp()
+/// var stdout = FileHandleTextOutputStream(.standardOutput)
+/// var stderr = FileHandleTextOutputStream(.standardError)
+/// let exitCode = await app.run(args: ["cli", "path/to/spec.yaml"], stdout: &stdout, stderr: &stderr)
+/// ```
 public struct SwiftOpenAPICLIApp {
+    /// Initializes a new instance of the CLI.
+    /// 
+    /// - Returns: A new instance of `SwiftOpenAPICLIApp`
     public init() {}
 
+    /// Runs the CLI with the specified arguments.
+    /// 
+    /// - Parameters:
+    ///   - args: The command line arguments
+    ///   - stdout: The TextOutputStream for standard output
+    ///   - stderr: The TextOutputStream for error output
+    /// - Returns: The return code (0 for success, 1 for error)
+    /// 
+    /// This method implements the main logic of the CLI:
+    /// 1. Parse the arguments
+    /// 2. Load the OpenAPI specification
+    /// 3. Execute the desired operation (standard output or validation)
+    /// 4. Error handling
     @discardableResult
     public func run(args: [String], stdout: inout TextOutputStream, stderr: inout TextOutputStream) async -> Int {
         do {

@@ -712,7 +712,9 @@ extension String {
     func isValidRegex() -> Bool {
         
         if #available(macOS 13.0, *) {
-            guard ((try? Regex(self) ) != nil) else { return false }
+
+            guard ((try? Regex(self)) != nil) else { return false }
+
             return true
         }
         else {

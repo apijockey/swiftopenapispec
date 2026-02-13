@@ -15,26 +15,49 @@
 //
 //  Created by Patric Dubois on 02.01.2026.
 //
-// Collect $ref occurrences from OpenAPISchema and nested schema types.
-//
-// Supports:
-// - OpenAPISchema.ref (wrapper-level)
-// - OpenAPISchemaReference as a schemaType (e.g. inside anyOf/oneOf/allOf items)
-// - Object properties: OpenAPIObjectType.properties: [OpenAPISchemaProperty] (KeyedElement)
-// - Array items: OpenAPIArrayType.items
-// - anyOf / oneOf / allOf composition types: OpenAPIAnyOfType / OpenAPIOneOfType / OpenAPIAllOfType
 
+/// Collects reference (`$ref`) occurrences from OpenAPI schemas and nested structures.
+/// 
+/// This collector is a specialized component that traverses OpenAPI schema definitions
+/// to find and catalog all reference occurrences. It plays a crucial role in:
+/// - Reference resolution and validation
+/// - Circular reference detection
+/// - Dependency analysis
+/// - Schema composition analysis
+///
+/// The collector supports a comprehensive range of reference locations:
+/// - Schema-level references (`OpenAPISchema.ref`)
+/// - Schema references as types (`OpenAPISchemaReference`)
+/// - Object properties (`OpenAPIObjectType.properties`)
+/// - Array items (`OpenAPIArrayType.items`)
+/// - Composition types (`anyOf`, `oneOf`, `allOf`)
+/// - Nested structures within compositions
+///
+/// - Note: The collector is designed to be thorough and will traverse
+///         deeply nested schema structures to ensure no references are missed.
 public struct SchemaRefCollector {
 
+    /// Initializes a new schema reference collector.
+    /// 
+    /// - Returns: A new `SchemaRefCollector` instance ready to traverse schemas
     public init() {}
 
-    /*
-     for response in responses {
-             let path = "/paths/\(JSONPointer.escape(path.key ?? ""))/operations/\(op.key ?? "")" + "/responses/\(response.key ?? "")"
-             occurrences += SchemaRefCollector().collect(from: response, pointer: path)
-     }
-     */
+
     
+    /// Collects references from an OpenAPI path item.
+    /// 
+    /// This method traverses a path item and its associated operations to find
+    /// all reference occurrences.
+    /// 
+    /// - Parameters:
+    ///   - path: The `OpenAPIPathItem` to analyze
+    ///   - pointer: The base JSON Pointer to the path item
+    /// - Returns: An array of `RefOccurrence` objects found in the path item
+    /// 
+    /// The method examines:
+    /// - Path-level references
+    /// - References in all HTTP methods (GET, POST, PUT, etc.)
+    /// - Parameters, request bodies, and responses
     public func collect(from path :OpenAPIPathItem, pointer : String) -> [RefOccurrence] {
         var out: [RefOccurrence] = []
         if let r = path.ref?.refString {
@@ -166,7 +189,9 @@ public struct SchemaRefCollector {
         ))
     }
         else {
-            for header in (encoding.headers ) {
+
+            for header in (encoding.headers) {
+
                 let ptr = pointer + "encoding/" + (header.key ?? "")
                 out.append(contentsOf: collect(from: header, pointer: ptr))
             }
@@ -349,6 +374,25 @@ public struct SchemaRefCollector {
         }
         return out
     }
+    /// Collects references from an OpenAPI schema.
+    /// 
+    /// This is the main method that traverses an OpenAPI schema and its nested structures
+    /// to find all reference occurrences. It handles all schema types and compositions.
+    /// 
+    /// - Parameters:
+    ///   - schema: The `OpenAPISchema` to analyze
+    ///   - pointer: The base JSON Pointer to the schema
+    /// - Returns: An array of `RefOccurrence` objects found in the schema and its children
+    /// 
+    /// The method recursively examines:
+    /// - Schema-level references (`schema.ref`)
+    /// - All schema types (object, array, string, number, etc.)
+    /// - Composition types (allOf, anyOf, oneOf)
+    /// - Nested properties and items
+    /// - Reference types (`OpenAPISchemaReference`)
+    ///
+    /// This method serves as the entry point for most schema reference collection
+    /// and is called by other collection methods for specific OpenAPI elements.
     public func collect(from schema: OpenAPISchema, pointer: String) -> [RefOccurrence] {
         var out: [RefOccurrence] = []
         switch schema.type {

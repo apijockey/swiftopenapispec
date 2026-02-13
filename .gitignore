@@ -49,3 +49,4 @@ helpers/
 >>>>>>> refs/remotes/origin/main
 .build/
 docs/
+.DS_Store
