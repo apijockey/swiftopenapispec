@@ -12,6 +12,20 @@ import Yams
 
 @Suite("Validation")
 struct ValidationTests {
+    /// Test cases for spec rules validation
+    /// This static property avoids the complex closure syntax that causes compiler crashes on Linux
+    static let specRulesTestCases: [(String, String)] = [
+        ("01-minimal-30-missingInfo", "OAS.RequiredOpenAPIFixedFields"),
+        ("02-minimal-30-missingPaths", "OAS.RequiredOpenAPIFixedFields"),
+        ("03-minimal-30-unsupportedV3", "OAS.UnsupportedVersion3"),
+        ("02-minimal-30-missingInfoVersion", "OAS.RequiredOpenAPIFixedInfoFields"),
+        ("02-minimal-30-missingInfoTitle", "OAS.RequiredOpenAPIFixedInfoFields"),
+        ("03-minimal-30-unsupportedPathName", "OAS.PathsMustStartWithSlashRule"),
+        ("03-minimal-30-missingResponse", "OAS.OperationMustHaveResponses"),
+        ("03-minimal-30-invalidHTTPStatus", "OAS.SupportedHTPStatusRule"),
+        ("03-minimal-30-noDescription", "OAS.ReferencesMustHaveRef")
+    ]
+
     struct ExpectedDiagnostic: Codable, Equatable {
         let code: String
         let pointer: String
@@ -220,19 +234,7 @@ struct ValidationTests {
     
     @Test(
         "Spec rules hit.",
-        arguments: { () -> [(String,String)] in
-            return [
-                ("01-minimal-30-missingInfo","OAS.RequiredOpenAPIFixedFields"),
-                ("02-minimal-30-missingPaths","OAS.RequiredOpenAPIFixedFields"),
-                ("03-minimal-30-unsupportedV3", "OAS.UnsupportedVersion3"),
-                ("02-minimal-30-missingInfoVersion","OAS.RequiredOpenAPIFixedInfoFields"),
-                ("02-minimal-30-missingInfoTitle","OAS.RequiredOpenAPIFixedInfoFields"),
-                ("03-minimal-30-unsupportedPathName","OAS.PathsMustStartWithSlashRule"),
-                ("03-minimal-30-missingResponse","OAS.OperationMustHaveResponses"),
-                ("03-minimal-30-invalidHTTPStatus","OAS.SupportedHTPStatusRule"),
-                ("03-minimal-30-noDescription","OAS.ReferencesMustHaveRef")
-            ]
-        }()
+        arguments: specRulesTestCases
     )
     func specRulesHits(setup : (String,String)) async throws {
         let subDirectory = "Resources/3_0/invalid"
