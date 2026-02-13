@@ -1,5 +1,5 @@
 name: Swift on Windows
-on: 
+on:
   push:
     branches: ["main"]
   workflow_dispatch:
@@ -9,7 +9,6 @@ concurrency:
 permissions:
   contents: read
   packages: read
-
 jobs:
   soundness:
     name: Soundness
