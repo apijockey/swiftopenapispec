@@ -45,3 +45,4 @@ path/
 .venv
 .build/
 docs/
+.DS_Store

@@ -18,10 +18,29 @@
 
 import Foundation
 
+/// The validation context containing configuration and rules for OpenAPI validation.
+/// 
+/// This structure holds all the necessary information for validating
+/// an OpenAPI document, including:
+/// - The OpenAPI Specification version
+/// - The validation dialect (ruleset)
+/// - Base URI for reference resolution
+/// - Operation IDs for reference tracking
+/// - Collections of validation rules
+///
+/// The context is designed to be thread-safe (`Sendable`) and can be
+/// shared across concurrent validation tasks.
 public struct ValidationContext : Sendable {
+    /// Errors that can occur when creating or using a validation context.
     enum ValidationContextError : LocalizedError {
+        /// Unsupported OpenAPI version.
+        /// - Parameter: The unsupported version string
         case unsupportedVersion(String)
     }
+    
+    /// Supported OpenAPI Specification versions.
+    /// 
+    /// These cases represent the different OAS versions that the validator supports.
     public enum OASVersion : Sendable{ case v30, v31, v32
         public static func fromString(_ s: String) throws -> OASVersion {
             let version = s.split(separator: ".")

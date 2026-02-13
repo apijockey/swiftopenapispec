@@ -48,8 +48,8 @@ public struct OpenAPIOneOfType : OpenAPISchemaType,ThrowingHashMapInitiable, Poi
            index >= 0,
            let itemsCount = self.items?.count,
            index < itemsCount,
-            items != nil{
-            return .navigable (self.items?[index])
+            let items = items {
+            return .navigable (items[index])
         }
         if segmentName ==  OpenAPISchemaReference.REF_KEY {
             return .reference( ref?.reference)

@@ -13,11 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-//  Created by Patric Dubois on 01.01.26.
-//
 
 import Foundation
 
-// Zentrale Stelle für die CLI-Versionsausgabe.
-// Bitte nach Bedarf pflegen oder automatisiert generieren.
+/// A constant containing the current version of the SwiftOpenAPI CLI.
+/// 
+/// This version is used for the `--version` option output and should be
+/// updated with each release.
+/// 
+/// - Example:
+/// ```bash
+/// $ swift run swiftopenapicli --version
+/// 0.1.0
+/// ```
 public let SwiftOpenAPICLIVersion: String = "0.1.0"
