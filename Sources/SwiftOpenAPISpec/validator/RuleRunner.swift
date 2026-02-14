@@ -159,4 +159,73 @@ public struct RuleRunner  : Sendable{
             self = Self.oas31RuleRunner
         }
     }
+    public static func pathItemInfo(spec: OpenAPISpecification) -> [(item: OpenAPIPathItem, pointer:String)] {
+        var items =  [(OpenAPIPathItem, String)]()
+        for pathItem in spec.paths {
+            
+                let pointer = "/#/paths/\(JSONPointer.escape(pathItem.key ?? ""))"
+            items.append((pathItem,  pointer))
+            
+        }
+        for pathItem in spec.components?.pathItems ?? [] {
+            
+                let pointer = "#/components/pathItems/\(JSONPointer.escape(pathItem.key ?? ""))"
+                items.append((pathItem,  pointer))
+                
+            
+        }
+        return items
+    }
+    public static func operationsInfo(spec: OpenAPISpecification) -> [(item: OpenAPIOperation, pointer:String)] {
+        var items =  [(OpenAPIOperation, String)]()
+        for pathItem in pathItemInfo(spec: spec) {
+            for operation in pathItem.item.operations {
+                let pointer = JSONPointer.join(pathItem.pointer, operation.key ?? operation.operationId ?? "")
+                items.append((item:operation,  pointer: pointer))
+            }
+            for operation in pathItem.item.additionalOperations {
+                let pointer = JSONPointer.join(pathItem.pointer, operation.key ?? operation.operationId ?? "")
+                items.append((item:operation,  pointer: pointer))
+            }
+        }
+        return items
+    }
+    public static func responseInfo(spec: OpenAPISpecification) -> [(item: OpenAPIResponse, pointer:String)] {
+        var items =  [(OpenAPIResponse, String)]()
+        for operationInfo in operationsInfo(spec: spec) {
+            for response in operationInfo.item.responses {
+                let pointer = JSONPointer.join(operationInfo.pointer, response.key ?? "")
+                items.append((item: response,  pointer: pointer))
+            }
+                
+        }
+        return items
+    }
+    public static func requestBodyInfo(spec: OpenAPISpecification) -> [(item: OpenAPIRequestBody, pointer:String)] {
+        var items =  [(OpenAPIRequestBody, String)]()
+        for operationInfo in operationsInfo(spec: spec) {
+            if let requestBody = operationInfo.item.requestBody {
+                let pointer = JSONPointer.join(operationInfo.pointer,requestBody.key ?? "")
+                items.append((item: requestBody,  pointer: pointer))
+            }
+           
+        }
+        return items
+    }
+    public static func mediaTypes(spec: OpenAPISpecification) -> [(item: OpenAPIMediaType, pointer:String)] {
+        var items =  [(OpenAPIMediaType, String)]()
+        for requestBody in requestBodyInfo(spec: spec) {
+            for content in requestBody.item.contents {
+                let pointer = JSONPointer.join(requestBody.pointer,content.key ?? "")
+                items.append((item: content,  pointer: pointer))
+            }
+        }
+        for response in responseInfo(spec: spec) {
+            for content in response.item.content {
+                let pointer = JSONPointer.join(response.pointer,content.key ?? "")
+                items.append((item: content,  pointer: pointer))
+            }
+        }
+        return items
+    }
 }

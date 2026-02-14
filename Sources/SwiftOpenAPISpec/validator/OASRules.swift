@@ -227,15 +227,10 @@ struct  OpenAPIPathV30_ItemFieldsNotAllowed: Rule {
     let name = "OpenAPIPathV30_ItemFieldsNotAllowed:"
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         var diagnostics = [Diagnostic]()
-        for pathItem in spec.paths {
+        for info in RuleRunner.pathItemInfo(spec: spec) {
+            let pointer = info.pointer
+            let pathItem = info.item
             if pathItem.additionalOperations.count > 0 {
-                let pointer = "/#/paths/\(pathItem.key!)/"
-                diagnostics.append(.init(severity: .error, code: .invalidElement, message: "Path items do not support 'additionalOperations' in OpenAPI 3.0/3.1 does not support HTTP methods as properties.", pointer: pointer, rule: self.name))
-            }
-        }
-        for pathItems in spec.components?.pathItems ?? [] {
-            if pathItems.additionalOperations.count > 0 {
-                let pointer = "#/components/pathItems/\(pathItems.key!)/"
                 diagnostics.append(.init(severity: .error, code: .invalidElement, message: "Path items do not support 'additionalOperations' in OpenAPI 3.0/3.1 does not support HTTP methods as properties.", pointer: pointer, rule: self.name))
             }
         }
@@ -247,62 +242,14 @@ struct  OpenAPIMediaTypeV30_1ItemFieldsNotAllowed: Rule {
     let name = "OpenAPIPathV30_ItemFieldsNotAllowed:"
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         var diagnostics = [Diagnostic]()
-        for path in spec.paths {
-            for operation in path.operations {
-                for mediaType in (operation.requestBody?.contents ?? []) {
-                    let pointer = "#/paths/\(JSONPointer.escape(path.key ?? ""))/\(operation.key ?? operation.operationId ?? "")/requestBody/content/\(JSONPointer.escape(mediaType.key ?? ""))"
-                    if mediaType.encoding.count > 0  || mediaType.itemEncoding.count > 0 || mediaType.prefixEncoding.count > 0 {
-                        diagnostics.append(.init(severity: .error, code: .invalidElement, message: "MediaTypes do not support 'encoding', 'itemEncoding' or 'prefixEncoding' in OpenAPI 3.0/3.1.", pointer: pointer, rule: self.name))
-                        
-                    }
-                }
-                for response in operation.responses {
-                    for mediaType in response.content {
-                        let pointer = "#/paths/\(JSONPointer.escape(path.key ?? ""))/\(operation.key ?? operation.operationId ?? "")/responses/\(JSONPointer.escape(response.key ?? ""))/content/\(JSONPointer.escape(mediaType.key ?? ""))"
-                        if mediaType.encoding.count > 0  || mediaType.itemEncoding.count > 0 || mediaType.prefixEncoding.count > 0 {
-                            diagnostics.append(.init(severity: .error, code: .invalidElement, message: "MediaTypes do not support 'encoding', 'itemEncoding' or 'prefixEncoding' in OpenAPI 3.0/3.1.", pointer: pointer, rule: self.name))
-                        }
-                    }
-                }
+        for info in RuleRunner.mediaTypes(spec: spec) {
+            let pointer = info.pointer
+            let mediaType = info.item
+            if mediaType.encoding.count > 0  || mediaType.itemEncoding.count > 0 || mediaType.prefixEncoding.count > 0 {
+                diagnostics.append(.init(severity: .error, code: .invalidElement, message: "MediaTypes do not support 'encoding', 'itemEncoding' or 'prefixEncoding' in OpenAPI 3.0/3.1.", pointer: pointer, rule: self.name))
+                
             }
         }
-        for path in spec.components?.pathItems ?? [] {
-            for operation in path.operations {
-                for mediaType in (operation.requestBody?.contents ?? []) {
-                    let pointer = "#/components/paths/\(JSONPointer.escape(path.key ?? ""))/\(operation.key ?? operation.operationId ?? "")/requestBody/content/\(JSONPointer.escape(mediaType.key ?? ""))"
-                    if mediaType.encoding.count > 0  || mediaType.itemEncoding.count > 0 || mediaType.prefixEncoding.count > 0 {
-                        diagnostics.append(.init(severity: .error, code: .invalidElement, message: "MediaTypes do not support 'encoding', 'itemEncoding' or 'prefixEncoding' in OpenAPI 3.0/3.1.", pointer: pointer, rule: self.name))
-                        
-                    }
-                }
-                for response in operation.responses {
-                    for mediaType in response.content {
-                        let pointer = "#/components/paths/\(JSONPointer.escape(path.key ?? ""))/\(operation.key ?? operation.operationId ?? "")/responses/\(JSONPointer.escape(response.key ?? ""))/content/\(JSONPointer.escape(mediaType.key ?? ""))"
-                        if mediaType.encoding.count > 0  || mediaType.itemEncoding.count > 0 || mediaType.prefixEncoding.count > 0 {
-                            diagnostics.append(.init(severity: .error, code: .invalidElement, message: "MediaTypes do not support 'encoding', 'itemEncoding' or 'prefixEncoding' in OpenAPI 3.0/3.1.", pointer: pointer, rule: self.name))
-                        }
-                    }
-                }
-            }
-        }
-        for requestbody in (spec.components?.requestBodies ?? []) {
-            for mediaType in (requestbody.contents) {
-                let pointer = "#/components/requestBody/content/\(JSONPointer.escape(mediaType.key ?? ""))"
-                if mediaType.encoding.count > 0  || mediaType.itemEncoding.count > 0 || mediaType.prefixEncoding.count > 0 {
-                    diagnostics.append(.init(severity: .error, code: .invalidElement, message: "MediaTypes do not support 'encoding', 'itemEncoding' or 'prefixEncoding' in OpenAPI 3.0/3.1.", pointer: pointer, rule: self.name))
-                    
-                }
-            }
-        }
-        for response in (spec.components?.responses ?? []) {
-            for mediaType in (response.content) {
-                let pointer = "#/components/responses/content/\(JSONPointer.escape(mediaType.key ?? ""))"
-                if mediaType.encoding.count > 0  || mediaType.itemEncoding.count > 0 || mediaType.prefixEncoding.count > 0 {
-                        diagnostics.append(.init(severity: .error, code: .invalidElement, message: "MediaTypes do not support 'encoding', 'itemEncoding' or 'prefixEncoding' in OpenAPI 3.0/3.1.", pointer: pointer, rule: self.name))
-                }
-            }
-        }
-        
         return diagnostics
     }
 }
@@ -685,45 +632,24 @@ struct ResponsesMustHaveDescriptionRule: Rule {
 
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         var diags: [Diagnostic] = []
-        for path in spec.paths {
-            for operation in path.operations {
-                for response in operation.responses {
-                    if response.description == nil {
-                        let diagnotics = Diagnostic( severity: .error,
-                                                     code: .missingRequired,
-                                                     message: "Response must have description.",
-                                                     pointer: JSONPointer.join("#/paths",JSONPointer.join(path.key ?? "", "responses/\(response.key ?? "")")),
-                                                     rule: name)
-                        diags.append(diagnotics)
-                    }
-                    else if let description = response.description,
-                            description.isEmpty{
-                        let diagnotics = Diagnostic( severity: .error,
-                                                     code: .missingRequired,
-                                                     message: "Response must have description.",
-                                                     pointer: JSONPointer.join("#/paths",JSONPointer.join(path.key ?? "", "responses/\(response.key ?? "")")),
-                                                     rule: name)
-                        diags.append(diagnotics)
-                    }
-                }
-            }
-        }
-        guard let responses = spec.components?.responses else { return diags }
-        for response in responses {
+        
+        for info in RuleRunner.responseInfo(spec: spec) {
+            let pointer = info.pointer
+            let response = info.item
             if response.description == nil {
                 let diagnotics = Diagnostic( severity: .error,
                                              code: .missingRequired,
-                                             message: "Response must have descreiption.",
-                                             pointer: "#/components/responses/\(response.key ?? "")",
+                                             message: "Response must have description.",
+                                             pointer: pointer,
                                              rule: name)
                 diags.append(diagnotics)
             }
             else if let description = response.description,
-                description.isEmpty {
+                    description.isEmpty{
                 let diagnotics = Diagnostic( severity: .error,
                                              code: .missingRequired,
-                                             message: "Request Bodies must have  content.",
-                                             pointer: "#/components/responses/\(response.key ?? "")",
+                                             message: "Response must have description.",
+                                             pointer: pointer,
                                              rule: name)
                 diags.append(diagnotics)
             }
@@ -738,32 +664,19 @@ struct OpenAPIResponse30_ValidFieldsRule: Rule {
 
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         var diags: [Diagnostic] = []
-        for path in spec.paths {
-            for operation in path.operations {
-                for response in operation.responses {
+        for info in RuleRunner.responseInfo(spec: spec) {
+            let pointer = info.pointer
+            let response = info.item
                     if  response.summary != nil || !(response.summary ?? "").isEmpty{
                         let diagnotics = Diagnostic( severity: .error,
                                                      code: .missingRequired,
                                                      message: "Response does not support 'summary' in OpenAPI 3.0/3.1",
-                                                     pointer: JSONPointer.join("#/paths",JSONPointer.join(path.key ?? "", "responses/\(response.key ?? "")")),
+                                                     pointer: pointer,
                                                      rule: name)
                         diags.append(diagnotics)
-                    }
                 }
-            }
         }
-        guard let responses = spec.components?.responses else { return diags }
-        for response in responses {
-            if  response.summary != nil || !(response.summary ?? "").isEmpty{
-                let diagnotics = Diagnostic( severity: .error,
-                                             code: .missingRequired,
-                                             message: "Response does not support 'summary' in OpenAPI 3.0/3.1",
-                                             pointer: "#/components/responses/\(response.key ?? "")",
-                                             rule: name)
-                diags.append(diagnotics)
-            }
-        }
-        
+       
         
         return diags
     }
@@ -774,12 +687,9 @@ struct SupportedHTPStatusRule: Rule {
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         var diags: [Diagnostic] = []
           
-        for pathItem in spec.paths {
-            for op in pathItem.operations {
-                guard op.responses.count > 0 else {
-                    return []
-                }
-                for response in op.responses {
+        for info in RuleRunner.responseInfo(spec: spec) {
+            let pointer = info.pointer
+            let response = info.item
                     guard let key = response.key else {
                         continue
                     }
@@ -787,34 +697,12 @@ struct SupportedHTPStatusRule: Rule {
                         diags.append(Diagnostic(severity: .error,
                                                 code: .invalidValue,
                                                 message: "Response code '\(key)' is not a valid HTTP status code.",
-                                                pointer: "#/paths/\(pathItem.key!)/\(op.key ?? "")/\(response.key ?? "")",
+                                                pointer: pointer,
                                                 rule: name))
-                    }
+                }
                     
-                }
             }
-        }
-        guard let pathItems = spec.components?.pathItems else { return diags }
-        for pathItem in pathItems  {
-            for op in pathItem.operations {
-                guard op.responses.count > 0 else {
-                    return []
-                }
-                for response in op.responses {
-                    guard let key = response.key else {
-                        continue
-                    }
-                    if !key.matches("^[1-5](?:\\d{2}|XX)$") {
-                        diags.append(Diagnostic(severity: .error,
-                                                code: .invalidValue,
-                                                message: "Response code \(key) is not a valid HTTP status code.",
-                                                pointer: "#/components/paths/\(pathItem.key!)/\(op.key ?? "")/\(response.key ?? "")",
-                                                rule: name))
-                    }
-                    
-                }
-            }
-        }
+           
         
         return diags
     }

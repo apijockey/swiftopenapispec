@@ -599,6 +599,8 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     public var externalDocumentation : OpenAPIExternalDocumentation?
     public var tags : [OpenAPITag] = []
     public var extensions : [OpenAPIExtension]?
+    
+    
    
     
     
