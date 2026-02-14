@@ -217,28 +217,17 @@ public struct Validator {
         let schemaRuleRunner = SchemaRuleRunner.defaultRunner(ctx: ctx)
         if let schemas = spec.components?.schemas {
             for namedSchema in schemas {
-                
-                    try await diagnostics.append(contentsOf:schemaRuleRunner.run(schema: namedSchema, pointer: "/components/schemas/\(namedSchema.key ?? "")", resolver: &resolver))
+                try await diagnostics.append(contentsOf:schemaRuleRunner.run(schema: namedSchema, pointer: "/components/schemas/\(namedSchema.key ?? "")", resolver: &resolver))
                 
             }
         }
-        // Validate requestBody content schemas in paths
-        for path in spec.paths{
-            for op in path.operations {
-                for content in (op.requestBody?.contents ?? []) {
-                    if let schema = content.schema  {
-                        try await diagnostics.append(contentsOf:schemaRuleRunner.run(schema: schema, pointer: "/paths/\(JSONPointer.escape(path.key ?? ""))/\(op.key ?? op.operationId ?? "")/requestBody/content/\(JSONPointer.escape(content.key ?? ""))/schema", resolver: &resolver))
-                    }
-                    
-                }
-                for response in (op.responses) {
-                    for content in response.content {
-                        if let schema = content.schema  {
-                            try await diagnostics.append(contentsOf:schemaRuleRunner.run(schema: schema, pointer: "/paths/\(JSONPointer.escape(path.key ?? ""))/\(op.key ?? op.operationId ?? "")/responses/\(response.key ?? "")/content/\(JSONPointer.escape(content.key ?? ""))/schema", resolver: &resolver))
-                        }
-                    }
-                }
+        for info in RuleRunner.mediaTypes(spec: spec)  {
+            let pointer = info.pointer
+            let content = info.item
+            if let schema = content.schema  {
+                try await diagnostics.append(contentsOf:schemaRuleRunner.run(schema: schema, pointer: JSONPointer.join(pointer, "/schema"), resolver: &resolver))
             }
+            
         }
         diagnostics.append(contentsOf: spec.diagnostics.filter{$0.code == .schemaViolation})
         return diagnostics
