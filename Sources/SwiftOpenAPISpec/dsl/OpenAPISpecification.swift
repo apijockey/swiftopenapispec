@@ -84,7 +84,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
             case Self.OPENAPI_KEY : return .value(JSONValue(string:self.version))
             case Self.PATHS_KEY : return .navigableCollection(self.paths)
             case Self.SECURITY_KEY :  return  .searchableCollection(self.securityObjects) // searchable
-            case Self.SERVERS_KEY : return  .navigableCollection(self.servers)
+           
             case Self.TAGS_KEY : return .navigableCollection(self.tags)
             case Self.SELF_URL_KEY : return .value(JSONValue(string:self.selfUrl))
         case Self.WEBHOOKS_KEY :return .navigableCollection(self.webhooks)
@@ -585,10 +585,10 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     public static let TAGS_KEY = "tags"
     public static let SELF_URL_KEY = "$self"
     public static let WEBHOOKS_KEY = "webhooks"
+   
     public var version : String? = "3.2.0"
     public var diagnostics: [Diagnostic] = []
     public var selfUrl : String?
-  
     public var jsonSchemaDialect : String?
     public var info : OpenAPIInfo?
     public var servers : [OpenAPIServer] = []

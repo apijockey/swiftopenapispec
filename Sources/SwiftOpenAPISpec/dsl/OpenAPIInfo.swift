@@ -23,7 +23,7 @@ import Foundation
 /// terms of service, contact information, license information, and version of the OpenAPI specification.
 ///
 /// This information is typically used to provide context and documentation about the API itself.
-public struct OpenAPIInfo : KeyedElement, PointerNavigable {
+public struct OpenAPIInfo : ThrowingHashMapInitiable, PointerNavigable {
   
     
     
@@ -92,7 +92,7 @@ public struct OpenAPIInfo : KeyedElement, PointerNavigable {
     public var title : String?
     public var  summary : String?
    
-    public var key: String?
+
    
     public var version : String?
     

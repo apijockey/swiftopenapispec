@@ -20,7 +20,7 @@
 import Foundation
 
 
-public struct OpenAPIServer : KeyedElement, PointerNavigable {
+public struct OpenAPIServer : ThrowingHashMapInitiable, PointerNavigable {
     
     
     public func element(for segmentName: String) throws -> NavigationResult {

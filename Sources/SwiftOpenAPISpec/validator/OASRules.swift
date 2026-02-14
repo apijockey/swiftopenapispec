@@ -32,6 +32,56 @@ struct SupportedVersion3: Rule {
         return []
     }
 }
+
+
+struct OpenAPISpecificationV30FieldsNotAllowed:  Rule{
+    let name = "OAS.OpenAPISpecificationV30FieldsNotAllowed"
+    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
+       var diagnostics: [Diagnostic] = []
+        if spec.selfUrl != nil {
+            let diag = Diagnostic(severity: .error,
+                                  code: .invalidElement,
+                                  message: "openapi.selfURL is not allowed in OpenAPI 3.0/3.1",
+                                  pointer: "openapi/selfUrl",
+                                  rule: name)
+            diagnostics.append(diag)
+        }
+        if spec.jsonSchemaDialect != nil {
+            let diag = Diagnostic(severity: .error,
+                                  code: .invalidElement,
+                                  message: "openapi.jsonSchemaDialect is not allowed in OpenAPI 3.0/3.1",
+                                  pointer: "#/jsonSchemaDialect",
+                                  rule: name)
+            diagnostics.append(diag)
+        }
+        if spec.webhooks.count > 0{
+            let diag = Diagnostic(severity: .error,
+                                  code: .invalidElement,
+                                  message: "openapi.webhooks is not allowed in OpenAPI 3.0/3.1",
+                                  pointer: "#/webhooks",
+                                  rule: name)
+            diagnostics.append(diag)
+        }
+        return diagnostics
+    }
+}
+
+struct OpenAPIInfoV30FieldsNotAllowed:  Rule{
+    let name = "OAS.OpenAPISpecificationV30FieldsNotAllowed"
+    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
+        var diagnostics: [Diagnostic] = []
+        if spec.info?.summary != nil {
+            let diag = Diagnostic(severity: .error,
+                                  code: .invalidElement,
+                                  message: "info.summary is not allowed in OpenAPI 3.0",
+                                  pointer: "#/info/summary",
+                                  rule: name)
+            diagnostics.append(diag)
+        }
+        return diagnostics
+    }
+}
+
 struct RequiredOpenAPI30FixedFieldsRule: Rule {
     let name = "OAS.RequiredOpenAPIFixedFields"
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
@@ -41,7 +91,7 @@ struct RequiredOpenAPI30FixedFieldsRule: Rule {
             return [.init(severity: .error,
                           code: .missingRequired,
                           message: "openapi, info, and paths are required",
-                          pointer: "/",
+                          pointer: "#/",
                           rule: name)]
         }
         return []
@@ -57,7 +107,7 @@ struct RequiredOpenAPI31FixedFieldsRule: Rule {
             return [.init(severity: .error,
                           code: .missingRequired,
                           message: "openapi, info, and paths or components or webhooks are required",
-                          pointer: "/",
+                          pointer: "#/",
                           rule: name)]
         }
         return []
@@ -76,14 +126,29 @@ struct RequiredOpenAPIFixedInfoFieldsRule: Rule {
             return [.init(severity: .error,
                           code: .missingRequired,
                           message: "info element requires 'title' and 'version'.",
-                          pointer: "/info",
+                          pointer: "#/info",
                           rule: name)]
         }
         return []
     }
 }
 
-
+struct  OpenAPILicenseV30FieldsNotAllowed: Rule {
+    let name = "OpenAPILicenseV30FieldsNotAllowed"
+    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
+        var diagnostics = [Diagnostic]()
+        if let license = spec.info?.license,
+           license.identifier != nil  {
+            diagnostics.append(.init(severity: .error,
+                                     code: .invalidElement,
+                                     message: "license.identifier is not allowed in OpenAPI 3.0/3.1",
+                                     pointer: "#/info/license/identifier",
+                                     rule: name))
+            
+        }
+        return diagnostics
+    }
+}
 
 struct RequiredLicenseNameRule: Rule {
     let name = "OAS.RequiredLicenseName"
@@ -94,7 +159,7 @@ struct RequiredLicenseNameRule: Rule {
             return [.init(severity: .error,
                           code: .missingRequired,
                           message: "Missing license 'name'.",
-                          pointer: "/info/license/name",
+                          pointer: "#/info/license/name",
                           rule: name)]
         }
         return []
@@ -111,7 +176,7 @@ struct RequiredServerURLRule: Rule {
                 diagnostics.append( .init(severity: .error,
                               code: .missingRequired,
                               message: "Missing required field 'url' in one of the 'servers'.",
-                              pointer: "/servers/\(server.key ?? "")/url",
+                              pointer: "#/servers/\(server.key ?? "")/url",
                               rule: name))
             }
         }
@@ -134,6 +199,114 @@ struct  ValidComponentNamesRule: Rule {
         return diagnostics
     }
 }
+
+struct  OpenAPIComponentV30FieldsNotAllowed: Rule {
+    let name = "OpenAPIComponentV30FieldsNotAllowed"
+    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
+        var diagnostics = [Diagnostic]()
+        if let pathItems = spec.components?.pathItems,
+           pathItems.count > 0 {
+            diagnostics.append(.init(severity: .error, code: .invalidElement, message: "The 'components.pathItems' property is not supported in OpenAPI 3.0", pointer: "#/components/pathItems", rule: self.name))
+        }
+        return diagnostics
+    }
+}
+struct  OpenAPIComponentV30_1FieldsNotAllowed: Rule {
+    let name = "OpenAPIComponentV30FieldsNotAllowed"
+    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
+        var diagnostics = [Diagnostic]()
+        if let mediaTypes = spec.components?.mediaTypes,
+           mediaTypes.count > 0 {
+            diagnostics.append(.init(severity: .error, code: .invalidElement, message: "The 'components.mediaTypes' property is not supported in OpenAPI 3.0/3.1", pointer: "#/components/mediaTypes", rule: self.name))
+        }
+        return diagnostics
+    }
+}
+
+struct  OpenAPIPathV30_ItemFieldsNotAllowed: Rule {
+    let name = "OpenAPIPathV30_ItemFieldsNotAllowed:"
+    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
+        var diagnostics = [Diagnostic]()
+        for pathItem in spec.paths {
+            if pathItem.additionalOperations.count > 0 {
+                let pointer = "/#/paths/\(pathItem.key!)/"
+                diagnostics.append(.init(severity: .error, code: .invalidElement, message: "Path items do not support 'additionalOperations' in OpenAPI 3.0/3.1 does not support HTTP methods as properties.", pointer: pointer, rule: self.name))
+            }
+        }
+        for pathItems in spec.components?.pathItems ?? [] {
+            if pathItems.additionalOperations.count > 0 {
+                let pointer = "#/components/pathItems/\(pathItems.key!)/"
+                diagnostics.append(.init(severity: .error, code: .invalidElement, message: "Path items do not support 'additionalOperations' in OpenAPI 3.0/3.1 does not support HTTP methods as properties.", pointer: pointer, rule: self.name))
+            }
+        }
+        return diagnostics
+    }
+}
+
+struct  OpenAPIMediaTypeV30_1ItemFieldsNotAllowed: Rule {
+    let name = "OpenAPIPathV30_ItemFieldsNotAllowed:"
+    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
+        var diagnostics = [Diagnostic]()
+        for path in spec.paths {
+            for operation in path.operations {
+                for mediaType in (operation.requestBody?.contents ?? []) {
+                    let pointer = "#/paths/\(JSONPointer.escape(path.key ?? ""))/\(operation.key ?? operation.operationId ?? "")/requestBody/content/\(JSONPointer.escape(mediaType.key ?? ""))"
+                    if mediaType.encoding.count > 0  || mediaType.itemEncoding.count > 0 || mediaType.prefixEncoding.count > 0 {
+                        diagnostics.append(.init(severity: .error, code: .invalidElement, message: "MediaTypes do not support 'encoding', 'itemEncoding' or 'prefixEncoding' in OpenAPI 3.0/3.1.", pointer: pointer, rule: self.name))
+                        
+                    }
+                }
+                for response in operation.responses {
+                    for mediaType in response.content {
+                        let pointer = "#/paths/\(JSONPointer.escape(path.key ?? ""))/\(operation.key ?? operation.operationId ?? "")/responses/\(JSONPointer.escape(response.key ?? ""))/content/\(JSONPointer.escape(mediaType.key ?? ""))"
+                        if mediaType.encoding.count > 0  || mediaType.itemEncoding.count > 0 || mediaType.prefixEncoding.count > 0 {
+                            diagnostics.append(.init(severity: .error, code: .invalidElement, message: "MediaTypes do not support 'encoding', 'itemEncoding' or 'prefixEncoding' in OpenAPI 3.0/3.1.", pointer: pointer, rule: self.name))
+                        }
+                    }
+                }
+            }
+        }
+        for path in spec.components?.pathItems ?? [] {
+            for operation in path.operations {
+                for mediaType in (operation.requestBody?.contents ?? []) {
+                    let pointer = "#/components/paths/\(JSONPointer.escape(path.key ?? ""))/\(operation.key ?? operation.operationId ?? "")/requestBody/content/\(JSONPointer.escape(mediaType.key ?? ""))"
+                    if mediaType.encoding.count > 0  || mediaType.itemEncoding.count > 0 || mediaType.prefixEncoding.count > 0 {
+                        diagnostics.append(.init(severity: .error, code: .invalidElement, message: "MediaTypes do not support 'encoding', 'itemEncoding' or 'prefixEncoding' in OpenAPI 3.0/3.1.", pointer: pointer, rule: self.name))
+                        
+                    }
+                }
+                for response in operation.responses {
+                    for mediaType in response.content {
+                        let pointer = "#/components/paths/\(JSONPointer.escape(path.key ?? ""))/\(operation.key ?? operation.operationId ?? "")/responses/\(JSONPointer.escape(response.key ?? ""))/content/\(JSONPointer.escape(mediaType.key ?? ""))"
+                        if mediaType.encoding.count > 0  || mediaType.itemEncoding.count > 0 || mediaType.prefixEncoding.count > 0 {
+                            diagnostics.append(.init(severity: .error, code: .invalidElement, message: "MediaTypes do not support 'encoding', 'itemEncoding' or 'prefixEncoding' in OpenAPI 3.0/3.1.", pointer: pointer, rule: self.name))
+                        }
+                    }
+                }
+            }
+        }
+        for requestbody in (spec.components?.requestBodies ?? []) {
+            for mediaType in (requestbody.contents) {
+                let pointer = "#/components/requestBody/content/\(JSONPointer.escape(mediaType.key ?? ""))"
+                if mediaType.encoding.count > 0  || mediaType.itemEncoding.count > 0 || mediaType.prefixEncoding.count > 0 {
+                    diagnostics.append(.init(severity: .error, code: .invalidElement, message: "MediaTypes do not support 'encoding', 'itemEncoding' or 'prefixEncoding' in OpenAPI 3.0/3.1.", pointer: pointer, rule: self.name))
+                    
+                }
+            }
+        }
+        for response in (spec.components?.responses ?? []) {
+            for mediaType in (response.content) {
+                let pointer = "#/components/responses/content/\(JSONPointer.escape(mediaType.key ?? ""))"
+                if mediaType.encoding.count > 0  || mediaType.itemEncoding.count > 0 || mediaType.prefixEncoding.count > 0 {
+                        diagnostics.append(.init(severity: .error, code: .invalidElement, message: "MediaTypes do not support 'encoding', 'itemEncoding' or 'prefixEncoding' in OpenAPI 3.0/3.1.", pointer: pointer, rule: self.name))
+                }
+            }
+        }
+        
+        return diagnostics
+    }
+}
+
 struct RequiredServerVariablesRule: Rule {
     let name = "OAS.ServerVariables"
     
@@ -147,7 +320,7 @@ struct RequiredServerVariablesRule: Rule {
                     diagnostics.append(.init(severity: .error,
                                   code: .missingRequired,
                                   message: "Missing required field 'default' in one of the 'servers' variables.",
-                                  pointer: "/servers/\(server.key ?? "")/variables/\(variable.key ?? "")/default",
+                                  pointer: "#/servers/\(server.key ?? "")/variables/\(variable.key ?? "")/default",
                                              rule: name))
                                        
                 }
@@ -188,7 +361,7 @@ struct RequiredSchemaComponentNamessRule: Rule {
             if let key = schema.key {
                 
                 if !key.matches("[a-zA-Z0-9\\-\\._]+") {
-                    diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\-\\._]+$'", pointer: "/components/schema/\(key)", rule: name))
+                    diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\-\\._]+$'", pointer: "#/components/schema/\(key)", rule: name))
                 }
             }
             
@@ -208,7 +381,7 @@ struct RequiredResponsesComponentNamessRule: Rule {
         for schema in schemas {
             if let key = schema.key {
                 if !key.matches("[a-zA-Z0-9\\.\\-_]+") {
-                    diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "/components/responses/\(key)", rule: name))
+                    diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "#/components/responses/\(key)", rule: name))
                     
                 }
                 
@@ -230,7 +403,7 @@ struct RequiredParameterComponentsNamessRule: Rule {
             if let key = schema.key {
                 
                     if !key.matches("[a-zA-Z0-9\\.\\-_]+") {
-                        diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "/components/parameters/\(key)", rule: name))
+                        diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "#/components/parameters/\(key)", rule: name))
                     }
                 
             }
@@ -250,7 +423,7 @@ struct RequiredExamplesComponentNamessRule: Rule {
         for schema in schemas {
             if let key = schema.key {
                     if !key.matches("[a-zA-Z0-9\\.\\-_]+") {
-                        diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "/components/examples/\(key)", rule: name))
+                        diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "#/components/examples/\(key)", rule: name))
                     }
               
             }
@@ -270,7 +443,7 @@ struct RequiredRequestBodiesComponentsNamessRule: Rule {
         for schema in schemas {
             if let key = schema.key {
                     if !key.matches("[a-zA-Z0-9\\.\\-_]+") {
-                        diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "/components/requestBodies/\(key)", rule: name))
+                        diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "#/components/requestBodies/\(key)", rule: name))
                     }
                 
             }
@@ -290,7 +463,7 @@ struct RequiredsHeaderComponentsNamessRule: Rule {
         for schema in schemas {
             if let key = schema.key {
                     if !key.matches( "[a-zA-Z0-9\\.\\-_]+") {
-                        diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "/components/headers/\(key)", rule: name))
+                        diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "#/components/headers/\(key)", rule: name))
                     }
                
             }
@@ -312,7 +485,7 @@ struct RequiredSecuritySchemeComponentsNamessRule: Rule {
             if let key = schema.key {
              
                     if !key.matches("[a-zA-Z0-9\\-\\._]+") {
-                        diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\-\\._]+$'", pointer: "/components/securitySchemes/\(key)", rule: name))
+                        diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\-\\._]+$'", pointer: "#/components/securitySchemes/\(key)", rule: name))
                     }
             }
             
@@ -332,7 +505,7 @@ struct RequiredLinksComponentsNamessRule: Rule {
             if let key = schema.key {
                
                     if !key.matches("[a-zA-Z0-9\\.\\-_]+") {
-                        diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "/components/links/\(key)", rule: name))
+                        diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "#/components/links/\(key)", rule: name))
                     }
                
             }
@@ -352,7 +525,7 @@ struct RequiredCallBackomponentsNamessRule: Rule {
         for schema in schemas {
             if let key = schema.key {
                 if !key.matches("[a-zA-Z0-9\\.\\-_]+") {
-                    diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "/components/callbacks/\(key)", rule: name))
+                    diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "#/components/callbacks/\(key)", rule: name))
                 }
             }
             
@@ -387,7 +560,7 @@ struct SupportedHTTPMethodRule: Rule {
         for path in spec.paths {
             
             for (operation) in path.operations where !supportedMethods.contains(operation.key ?? "nil") {
-                diagnostics.append(.init(severity: .error, code: .invalidValue, message: "http operation not supported: '\(operation.key ?? "")'", pointer: "/paths\(path.key ?? "")", rule: name))
+                diagnostics.append(.init(severity: .error, code: .invalidValue, message: "http operation not supported: '\(operation.key ?? "")'", pointer: "#/paths\(path.key ?? "")", rule: name))
             }
         }
         return diagnostics
@@ -401,7 +574,7 @@ struct WebhookSupport30Rule: Rule {
             let diagnotic = Diagnostic( severity: .error,
                                          code: .invalidElement,
             message: "Webhooks are not supported in OAS 3.0",
-            pointer: "/webhooks",
+            pointer: "#/webhooks",
             rule: name)
             diags.append(diagnotic)
         }
@@ -423,7 +596,7 @@ struct OperationMustHaveResponsesRule: Rule {
                     let diagnotics = Diagnostic( severity: .error,
                                                  code: .missingResponses,
                                                  message: "The Responses Object MUST contain at least one response code, and it SHOULD be the response for a successful operation call.",
-                                                 pointer: JSONPointer.join("/paths",JSONPointer.join(pathItem.key ?? "", "responses")),
+                                                 pointer: JSONPointer.join("#/paths",JSONPointer.join(pathItem.key ?? "", "responses")),
                                                  rule: name)
                     diags.append(diagnotics)
                     break
@@ -445,7 +618,7 @@ struct ExternalDocumentationMustHaveURLRule: Rule {
             let diagnotics = Diagnostic( severity: .error,
                                          code: .missingRequired,
                                          message: "External documentation must define a url.",
-                                         pointer: "/components/externalDocumentation/url",
+                                         pointer: "#/components/externalDocumentation/url",
                                          rule: name)
             diags.append(diagnotics)
         }
@@ -465,7 +638,7 @@ struct ParameterLocationsMustHaveInRule: Rule {
                 let diagnostic = Diagnostic( severity: .error,
                                              code: .missingRequired,
                                              message: "Parameters must be one of: 'query','queryString','header','path',cookie'.",
-                                             pointer: "/components/parameters/\(parameter.key ?? "")",
+                                             pointer: "#/components/parameters/\(parameter.key ?? "")",
                                              rule: name)
                 diags.append(diagnostic)
                 if parameter.location == .path {
@@ -473,7 +646,7 @@ struct ParameterLocationsMustHaveInRule: Rule {
                         let diagnostic = Diagnostic( severity: .error,
                                                      code: .missingRequired,
                                                      message: "Path Parameters MUST BE required.",
-                                                     pointer: "/components/parameters/\(parameter.key ?? "")",
+                                                     pointer: "#/components/parameters/\(parameter.key ?? "")",
                                                      rule: name)
                         diags.append(diagnostic)
                     }
@@ -496,7 +669,7 @@ struct RequestBodiesMustHaveContentRule: Rule {
                 let diagnotics = Diagnostic( severity: .error,
                                              code: .missingRequired,
                                              message: "Request Bodies must have  content.",
-                                             pointer: "/components/requestBodies/\(requestBody.key ?? "")",
+                                             pointer: "#/components/requestBodies/\(requestBody.key ?? "")",
                                              rule: name)
                 diags.append(diagnotics)
             }
@@ -507,18 +680,41 @@ struct RequestBodiesMustHaveContentRule: Rule {
     }
 }
 
-struct ResponsesMustHaveDesccriptionRule: Rule {
+struct ResponsesMustHaveDescriptionRule: Rule {
     let name = "OAS.ResponsesMustHaveDesccription"
 
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         var diags: [Diagnostic] = []
+        for path in spec.paths {
+            for operation in path.operations {
+                for response in operation.responses {
+                    if response.description == nil {
+                        let diagnotics = Diagnostic( severity: .error,
+                                                     code: .missingRequired,
+                                                     message: "Response must have description.",
+                                                     pointer: JSONPointer.join("#/paths",JSONPointer.join(path.key ?? "", "responses/\(response.key ?? "")")),
+                                                     rule: name)
+                        diags.append(diagnotics)
+                    }
+                    else if let description = response.description,
+                            description.isEmpty{
+                        let diagnotics = Diagnostic( severity: .error,
+                                                     code: .missingRequired,
+                                                     message: "Response must have description.",
+                                                     pointer: JSONPointer.join("#/paths",JSONPointer.join(path.key ?? "", "responses/\(response.key ?? "")")),
+                                                     rule: name)
+                        diags.append(diagnotics)
+                    }
+                }
+            }
+        }
         guard let responses = spec.components?.responses else { return diags }
         for response in responses {
             if response.description == nil {
                 let diagnotics = Diagnostic( severity: .error,
                                              code: .missingRequired,
                                              message: "Response must have descreiption.",
-                                             pointer: "/components/responses/\(response.key ?? "")",
+                                             pointer: "#/components/responses/\(response.key ?? "")",
                                              rule: name)
                 diags.append(diagnotics)
             }
@@ -527,7 +723,7 @@ struct ResponsesMustHaveDesccriptionRule: Rule {
                 let diagnotics = Diagnostic( severity: .error,
                                              code: .missingRequired,
                                              message: "Request Bodies must have  content.",
-                                             pointer: "/components/responses/\(response.key ?? "")",
+                                             pointer: "#/components/responses/\(response.key ?? "")",
                                              rule: name)
                 diags.append(diagnotics)
             }
@@ -537,7 +733,41 @@ struct ResponsesMustHaveDesccriptionRule: Rule {
         return diags
     }
 }
+struct OpenAPIResponse30_ValidFieldsRule: Rule {
+    let name = "OpenAPIResponse30_ValidFieldsRule"
 
+    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
+        var diags: [Diagnostic] = []
+        for path in spec.paths {
+            for operation in path.operations {
+                for response in operation.responses {
+                    if  response.summary != nil || !(response.summary ?? "").isEmpty{
+                        let diagnotics = Diagnostic( severity: .error,
+                                                     code: .missingRequired,
+                                                     message: "Response does not support 'summary' in OpenAPI 3.0/3.1",
+                                                     pointer: JSONPointer.join("#/paths",JSONPointer.join(path.key ?? "", "responses/\(response.key ?? "")")),
+                                                     rule: name)
+                        diags.append(diagnotics)
+                    }
+                }
+            }
+        }
+        guard let responses = spec.components?.responses else { return diags }
+        for response in responses {
+            if  response.summary != nil || !(response.summary ?? "").isEmpty{
+                let diagnotics = Diagnostic( severity: .error,
+                                             code: .missingRequired,
+                                             message: "Response does not support 'summary' in OpenAPI 3.0/3.1",
+                                             pointer: "#/components/responses/\(response.key ?? "")",
+                                             rule: name)
+                diags.append(diagnotics)
+            }
+        }
+        
+        
+        return diags
+    }
+}
 struct SupportedHTPStatusRule: Rule {
     let name = "OAS.SupportedHTPStatusRule"
     
@@ -557,7 +787,7 @@ struct SupportedHTPStatusRule: Rule {
                         diags.append(Diagnostic(severity: .error,
                                                 code: .invalidValue,
                                                 message: "Response code '\(key)' is not a valid HTTP status code.",
-                                                pointer: "/paths/\(pathItem.key!)/\(op.key ?? "")/\(response.key ?? "")",
+                                                pointer: "#/paths/\(pathItem.key!)/\(op.key ?? "")/\(response.key ?? "")",
                                                 rule: name))
                     }
                     
@@ -578,7 +808,7 @@ struct SupportedHTPStatusRule: Rule {
                         diags.append(Diagnostic(severity: .error,
                                                 code: .invalidValue,
                                                 message: "Response code \(key) is not a valid HTTP status code.",
-                                                pointer: "/components/paths/\(pathItem.key!)/\(op.key ?? "")/\(response.key ?? "")",
+                                                pointer: "#/components/paths/\(pathItem.key!)/\(op.key ?? "")/\(response.key ?? "")",
                                                 rule: name))
                     }
                     
@@ -604,7 +834,7 @@ struct LinkMustHaveRefOrIdentifier: Rule {
                 let diagnotics = Diagnostic( severity: .error,
                                              code: .missingRequired,
                                              message: "Request Bodies must have  content.",
-                                             pointer: "/components/links/\(link.key ?? "")",
+                                             pointer: "#/components/links/\(link.key ?? "")",
                                              rule: name)
                 diags.append(diagnotics)
             }
@@ -627,7 +857,7 @@ struct TagMustHaveName: Rule {
                 let diagnotics = Diagnostic( severity: .error,
                                              code: .missingRequired,
                                              message: "Tag needs an mae",
-                                             pointer: "/tags/\(tag.key ?? "")",
+                                             pointer: "#/tags/\(tag.key ?? "")",
                                              rule: name)
                 diags.append(diagnotics)
             }
@@ -646,31 +876,31 @@ struct ReferencesMustHaveRefRule : Rule {
         
         if let headers = spec.components?.headers  {
             for header in headers {
-                let pointer = "/components/headers/"
+                let pointer = "#/components/headers/"
                 diags.append(contentsOf:  ReusableHeaderRefRule().check(header: header, ctx: ctx,  pointer: pointer ,rule: name))
             }
         }
         if let callbacks = spec.components?.callbacks {
             for callback in callbacks {
-                let pointer = "/components/callbacks/"
+                let pointer = "#/components/callbacks/"
                 diags.append(contentsOf:  ReusableCallbackRefRule().check(callback: callback,ctx: ctx,  pointer: pointer ,rule: name))
             }
         }
         if let examples = spec.components?.examples {
             for example in examples {
-                let pointer = "/components/examples"
+                let pointer = "#/components/examples"
                 diags.append(contentsOf: ReusableExampleRefRule().check(example : example, ctx: ctx, pointer: pointer, rule: name))
             }
         }
         if let links = spec.components?.links  {
             for link in links {
-                let pointer = "/components/links/"
+                let pointer = "#/components/links/"
                 diags.append(contentsOf:  ReusableLinkRefRule().check(link: link, ctx: ctx,  pointer: pointer ,rule: name))
             }
         }
         if let requestBodies = spec.components?.requestBodies {
             for requestBody in requestBodies{
-                let pointer = "/components/requestBodies/"
+                let pointer = "#/components/requestBodies/"
                 diags.append(contentsOf: ReusableRequestBodyRefRule().check(requestBody: requestBody, ctx: ctx, pointer: pointer, rule: name))
             }
         }
@@ -682,14 +912,14 @@ struct ReferencesMustHaveRefRule : Rule {
         }
         if let schemacomponents =  spec.components?.schemas  {
             for schema in schemacomponents {
-                let pointer =  "/components/schemas\(schema.key ?? "")"
+                let pointer =  "#/components/schemas\(schema.key ?? "")"
                 diags.append(contentsOf: ReusableNamedSchemaRefRule().check(schema: schema, ctx: ctx, pointer: pointer, rule: name))
             }
         }
         
         if let parameters = spec.components?.parameters {
             for parameter in parameters {
-                let pointer = "/components/parameter/"
+                let pointer = "#/components/parameter/"
                 diags.append(contentsOf: ReusableParameterRefRule().check(parameter: parameter, ctx: ctx, pointer: pointer, rule: name))
             }
         }
@@ -698,7 +928,7 @@ struct ReferencesMustHaveRefRule : Rule {
                 let diagnotics = Diagnostic( severity: .error,
                                              code: .missingRequired,
                                              message: "Path needs a ref or an operation",
-                                             pointer: "/paths\(path.key ?? "")",
+                                             pointer: "#/paths\(path.key ?? "")",
                                              rule: name)
                 diags.append(diagnotics)
             }
@@ -729,7 +959,7 @@ struct RequiredPathsRule: Rule {
             return [.init(severity: .error,
                           code: .missingRequired,
                           message: "Missing required field 'paths' or it is empty.",
-                          pointer: "/paths",
+                          pointer: "#/paths",
                           rule: name)]
         }
         return []

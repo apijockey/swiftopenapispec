@@ -115,8 +115,5 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
     public var examples : [OpenAPIExample] = []
     public var content : OpenAPIMediaType? = nil
  
-   
-    //TODO: Examples Object
-   
 }
 
