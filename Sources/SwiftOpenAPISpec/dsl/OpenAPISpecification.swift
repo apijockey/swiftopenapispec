@@ -106,7 +106,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
             throw OpenAPISpecification.Errors.invalidYaml("mergeKeys failed")
         
         }
-       
+       let pointer = "#"
         
         self.version = dictionary.readIfPresent(OpenAPISpecification.OPENAPI_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISpecification.OPENAPI_KEY) )
         self.info = try dictionary.readIfPresent(OpenAPISpecification.INFO_KEY, objectType: OpenAPIInfo.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISpecification.INFO_KEY))

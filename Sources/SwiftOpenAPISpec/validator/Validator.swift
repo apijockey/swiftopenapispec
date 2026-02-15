@@ -182,7 +182,7 @@ public struct Validator {
         }
         
         for path in spec.paths {
-                let pointer = "/paths/\(JSONPointer.escape(path.key ?? ""))"
+                let pointer = "#/paths/\(JSONPointer.escape(path.key ?? ""))"
             occurrences += SchemaRefCollector().collect(from: path, pointer: pointer)
         }
         for encoding in (spec.components?.mediaTypes ?? []) {
@@ -225,7 +225,7 @@ public struct Validator {
             let pointer = info.pointer
             let content = info.item
             if let schema = content.schema  {
-                try await diagnostics.append(contentsOf:schemaRuleRunner.run(schema: schema, pointer: JSONPointer.join(pointer, "/schema"), resolver: &resolver))
+                try await diagnostics.append(contentsOf:schemaRuleRunner.run(schema: schema, pointer: "\(pointer)/schema", resolver: &resolver))
             }
             
         }

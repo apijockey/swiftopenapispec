@@ -26,7 +26,7 @@ struct SupportedVersion3: Rule {
             return [.init(severity: .error,
                           code: .invalidValue,
                           message: "unsupported Version'\(spec.version ?? "") '",
-                          pointer: "/openapi",
+                          pointer: "#/openapi",
                           rule: name)]
         }
         return []
@@ -42,7 +42,7 @@ struct OpenAPISpecificationV30FieldsNotAllowed:  Rule{
             let diag = Diagnostic(severity: .error,
                                   code: .invalidElement,
                                   message: "openapi.selfURL is not allowed in OpenAPI 3.0/3.1",
-                                  pointer: "openapi/selfUrl",
+                                  pointer: "#/$self",
                                   rule: name)
             diagnostics.append(diag)
         }
@@ -192,7 +192,7 @@ struct  ValidComponentNamesRule: Rule {
         for schema in (spec.components?.schemas ?? []) {
             if let key = schema.key {
                 if !key.matches("^[a-zA-Z0-9\\.\\-_]+$") {
-                    diagnostics.append(.init(severity: .error, code: .invalidValue, message: name, pointer: "/components/schemas/\(key)", rule: self.name))
+                    diagnostics.append(.init(severity: .error, code: .invalidValue, message: name, pointer: "#/components/schemas/\(key)", rule: self.name))
                 }
             }
         }
@@ -491,7 +491,7 @@ struct PathsMustStartWithSlashRule: Rule {
             
             if let key = path.key,
                !key.hasPrefix("/") {
-                diagnostics.append(.init(severity: .error, code: .invalidValue, message: "path must start with a '/'", pointer: "/paths/\(key)", rule: name))
+                diagnostics.append(.init(severity: .error, code: .invalidValue, message: "path must start with a '/'", pointer: "#/paths/\(key)", rule: name))
             }
         }
         return diagnostics
@@ -764,13 +764,13 @@ struct ReferencesMustHaveRefRule : Rule {
         
         if let headers = spec.components?.headers  {
             for header in headers {
-                let pointer = "#/components/headers/"
+                let pointer = "#/components/headers"
                 diags.append(contentsOf:  ReusableHeaderRefRule().check(header: header, ctx: ctx,  pointer: pointer ,rule: name))
             }
         }
         if let callbacks = spec.components?.callbacks {
             for callback in callbacks {
-                let pointer = "#/components/callbacks/"
+                let pointer = "#/components/callbacks"
                 diags.append(contentsOf:  ReusableCallbackRefRule().check(callback: callback,ctx: ctx,  pointer: pointer ,rule: name))
             }
         }
@@ -782,19 +782,19 @@ struct ReferencesMustHaveRefRule : Rule {
         }
         if let links = spec.components?.links  {
             for link in links {
-                let pointer = "#/components/links/"
+                let pointer = "#/components/links"
                 diags.append(contentsOf:  ReusableLinkRefRule().check(link: link, ctx: ctx,  pointer: pointer ,rule: name))
             }
         }
         if let requestBodies = spec.components?.requestBodies {
             for requestBody in requestBodies{
-                let pointer = "#/components/requestBodies/"
+                let pointer = "#/components/requestBodies"
                 diags.append(contentsOf: ReusableRequestBodyRefRule().check(requestBody: requestBody, ctx: ctx, pointer: pointer, rule: name))
             }
         }
         if let responses = spec.components?.responses {
             for response in responses {
-                let pointer = "#/components/responses/"
+                let pointer = "#/components/responses"
                 diags.append(contentsOf: ReusableResponseRefRule().check(response: response, ctx: ctx, pointer: pointer, rule: name))
             }
         }
@@ -807,7 +807,7 @@ struct ReferencesMustHaveRefRule : Rule {
         
         if let parameters = spec.components?.parameters {
             for parameter in parameters {
-                let pointer = "#/components/parameter/"
+                let pointer = "#/components/parameter"
                 diags.append(contentsOf: ReusableParameterRefRule().check(parameter: parameter, ctx: ctx, pointer: pointer, rule: name))
             }
         }
@@ -816,13 +816,13 @@ struct ReferencesMustHaveRefRule : Rule {
                 let diagnotics = Diagnostic( severity: .error,
                                              code: .missingRequired,
                                              message: "Path needs a ref or an operation",
-                                             pointer: "#/paths\(path.key ?? "")",
+                                             pointer: "#/paths/\(JSONPointer.escape(path.key ?? ""))",
                                              rule: name)
                 diags.append(diagnotics)
             }
             else {
                 for operation in path.operations {
-                    diags.append(contentsOf: ReusableOperationRefRule().check(operation: operation, ctx: ctx, pointer: "/paths\(path.key ?? "")", rule: name))
+                    diags.append(contentsOf: ReusableOperationRefRule().check(operation: operation, ctx: ctx, pointer: "#/paths/\(JSONPointer.escape(path.key ?? ""))", rule: name))
                 }
             }
          

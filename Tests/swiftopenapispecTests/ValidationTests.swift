@@ -356,26 +356,26 @@ struct ValidationTests {
        }
        
        #expect(diags.contains { diag in
-           diag.pointer == "/paths/~1pets/patch/requestBody/content/application~1json/schema/oneOf/0/$ref"
+           diag.pointer == "#/paths/~1pets/patch/requestBody/content/application~1json/schema/oneOf/0/$ref"
            && diag.message.contains("#/components/schemas/Cat'")
        })
        #expect(diags.contains { diag in
-           diag.pointer == "/paths/~1pets/patch/requestBody/content/application~1json/schema/oneOf/1/$ref"
+           diag.pointer == "#/paths/~1pets/patch/requestBody/content/application~1json/schema/oneOf/1/$ref"
            && diag.message.contains("#/components/schemas/Dog'")
        })
        
        #expect(diags.contains { diag in
-           diag.pointer == "/paths/~1pets/post/requestBody/content/application~1xml/schema/$ref"
+           diag.pointer == "#/paths/~1pets/post/requestBody/content/application~1xml/schema/$ref"
            && diag.message.contains("'#/components/schemas/Pet'")
        })
        
        #expect(diags.contains { diag in
-           diag.pointer == "/paths/~1pets/post/requestBody/content/application~1x-www-form-urlencoded/schema/$ref"
+           diag.pointer == "#/paths/~1pets/post/requestBody/content/application~1x-www-form-urlencoded/schema/$ref"
            && diag.message.contains("'#/components/schemas/PetForm'")
        })
        
        #expect(diags.contains { diag in
-           diag.pointer == "/paths/~1pets/post/requestBody/content/application~1json/schema/$ref"
+           diag.pointer == "#/paths/~1pets/post/requestBody/content/application~1json/schema/$ref"
            && diag.message.contains("'#/components/schemas/Pet'")
        })
        

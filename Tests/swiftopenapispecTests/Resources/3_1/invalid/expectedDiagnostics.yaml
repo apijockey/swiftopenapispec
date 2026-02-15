@@ -17,7 +17,7 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/components/schemas/InvalidSchema/required"
+        pointer: "#/components/schemas/InvalidSchema/required"
         rule: "Schema.RequiredSubsetOfProperties"
         severity: "error"
         messageContains: "Object marks 'missing_required_field' as required, but no such property exists"

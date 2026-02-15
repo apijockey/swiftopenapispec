@@ -180,11 +180,11 @@ public struct RuleRunner  : Sendable{
         var items =  [(OpenAPIOperation, String)]()
         for pathItem in pathItemInfo(spec: spec) {
             for operation in pathItem.item.operations {
-                let pointer = JSONPointer.join(pathItem.pointer, operation.key ?? operation.operationId ?? "")
+                let pointer = "\(pathItem.pointer)/\(operation.key ?? operation.operationId ?? "")"
                 items.append((item:operation,  pointer: pointer))
             }
             for operation in pathItem.item.additionalOperations {
-                let pointer = JSONPointer.join(pathItem.pointer, operation.key ?? operation.operationId ?? "")
+                let pointer = "\(pathItem.pointer)/\(operation.key ?? operation.operationId ?? "")"
                 items.append((item:operation,  pointer: pointer))
             }
         }
@@ -194,7 +194,7 @@ public struct RuleRunner  : Sendable{
         var items =  [(OpenAPIResponse, String)]()
         for operationInfo in operationsInfo(spec: spec) {
             for response in operationInfo.item.responses {
-                let pointer = JSONPointer.join(operationInfo.pointer, JSONPointer.join("responses",response.key ?? ""))
+                let pointer = "\(operationInfo.pointer)/responses/\(response.key ?? "")"
                 items.append((item: response,  pointer: pointer))
             }
                 
@@ -205,7 +205,10 @@ public struct RuleRunner  : Sendable{
         var items =  [(OpenAPIRequestBody, String)]()
         for operationInfo in operationsInfo(spec: spec) {
             if let requestBody = operationInfo.item.requestBody {
-                let pointer = JSONPointer.join(operationInfo.pointer, JSONPointer.join("requestBody",requestBody.key ?? ""))
+                var pointer = "\(operationInfo.pointer)/requestBody"
+                if requestBody.key != nil {
+                    pointer.append("/\(requestBody.key ?? "")")
+                }
                 items.append((item: requestBody,  pointer: pointer))
             }
            
@@ -216,13 +219,13 @@ public struct RuleRunner  : Sendable{
         var items =  [(OpenAPIMediaType, String)]()
         for requestBody in requestBodyInfo(spec: spec) {
             for content in requestBody.item.contents {
-                let pointer = JSONPointer.join(requestBody.pointer,content.key ?? "")
+                let pointer = "\(requestBody.pointer)/content/\(JSONPointer.escape(content.key ?? ""))"
                 items.append((item: content,  pointer: pointer))
             }
         }
         for response in responseInfo(spec: spec) {
             for content in response.item.content {
-                let pointer = JSONPointer.join(response.pointer,content.key ?? "")
+                let pointer = "\(response.pointer)/content/\(JSONPointer.escape(content.key ?? ""))"
                 items.append((item: content,  pointer: pointer))
             }
         }

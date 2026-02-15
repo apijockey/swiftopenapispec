@@ -60,7 +60,7 @@ cases:
     shouldPass: false
     expected:
       - code: "invalidValue"
-        pointer: "#/paths"
+        pointer: "#/paths/oops"
         rule: "OAS.PathsMustStartWithSlashRule"
         severity: "error"
         messageContains: "path must start with a '/'"
@@ -92,7 +92,7 @@ cases:
     shouldPass: false
     expected:
       - code: "missingRequired"
-        pointer: "#/"
+        pointer: "#/paths/~1ping/get/200"
         rule: "OAS.ReferencesMustHaveRef"
         severity: "error"
         messageContains: "Response needs a ref or a response object with 'description'"
