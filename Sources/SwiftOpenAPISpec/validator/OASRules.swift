@@ -794,7 +794,7 @@ struct ReferencesMustHaveRefRule : Rule {
         }
         if let responses = spec.components?.responses {
             for response in responses {
-                let pointer = "/components/responses/"
+                let pointer = "#/components/responses/"
                 diags.append(contentsOf: ReusableResponseRefRule().check(response: response, ctx: ctx, pointer: pointer, rule: name))
             }
         }

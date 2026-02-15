@@ -163,7 +163,7 @@ public struct RuleRunner  : Sendable{
         var items =  [(OpenAPIPathItem, String)]()
         for pathItem in spec.paths {
             
-                let pointer = "/#/paths/\(JSONPointer.escape(pathItem.key ?? ""))"
+                let pointer = "#/paths/\(JSONPointer.escape(pathItem.key ?? ""))"
             items.append((pathItem,  pointer))
             
         }
@@ -194,7 +194,7 @@ public struct RuleRunner  : Sendable{
         var items =  [(OpenAPIResponse, String)]()
         for operationInfo in operationsInfo(spec: spec) {
             for response in operationInfo.item.responses {
-                let pointer = JSONPointer.join(operationInfo.pointer, response.key ?? "")
+                let pointer = JSONPointer.join(operationInfo.pointer, JSONPointer.join("responses",response.key ?? ""))
                 items.append((item: response,  pointer: pointer))
             }
                 
@@ -205,7 +205,7 @@ public struct RuleRunner  : Sendable{
         var items =  [(OpenAPIRequestBody, String)]()
         for operationInfo in operationsInfo(spec: spec) {
             if let requestBody = operationInfo.item.requestBody {
-                let pointer = JSONPointer.join(operationInfo.pointer,requestBody.key ?? "")
+                let pointer = JSONPointer.join(operationInfo.pointer, JSONPointer.join("requestBody",requestBody.key ?? ""))
                 items.append((item: requestBody,  pointer: pointer))
             }
            

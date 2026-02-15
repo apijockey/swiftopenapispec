@@ -153,31 +153,31 @@ public struct Validator {
     public static func findOccurrences(spec: OpenAPISpecification, baseURI: String, ctx: ValidationContext, resolver:  inout  JSONPointerResolver) -> [RefOccurrence] {
         var occurrences = [RefOccurrence]()
         for (schema) in (spec.components?.schemas ?? []){
-            let p = "/components/schemas/\(JSONPointer.escape(schema.key ?? ""))"
+            let p = "#/components/schemas/\(JSONPointer.escape(schema.key ?? ""))"
             occurrences += SchemaRefCollector().collect(from: schema, pointer: p)
         }
         for (requestBody) in (spec.components?.requestBodies ?? []){
-            let p = "/components/requestBodies/\(JSONPointer.escape(requestBody.key ?? ""))"
+            let p = "#/components/requestBodies/\(JSONPointer.escape(requestBody.key ?? ""))"
             occurrences += SchemaRefCollector().collect(from: requestBody, pointer: p)
         }
         for (response) in (spec.components?.responses ?? []){
-            let p = "/components/responses/\(JSONPointer.escape(response.key ?? ""))"
+            let p = "#/components/responses/\(JSONPointer.escape(response.key ?? ""))"
             occurrences += SchemaRefCollector().collect(from: response, pointer: p)
         }
         for (parameter) in (spec.components?.parameters ?? []){
-            let p = "/components/parameters/\(JSONPointer.escape(parameter.key ?? ""))"
+            let p = "#/components/parameters/\(JSONPointer.escape(parameter.key ?? ""))"
             occurrences += SchemaRefCollector().collect(from: parameter, pointer: p)
         }
         for (header) in (spec.components?.headers ?? []){
-            let p = "/components/headers/\(JSONPointer.escape(header.key ?? ""))"
+            let p = "#/components/headers/\(JSONPointer.escape(header.key ?? ""))"
             occurrences += SchemaRefCollector().collect(from: header, pointer: p)
         }
         for (securityScheme) in (spec.components?.securitySchemas ?? []){
-            let p = "/components/securitySchemes/\(JSONPointer.escape(securityScheme.key ?? ""))"
+            let p = "#/components/securitySchemes/\(JSONPointer.escape(securityScheme.key ?? ""))"
             occurrences += SchemaRefCollector().collect(from: securityScheme, pointer: p)
         }
         for (link) in (spec.components?.links ?? []){
-            let p = "/components/links/\(JSONPointer.escape(link.key ?? ""))"
+            let p = "#/components/links/\(JSONPointer.escape(link.key ?? ""))"
             occurrences += SchemaRefCollector().collect(from: link, pointer: p)
         }
         
@@ -186,17 +186,17 @@ public struct Validator {
             occurrences += SchemaRefCollector().collect(from: path, pointer: pointer)
         }
         for encoding in (spec.components?.mediaTypes ?? []) {
-            let pointer = "/components/encodings/\(JSONPointer.escape(encoding.key ?? ""))"
+            let pointer = "#/components/encodings/\(JSONPointer.escape(encoding.key ?? ""))"
             occurrences += SchemaRefCollector().collect(from: encoding, pointer: pointer)
         }
         for (callback) in (spec.components?.callbacks ?? []){
-            let p = "/components/callbacks"
+            let p = "#/components/callbacks"
             
             let subPath = "/\(JSONPointer.escape(callback.key ?? ""))"
             occurrences += SchemaRefCollector().collect(from: callback, pointer: p + subPath)
         }
         for example in (spec.components?.examples ?? []) {
-                let pointer = "/components/examples/\(JSONPointer.escape(example.key ?? ""))"
+                let pointer = "#/components/examples/\(JSONPointer.escape(example.key ?? ""))"
             occurrences += SchemaRefCollector().collect(from: example, pointer: pointer)
         }
       
@@ -217,7 +217,7 @@ public struct Validator {
         let schemaRuleRunner = SchemaRuleRunner.defaultRunner(ctx: ctx)
         if let schemas = spec.components?.schemas {
             for namedSchema in schemas {
-                try await diagnostics.append(contentsOf:schemaRuleRunner.run(schema: namedSchema, pointer: "/components/schemas/\(namedSchema.key ?? "")", resolver: &resolver))
+                try await diagnostics.append(contentsOf:schemaRuleRunner.run(schema: namedSchema, pointer: "#/components/schemas/\(namedSchema.key ?? "")", resolver: &resolver))
                 
             }
         }
