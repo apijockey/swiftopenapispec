@@ -613,12 +613,12 @@ struct RequestBodiesMustHaveContentRule: Rule {
         guard let requestBodies = spec.components?.requestBodies else { return diags }
         for requestBody in requestBodies {
             if requestBody.contents.count == 0{
-                let diagnotics = Diagnostic( severity: .error,
+                let diagnostics = Diagnostic( severity: .error,
                                              code: .missingRequired,
                                              message: "Request Bodies must have  content.",
                                              pointer: "#/components/requestBodies/\(requestBody.key ?? "")",
                                              rule: name)
-                diags.append(diagnotics)
+                diags.append(diagnostics)
             }
         }
         
@@ -637,21 +637,21 @@ struct ResponsesMustHaveDescriptionRule: Rule {
             let pointer = info.pointer
             let response = info.item
             if response.description == nil {
-                let diagnotics = Diagnostic( severity: .error,
+                let diagnostics = Diagnostic( severity: .error,
                                              code: .missingRequired,
                                              message: "Response must have description.",
                                              pointer: pointer,
                                              rule: name)
-                diags.append(diagnotics)
+                diags.append(diagnostics)
             }
             else if let description = response.description,
                     description.isEmpty{
-                let diagnotics = Diagnostic( severity: .error,
+                let diagnostics = Diagnostic( severity: .error,
                                              code: .missingRequired,
                                              message: "Response must have description.",
                                              pointer: pointer,
                                              rule: name)
-                diags.append(diagnotics)
+                diags.append(diagnostics)
             }
         }
         
@@ -659,8 +659,69 @@ struct ResponsesMustHaveDescriptionRule: Rule {
         return diags
     }
 }
+struct OpenAPIExample30_ValidFieldsRule: Rule {
+    let name = "OpenAPIExample30_ValidFieldsRule"
+    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
+        var diags: [Diagnostic] = []
+        let examples = RuleRunner.examplesInfo(spec: spec)
+        for exampleInfo in examples {
+            let example = exampleInfo.item
+            let pointer = exampleInfo.pointer
+            if example.dataValue != nil || example.serializedValue != nil {
+                let diagnostics = Diagnostic( severity: .error,
+                                             code: .missingRequired,
+                                             message: "Example does not support 'dataValue', 'serializedValue'in OpenAPI 3.0/3.1",
+                                             pointer: pointer,
+                                             rule: name)
+                diags.append(diagnostics)
+            }
+        }
+        return diags
+    }
+}
+
+struct OpenAPIHeader30_ValidFieldsRule: Rule {
+    let name = "OpenAPIHeader30_ValidFieldsRule"
+    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
+        var diags: [Diagnostic] = []
+        let headers = RuleRunner.headerInfo(spec: spec)
+        for headerInfo in headers {
+            let header = headerInfo.item
+            let pointer = headerInfo.pointer
+            if header.key != nil {
+                let diagnostics = Diagnostic( severity: .error,
+                                             code: .missingRequired,
+                                             message: "Header/Parameter must not specify 'name' and 'in' in OpenAPI 3.0/3.1",
+                                             pointer: pointer,
+                                             rule: name)
+                diags.append(diagnostics)
+            }
+        }
+        return diags
+    }
+}
+struct OpenAPITag30_ValidFieldsRule: Rule {
+    let name = " OpenAPITag30_ValidFieldsRule"
+    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
+        var diags: [Diagnostic] = []
+        for tag in spec.tags {
+            if tag.summary != nil ||
+                tag.parent != nil ||
+                tag.kind != nil {
+                let diagnostics = Diagnostic( severity: .error,
+                                             code: .missingRequired,
+                                             message: "Tags must not specify 'summary','parent' or 'kind' in OpenAPI 3.0/3.1",
+                                             pointer: "#/tags/\(tag.key ?? "")",
+                                             rule: name)
+                diags.append(diagnostics)
+            }
+        }
+        return diags
+    }
+}
 struct OpenAPIResponse30_ValidFieldsRule: Rule {
     let name = "OpenAPIResponse30_ValidFieldsRule"
+    
 
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         var diags: [Diagnostic] = []
@@ -668,12 +729,12 @@ struct OpenAPIResponse30_ValidFieldsRule: Rule {
             let pointer = info.pointer
             let response = info.item
                     if  response.summary != nil || !(response.summary ?? "").isEmpty{
-                        let diagnotics = Diagnostic( severity: .error,
+                        let diagnostics = Diagnostic( severity: .error,
                                                      code: .missingRequired,
                                                      message: "Response does not support 'summary' in OpenAPI 3.0/3.1",
                                                      pointer: pointer,
                                                      rule: name)
-                        diags.append(diagnotics)
+                        diags.append(diagnostics)
                 }
         }
        
@@ -681,6 +742,174 @@ struct OpenAPIResponse30_ValidFieldsRule: Rule {
         return diags
     }
 }
+struct OpenAPISchema30_ValidFieldsRule: Rule {
+    let name = "OpenAPISchema30_ValidFieldsRule"
+    
+
+    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
+        var diags: [Diagnostic] = []
+        for schemaInfo in RuleRunner.schemasInfo(spec: spec) {
+            let pointer = schemaInfo.pointer
+            let schema = schemaInfo.item
+            if  schema.allowedValues.count > 0 {
+                        let diagnostics = Diagnostic( severity: .error,
+                                                     code: .missingRequired,
+                                                     message: "Schemas must not have 'allowedValue' in OpenAPI 3.0",
+                                                     pointer: pointer,
+                                                     rule: name)
+                        diags.append(diagnostics)
+                }
+        }
+       
+        
+        return diags
+    }
+}
+struct OpenAPIDiscriminator30_ValidFieldsRule: Rule {
+    let name = "OpenAPIDiscriminator30_ValidFieldsRule"
+    
+
+    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
+        var diags: [Diagnostic] = []
+        for schemaInfo in RuleRunner.schemasInfo(spec: spec) {
+            let pointer = schemaInfo.pointer
+            let schema = schemaInfo.item
+            if  schema.defaultValue != nil {
+                        let diagnostics = Diagnostic( severity: .error,
+                                                     code: .missingRequired,
+                                                     message: "Discriminators must not have 'defaultValue' in OpenAPI 3.0/3.1",
+                                                     pointer: pointer,
+                                                     rule: name)
+                        diags.append(diagnostics)
+                }
+        }
+       
+        
+        return diags
+    }
+}
+
+struct OpenAPIXMLObject_ValidFieldsRule: Rule {
+    let name = "OpenAPIXMLObject_ValidFieldsRule"
+    
+
+    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
+        var diags: [Diagnostic] = []
+        for schemaInfo in RuleRunner.schemasInfo(spec: spec) {
+            let pointer = schemaInfo.pointer
+            let schema = schemaInfo.item
+            if let xmlObject = schema.xml,
+            xmlObject.nodeType != nil {
+                let diagnostics = Diagnostic( severity: .error,
+                                             code: .missingRequired,
+                                             message: "XMLObject must not have 'nodeType' in OpenAPI 3.0/3.1",
+                                             pointer: pointer,
+                                             rule: name)
+                diags.append(diagnostics)
+            }
+           
+        }
+       
+        
+        return diags
+    }
+}
+
+struct OpenAPISecurityScheme_ValidFieldsRule: Rule {
+    let name = "OpenAPISecurityScheme_ValidFieldsRule"
+    
+
+    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
+        var diags: [Diagnostic] = []
+        for securityScheme in (spec.components?.securitySchemas ?? []) {
+           
+            if securityScheme.oauth2MetadataURL != nil,
+               securityScheme.deprecated != nil{
+                let diagnostics = Diagnostic( severity: .error,
+                                             code: .missingRequired,
+                                             message: "SecurityScheme must not have 'oauth2MetadataURL','deprecated' in OpenAPI 3.0/3.1",
+                                              pointer: "#/components/securityScheme/\(securityScheme.key ?? "")",
+                                             rule: name)
+                diags.append(diagnostics)
+            }
+           
+        }
+       
+        
+        return diags
+    }
+}
+
+struct OpenAPIOAuthFlow_ValidFieldsRule: Rule {
+    let name = "OpenAPIOAuthFlow_ValidFieldsRule"
+    
+
+    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
+        var diags: [Diagnostic] = []
+        for securityScheme in (spec.components?.securitySchemas ?? []) {
+           
+            if let flows = securityScheme.flows,
+               flows.deviceAuthorization != nil {
+                let diagnostics = Diagnostic( severity: .error,
+                                             code: .missingRequired,
+                                             message: "OAuth flows must not have 'deviceAuthorization' in OpenAPI 3.0/3.1",
+                                              pointer: "#/components/securityScheme/\(securityScheme.key ?? "")/flows",
+                                             rule: name)
+                diags.append(diagnostics)
+                if let password = flows.password,
+                   password.deviceAuthorizationUrl != nil  {
+                    let diagnostics = Diagnostic( severity: .error,
+                                                 code: .missingRequired,
+                                                 message: "OAuth flows must not have 'deviceAuthorizationUrl' in OpenAPI 3.0/3.1",
+                                                  pointer: "#/components/securityScheme/\(securityScheme.key ?? "")/flows/password",
+                                                 rule: name)
+                    diags.append(diagnostics)
+                    
+                }
+                if let authorizationCode =  flows.authorizationCode,
+                   authorizationCode.deviceAuthorizationUrl != nil {
+                    let diagnostics = Diagnostic( severity: .error,
+                                                 code: .missingRequired,
+                                                 message: "OAuth flows must not have 'deviceAuthorizationUrl' in OpenAPI 3.0/3.1",
+                                                  pointer: "#/components/securityScheme/\(securityScheme.key ?? "")/flows/authorizationCode",
+                                                 rule: name)
+                    diags.append(diagnostics)
+                    
+                }
+                if let clientCredentials = flows.clienCredentials,
+                   clientCredentials.deviceAuthorizationUrl != nil {
+                    let diagnostics = Diagnostic( severity: .error,
+                                                 code: .missingRequired,
+                                                 message: "OAuth flows must not have 'deviceAuthorizationUrl' in OpenAPI 3.0/3.1",
+                                                  pointer: "#/components/securityScheme/\(securityScheme.key ?? "")/flows/clientCredentials",
+                                                 rule: name)
+                    diags.append(diagnostics)
+                    
+                }
+                if let implicit = flows.implicit,
+                   implicit.deviceAuthorizationUrl != nil {
+                    let diagnostics = Diagnostic( severity: .error,
+                                                 code: .missingRequired,
+                                                 message: "OAuth flows must not have 'deviceAuthorizationUrl' in OpenAPI 3.0/3.1",
+                                                  pointer: "#/components/securityScheme/\(securityScheme.key ?? "")/flows/implicit",
+                                                 rule: name)
+                    diags.append(diagnostics)
+                    
+                    
+                }
+                
+                    
+            }
+            
+            
+           
+        }
+       
+        
+        return diags
+    }
+}
+
 struct SupportedHTPStatusRule: Rule {
     let name = "OAS.SupportedHTPStatusRule"
     

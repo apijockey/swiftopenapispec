@@ -25,6 +25,9 @@ public struct OpenAPIExample : KeyedElement, RefPointerNavigable {
  
     public static let EXTERNAL_VALUE_KEY = "externalValue"
     public static let SERIALIZED_VALUE_KEY = "serializedValue"
+    public init(value : JSONValue) {
+        self.value = value
+    }
     public init(load map: StringDictionary, diagnostics: inout [Diagnostic],pointer : String) throws {
         if case let .string(refKey) = map[OpenAPISchemaReference.REF_KEY]{
             self.ref = OpenAPISchemaReference(ref: refKey)

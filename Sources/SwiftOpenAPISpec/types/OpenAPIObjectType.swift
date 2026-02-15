@@ -149,7 +149,7 @@ public struct OpenAPIObjectType : OpenAPISchemaType,ThrowingHashMapInitiable, Po
     public var additionalPropertiesObject = [OpenAPISchema]()
     public var required : [String] = []
     public var unevaluatedProperties : Bool = false
-    public var discriminator: OpenAPIDiscriminator?
+   
     public var nullable: Bool?
     public var readOnly: Bool?
     public var writeOnly: Bool?

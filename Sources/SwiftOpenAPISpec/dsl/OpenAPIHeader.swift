@@ -46,7 +46,7 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
        
         self.explode = map.readIfPresent(Self.EXPLODE_KEY, valueType: Bool.self, diagnostics : &diagnostics, pointer: pointer)
         self.allowReserved = map.readIfPresent(Self.ALLOW_RESERVED_KEY,valueType:  Bool.self, diagnostics : &diagnostics, pointer: pointer)
-        self.example = map.readIfPresent(Self.EXAMPLE_KEY,valueType:  String.self, diagnostics : &diagnostics, pointer: pointer)
+        self.example = try map.readIfPresent(Self.EXAMPLE_KEY,objectType:  OpenAPIExample.self, diagnostics : &diagnostics, pointer: pointer)
         
         self.examples  = try map.mapListIfPresent(Self.EXAMPLES_KEY, objectType: OpenAPIExample.self, diagnostics: &diagnostics, pointer: pointer)
         self.content = try map.readIfPresent(Self.CONTENT_KEY,objectType:  OpenAPIMediaType.self, diagnostics: &diagnostics, pointer: pointer)
@@ -110,7 +110,7 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
     public var explode : Bool? = nil
     public var ref : OpenAPISchemaReference? = nil
     public var allowReserved : Bool? = nil
-    public var example :(any Sendable)? = nil
+    public var example :OpenAPIExample? = nil
     public var extensions : [OpenAPIExtension] = []
     public var examples : [OpenAPIExample] = []
     public var content : OpenAPIMediaType? = nil

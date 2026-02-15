@@ -82,20 +82,27 @@ public struct RuleRunner  : Sendable{
             OpenAPIComponentV30FieldsNotAllowed(),
             OpenAPIComponentV30_1FieldsNotAllowed(),
             OpenAPIMediaTypeV30_1ItemFieldsNotAllowed(),
+            OpenAPIExample30_ValidFieldsRule(),
+            OpenAPIHeader30_ValidFieldsRule(),
             RequiredResponsesComponentNamessRule(),
             OpenAPIResponse30_ValidFieldsRule(),
             RequiredExamplesComponentNamessRule(),
             RequiredRequestBodiesComponentsNamessRule(),
             RequiredsHeaderComponentsNamessRule(),
             RequiredSecuritySchemeComponentsNamessRule(),
+            OpenAPISchema30_ValidFieldsRule(),
             RequiredLinksComponentsNamessRule(),
             RequiredCallBackomponentsNamessRule(),
+            OpenAPITag30_ValidFieldsRule(),
             OperationMustHaveResponsesRule(),
             ExternalDocumentationMustHaveURLRule(),
             ParameterLocationsMustHaveInRule(),
+            OpenAPIDiscriminator30_ValidFieldsRule(),
+            OpenAPIXMLObject_ValidFieldsRule(),
             RequestBodiesMustHaveContentRule(),
             ResponsesMustHaveDescriptionRule(),
             LinkMustHaveRefOrIdentifier(),
+            OpenAPISecurityScheme_ValidFieldsRule(),
             TagMustHaveName(),
             ReferencesMustHaveRefRule()
         ]
@@ -129,12 +136,15 @@ public struct RuleRunner  : Sendable{
             OpenAPIComponentV30_1FieldsNotAllowed(),
             OpenAPIPathV30_ItemFieldsNotAllowed(),
             OpenAPIMediaTypeV30_1ItemFieldsNotAllowed(),
+            OpenAPITag30_ValidFieldsRule(),
             RequiredResponsesComponentNamessRule(),
             RequiredExamplesComponentNamessRule(),
             OpenAPIMediaTypeV30_1ItemFieldsNotAllowed(),
             RequiredRequestBodiesComponentsNamessRule(),
+            OpenAPIExample30_ValidFieldsRule(),
             OpenAPIResponse30_ValidFieldsRule(),
             RequiredsHeaderComponentsNamessRule(),
+            OpenAPIDiscriminator30_ValidFieldsRule(),
             RequiredSecuritySchemeComponentsNamessRule(),
             RequiredLinksComponentsNamessRule(),
             RequiredCallBackomponentsNamessRule(),
@@ -143,6 +153,8 @@ public struct RuleRunner  : Sendable{
             ParameterLocationsMustHaveInRule(),
             RequestBodiesMustHaveContentRule(),
             ResponsesMustHaveDescriptionRule(),
+            OpenAPIXMLObject_ValidFieldsRule(),
+            OpenAPISecurityScheme_ValidFieldsRule(),
             LinkMustHaveRefOrIdentifier(),
             TagMustHaveName(),
             ReferencesMustHaveRefRule()
@@ -227,6 +239,106 @@ public struct RuleRunner  : Sendable{
             for content in response.item.content {
                 let pointer = "\(response.pointer)/content/\(JSONPointer.escape(content.key ?? ""))"
                 items.append((item: content,  pointer: pointer))
+            }
+        }
+        return items
+    }
+    public static func headerInfo(spec: OpenAPISpecification) -> [(item: OpenAPIHeader, pointer:String)] {
+        var items =  [(OpenAPIHeader, String)]()
+        if let headers = spec.components?.headers?.map ({ header in
+                (item:header, pointer: "#/components/headers/\(header.key ?? "")")
+        }) {
+            items.append(contentsOf: headers)
+        }
+        for responseInfo in responseInfo(spec: spec) {
+            let response = responseInfo.item
+            let pointer = responseInfo.pointer
+            let headersInfo = response.headers.map { header in
+                (item:header, pointer: "\(pointer)/\(header.key ?? "")")
+            }
+            items.append(contentsOf:headersInfo)
+            
+        }
+        for mediaTypeInfo in mediaTypes(spec: spec) {
+            
+            let mediaType = mediaTypeInfo.item
+            let pointer = mediaTypeInfo.pointer
+            
+            for encoding in mediaType.encoding{
+                for header in encoding.headers {
+                    items.append((item: header, pointer: "\(pointer)/encoding/\(encoding.key ?? "")/headers\(header.key ?? "")"))
+                }
+            }
+            for encoding in mediaType.itemEncoding{
+                for header in encoding.headers {
+                    items.append((item: header, pointer: "\(pointer)/itemEncoding/\(encoding.key ?? "")/headers\(header.key ?? "")"))
+                }
+            }
+            for encoding in mediaType.prefixEncoding{
+                for header in encoding.headers {
+                    items.append((item: header, pointer: "\(pointer)/prefixEncoding/\(encoding.key ?? "")/headers\(header.key ?? "")"))
+                }
+            }
+             
+        }
+        return items
+    }
+    public static func examplesInfo(spec: OpenAPISpecification) -> [(item: OpenAPIExample, pointer:String)] {
+        var items =  [(OpenAPIExample, String)]()
+        if let examples = spec.components?.examples?.map ({ example in
+            return (item: example, pointer: "#/components/examples/\(example.key ?? "")")
+        }) {
+            items.append(contentsOf: examples)
+        }
+       
+        let mediaTypeInfos = mediaTypes(spec: spec)
+        for mediaTypeInfo in mediaTypeInfos {
+            let mediaType = mediaTypeInfo.item
+            let pointer = mediaTypeInfo.pointer
+            if let example = mediaType.example {
+                items.append((item: example, pointer: "\(pointer)/example"))
+            }
+            for example in mediaType.examples {
+                items.append((item: example, pointer: "\(pointer)/examples/\(example.key ?? "")"))
+            }
+            if let schema = mediaType.schema,
+               let example = schema.example{
+                items.append((item: example, pointer: "\(pointer)/schema/example/\(example.key ?? "")"))
+            }
+            if let schema = mediaType.itemSchema,
+               let example = schema.example {
+                items.append((item: example, pointer: "\(pointer)/schema/example/\(example.key ?? "")"))
+            }
+        }
+        for headerInfo in headerInfo(spec: spec) {
+            let header = headerInfo.item
+            let pointer = headerInfo.pointer
+            if let example = header.example {
+                items.append((item: example, pointer: "\(pointer)/example"))
+            }
+            for example in header.examples {
+                items.append((item: example, pointer: "\(pointer)/examples/\(example.key ?? "")"))
+            }
+        }
+        for schema in (spec.components?.schemas ?? []) {
+            if let example = schema.example {
+                items.append((item: example, pointer: "#/components/schemas/\(schema.key ?? "")example/\(example.key ?? "")"))
+            }
+        }
+        return items
+    }
+    public static func schemasInfo(spec: OpenAPISpecification) -> [(item: OpenAPISchema, pointer:String)] {
+        var items =  [(OpenAPISchema, String)]()
+        if let schemas = spec.components?.schemas {
+            for namedSchema in schemas {
+                items.append((item: namedSchema,pointer:"#/components/schemas/\(namedSchema.key ?? "")"))
+            }
+        }
+        for info in RuleRunner.mediaTypes(spec: spec)  {
+            let pointer = info.pointer
+            let content = info.item
+            if let schema = content.schema  {
+                items.append((item: schema,pointer: "\(pointer)/schema"))
             }
         }
         return items

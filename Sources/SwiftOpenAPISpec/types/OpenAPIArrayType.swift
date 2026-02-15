@@ -39,7 +39,7 @@
 
 
 public struct OpenAPIArrayType : OpenAPISchemaType, PointerNavigable{
-    public var discriminator: OpenAPIDiscriminator?
+   
     
     
     
