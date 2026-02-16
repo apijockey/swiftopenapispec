@@ -14,7 +14,12 @@
 
 # base
 openapi: 3.0.3
-info: {version: "1.0"}
+info:
+  version: "1.0"
+  title: "required"
+  license:
+    identifier: "Identifer is not supported, but name is required"
+
 paths:
   /pets/{id}:
     description: Returns pets information

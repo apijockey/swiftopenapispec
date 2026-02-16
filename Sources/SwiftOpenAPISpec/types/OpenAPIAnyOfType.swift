@@ -87,6 +87,9 @@ public struct OpenAPIAnyOfType : OpenAPISchemaType, PointerNavigable {
         }
         throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIAnyOfType",segmentName)
     }
+    public static var supportedKeys: [String] {
+        return [TYPE_KEY,DISCRIMINATOR_KEY,OpenAPISchemaReference.REF_KEY]
+    }
     public let type : String?
     public var items: [OpenAPISchema]?
    

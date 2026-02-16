@@ -122,13 +122,15 @@ public struct OpenAPIParameter :  KeyedElement,  PointerNavigable {
             self.style = style
         }
         var supportingElments = Set(Self.supportedKeys)
-        supportingElments.subtract((self.extensions ?? []).compactMap({ $0.key }))
+        supportingElments.formUnion((self.extensions ?? []).compactMap({ $0.key }))
         diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
         
         
         
     }
     public static let supportedKeys: Set<String> = [
+        FORMAT_KEY,
+        NAME_KEY,
         IN_KEY,
         REQUIRED_KEY,
         DESCRIPTION_KEY,
@@ -137,7 +139,12 @@ public struct OpenAPIParameter :  KeyedElement,  PointerNavigable {
         ALLOW_RESERVED_KEY,
         SCHEMA_KEY,
         STYLE_KEY,
-        EXPLODE_KEY
+        EXPLODE_KEY,
+        EXAMPLE_KEY,
+        EXAMPLES_KEY,
+        CONTENT_KEY,
+        OpenAPISchemaReference.REF_KEY,
+        
     ]
    
 

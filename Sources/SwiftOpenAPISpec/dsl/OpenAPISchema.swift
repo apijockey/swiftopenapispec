@@ -259,7 +259,35 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
         self.writeOnly = map.readIfPresent(Self.WRITE_ONLY_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.WRITE_ONLY_KEY))
         self.xml =  try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIXMLObject.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXAMPLE_KEY))
         var supportingElments = Set(Self.supportedKeys)
-        supportingElments.subtract((self.extensions ?? []).compactMap({ $0.key }))
+        supportingElments.formUnion((self.extensions ?? []).compactMap({ $0.key }))
+        switch type {
+        case .allOf:
+            supportingElments.formUnion(OpenAPIAllOfType.supportedKeys)
+        case .anyOf:
+            supportingElments.formUnion(OpenAPIAnyOfType.supportedKeys)
+        case .array:
+            supportingElments.formUnion(OpenAPIArrayType.supportedKeys)
+        case .bool:
+            break
+        case .integer:
+            break
+        case .number:
+            break
+        case .object:
+            supportingElments.formUnion(OpenAPIObjectType.supportedKeys)
+        case .oneOf:
+            supportingElments.formUnion(OpenAPIOneOfType.supportedKeys)
+        case .string:
+            break
+        case .ref:
+            supportingElments.formUnion(OpenAPISchemaReference.supportedKeys)
+        case .null:
+            break
+        case .unknown:
+            break
+        case nil:
+            break
+        }
         diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
         
     }
@@ -271,6 +299,7 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
             DEPRECATED_KEY,
             EXAMPLE_KEY,
             EXTENSIONS_KEY,
+            OpenAPISchemaReference.REF_KEY,
             EXCLUSIVE_MAXIMUM_KEY,
             EXCLUSIVE_MINIMUM_KEY,
             FORMAT_KEY,
@@ -295,7 +324,6 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
             TYPE_KEY,
             TITLE_KEY,
             REQUIRED_KEY
-
         ]
     }
          //self.format30 = map.readIfPresent(Self.FORMAT_KEY, String.self)

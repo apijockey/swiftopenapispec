@@ -50,7 +50,7 @@ public struct OpenAPILink : KeyedElement , PointerNavigable {
             }
         }
         var supportingElments = Set(Self.supportedKeys)
-        supportingElments.subtract((self.extensions ?? []).compactMap({ $0.key }))
+        supportingElments.formUnion((self.extensions ?? []).compactMap({ $0.key }))
         diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
            
     }
@@ -61,6 +61,7 @@ public struct OpenAPILink : KeyedElement , PointerNavigable {
         PARAMETERS_KEY,
         REQUEST_BODY_KEY,
         DESCRIPTION_KEY,
+        OpenAPISchemaReference.REF_KEY,
         SERVER_KEY
     ]
     public func element(for segmentName: String) throws -> NavigationResult {

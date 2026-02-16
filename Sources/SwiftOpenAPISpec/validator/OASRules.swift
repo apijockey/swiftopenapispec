@@ -73,7 +73,7 @@ struct OpenAPIInfoV30FieldsNotAllowed:  Rule{
         if spec.info?.summary != nil {
             let diag = Diagnostic(severity: .error,
                                   code: .invalidElement,
-                                  message: "info.summary is not allowed in OpenAPI 3.0",
+                                  message: "'info.summary' is not allowed in OpenAPI 3.0/3.1",
                                   pointer: "#/info/summary",
                                   rule: name)
             diagnostics.append(diag)
@@ -141,7 +141,7 @@ struct  OpenAPILicenseV30FieldsNotAllowed: Rule {
            license.identifier != nil  {
             diagnostics.append(.init(severity: .error,
                                      code: .invalidElement,
-                                     message: "license.identifier is not allowed in OpenAPI 3.0/3.1",
+                                     message: "license.identifier is not allowed in OpenAPI 3.0",
                                      pointer: "#/info/license/identifier",
                                      rule: name))
             
@@ -503,7 +503,7 @@ struct SupportedHTTPMethodRule: Rule {
     
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         var diagnostics: [Diagnostic] = []
-        let supportedMethods = ["get", "put", "post", "delete", "options", "head", "patch", "trace"]
+        let supportedMethods = OpenAPIPathItem.Operations.allCases.map(\.rawValue)
         for path in spec.paths {
             
             for (operation) in path.operations where !supportedMethods.contains(operation.key ?? "nil") {

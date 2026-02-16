@@ -41,7 +41,20 @@
 public struct OpenAPIObjectType : OpenAPISchemaType,ThrowingHashMapInitiable, PointerNavigable{
     
     
-   
+    public static var supportedKeys: [String] {
+        return [
+            DEPENDENT_REQUIRED_KEY,
+            DEPENDENCIES_KEY,
+            TYPE_KEY,
+            PROPERTIES_KEY,
+            PATTERNPROPERTIES_KEY,
+            MAX_PROPERTIES_KEY,
+            MIN_PROPERTIES_KEY,
+            ADDITIONAL_PROPERTIES_KEY,
+            UNEVALUATEDPROPERTIES_KEY,
+            REQUIRED_KEY
+        ]
+    }
     
     public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {

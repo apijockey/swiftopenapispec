@@ -54,7 +54,6 @@ public struct OpenAPIInfo : ThrowingHashMapInitiable, PointerNavigable {
         
         // Validate unsupported keys
         diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: Self.supportedKeys, pointer: pointer))
-        
     }
     
     /// The set of keys supported by OpenAPI Info object
@@ -66,8 +65,7 @@ public struct OpenAPIInfo : ThrowingHashMapInitiable, PointerNavigable {
             Self.CONTACT_KEY,
             Self.LICENSE_KEY,
             Self.VERSION_KEY,
-            Self.SUMMARY_KEY,
-            "extensions"
+            Self.SUMMARY_KEY
         ]
     }
    
@@ -87,8 +85,6 @@ public struct OpenAPIInfo : ThrowingHashMapInitiable, PointerNavigable {
         case Self.SUMMARY_KEY: return .value(JSONValue(summary))
     case Self.TERMS_KEY: return .value(JSONValue(termsOfService))
         case Self.CONTACT_KEY: return .navigable(contact)
-        
-        
         default:
             // Für x-* Vendor Extensions einzelne Keys erlauben: "x-..." -> passenden Extension-Wert liefern
             if segmentName.hasPrefix("x-"), let exts = extensions {
@@ -107,10 +103,6 @@ public struct OpenAPIInfo : ThrowingHashMapInitiable, PointerNavigable {
     public var license : OpenAPILicense? = nil
     public var termsOfService : String? = nil
     public var title : String?
-    public var  summary : String?
-   
-
-   
+    public var summary : String?
     public var version : String?
-    
 }

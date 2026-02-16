@@ -93,6 +93,7 @@ public struct OpenAPISecurityScheme : KeyedElement , PointerNavigable {
         Self.TYPE_KEY,
         Self.DESCRIPTION_KEY,
         Self.NAME_KEY,
+        OpenAPISchemaReference.REF_KEY,
         Self.LOCATION_KEY,
         Self.SCHEME_KEY,
         Self.BEARER_FORMAT_KEY,

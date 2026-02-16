@@ -53,6 +53,7 @@ public struct OpenAPIExample : KeyedElement, RefPointerNavigable {
             Self.DESCRIPTION_KEY,
             Self.VALUE_KEY,
             Self.EXTERNAL_VALUE_KEY,
+            OpenAPISchemaReference.REF_KEY,
             Self.SERIALIZED_VALUE_KEY
         ]
     }

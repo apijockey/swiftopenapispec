@@ -51,9 +51,10 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
         self.securityObjects = try map.mapListIfPresent(Self.SECURITY_KEY, objectType: OpenAPISecuritySchemeReference.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.SECURITY_KEY))
         self.servers =  try map.mapListIfPresent(OpenAPISpecification.SERVERS_KEY, objectType: OpenAPIServer.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISpecification.SERVERS_KEY))
         extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
-        var supportingElments = Set(Self.supportedKeys)
-        supportingElments.subtract((self.extensions ?? []).compactMap({ $0.key }))
-        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
+        var supportingElements = Set(Self.supportedKeys)
+        supportingElements.formUnion((self.extensions ?? []).compactMap({ $0.key }))
+        
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElements , pointer: pointer))
        
         
     }
@@ -62,12 +63,16 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
         Self.DEPRECATED_KEY,
         Self.DESCRIPTION_KEY,
         Self.EXTERNAL_DOCS_KEY,
+        Self.CALLBACKS_KEY,
         Self.OP_ID_KEY,
         Self.PARAMETERS_KEY,
         Self.REQUEST_BODIES_KEY,
+        Self.SUMMARY_KEY,
         Self.RESPONSES_KEY,
-        Self.DEFAULT_RESPONSE_KEY
-        ]
+        Self.DEFAULT_RESPONSE_KEY,
+        Self.TAGS_KEY,
+        Self.SECURITY_KEY
+    ]
     /// Navigates to a specific element within the OpenAPI operation structure.
     ///
     /// - Parameter segmentName: The name of the element to navigate to

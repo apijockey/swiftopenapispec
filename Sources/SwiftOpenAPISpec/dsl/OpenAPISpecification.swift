@@ -127,24 +127,29 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
         
         
         self.extensions = try OpenAPIExtension.extensionElements(dictionary, &diagnostics, pointer: JSONPointer.join(pointer, "extensions"))
-        var supportingElments = Set(self.supportedElements)
-        supportingElments.subtract((self.extensions ?? []).compactMap({ $0.key }))
+        var supportingElments = Set(Self.supportedKeys)
+        supportingElments.formUnion((self.extensions ?? []).compactMap({ $0.key }))
         diagnostics.append(contentsOf: dictionary.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
 
        
         
        
     }
-    private var supportedElements : Set<String> {
-        [
-            OpenAPISpecification.OPENAPI_KEY,
-            OpenAPISpecification.INFO_KEY,
-            OpenAPISpecification.SERVERS_KEY,
-            OpenAPISpecification.PATHS_KEY,
-            OpenAPISpecification.COMPONENTS_KEY,
-            OpenAPISpecification.TAGS_KEY
-            ]
-    }
+    private static let supportedKeys : Set<String> = [
+        Self.COMPONENTS_KEY,
+        Self.EXTERNAL_DOCS_KEY,
+        Self.INFO_KEY,
+        Self.JSON_SCHEMA_DIALECT_KEY,
+        Self.OPENAPI_KEY,
+        Self.PATHS_KEY,
+        Self.SECURITY_KEY,
+        Self.TAGS_KEY,
+        Self.SELF_URL_KEY,
+        Self.WEBHOOKS_KEY,
+        Self.SERVERS_KEY,
+        Self.SCHEMA_DATA_TYPE
+        
+    ]
    
     /// Userinfo  holds information about validation or generation errors on each struct to simplify and streamline error handling and navigation
     

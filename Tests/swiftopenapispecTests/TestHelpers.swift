@@ -199,7 +199,7 @@ struct TestHelpers {
             try await objectLoader.load(from: url)
         }
         
-        let errors = try await Validator.validateSchema(spec: apiSpec, ctx: ctx, baseURI: resourceUrl.absoluteString, resolver: &resolver)
+        let errors = try await Validator.validate(spec: apiSpec, baseURI: resourceUrl.absoluteString, ctx: ctx, resolver: &resolver)
         #expect(errors.count == fixture.expected.count, "Expected \(fixture.expected.count) errors, got \(errors.count)")
         let sortedErrors = errors.sorted { lhs, rhs in lhs.pointer < rhs.pointer }
         let sortedExpected = fixture.expected.sorted { lhs, rhs in lhs.pointer < rhs.pointer}

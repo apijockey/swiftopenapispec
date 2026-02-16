@@ -42,7 +42,7 @@ public struct OpenAPIEncoding : KeyedElement, PointerNavigable {
         
         // Validate unsupported keys (excluding extensions as they are dynamic)
         var supportingElments = Set(Self.supportedKeys)
-        supportingElments.subtract((self.extensions).compactMap({ $0.key }))
+        supportingElments.formUnion((self.extensions).compactMap({ $0.key }))
         diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
         
     }
@@ -57,6 +57,7 @@ public struct OpenAPIEncoding : KeyedElement, PointerNavigable {
             Self.ITEM_ENCODING_KEY,
             Self.STYLE_KEY,
             Self.EXPLODE_KEY,
+            OpenAPISchemaReference.REF_KEY,
             Self.ALLOW_RESERVED_KEY
         ]
     }

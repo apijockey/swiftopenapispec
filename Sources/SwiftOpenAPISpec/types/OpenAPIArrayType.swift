@@ -80,7 +80,18 @@ public struct OpenAPIArrayType : OpenAPISchemaType, PointerNavigable{
              self.items = try OpenAPISchema.initialize(load: type, diagnostics : &diagnostics, pointer: pointer).value
              }
     }
-   
+    public static var supportedKeys: [String] {
+        return [
+            ARRAY_TYPE_KEY,
+            TYPE_KEY,
+            MAX_ITEMS_KEY,
+            ITEMS_KEY,
+            MIN_ITEMS_KEY,
+            UNIQE_ITEMS_KEY,
+            MAX_CONTAINS_KEY,
+            MIN_CONTAINS_KEY
+        ]
+    }
 
     public func validate() throws {
         

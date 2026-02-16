@@ -54,7 +54,7 @@ public struct OpenAPITag:  KeyedElement, PointerNavigable {
         self.externalDocs = try map.readIfPresent(Self.EXTERNAL_DOCS_KEY, objectType: OpenAPIExternalDocumentation.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXTERNAL_DOCS_KEY))
         self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
         var supportingElments = Set(Self.supportedKeys)
-        supportingElments.subtract((self.extensions ?? []).compactMap({ $0.key }))
+        supportingElments.formUnion((self.extensions ?? []).compactMap({ $0.key }))
         diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
     }
     public static var supportedKeys: Set<String> {

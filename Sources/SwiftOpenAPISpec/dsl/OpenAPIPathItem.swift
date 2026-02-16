@@ -47,7 +47,7 @@ import Foundation
 public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
    
     
-    public enum Operations: String, Codable {
+    public enum Operations: String, Codable, CaseIterable {
         case get, post, put, delete, options, head, patch, trace, query
     }
     
@@ -80,6 +80,7 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
                 operation.key = key
                 self.operations.append(operation)
             }
+            
             else {
                 if key != Self.SUMMARY_KEY,
                    key != Self.DESCRIPTION_KEY,
@@ -107,9 +108,7 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
         }
         self.additionalOperations = try map.mapListIfPresent(Self.ADDITIONAL_OPERATIONS_KEY, valueType: OpenAPIOperation.self, pointer: JSONPointer.join(pointer, Self.ADDITIONAL_OPERATIONS_KEY))
         self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
-        var supportingElments = Set(Self.supportedKeys)
-        supportingElments.subtract((self.extensions).compactMap({ $0.key }))
-        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
+       
     }
    
     public static let supportedKeys: Set<String> = [

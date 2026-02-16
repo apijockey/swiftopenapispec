@@ -69,6 +69,7 @@ public struct RuleRunner  : Sendable{
             RequiredOpenAPI30FixedFieldsRule(),
             RequiredOpenAPIFixedInfoFieldsRule(),
             OpenAPIInfoV30FieldsNotAllowed(),
+            OpenAPILicenseV30FieldsNotAllowed(),
             RequiredPathsRule(),
             OpenAPIPathV30_ItemFieldsNotAllowed(),
             SupportedHTTPMethodRule(),

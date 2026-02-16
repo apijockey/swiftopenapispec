@@ -47,7 +47,7 @@ public struct OpenAPISchemaReference  : ThrowingHashMapInitiable, PointerNavigab
     }
     
     /// The set of keys supported by OpenAPI Schema Reference object (excluding dynamic extensions)
-    private static var supportedKeys: Set<String> {
+    public static var supportedKeys: Set<String> {
         [
             Self.REF_KEY,
             Self.SUMMARY_KEY,

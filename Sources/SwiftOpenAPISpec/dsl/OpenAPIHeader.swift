@@ -71,6 +71,7 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
         EXPLODE_KEY,
         DESCRIPTION_KEY,
         REQUIRED_KEY,
+        OpenAPISchemaReference.REF_KEY,
         SCHEMA_KEY
     ]
     

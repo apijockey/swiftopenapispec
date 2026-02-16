@@ -78,6 +78,7 @@ public struct OpenAPIMediaType :  KeyedElement , PointerNavigable {
             Self.EXAMPLE_KEY,
             Self.ENCODING_KEY,
             Self.PREFIX_ENCODING_KEY,
+            OpenAPISchemaReference.REF_KEY,
             Self.ITEM_ENCODING_KEY
         ]
     }

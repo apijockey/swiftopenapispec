@@ -22,7 +22,7 @@ cases:
         severity: "error"
         messageContains: "openapi, info, and paths are required"
     onlyThese: true
-  - fixture: "02-minimal-30-missingInfoTitle"
+  - fixture: "02-minimal-30-InfoValidations"
     shouldPass: false
     expected:
       - code: "missingRequired"
@@ -30,6 +30,11 @@ cases:
         rule: "OAS.RequiredOpenAPIFixedInfoFields"
         severity: "error"
         messageContains: "info element requires 'title' and 'version'."
+      - code: "invalidElement"
+        pointer: "#/info/summary"
+        rule: "OAS.OpenAPISpecificationV30FieldsNotAllowed"
+        severity: "error"
+        messageContains: "'info.summary' is not allowed in OpenAPI 3.0/3.1"
   - fixture: "02-minimal-30-missingInfoVersion"
     shouldPass: false
     expected:
@@ -38,6 +43,19 @@ cases:
         rule: "OAS.RequiredOpenAPIFixedInfoFields"
         severity: "error"
         messageContains: "info element requires 'title' and 'version'."
+  - fixture: "02-minimal-30-LicenseValidations.yaml"
+    shouldPass: false
+    expected:
+      - code: "missingRequired"
+        pointer: " #/info/license/name"
+        rule: "OAS.RequiredLicenseName"
+        severity: "error"
+        messageContains: "Missing license 'name'."
+      - code: "invalidElement"
+        pointer: " #/info/license/identifier"
+        rule: "OAS.OpenAPISpecificationV30FieldsNotAllowed"
+        severity: "error"
+        messageContains: "Missing license 'name'."
   - fixture: "02-minimal-30-missingPaths"
     shouldPass: false
     expected:
@@ -380,7 +398,7 @@ cases:
         severity: "error"
         messageContains: "dependency value must be an object or array, not boolean"
     onlyThese: true
-  - fixture: "01-minimal-30-unsupportedSpecFields.yaml"
+  - fixture: "01-minimal-30-unsupportedSpecFields"
     shouldPass : false
     expected:
       - code: "invalidElement"
@@ -389,12 +407,12 @@ cases:
         severity: "error"
         messageContains: "openapi.selfURL is not allowed in OpenAPI 3.0/3.1"
       - code: "invalidElement"
-        pointer: " #/jsonSchemaDialect"
+        pointer: "#/jsonSchemaDialect"
         rule: "OAS.OpenAPISpecificationV30FieldsNotAllowed"
         severity: "error"
         messageContains: "openapi.jsonSchemaDialect is not allowed in OpenAPI 3.0/3.1"
       - code: "invalidElement"
-        pointer: " #/jsonSchemaDialect"
+        pointer: "#/webhooks"
         rule: "OAS.OpenAPISpecificationV30FieldsNotAllowed"
         severity: "error"
         messageContains: "openapi.webhooks is not allowed in OpenAPI 3.0/3.1"

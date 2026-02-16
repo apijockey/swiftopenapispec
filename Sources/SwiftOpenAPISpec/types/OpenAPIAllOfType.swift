@@ -44,6 +44,9 @@ public struct OpenAPIAllOfType : OpenAPISchemaType, ThrowingHashMapInitiable, Po
     
     public var ref: OpenAPISchemaReference?
    
+    public static var supportedKeys: [String] {
+        return [TYPE_KEY,DISCRIMINATOR_KEY,OpenAPISchemaReference.REF_KEY]
+    }
     public static let TYPE_KEY = "allOf"
     public static let DISCRIMINATOR_KEY = "discriminator"
   
@@ -52,6 +55,7 @@ public struct OpenAPIAllOfType : OpenAPISchemaType, ThrowingHashMapInitiable, Po
         if case .array = map[Self.TYPE_KEY] {
             self.type = "array"
         }
+    
         else {
             self.type = "unknown"
             diagnostics.append(Diagnostic(severity: .error,
