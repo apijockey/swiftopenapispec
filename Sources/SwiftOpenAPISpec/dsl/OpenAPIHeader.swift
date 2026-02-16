@@ -46,7 +46,7 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
        
         self.explode = map.readIfPresent(Self.EXPLODE_KEY, valueType: Bool.self, diagnostics : &diagnostics, pointer: pointer)
         self.allowReserved = map.readIfPresent(Self.ALLOW_RESERVED_KEY,valueType:  Bool.self, diagnostics : &diagnostics, pointer: pointer)
-        self.example = try map.readIfPresent(Self.EXAMPLE_KEY,objectType:  OpenAPIExample.self, diagnostics : &diagnostics, pointer: pointer)
+        self.example = map[Self.EXAMPLE_KEY]
         
         self.examples  = try map.mapListIfPresent(Self.EXAMPLES_KEY, objectType: OpenAPIExample.self, diagnostics: &diagnostics, pointer: pointer)
         self.content = try map.readIfPresent(Self.CONTENT_KEY,objectType:  OpenAPIMediaType.self, diagnostics: &diagnostics, pointer: pointer)
@@ -85,7 +85,7 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
            return .value(value)
        case Self.CONTENT_KEY: return .navigable(content)
        case Self.EXAMPLE_KEY:
-           let value = try JSONValue(example)
+           let value = example
            return .value(value)
        case Self.EXAMPLES_KEY: return .navigableCollection(examples)
        case Self.EXPLODE_KEY:
@@ -101,13 +101,11 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
        case Self.STYLE_KEY: return .value(JSONValue(style))
        case OpenAPISchemaReference.REF_KEY: return .reference(ref?.reference)
        default:
-           // Für x-* Vendor Extensions einzelne Keys erlauben: "x-..." -> passenden Extension-Wert liefern
-//           if segmentName.hasPrefix("x-"), let exts = extensions {
-//               let ext = exts.first(where: { $0.key == segmentName }) {
-//                   // Gib die strukturierte oder einfache Extension zurück
-//                   //return ext.structuredExtension?.properties ?? ext.simpleExtensionValue
-//               }
-//           }
+           if segmentName.hasPrefix("x-"),
+               let ext = extensions.first(where: { $0.key == segmentName }) {
+                   // Gib die strukturierte oder einfache Extension zurück
+               return .navigable(ext)
+            }
            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIHeader", segmentName)
     
        
@@ -124,7 +122,7 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
     public var explode : Bool? = nil
     public var ref : OpenAPISchemaReference? = nil
     public var allowReserved : Bool? = nil
-    public var example :OpenAPIExample? = nil
+    public var example :JSONValue? = nil
     public var extensions : [OpenAPIExtension] = []
     public var examples : [OpenAPIExample] = []
     public var content : OpenAPIMediaType? = nil

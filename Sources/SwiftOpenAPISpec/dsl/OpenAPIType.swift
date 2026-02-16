@@ -53,11 +53,11 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
         case .some("array"):
             let arrayType = try OpenAPIArrayType(load: map, diagnostics : &diagnostics, pointer: pointer)
             self = .array(arrayType)
-
+        
         case .some("object"):
             let objectType = try OpenAPIObjectType(load: map, diagnostics: &diagnostics, pointer : pointer)
             self = .object(objectType)
-
+        
         case .some("boolean"):
             self = .bool
                    
@@ -67,6 +67,7 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
             if map.readIfPresent(OpenAPISchemaReference.REF_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: pointer) != nil{
                 let ref = try OpenAPISchemaReference(load: map, diagnostics: &diagnostics,pointer :pointer)
                    self = .ref(ref)
+                  
                    return
             }
             // Try composite constructs if type is missing
@@ -74,24 +75,29 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
                 case .array  = oneOfValue  {
                 let pointer = JSONPointer.join(pointer, "oneOf")
                 var localDiagnostics: [Diagnostic] = []
+               
                 let oneOf = try OpenAPIOneOfType(load: map, diagnostics: &localDiagnostics,pointer : pointer)
-                diagnostics.append(contentsOf: localDiagnostics)
+               
                 self = .oneOf(oneOf)
+                
                 return
             }
            
             if let oneOfValue = map[OpenAPIAnyOfType.TYPE_KEY],
                 case .array  = oneOfValue  {
-                let pointer = JSONPointer.join(pointer, "oneOf")
+                let pointer = JSONPointer.join(pointer, "anyOf")
                 // OpenAPIAnyOfType has a different initializer style
                 let anyOf = try OpenAPIAnyOfType(load: map,  &diagnostics, pointer: pointer)
                 self = .anyOf(anyOf)
+                
                 return
             }
             if let oneOfValue = map[OpenAPIAllOfType.TYPE_KEY],
                 case .array  = oneOfValue  {
                 let pointer = JSONPointer.join(pointer, "allOf")
+                
                 let allOf = try OpenAPIAllOfType(load: map, diagnostics: &diagnostics,pointer : pointer)
+                
                 self = .allOf(allOf)
                 return
             }
@@ -108,9 +114,9 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
             self = .unknown(type ?? "")
         }
         
-        let supportingElments = Set(Self.supportedKeys)
+       
         
-        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
+                    
         
     }
     

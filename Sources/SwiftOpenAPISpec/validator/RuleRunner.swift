@@ -295,36 +295,22 @@ public struct RuleRunner  : Sendable{
         for mediaTypeInfo in mediaTypeInfos {
             let mediaType = mediaTypeInfo.item
             let pointer = mediaTypeInfo.pointer
-            if let example = mediaType.example {
-                items.append((item: example, pointer: "\(pointer)/example"))
-            }
+            
             for example in mediaType.examples {
                 items.append((item: example, pointer: "\(pointer)/examples/\(example.key ?? "")"))
             }
-            if let schema = mediaType.schema,
-               let example = schema.example{
-                items.append((item: example, pointer: "\(pointer)/schema/example/\(example.key ?? "")"))
-            }
-            if let schema = mediaType.itemSchema,
-               let example = schema.example {
-                items.append((item: example, pointer: "\(pointer)/schema/example/\(example.key ?? "")"))
-            }
+           
+           
         }
         for headerInfo in headerInfo(spec: spec) {
             let header = headerInfo.item
             let pointer = headerInfo.pointer
-            if let example = header.example {
-                items.append((item: example, pointer: "\(pointer)/example"))
-            }
+            
             for example in header.examples {
                 items.append((item: example, pointer: "\(pointer)/examples/\(example.key ?? "")"))
             }
         }
-        for schema in (spec.components?.schemas ?? []) {
-            if let example = schema.example {
-                items.append((item: example, pointer: "#/components/schemas/\(schema.key ?? "")example/\(example.key ?? "")"))
-            }
-        }
+       
         return items
     }
     public static func schemasInfo(spec: OpenAPISpecification) -> [(item: OpenAPISchema, pointer:String)] {

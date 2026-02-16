@@ -43,19 +43,19 @@ cases:
         rule: "OAS.RequiredOpenAPIFixedInfoFields"
         severity: "error"
         messageContains: "info element requires 'title' and 'version'."
-  - fixture: "02-minimal-30-LicenseValidations.yaml"
+  - fixture: "02-minimal-30-LicenseValidations"
     shouldPass: false
     expected:
       - code: "missingRequired"
-        pointer: " #/info/license/name"
+        pointer: "#/info/license/name"
         rule: "OAS.RequiredLicenseName"
         severity: "error"
         messageContains: "Missing license 'name'."
       - code: "invalidElement"
-        pointer: " #/info/license/identifier"
-        rule: "OAS.OpenAPISpecificationV30FieldsNotAllowed"
+        pointer: "#/info/license/identifier"
+        rule: "OAS.OpenAPILicenseV30FieldsNotAllowed"
         severity: "error"
-        messageContains: "Missing license 'name'."
+        messageContains: "'license.identifier' is not allowed in OpenAPI 3.0"
   - fixture: "02-minimal-30-missingPaths"
     shouldPass: false
     expected:

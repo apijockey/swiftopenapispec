@@ -134,14 +134,14 @@ struct RequiredOpenAPIFixedInfoFieldsRule: Rule {
 }
 
 struct  OpenAPILicenseV30FieldsNotAllowed: Rule {
-    let name = "OpenAPILicenseV30FieldsNotAllowed"
+    let name = "OAS.OpenAPILicenseV30FieldsNotAllowed"
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         var diagnostics = [Diagnostic]()
         if let license = spec.info?.license,
            license.identifier != nil  {
             diagnostics.append(.init(severity: .error,
                                      code: .invalidElement,
-                                     message: "license.identifier is not allowed in OpenAPI 3.0",
+                                     message: "'license.identifier' is not allowed in OpenAPI 3.0",
                                      pointer: "#/info/license/identifier",
                                      rule: name))
             
