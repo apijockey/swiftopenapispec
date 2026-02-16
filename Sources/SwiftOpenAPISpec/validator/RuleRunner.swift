@@ -66,7 +66,6 @@ public struct RuleRunner  : Sendable{
         let rules: [Rule] = [
             SupportedVersion3(),
             OpenAPISpecificationV30FieldsNotAllowed(),
-            WebhookSupport30Rule(),
             RequiredOpenAPI30FixedFieldsRule(),
             RequiredOpenAPIFixedInfoFieldsRule(),
             OpenAPIInfoV30FieldsNotAllowed(),

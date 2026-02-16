@@ -41,7 +41,7 @@ public struct Diagnostic: Sendable, Equatable, CustomDebugStringConvertible, Cus
     
     private func formattedDescription() -> String {
         // Begrenzung der Länge für rule auf 40 Zeichen
-        let truncatedRule = String(rule.prefix(40))
+        let truncatedRule = String(rule.prefix(60))
         
         // Farbcodes basierend auf der Schwere
         let severityColor: String

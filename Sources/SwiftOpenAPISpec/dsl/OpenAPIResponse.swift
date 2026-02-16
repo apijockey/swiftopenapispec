@@ -78,9 +78,18 @@ public struct OpenAPIResponse : KeyedElement, PointerNavigable {
         self.content = try map.mapListIfPresent(Self.CONTENT_KEY, objectType: OpenAPIMediaType.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.CONTENT_KEY))
         self.headers = try map.mapListIfPresent(Self.HEADERS_KEY, objectType: OpenAPIHeader.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.HEADERS_KEY))
         self.links =   try map.mapListIfPresent(Self.LINKS_KEY, objectType: OpenAPILink .self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.LINKS_KEY))
-      
+        let supportingElments = Set(Self.supportedKeys)
+        
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
     }
    
+    public static var supportedKeys: [String] { [
+        Self.CONTENT_KEY,
+        Self.DESCRIPTION_KEY,
+        Self.HEADERS_KEY,
+        Self.LINKS_KEY,
+        Self.SUMMARY_KEY
+    ] }
     
     public var summary : String?
     public var description : String?

@@ -40,6 +40,25 @@ public struct OpenAPIEncoding : KeyedElement, PointerNavigable {
         self.explode = map.readIfPresent(Self.EXPLODE_KEY, valueType: Bool.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXPLODE_KEY))
         self.allowReserved = map.readIfPresent(Self.ALLOW_RESERVED_KEY, valueType: Bool.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXPLODE_KEY))
         
+        // Validate unsupported keys (excluding extensions as they are dynamic)
+        var supportingElments = Set(Self.supportedKeys)
+        supportingElments.subtract((self.extensions).compactMap({ $0.key }))
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
+        
+    }
+    
+    /// The set of keys supported by OpenAPI Encoding object (excluding dynamic extensions)
+    private static var supportedKeys: Set<String> {
+        [
+            Self.CONTENT_TYPE_KEY,
+            Self.HEADERS_KEY,
+            Self.ENCODING_KEY,
+            Self.PREFIX_ENCODING_KEY,
+            Self.ITEM_ENCODING_KEY,
+            Self.STYLE_KEY,
+            Self.EXPLODE_KEY,
+            Self.ALLOW_RESERVED_KEY
+        ]
     }
    
     public func element(for segmentName: String) throws -> NavigationResult {

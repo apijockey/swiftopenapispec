@@ -380,3 +380,23 @@ cases:
         severity: "error"
         messageContains: "dependency value must be an object or array, not boolean"
     onlyThese: true
+  - fixture: "01-minimal-30-unsupportedSpecFields.yaml"
+    shouldPass : false
+    expected:
+      - code: "invalidElement"
+        pointer: "#/$self"
+        rule: "OAS.OpenAPISpecificationV30FieldsNotAllowed"
+        severity: "error"
+        messageContains: "openapi.selfURL is not allowed in OpenAPI 3.0/3.1"
+      - code: "invalidElement"
+        pointer: " #/jsonSchemaDialect"
+        rule: "OAS.OpenAPISpecificationV30FieldsNotAllowed"
+        severity: "error"
+        messageContains: "openapi.jsonSchemaDialect is not allowed in OpenAPI 3.0/3.1"
+      - code: "invalidElement"
+        pointer: " #/jsonSchemaDialect"
+        rule: "OAS.OpenAPISpecificationV30FieldsNotAllowed"
+        severity: "error"
+        messageContains: "openapi.webhooks is not allowed in OpenAPI 3.0/3.1"
+ 
+        

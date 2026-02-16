@@ -513,23 +513,7 @@ struct SupportedHTTPMethodRule: Rule {
         return diagnostics
     }
 }
-struct WebhookSupport30Rule: Rule {
-    let name = "OASWebhookSupport"
-    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
-        var diags: [Diagnostic] = []
-        if spec.webhooks.count > 0 {
-            let diagnotic = Diagnostic( severity: .error,
-                                         code: .invalidElement,
-            message: "Webhooks are not supported in OAS 3.0",
-            pointer: "#/webhooks",
-            rule: name)
-            diags.append(diagnotic)
-        }
-        
-        return diags
-    }
-    
-}
+
 struct OperationMustHaveResponsesRule: Rule {
     let name = "OAS.OperationMustHaveResponses"
 

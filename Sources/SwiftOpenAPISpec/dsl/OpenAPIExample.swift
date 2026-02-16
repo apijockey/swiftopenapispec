@@ -39,6 +39,22 @@ public struct OpenAPIExample : KeyedElement, RefPointerNavigable {
         self.externalValue = map.readIfPresent(Self.EXTERNAL_VALUE_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.EXTERNAL_VALUE_KEY))
 
         self.serializedValue = map.readIfPresent(Self.SERIALIZED_VALUE_KEY,valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.SERIALIZED_VALUE_KEY))
+        
+        // Validate unsupported keys (excluding extensions as they are dynamic)
+        let supportingElments = Set(Self.supportedKeys)
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
+        
+    }
+    
+    /// The set of keys supported by OpenAPI Example object (excluding dynamic extensions and $ref)
+    private static var supportedKeys: Set<String> {
+        [
+            Self.SUMMARY_KEY,
+            Self.DESCRIPTION_KEY,
+            Self.VALUE_KEY,
+            Self.EXTERNAL_VALUE_KEY,
+            Self.SERIALIZED_VALUE_KEY
+        ]
     }
    
     public func element(for segmentName: String) throws -> NavigationResult {

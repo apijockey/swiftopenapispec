@@ -107,8 +107,18 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
         }
         self.additionalOperations = try map.mapListIfPresent(Self.ADDITIONAL_OPERATIONS_KEY, valueType: OpenAPIOperation.self, pointer: JSONPointer.join(pointer, Self.ADDITIONAL_OPERATIONS_KEY))
         self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
+        var supportingElments = Set(Self.supportedKeys)
+        supportingElments.subtract((self.extensions).compactMap({ $0.key }))
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
     }
    
+    public static let supportedKeys: Set<String> = [
+        Self.SUMMARY_KEY,
+        Self.DESCRIPTION_KEY,
+        OpenAPISchemaReference.REF_KEY,
+        Self.SERVERS_KEY,
+        Self.PARAMETERS_KEY,
+    ]
     public func element(for segmentName: String) throws -> NavigationResult{
         switch segmentName {
            

@@ -107,6 +107,24 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
             diagnostics.append(diagnostic)
             self = .unknown(type ?? "")
         }
+        
+        let supportingElments = Set(Self.supportedKeys)
+        
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
+        
+    }
+    
+    /// The set of keys supported by OpenAPI Type object (excluding dynamic extensions)
+    private static var supportedKeys: Set<String> {
+        [
+            Self.TYPE_KEY,
+            Self.ONEOF_KEY,
+            Self.ANYOF_KEY,
+            Self.ALLOF_KEY,
+            Self.XML_KEY,
+            Self.NULLABLE_KEY,
+            OpenAPISchemaReference.REF_KEY
+        ]
     }
     
     public func element(for segmentName : String) throws -> Any? {

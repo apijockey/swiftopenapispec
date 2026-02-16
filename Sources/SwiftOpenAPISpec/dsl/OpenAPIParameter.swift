@@ -93,7 +93,7 @@ public struct OpenAPIParameter :  KeyedElement,  PointerNavigable {
     public init(load map: StringDictionary,diagnostics: inout [Diagnostic],pointer : String) throws {
         
         if case let .string(refKey) = map[OpenAPISchemaReference.REF_KEY]{
-                    self.ref = OpenAPISchemaReference(ref: refKey)
+            self.ref = OpenAPISchemaReference(ref: refKey)
             return
         }
         guard let location = map.readIfPresent(Self.IN_KEY,valueType:String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.IN_KEY)) else {
@@ -106,14 +106,14 @@ public struct OpenAPIParameter :  KeyedElement,  PointerNavigable {
         self.description =  map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.DESCRIPTION_KEY))
         self.deprecated =  map.readIfPresent(Self.DEPRECATED_KEY, valueType: Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.DEPRECATED_KEY))
         self.explode = map.readIfPresent(Self.EXPLODE_KEY, valueType: Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.EXPLODE_KEY))
-       
+        
         self.example = map.readIfPresent(Self.EXAMPLE_KEY, valueType: JSONValue.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.EXAMPLE_KEY))
         self.format = map.readIfPresent(Self.FORMAT_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.FORMAT_KEY))
         
         self.examples  = try map.mapListIfPresent(Self.EXAMPLES_KEY,objectType: OpenAPIExample.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXAMPLES_KEY))
         extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
         self.location = ParameterLocation(rawValue: location)
-      
+        
         self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.NAME_KEY))
         let required = map.readIfPresent(Self.REQUIRED_KEY,valueType: Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.REQUIRED_KEY))
         self.required = required ?? false
@@ -121,11 +121,24 @@ public struct OpenAPIParameter :  KeyedElement,  PointerNavigable {
         if let style = map.readIfPresent(Self.STYLE_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.STYLE_KEY)){
             self.style = style
         }
+        var supportingElments = Set(Self.supportedKeys)
+        supportingElments.subtract((self.extensions ?? []).compactMap({ $0.key }))
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
         
-       
-       
-       
+        
+        
     }
+    public static let supportedKeys: Set<String> = [
+        IN_KEY,
+        REQUIRED_KEY,
+        DESCRIPTION_KEY,
+        DEPRECATED_KEY,
+        ALLOW_EMPTYVALUE_KEY,
+        ALLOW_RESERVED_KEY,
+        SCHEMA_KEY,
+        STYLE_KEY,
+        EXPLODE_KEY
+    ]
    
 
     public func element(for segmentName: String) throws -> NavigationResult {

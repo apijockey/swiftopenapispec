@@ -82,10 +82,23 @@ public struct OpenAPISecurityScheme : KeyedElement , PointerNavigable {
                 return
             }
         }
+        let supportingElments = Set(Self.supportedKeys)
+      
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
 
          
        
     }
+    public static let supportedKeys: Set<String> = [
+        Self.TYPE_KEY,
+        Self.DESCRIPTION_KEY,
+        Self.NAME_KEY,
+        Self.LOCATION_KEY,
+        Self.SCHEME_KEY,
+        Self.BEARER_FORMAT_KEY,
+        Self.FLOWS_KEY,
+        Self.OPENID_CONNECT_URL_KEY
+    ]
     public func element(for segmentName: String) throws -> NavigationResult {
        switch segmentName {
        case Self.TYPE_KEY : return .value(JSONValue(securityType?.rawValue))

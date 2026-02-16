@@ -53,6 +53,21 @@ public struct OpenAPIServer : ThrowingHashMapInitiable, PointerNavigable {
         self.key = map.readIfPresent(Self.NAME_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.NAME_KEY))
         self.variables = try map.mapListIfPresent(Self.VARIABLES_KEY,objectType : OpenAPIVariable.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.VARIABLES_KEY))
         extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
+        
+        // Validate unsupported keys
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: Self.supportedKeys, pointer: pointer))
+        
+    }
+    
+    /// The set of keys supported by OpenAPI Server object
+    private static var supportedKeys: Set<String> {
+        [
+            Self.URL_KEY,
+            Self.DESCRIPTION_KEY,
+            Self.NAME_KEY,
+            Self.VARIABLES_KEY,
+            "extensions"
+        ]
     }
    
 

@@ -127,10 +127,23 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
         
         
         self.extensions = try OpenAPIExtension.extensionElements(dictionary, &diagnostics, pointer: JSONPointer.join(pointer, "extensions"))
+        var supportingElments = Set(self.supportedElements)
+        supportingElments.subtract((self.extensions ?? []).compactMap({ $0.key }))
+        diagnostics.append(contentsOf: dictionary.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
 
        
         
        
+    }
+    private var supportedElements : Set<String> {
+        [
+            OpenAPISpecification.OPENAPI_KEY,
+            OpenAPISpecification.INFO_KEY,
+            OpenAPISpecification.SERVERS_KEY,
+            OpenAPISpecification.PATHS_KEY,
+            OpenAPISpecification.COMPONENTS_KEY,
+            OpenAPISpecification.TAGS_KEY
+            ]
     }
    
     /// Userinfo  holds information about validation or generation errors on each struct to simplify and streamline error handling and navigation
@@ -577,7 +590,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     public static let COMPONENTS_KEY = "components"
     public static let EXTERNAL_DOCS_KEY = "externalDocs"
     public static let INFO_KEY = "info"
-    public static let JSON_SCHEMA_DIALECT_KEY = "$schema"
+    public static let JSON_SCHEMA_DIALECT_KEY = "jsonSchemaDialect"
     public static let OPENAPI_KEY = "openapi"
     public static let PATHS_KEY = "paths"
     public static let SECURITY_KEY = "security"

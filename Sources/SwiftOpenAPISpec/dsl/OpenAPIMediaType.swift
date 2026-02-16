@@ -63,6 +63,23 @@ public struct OpenAPIMediaType :  KeyedElement , PointerNavigable {
         self.encoding =  try map.mapListIfPresent(Self.ENCODING_KEY, objectType: OpenAPIEncoding.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.ENCODING_KEY))
         self.prefixEncoding = try map.mapListIfPresent(Self.PREFIX_ENCODING_KEY, objectType: OpenAPIEncoding.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.PREFIX_ENCODING_KEY))
         self.itemEncoding =  try map.mapListIfPresent(Self.ITEM_ENCODING_KEY, objectType: OpenAPIEncoding.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.ITEM_ENCODING_KEY))
+        
+        let supportingElments = Set(Self.supportedKeys)
+        
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
+        
+    }
+    
+    /// The set of keys supported by OpenAPI Media Type object (excluding dynamic extensions and $ref)
+    private static var supportedKeys: Set<String> {
+        [
+            Self.SCHEMA_KEY,
+            Self.EXAMPLES_KEY,
+            Self.EXAMPLE_KEY,
+            Self.ENCODING_KEY,
+            Self.PREFIX_ENCODING_KEY,
+            Self.ITEM_ENCODING_KEY
+        ]
     }
    
 

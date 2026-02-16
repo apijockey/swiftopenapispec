@@ -258,9 +258,46 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
         self.uniqueItems = map.readIfPresent(Self.UNIQUE_ITEMS_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.UNIQUE_ITEMS_KEY))
         self.writeOnly = map.readIfPresent(Self.WRITE_ONLY_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.WRITE_ONLY_KEY))
         self.xml =  try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIXMLObject.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXAMPLE_KEY))
+        var supportingElments = Set(Self.supportedKeys)
+        supportingElments.subtract((self.extensions ?? []).compactMap({ $0.key }))
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
         
     }
-   
+    public static var supportedKeys: [String]      {
+        return [
+            ALLOWED_ELEMENTS_KEY,
+            DEFAULT_VALUE_KEY,
+            DISCRIMINATOR_KEY,
+            DEPRECATED_KEY,
+            EXAMPLE_KEY,
+            EXTENSIONS_KEY,
+            EXCLUSIVE_MAXIMUM_KEY,
+            EXCLUSIVE_MINIMUM_KEY,
+            FORMAT_KEY,
+            MULTIPLEOF_KEY,
+            MAXIMUM_KEY,
+            MINIMUM_KEY,
+            MAX_CONTAINS_KEY,
+            MIN_CONTAINS_KEY,
+            NULLABLE_KEY,
+            UNIQUE_ITEMS_KEY,
+            XML_KEY,
+            MAX_LENGTH_KEY,
+            MIN_LENGTH_KEY,
+            MAX_ITEMS_KEY,
+            MIN_ITEMS_KEY,
+            READ_ONLY_KEY,
+            WRITE_ONLY_KEY,
+            PROPERTIES_KEY,
+            MAX_PROPERTIES_KEY,
+            MIN_PROPERTIES_KEY,
+            PATTERN_KEY,
+            TYPE_KEY,
+            TITLE_KEY,
+            REQUIRED_KEY
+
+        ]
+    }
          //self.format30 = map.readIfPresent(Self.FORMAT_KEY, String.self)
          //extensions = try OpenAPIExtension.extensionElements(map)
     

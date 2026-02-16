@@ -75,8 +75,12 @@ public struct OpenAPIRequestBody : KeyedElement , PointerNavigable {
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.DESCRIPTION_KEY))
         
         self.required = map.readIfPresent(Self.REQUIRED_KEY, valueType: Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.REQUIRED_KEY)) ?? false
+        let supportingElments = Set(Self.supportedKeys)
+        
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
         
     }
+    public static let supportedKeys: [String] = [Self.DESCRIPTION_KEY,Self.REQUIRED_KEY,Self.CONTENTS_KEY]
    
 
     public var key : String?

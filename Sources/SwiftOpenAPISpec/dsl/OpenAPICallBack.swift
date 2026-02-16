@@ -49,7 +49,17 @@ public struct OpenAPICallBack : KeyedElement,PointerNavigable{
             pathItems = []
             self.pathItems =  try map.mapListIfPresent(objectType: OpenAPIPathItem.self, pointer: JSONPointer.join(pointer, "callback"))
         }
-     
+        
+        var supportingElments = Set(Self.supportedKeys)
+        supportingElments.subtract((self.extensions ?? []).compactMap({ $0.key }))
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
+        
+    }
+    
+    /// The set of keys supported by OpenAPI Callback object (excluding dynamic extensions and $ref)
+    /// Callbacks are special as they support any URL as a key for path items
+    private static var supportedKeys: Set<String> {
+        [] // Callback supports any key as a dynamic callback URL, plus extensions (x-*) and $ref
     }
   
     public var extensions : [OpenAPIExtension]?

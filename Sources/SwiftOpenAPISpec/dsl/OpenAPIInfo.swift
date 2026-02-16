@@ -52,6 +52,23 @@ public struct OpenAPIInfo : ThrowingHashMapInitiable, PointerNavigable {
         self.license = try map.readIfPresent(Self.LICENSE_KEY, objectType: OpenAPILicense.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.LICENSE_KEY))
         extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
         
+        // Validate unsupported keys
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: Self.supportedKeys, pointer: pointer))
+        
+    }
+    
+    /// The set of keys supported by OpenAPI Info object
+    private static var supportedKeys: Set<String> {
+        [
+            Self.TITLE_KEY,
+            Self.DESCRIPTION_KEY,
+            Self.TERMS_KEY,
+            Self.CONTACT_KEY,
+            Self.LICENSE_KEY,
+            Self.VERSION_KEY,
+            Self.SUMMARY_KEY,
+            "extensions"
+        ]
     }
    
     /// Navigates to a specific element within the OpenAPI info structure.

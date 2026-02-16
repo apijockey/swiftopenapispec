@@ -57,10 +57,23 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
         self.schema = try map.readIfPresent(Self.SCHEMA_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: pointer)
        
         self.style = map.readIfPresent(Self.STYLE_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: pointer)
-       
+        var supportingElments = Set(Self.supportedKeys)
+        supportingElments.subtract((self.extensions).compactMap({ $0.key }))
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
     }
    
-
+    public static let supportedKeys: Set<String> = [
+        ALLOW_EMPTYVALUE_KEY,
+        ALLOW_RESERVED_KEY,
+        CONTENT_KEY,
+        EXAMPLE_KEY,
+        EXAMPLES_KEY,
+        EXPLODE_KEY,
+        DESCRIPTION_KEY,
+        REQUIRED_KEY,
+        SCHEMA_KEY
+    ]
+    
     public func element(for segmentName: String) throws -> NavigationResult {
        switch segmentName {
        case Self.ALLOW_EMPTYVALUE_KEY:

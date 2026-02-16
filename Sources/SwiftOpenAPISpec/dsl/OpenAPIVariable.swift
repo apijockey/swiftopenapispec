@@ -31,7 +31,13 @@ public struct OpenAPIVariable : KeyedElement , PointerNavigable {
         self.defaultValue = map.readIfPresent(Self.DEFAULT_KEY,  valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.DEFAULT_KEY))
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.DESCRIPTION_KEY))
         self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
+        var supportingElments = Set(Self.supportedKeys)
+        supportingElments.subtract((self.extensions ?? []).compactMap({ $0.key }))
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
             
+    }
+    public static var supportedKeys: [String] {
+        [Self.ENUM_KEY,Self.DEFAULT_KEY,Self.DESCRIPTION_KEY]
     }
     public func element(for segmentName: String) throws -> NavigationResult{
         switch segmentName {

@@ -37,6 +37,20 @@ public struct OpenAPIContact : ThrowingHashMapInitiable , PointerNavigable {
         self.url =  map.readIfPresent(Self.URL_KEY, valueType:  String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.URL_KEY))
         self.email = map.readIfPresent(Self.EMAIL_KEY,valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.EMAIL_KEY))
         extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
+        
+        var supportingElments = Set(Self.supportedKeys)
+        supportingElments.subtract((self.extensions ?? []).compactMap({ $0.key }))
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
+        
+    }
+    
+    /// The set of keys supported by OpenAPI Contact object (excluding dynamic extensions)
+    private static var supportedKeys: Set<String> {
+        [
+            Self.NAME_KEY,
+            Self.URL_KEY,
+            Self.EMAIL_KEY
+        ]
     }
    
     
