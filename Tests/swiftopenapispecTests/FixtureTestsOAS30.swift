@@ -73,13 +73,14 @@ struct FixtureTestsOAS30 {
             throw FixtureErrors.notFound(resource)
         }
         
-        try await TestHelpers.validateSchemaAndCompare(
+        try await TestHelpers.assertValidations(
             apiSpec: apiSpec,
             fixture: fixture,
             resourceUrl: resourceUrl,
             resourceName: resource,
             version: ValidationContext.OASVersion.v30,
-            dialect: ConverterConfig.Dialect.oas30
+            dialect: ConverterConfig.Dialect.oas30,
+            assertions: .OAS
         )
     }
 }

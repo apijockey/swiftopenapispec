@@ -82,7 +82,7 @@ struct ReusableMediaTypeRefRule {
     func check(content : OpenAPIMediaType, ctx: ValidationContext, pointer : String, rule: String) -> [Diagnostic] {
         var diags: [Diagnostic] = []
         
-        let pointer =  "\(pointer)/\(content.key ?? "")"
+        let pointer =  "\(pointer)/\(JSONPointer.escape(content.key ?? ""))"
         if content.ref == nil && content.schema == nil {
             let diagnotics = Diagnostic( severity: .error,
                                          code: .missingRequired,
@@ -208,7 +208,7 @@ struct ReusableResponseRefRule {
         else if response.content.count > 0 {
             for content in response.content {
 
-                diags.append(contentsOf: ReusableMediaTypeRefRule().check(content: content, ctx: ctx, pointer: pointer, rule: rule))
+                diags.append(contentsOf: ReusableMediaTypeRefRule().check(content: content, ctx: ctx, pointer: "\(pointer)/content", rule: rule))
             }
             
         }
@@ -219,10 +219,7 @@ struct ReusableResponseRefRule {
 struct ReusableSchemaRefRule {
     func check(schema : OpenAPISchema, ctx: ValidationContext, pointer : String, rule: String) -> [Diagnostic] {
         var diags: [Diagnostic] = []
-        switch schema.type{
-            case .allOf, .oneOf, .anyOf, .object, .array, .string, .integer, .bool, .number, .ref:
-            return diags
-            default:
+        if schema.type == nil {
                 let diagnotics = Diagnostic( severity: .error,
                                          code: .missingRequired,
                                          message: "schema needs a ref or a schema type",
@@ -238,7 +235,7 @@ struct ReusableNamedSchemaRefRule {
     func check(schema : OpenAPISchema, ctx: ValidationContext, pointer : String, rule: String) -> [Diagnostic] {
         var diags: [Diagnostic] = []
         guard let key = schema.key,
-              let type = schema.type else {
+              schema.type != nil else {
             let diagnotics = Diagnostic( severity: .error,
                                      code: .missingRequired,
                                      message: "schema incomplete missing 'name' or 'type'",
@@ -248,10 +245,7 @@ struct ReusableNamedSchemaRefRule {
             return diags
         }
         let pointer =  "\(pointer)/schemas/\(key)"
-        switch type{
-            case .allOf, .oneOf, .anyOf, .object, .array, .string, .integer, .bool, .number, .ref:
-            return diags
-            default:
+            if schema.type == nil {
                 let diagnotics = Diagnostic( severity: .error,
                                          code: .missingRequired,
                                          message: "schema needs a ref or a schema type",

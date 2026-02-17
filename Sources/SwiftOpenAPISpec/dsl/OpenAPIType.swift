@@ -105,10 +105,10 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
             // Unsupported or missing type info
             let diagnostic = Diagnostic(
                 severity: .error,
-                code: .missingRequired,
-                message: "unsupported or missing type info",
-                pointer: pointer,
-                rule: "Initialization.OpenAPIType"
+                code: .invalidType,
+                message: "type '\(type?.description ?? "")' not supported or not recognized in OpenAPI 3.0",
+                pointer: "\(pointer)/type",
+                rule: "OAS30.SupportedTypes"
             )
             diagnostics.append(diagnostic)
             self = .unknown(type ?? "")
@@ -162,8 +162,8 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
         }
     }
 }
-extension  OpenAPIType : CustomDebugStringConvertible {
-    public var debugDescription: String {
+extension  OpenAPIType : CustomStringConvertible {
+    public var description: String {
         switch self {
         case .allOf:
             return "allOf"
@@ -193,9 +193,9 @@ extension  OpenAPIType : CustomDebugStringConvertible {
     }
 }
 extension Optional where Wrapped == OpenAPIType {
-    public var debugDescription: String {
+    public var description: String {
         if let wrapped = self {
-            return wrapped.debugDescription
+            return wrapped.description
         } else {
                 return "nil"
         }

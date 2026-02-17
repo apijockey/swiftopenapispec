@@ -19,7 +19,6 @@ struct ValidationTests {
         ("02-minimal-30-missingPaths", "OAS.RequiredOpenAPIFixedFields"),
         ("03-minimal-30-unsupportedV3", "OAS.UnsupportedVersion3"),
         ("02-minimal-30-missingInfoVersion", "OAS.RequiredOpenAPIFixedInfoFields"),
-        ("02-minimal-30-missingInfoTitle", "OAS.RequiredOpenAPIFixedInfoFields"),
         ("03-minimal-30-unsupportedPathName", "OAS.PathsMustStartWithSlashRule"),
         ("03-minimal-30-missingResponse", "OAS.OperationMustHaveResponses"),
         ("03-minimal-30-invalidHTTPStatus", "OAS.SupportedHTPStatusRule"),

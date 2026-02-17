@@ -90,7 +90,7 @@ public struct RuleRunner  : Sendable{
             RequiredRequestBodiesComponentsNamessRule(),
             RequiredsHeaderComponentsNamessRule(),
             RequiredSecuritySchemeComponentsNamessRule(),
-            OpenAPISchema30_ValidFieldsRule(),
+            
             RequiredLinksComponentsNamessRule(),
             RequiredCallBackomponentsNamessRule(),
             OpenAPITag30_ValidFieldsRule(),

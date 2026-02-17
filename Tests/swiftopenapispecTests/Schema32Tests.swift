@@ -31,13 +31,13 @@ struct Schema32ValidationTests {
             throw FixtureErrors.notFound(resource)
         }
         
-        try await TestHelpers.validateSchemaAndCompare(
+        try await TestHelpers.assertValidations(
             apiSpec: apiSpec,
             fixture: fixture,
             resourceUrl: resourceUrl,
             resourceName: resource,
             version: ValidationContext.OASVersion.v32,
-            dialect: ConverterConfig.Dialect.jsonSchema2020_12
+            dialect: ConverterConfig.Dialect.jsonSchema2020_12, assertions: .Schema
         )
     }
 }

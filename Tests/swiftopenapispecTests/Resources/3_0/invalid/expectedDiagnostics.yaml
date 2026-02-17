@@ -117,7 +117,7 @@ cases:
   - fixture: "05-response-invalidType"
     shouldPass: false
     expected:
-      - code: "schemaViolation"
+      - code: "invalidType"
         pointer: "#/paths/~1create/post/responses/201/content/application~1json/schema/type"
         rule: "OAS30.SupportedTypes"
         severity: "error"
@@ -125,7 +125,7 @@ cases:
   - fixture: "05-response-invalidPropertyType"
     shouldPass: false
     expected:
-      - code: "schemaViolation"
+      - code: "invalidType"
         pointer: "#/paths/~1create/post/responses/201/content/application~1json/schema/properties/id/type"
         rule: "OAS30.SupportedTypes"
         severity: "error"

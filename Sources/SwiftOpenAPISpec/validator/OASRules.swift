@@ -726,29 +726,7 @@ struct OpenAPIResponse30_ValidFieldsRule: Rule {
         return diags
     }
 }
-struct OpenAPISchema30_ValidFieldsRule: Rule {
-    let name = "OpenAPISchema30_ValidFieldsRule"
-    
 
-    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
-        var diags: [Diagnostic] = []
-        for schemaInfo in RuleRunner.schemasInfo(spec: spec) {
-            let pointer = schemaInfo.pointer
-            let schema = schemaInfo.item
-            if  schema.allowedValues.count > 0 {
-                        let diagnostics = Diagnostic( severity: .error,
-                                                     code: .missingRequired,
-                                                     message: "Schemas must not have 'allowedValue' in OpenAPI 3.0",
-                                                     pointer: pointer,
-                                                     rule: name)
-                        diags.append(diagnostics)
-                }
-        }
-       
-        
-        return diags
-    }
-}
 struct OpenAPIDiscriminator30_ValidFieldsRule: Rule {
     let name = "OpenAPIDiscriminator30_ValidFieldsRule"
     

@@ -189,7 +189,7 @@ struct FixtureTests {
             return
         }
         //#expect(requestbodyContents[0].schema?.allowedValues == ["Alice","Bob","Carl"])
-        #expect(requestbodyContents[0].schema?.allowedValues.compactMap({ value in
+        #expect((requestbodyContents[0].schema?.allowedValues ?? []).compactMap({ value in
             if case .string(let stringValue) = value { return stringValue } else { return nil }
         }) == ["Alice","Bob","Carl"])
         
@@ -258,7 +258,7 @@ struct FixtureTests {
         
         //guard case let .string(stringPropertyInfo) = try #require(schema.type) else { Issue.record(); return }
         //#expect(winnerProperty.allowedValues == ["X", "O", "."])
-        #expect(Set(winnerProperty.allowedValues.compactMap({ value in
+        #expect(Set((winnerProperty.allowedValues ?? []).compactMap({ value in
             if case .string(let value) = value { return value } else { return nil }
         })) ==  ["X", "O", "."])
         

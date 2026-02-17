@@ -183,6 +183,14 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
        
         
         if case let .array(allowedElements)  = map[Self.ALLOWED_ELEMENTS_KEY]  {
+            if allowedElements.count == 0 {
+                let diagnostic = Diagnostic( severity: .error,
+                                             code: .missingRequired,
+                                             message: "'enums' must not be empty'",
+                                             pointer: pointer,
+                                             rule: "OAS30.EnumAllowedValues")
+                diagnostics.append(diagnostic)
+            }
             var collected: [JSONValue] = []
             for (index,value) in allowedElements.enumerated() {
                 switch value {
@@ -195,14 +203,14 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
                         collected.append(value)
                     }
                     else {
-                        diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "mixed elements are not suported and must match the schema type '\(self.type.debugDescription)', got: '\(value.debugDescription)'", pointer: JSONPointer.join(JSONPointer.join(pointer, "enum"),String(index)),rule: "OAS30.EnumAllowedValues"))
+                        diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "mixed elements are not suported and must match the schema type '\(self.type.description)', got: '\(value.debugDescription)'", pointer: JSONPointer.join(JSONPointer.join(pointer, "enum"),String(index)),rule: "OAS30.EnumAllowedValues"))
                     }
                 case .number:
                     if case .number = type {
                         collected.append(value)
                     }
                     else {
-                        diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "mixed elements are not suported and must match the schema type '\(self.type.debugDescription)', got: '\(value.debugDescription)'", pointer: JSONPointer.join(JSONPointer.join(pointer, "enum"),String(index)),rule: "OAS30.EnumAllowedValues"))
+                        diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "mixed elements are not suported and must match the schema type '\(self.type.description)', got: '\(value.debugDescription)'", pointer: JSONPointer.join(JSONPointer.join(pointer, "enum"),String(index)),rule: "OAS30.EnumAllowedValues"))
                     }
                 case .integer:
                     if case .number = type{
@@ -212,14 +220,14 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
                         collected.append(value)
                     }
                     else {
-                        diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "mixed elements are not suported and must match the schema type '\(self.type.debugDescription)', got: '\(value.debugDescription)'", pointer: JSONPointer.join(JSONPointer.join(pointer, "enum"),String(index)),rule: "OAS30.EnumAllowedValues"))
+                        diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "mixed elements are not suported and must match the schema type '\(self.type.description)', got: '\(value.debugDescription)'", pointer: JSONPointer.join(JSONPointer.join(pointer, "enum"),String(index)),rule: "OAS30.EnumAllowedValues"))
                     }
                 case .boolean:
                     if case .bool = type {
                         collected.append(value)
                     }
                     else {
-                        diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "mixed elements are not suported and must match the schema type '\(self.type.debugDescription)', got: '\(value.debugDescription)'", pointer: JSONPointer.join(JSONPointer.join(pointer, "enum"),String(index)),rule: "OAS30.EnumAllowedValues"))
+                        diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "mixed elements are not suported and must match the schema type '\(self.type.description)', got: '\(value.debugDescription)'", pointer: JSONPointer.join(JSONPointer.join(pointer, "enum"),String(index)),rule: "OAS30.EnumAllowedValues"))
                     }
                 case .null:
                     if self.nullable == false {
@@ -227,10 +235,8 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
                     }
                 }
             }
-            
             self.allowedValues = collected
         } else {
-            self.allowedValues = []
         }
         self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
         self.exclusiveMinimum = map.readIfPresent(Self.EXCLUSIVE_MINIMUM_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.EXCLUSIVE_MINIMUM_KEY))
@@ -302,7 +308,7 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
          //self.format30 = map.readIfPresent(Self.FORMAT_KEY, String.self)
          //extensions = try OpenAPIExtension.extensionElements(map)
     
-    public var allowedValues: [JSONValue]
+    public var allowedValues: [JSONValue]?
     public var defaultValue : JSONValue?
     public var deprecated: Bool?
     public var discriminator: OpenAPIDiscriminator?
