@@ -49,16 +49,20 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
         self.example = map[Self.EXAMPLE_KEY]
         
         self.examples  = try map.mapListIfPresent(Self.EXAMPLES_KEY, objectType: OpenAPIExample.self, diagnostics: &diagnostics, pointer: pointer)
-        self.content = try map.readIfPresent(Self.CONTENT_KEY,objectType:  OpenAPIMediaType.self, diagnostics: &diagnostics, pointer: pointer)
+        
+        let contents = try map.mapListIfPresent(Self.CONTENT_KEY,objectType:  OpenAPIMediaType.self, diagnostics: &diagnostics, pointer: pointer)
+        if contents.count > 1 {
+            diagnostics.append(.init(severity: .error, code: .invalidValue, message: "The content map for a Header MUST only contain one entry.", pointer: JSONPointer.join(pointer, "content"), rule: "OAS.OpenAPIHeaderContentAllowed"))
+        }
+        self.content = contents.first
         extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
-     
-       
         self.required = map.readIfPresent(Self.REQUIRED_KEY, valueType: Bool.self, diagnostics : &diagnostics, pointer: pointer) ?? false
         self.schema = try map.readIfPresent(Self.SCHEMA_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: pointer)
        
         self.style = map.readIfPresent(Self.STYLE_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: pointer)
         var supportingElments = Set(Self.supportedKeys)
-        supportingElments.subtract((self.extensions).compactMap({ $0.key }))
+        supportingElments.formUnion((self.extensions).compactMap({ $0.key }))
+        supportingElments.formUnion(contents.map({ $0.key ?? "" }))
         diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
     }
    

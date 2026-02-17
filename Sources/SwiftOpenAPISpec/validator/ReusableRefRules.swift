@@ -44,15 +44,7 @@ struct ReusableHeaderRefRule {
     func check(header : OpenAPIHeader, ctx: ValidationContext, pointer : String, rule: String) -> [Diagnostic] {
         var diags: [Diagnostic] = []
         let pointer =  "\(pointer)/\(header.key ?? "")"
-        if header.ref == nil  && header.content == nil {
-            let diagnotics = Diagnostic( severity: .error,
-                                         code: .missingRequired,
-                                         message: "Header needs a ref",
-                                         pointer: pointer,
-                                         rule: rule)
-            diags.append(diagnotics)
-        }
-        else if let content = header.content {
+        if let content = header.content {
             
             diags.append(contentsOf: ReusableMediaTypeRefRule().check(content: content, ctx: ctx, pointer: pointer, rule: rule))
         }

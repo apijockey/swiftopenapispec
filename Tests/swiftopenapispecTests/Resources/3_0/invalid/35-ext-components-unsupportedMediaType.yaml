@@ -16,23 +16,25 @@ info:
   title: Minimal 3.0
   version: "1.0"
 paths:
-  /ping:
-    get:
-      operationId: ping
+  /upload:
+    post:
+      operationId: upload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                productName:
+                  type: string
+                productPrice:
+                  type: number
       responses:
-        "200":
-          description: ok
-          content:
-            application/json:
-              schema: {
-                type: object,
-                properties: {
-                  ok: {
-                    type: boolean
-                  }
-                },
-                required: [ok]
-              }
+        "201": {
+          description: created
+        }
+
 components:
   headers:
     RFC2557NoContentId:

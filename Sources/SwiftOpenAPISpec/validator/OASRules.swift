@@ -242,11 +242,13 @@ struct OpenAPIMediaTypeV30_1ItemFieldsNotAllowed: Rule {
     let name = "OAS.OpenAPIMediaTypeV30_ItemFieldsNotAllowed"
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         var diagnostics = [Diagnostic]()
-        for info in RuleRunner.mediaTypes(spec: spec) {
+        let results = RuleRunner.mediaTypes(spec: spec)
+        for info in  results{
             let pointer = info.pointer
             let mediaType = info.item
-            if mediaType.itemEncoding.count > 0 || mediaType.prefixEncoding.count > 0 {
-                diagnostics.append(.init(severity: .error, code: .invalidElement, message: "MediaTypes do not support 'itemEncoding' or 'prefixEncoding' in OpenAPI 3.0/3.1.", pointer: pointer, rule: self.name))
+           
+            if mediaType.itemEncoding != nil || mediaType.prefixEncoding.count > 0 {
+                diagnostics.append(.init(severity: .error, code: .invalidElement, message: "Media types do not support 'itemEncoding' or 'prefixEncoding' in OpenAPI 3.0/3.1.", pointer: pointer, rule: self.name))
                 
             }
         }

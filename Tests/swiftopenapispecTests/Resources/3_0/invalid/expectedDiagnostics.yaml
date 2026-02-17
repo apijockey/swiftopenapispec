@@ -122,6 +122,14 @@ cases:
         rule: "OAS30.SupportedTypes"
         severity: "error"
         messageContains: "type 'double' not supported or not recognized in OpenAPI 3.0"
+  - fixture: "05-response-invalidHTTPStatus"
+    shouldPass: false
+    expected:
+      - code: "invalidValue"
+        pointer: "#/paths/~1create/post/responses/HI"
+        rule: "OAS.UnsupportedElement"
+        severity: "error"
+        messageContains: "The element 'HI' is not supported by this version of the spec."
   - fixture: "05-response-invalidPropertyType"
     shouldPass: false
     expected:
@@ -441,7 +449,7 @@ cases:
     shouldPass: false
     expected:
       - code: "invalidElement"
-        pointer: "#/components/requestBodies/CreateEvent/content/application~1json"
+        pointer: "#/components/requestBodies/RFC2557/content/multipart~1related; type=text~1html"
         rule: "OAS.OpenAPIMediaTypeV30_ItemFieldsNotAllowed"
         severity: "error"
         messageContains: "Media types do not support 'itemEncoding' or 'prefixEncoding' in OpenAPI 3.0/3.1."

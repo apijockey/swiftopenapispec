@@ -60,7 +60,8 @@ struct FixtureTestsOAS30 {
         "02-minimal-30-LicenseValidations",
         "33-components-unsupported",
         "03-pathitems-unsupported",
-        "35-ext-components-unsupportedMediaType"
+        "35-ext-components-unsupportedMediaType",
+        "05-response-invalidHTTPStatus"
     ])
     func schemaWarningRulesHit(resource: String) async throws {
         let subDirectory = "Resources/3_0/invalid"

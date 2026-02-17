@@ -211,6 +211,10 @@ public struct RuleRunner  : Sendable{
             }
                 
         }
+        for response in spec.components?.responses ?? [] {
+            let pointer = "#/components/responses/\(response.key ?? "")"
+            items.append((item: response,  pointer: pointer))
+        }
         return items
     }
     public static func requestBodyInfo(spec: OpenAPISpecification) -> [(item: OpenAPIRequestBody, pointer:String)] {
@@ -224,6 +228,11 @@ public struct RuleRunner  : Sendable{
                 items.append((item: requestBody,  pointer: pointer))
             }
            
+        }
+        for requestBody in (spec.components?.requestBodies ?? []) {
+            
+                let pointer = "#/components/requestBodies/\(requestBody.key ?? "")"
+                items.append((item: requestBody,  pointer: pointer))
         }
         return items
     }
@@ -269,7 +278,7 @@ public struct RuleRunner  : Sendable{
                     items.append((item: header, pointer: "\(pointer)/encoding/\(encoding.key ?? "")/headers\(header.key ?? "")"))
                 }
             }
-            for encoding in mediaType.itemEncoding{
+            if let encoding = mediaType.itemEncoding {
                 for header in encoding.headers {
                     items.append((item: header, pointer: "\(pointer)/itemEncoding/\(encoding.key ?? "")/headers\(header.key ?? "")"))
                 }

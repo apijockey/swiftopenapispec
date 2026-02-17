@@ -276,6 +276,7 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
             EXTENSIONS_KEY,
             OpenAPISchemaReference.REF_KEY,
             EXCLUSIVE_MAXIMUM_KEY,
+            ADDITIONAL_PROPERTIES_KEY,
             EXCLUSIVE_MINIMUM_KEY,
             FORMAT_KEY,
             MULTIPLEOF_KEY,

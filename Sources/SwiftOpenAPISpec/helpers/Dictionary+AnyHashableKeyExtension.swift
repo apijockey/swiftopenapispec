@@ -200,7 +200,25 @@ extension StringDictionary {
     func mapListIfPresent<T>(_ key : String, objectType : T.Type , diagnostics: inout [Diagnostic], pointer : String) throws -> [T]  where  T : KeyedElement{
         var elements = [T]()
         if let value = self[key] {
-        if case let .object(objectMap)  = value{
+        if case let .object(objectMap)  = value,
+           objectMap.count == 1 ,
+           let objectValue = objectMap.first?.value,
+           case let .object(map) = objectValue,
+           let objectKey = objectMap.first?.key{
+            
+            var type = try T.initialize(load:  map, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, objectKey)).value
+            if type.key == nil && objectMap.keys.count == 1{
+                type.key = objectKey
+            }
+            elements.append(type)
+       
+                
+           
+        }
+           
+           
+        else if case let .object(objectMap)  = value,
+                objectMap.count > 1 {
             for element in objectMap {
                 let value = element.value
                 if case let .object(valueMap) = value {
@@ -221,7 +239,8 @@ extension StringDictionary {
                 }
             }
         }
-        if case let .array(arrayList) = value {
+       
+        else if case let .array(arrayList) = value {
             for (index,jsonElement) in arrayList.enumerated() {
                 if case let .object(objectElement) = jsonElement {
                     var type = try T.initialize(load:  objectElement, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, String(index))).value

@@ -50,10 +50,7 @@ public struct OpenAPICallBack : KeyedElement,PointerNavigable{
             pathItems = []
             self.pathItems =  try map.mapListIfPresent(objectType: OpenAPIPathItem.self, pointer: JSONPointer.join(pointer, Self.CALL_BACK_KEY))
         }
-        
-        var supportingElments = Set(Self.supportedKeys)
-        supportingElments.formUnion((self.extensions ?? []).compactMap({ $0.key }))
-        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
+        //keys are expressions
         
     }
     

@@ -89,11 +89,25 @@ public struct OpenAPIResponse : KeyedElement, PointerNavigable {
             }
         }
         supportingElements = supportingElements.union(supportedStatus)
+        supportingElements.formUnion(["default"])
         var diagnostics =  map.diagnoseUnsupportedElements(supportedKeys: supportingElements , pointer: pointer)
         
         diagnostics.append(contentsOf:diagnostics)
     }
-   
+    public static func defaultResponse(value : JSONValue?, diagnostics: inout [Diagnostic],pointer : String) throws  -> OpenAPIResponse?{
+        print(value)
+        if case let .object(responses) = value {
+            for response in responses {
+                if response.key == "default",
+                   case let .object(responseObject) = response.value
+                {
+                    return try OpenAPIResponse(load: responseObject, diagnostics: &diagnostics, pointer: pointer)
+                }
+            }
+        }
+        return nil
+       
+    }
     public static var supportedKeys: [String] { [
         Self.CONTENT_KEY,
         Self.DESCRIPTION_KEY,

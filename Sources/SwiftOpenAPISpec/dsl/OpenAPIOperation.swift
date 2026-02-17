@@ -45,7 +45,7 @@ public struct OpenAPIOperation : KeyedElement, PointerNavigable {
         self.parameters = try map.mapListIfPresent(Self.PARAMETERS_KEY, objectType: OpenAPIParameter.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.PARAMETERS_KEY))
         self.requestBody = try map.readIfPresent(Self.REQUEST_BODIES_KEY, objectType: OpenAPIRequestBody.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.REQUEST_BODIES_KEY))
         self.responses = try map.mapListIfPresent(Self.RESPONSES_KEY, objectType: OpenAPIResponse.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.RESPONSES_KEY))
-        self.defaultResponse = try map.readIfPresent(Self.RESPONSES_KEY, objectType: OpenAPIResponse.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.DEFAULT_RESPONSE_KEY))
+        self.defaultResponse =  try OpenAPIResponse.defaultResponse(value: map[Self.RESPONSES_KEY],diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.RESPONSES_KEY))
         self.callbacks =  try map.mapListIfPresent(Self.CALLBACKS_KEY, objectType: OpenAPICallBack.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.CALLBACKS_KEY))
         self.deprecated = map.readIfPresent(Self.DEPRECATED_KEY, valueType: Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.DEPRECATED_KEY))
         self.securityObjects = try map.mapListIfPresent(Self.SECURITY_KEY, objectType: OpenAPISecuritySchemeReference.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.SECURITY_KEY))
