@@ -186,7 +186,7 @@ struct RequiredServerURLRule: Rule {
     
 }
 struct  ValidComponentNamesRule: Rule {
-    let name = "SupportedComponentNamesRule"
+    let name = "OAS.SupportedComponentNamesRule"
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         var diagnostics: [Diagnostic] = []
         for schema in (spec.components?.schemas ?? []) {
@@ -201,52 +201,52 @@ struct  ValidComponentNamesRule: Rule {
 }
 
 struct  OpenAPIComponentV30FieldsNotAllowed: Rule {
-    let name = "OpenAPIComponentV30FieldsNotAllowed"
+    let name = "OAS.OpenAPIComponentV30FieldsNotAllowed"
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         var diagnostics = [Diagnostic]()
         if let pathItems = spec.components?.pathItems,
            pathItems.count > 0 {
-            diagnostics.append(.init(severity: .error, code: .invalidElement, message: "The 'components.pathItems' property is not supported in OpenAPI 3.0", pointer: "#/components/pathItems", rule: self.name))
+            diagnostics.append(.init(severity: .error, code: .invalidElement, message: "The 'components.pathItems' property is not supported in OpenAPI 3.0.", pointer: "#/components/pathItems", rule: self.name))
         }
         return diagnostics
     }
 }
 struct  OpenAPIComponentV30_1FieldsNotAllowed: Rule {
-    let name = "OpenAPIComponentV30FieldsNotAllowed"
+    let name = "OAS.OpenAPIComponentV30FieldsNotAllowed"
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         var diagnostics = [Diagnostic]()
         if let mediaTypes = spec.components?.mediaTypes,
            mediaTypes.count > 0 {
-            diagnostics.append(.init(severity: .error, code: .invalidElement, message: "The 'components.mediaTypes' property is not supported in OpenAPI 3.0/3.1", pointer: "#/components/mediaTypes", rule: self.name))
+            diagnostics.append(.init(severity: .error, code: .invalidElement, message: "The 'components.mediaTypes' property is not supported in OpenAPI 3.0/3.1.", pointer: "#/components/mediaTypes", rule: self.name))
         }
         return diagnostics
     }
 }
 
-struct  OpenAPIPathV30_ItemFieldsNotAllowed: Rule {
-    let name = "OpenAPIPathV30_ItemFieldsNotAllowed:"
+struct OpenAPIPathV30_ItemFieldsNotAllowed: Rule {
+    let name = "OAS.OpenAPIPathV30_ItemFieldsNotAllowed"
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         var diagnostics = [Diagnostic]()
         for info in RuleRunner.pathItemInfo(spec: spec) {
             let pointer = info.pointer
             let pathItem = info.item
             if pathItem.additionalOperations.count > 0 {
-                diagnostics.append(.init(severity: .error, code: .invalidElement, message: "Path items do not support 'additionalOperations' in OpenAPI 3.0/3.1 does not support HTTP methods as properties.", pointer: pointer, rule: self.name))
+                diagnostics.append(.init(severity: .error, code: .invalidElement, message: "Path items do not support 'additionalOperations' in OpenAPI 3.0/3.1.", pointer: pointer, rule: self.name))
             }
         }
         return diagnostics
     }
 }
 
-struct  OpenAPIMediaTypeV30_1ItemFieldsNotAllowed: Rule {
-    let name = "OpenAPIPathV30_ItemFieldsNotAllowed:"
+struct OpenAPIMediaTypeV30_1ItemFieldsNotAllowed: Rule {
+    let name = "OAS.OpenAPIMediaTypeV30_ItemFieldsNotAllowed"
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         var diagnostics = [Diagnostic]()
         for info in RuleRunner.mediaTypes(spec: spec) {
             let pointer = info.pointer
             let mediaType = info.item
-            if mediaType.encoding.count > 0  || mediaType.itemEncoding.count > 0 || mediaType.prefixEncoding.count > 0 {
-                diagnostics.append(.init(severity: .error, code: .invalidElement, message: "MediaTypes do not support 'encoding', 'itemEncoding' or 'prefixEncoding' in OpenAPI 3.0/3.1.", pointer: pointer, rule: self.name))
+            if mediaType.itemEncoding.count > 0 || mediaType.prefixEncoding.count > 0 {
+                diagnostics.append(.init(severity: .error, code: .invalidElement, message: "MediaTypes do not support 'itemEncoding' or 'prefixEncoding' in OpenAPI 3.0/3.1.", pointer: pointer, rule: self.name))
                 
             }
         }
@@ -655,27 +655,6 @@ struct OpenAPIExample30_ValidFieldsRule: Rule {
                 let diagnostics = Diagnostic( severity: .error,
                                              code: .missingRequired,
                                              message: "Example does not support 'dataValue', 'serializedValue'in OpenAPI 3.0/3.1",
-                                             pointer: pointer,
-                                             rule: name)
-                diags.append(diagnostics)
-            }
-        }
-        return diags
-    }
-}
-
-struct OpenAPIHeader30_ValidFieldsRule: Rule {
-    let name = "OpenAPIHeader30_ValidFieldsRule"
-    func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
-        var diags: [Diagnostic] = []
-        let headers = RuleRunner.headerInfo(spec: spec)
-        for headerInfo in headers {
-            let header = headerInfo.item
-            let pointer = headerInfo.pointer
-            if header.key != nil {
-                let diagnostics = Diagnostic( severity: .error,
-                                             code: .missingRequired,
-                                             message: "Header/Parameter must not specify 'name' and 'in' in OpenAPI 3.0/3.1",
                                              pointer: pointer,
                                              rule: name)
                 diags.append(diagnostics)

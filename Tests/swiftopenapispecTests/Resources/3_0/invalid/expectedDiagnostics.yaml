@@ -399,7 +399,7 @@ cases:
         messageContains: "dependency value must be an object or array, not boolean"
     onlyThese: true
   - fixture: "01-minimal-30-unsupportedSpecFields"
-    shouldPass : false
+    shouldPass: false
     expected:
       - code: "invalidElement"
         pointer: "#/$self"
@@ -416,5 +416,32 @@ cases:
         rule: "OAS.OpenAPISpecificationV30FieldsNotAllowed"
         severity: "error"
         messageContains: "openapi.webhooks is not allowed in OpenAPI 3.0/3.1"
- 
-        
+  - fixture: "33-components-unsupported"
+    shouldPass: false
+    expected:
+      - code: "invalidElement"
+        pointer: "#/components/mediaTypes"
+        rule: "OAS.OpenAPIComponentV30FieldsNotAllowed"
+        severity: "error"
+        messageContains: "The 'components.mediaTypes' property is not supported in OpenAPI 3.0/3.1"
+      - code: "invalidElement"
+        pointer: "#/components/pathItems"
+        rule: "OAS.OpenAPIComponentV30FieldsNotAllowed"
+        severity: "error"
+        messageContains: "The 'components.pathItems' property is not supported in OpenAPI 3.0"
+  - fixture: "03-pathitems-unsupported"
+    shouldPass: false
+    expected:
+      - code: "invalidElement"
+        pointer: "#/paths/~1pets"
+        rule: "OAS.OpenAPIPathV30_ItemFieldsNotAllowed"
+        severity: "error"
+        messageContains: "Path items do not support 'additionalOperations' in OpenAPI 3.0/3.1."
+  - fixture: "35-ext-components-unsupportedMediaType"
+    shouldPass: false
+    expected:
+      - code: "invalidElement"
+        pointer: "#/components/requestBodies/CreateEvent/content/application~1json"
+        rule: "OAS.OpenAPIMediaTypeV30_ItemFieldsNotAllowed"
+        severity: "error"
+        messageContains: "Media types do not support 'itemEncoding' or 'prefixEncoding' in OpenAPI 3.0/3.1."

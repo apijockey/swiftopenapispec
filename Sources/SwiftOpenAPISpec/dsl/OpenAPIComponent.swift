@@ -144,9 +144,9 @@ public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
             schemas =   try map.mapListIfPresent(Self.SCHEMAS_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.SCHEMAS_KEY))
             self.securitySchemas =   try map.mapListIfPresent(Self.SECURITY_SCHEMES_KEY, objectType:OpenAPISecurityScheme.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.SECURITY_SCHEMES_KEY))
         
-        var supportingElments = Set(Self.supportedKeys)
-        supportingElments.formUnion((self.extensions ?? []).compactMap({ $0.key }))
-        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
+        var supportingElements = Set(Self.supportedKeys)
+        supportingElements.formUnion((self.extensions ?? []).compactMap({ $0.key }))
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElements , pointer: pointer))
         
     }
     

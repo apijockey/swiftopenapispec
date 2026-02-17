@@ -261,9 +261,7 @@ struct ValidationTests {
                 #expect(result.pointer.starts(with: expected.pointer), "pointer: \(result) not as \(expected)")
                 #expect(result.rule == expected.rule,  "rule: \(result) != \(expected)")
                 #expect(result.severity.rawValue == expected.severity,  "severity: \(result) != \(expected)")
-                
             }
-            
         }
     
     @Test("03-minimal-30-unsupportedHTTPMethod")

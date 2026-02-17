@@ -84,6 +84,7 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
             else {
                 if key != Self.SUMMARY_KEY,
                    key != Self.DESCRIPTION_KEY,
+                   key != Self.ADDITIONAL_OPERATIONS_KEY,
                    key != OpenAPISchemaReference.REF_KEY,
                    key != Self.SERVERS_KEY,
                    key != Self.PARAMETERS_KEY,
@@ -115,6 +116,7 @@ public struct OpenAPIPathItem: KeyedElement , PointerNavigable {
         Self.SUMMARY_KEY,
         Self.DESCRIPTION_KEY,
         OpenAPISchemaReference.REF_KEY,
+        Self.ADDITIONAL_OPERATIONS_KEY,
         Self.SERVERS_KEY,
         Self.PARAMETERS_KEY,
     ]

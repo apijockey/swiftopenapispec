@@ -83,7 +83,7 @@ public struct RuleRunner  : Sendable{
             OpenAPIComponentV30_1FieldsNotAllowed(),
             OpenAPIMediaTypeV30_1ItemFieldsNotAllowed(),
             OpenAPIExample30_ValidFieldsRule(),
-            OpenAPIHeader30_ValidFieldsRule(),
+           
             RequiredResponsesComponentNamessRule(),
             OpenAPIResponse30_ValidFieldsRule(),
             RequiredExamplesComponentNamessRule(),

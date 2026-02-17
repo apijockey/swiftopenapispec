@@ -54,17 +54,22 @@ public struct OpenAPIMediaType :  KeyedElement , PointerNavigable {
                     self.ref = OpenAPISchemaReference(ref: refKey)
             return
         }
-        self.schema = try map.readIfPresent(Self.SCHEMA_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.SCHEMA_KEY))
-        self.examples = try map.mapListIfPresent(Self.EXAMPLES_KEY, objectType: OpenAPIExample.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXAMPLES_KEY))
+        // one content has a key and
+        guard let mediaTypeValue = map.first?.value,
+              case let .object(objectMap) =  mediaTypeValue else {
+            return
+        }
+        self.schema = try objectMap.readIfPresent(Self.SCHEMA_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.SCHEMA_KEY))
+        self.examples = try objectMap.mapListIfPresent(Self.EXAMPLES_KEY, objectType: OpenAPIExample.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXAMPLES_KEY))
         self.example = map[Self.EXAMPLE_KEY]
         
-        self.encoding =  try map.mapListIfPresent(Self.ENCODING_KEY, objectType: OpenAPIEncoding.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.ENCODING_KEY))
-        self.prefixEncoding = try map.mapListIfPresent(Self.PREFIX_ENCODING_KEY, objectType: OpenAPIEncoding.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.PREFIX_ENCODING_KEY))
-        self.itemEncoding =  try map.mapListIfPresent(Self.ITEM_ENCODING_KEY, objectType: OpenAPIEncoding.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.ITEM_ENCODING_KEY))
+        self.encoding =  try objectMap.mapListIfPresent(Self.ENCODING_KEY, objectType: OpenAPIEncoding.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.ENCODING_KEY))
+        self.prefixEncoding = try objectMap.mapListIfPresent(Self.PREFIX_ENCODING_KEY, objectType: OpenAPIEncoding.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.PREFIX_ENCODING_KEY))
+        self.itemEncoding =  try objectMap.mapListIfPresent(Self.ITEM_ENCODING_KEY, objectType: OpenAPIEncoding.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.ITEM_ENCODING_KEY))
         
         let supportingElments = Set(Self.supportedKeys)
         
-        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
+        diagnostics.append(contentsOf: objectMap.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
         
     }
     

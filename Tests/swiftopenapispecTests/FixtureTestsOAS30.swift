@@ -57,7 +57,10 @@ struct FixtureTestsOAS30 {
     @Test("OAS3.0 Field support rules", arguments: [
         "01-minimal-30-unsupportedSpecFields",
         "02-minimal-30-InfoValidations",
-        "02-minimal-30-LicenseValidations"
+        "02-minimal-30-LicenseValidations",
+        "33-components-unsupported",
+        "03-pathitems-unsupported",
+        "35-ext-components-unsupportedMediaType"
     ])
     func schemaWarningRulesHit(resource: String) async throws {
         let subDirectory = "Resources/3_0/invalid"
