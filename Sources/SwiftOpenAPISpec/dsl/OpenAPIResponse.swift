@@ -95,7 +95,6 @@ public struct OpenAPIResponse : KeyedElement, PointerNavigable {
         diagnostics.append(contentsOf:diagnostics)
     }
     public static func defaultResponse(value : JSONValue?, diagnostics: inout [Diagnostic],pointer : String) throws  -> OpenAPIResponse?{
-        print(value)
         if case let .object(responses) = value {
             for response in responses {
                 if response.key == "default",

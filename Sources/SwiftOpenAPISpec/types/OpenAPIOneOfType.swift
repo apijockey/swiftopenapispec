@@ -59,10 +59,10 @@ public struct OpenAPIOneOfType : OpenAPISchemaType,ThrowingHashMapInitiable, Poi
     
     
     public static let TYPE_KEY = "oneOf"
-    public static let DISCRIMINATOR_KEY = "discriminator"
+   
     
     public static var supportedKeys: [String] {
-        return [TYPE_KEY,DISCRIMINATOR_KEY,OpenAPISchemaReference.REF_KEY]
+        return [TYPE_KEY,OpenAPISchemaReference.REF_KEY]
     }
 
     public init(load map: StringDictionary,diagnostics: inout [Diagnostic],pointer : String) throws {

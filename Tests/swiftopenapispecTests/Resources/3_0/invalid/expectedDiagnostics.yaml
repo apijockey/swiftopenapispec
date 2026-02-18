@@ -126,10 +126,10 @@ cases:
     shouldPass: false
     expected:
       - code: "invalidValue"
-        pointer: "#/paths/~1create/post/responses/HI"
-        rule: "OAS.UnsupportedElement"
+        pointer: "#/paths/~1create/post/responses/Hi"
+        rule: "OAS.SupportedHTPStatusRule"
         severity: "error"
-        messageContains: "The element 'HI' is not supported by this version of the spec."
+        messageContains: "Response code 'Hi' is not a valid HTTP status code."
   - fixture: "05-response-invalidPropertyType"
     shouldPass: false
     expected:
@@ -453,3 +453,68 @@ cases:
         rule: "OAS.OpenAPIMediaTypeV30_ItemFieldsNotAllowed"
         severity: "error"
         messageContains: "Media types do not support 'itemEncoding' or 'prefixEncoding' in OpenAPI 3.0/3.1."
+  - fixture: "openapi-invalidExamples"
+    shouldPass: false
+    expected:
+      - code: "invalidElement"
+        pointer: "#/paths/~1pets/post/requestBody/content/application~1json/examples/withRating"
+        rule: "OpenAPIExample30_ValidFieldsRule"
+        severity: "error"
+        messageContains: "Example does not support 'dataValue', 'serializedValue'in OpenAPI 3.0/3.1."
+      - code: "invalidElement"
+        pointer: "#/paths/~1pets/post/requestBody/content/application~1json/examples/noRating"
+        rule: "OpenAPIExample30_ValidFieldsRule"
+        severity: "error"
+        messageContains: "Example does not support 'dataValue', 'serializedValue'in OpenAPI 3.0/3.1."
+  - fixture: "01-minimal-30-invalidTags"
+    shouldPass: false
+    expected:
+      - code: "invalidElement"
+        pointer: "#/tags/account-updates"
+        rule: "OpenAPITag30_ValidFieldsRule"
+        severity: "error"
+        messageContains: "Tags must not specify 'summary','parent' or 'kind' in OpenAPI 3.0/3.1."
+      - code: "invalidElement"
+        pointer: "#/tags/partner"
+        rule: "OpenAPITag30_ValidFieldsRule"
+        severity: "error"
+        messageContains: "Tags must not specify 'summary','parent' or 'kind' in OpenAPI 3.0/3.1."
+      - code: "invalidElement"
+        pointer: "#/tags/external"
+        rule: "OpenAPITag30_ValidFieldsRule"
+        severity: "error"
+        messageContains: "Tags must not specify 'summary','parent' or 'kind' in OpenAPI 3.0/3.1."
+  - fixture: "16-discriminator-invalid-defaultMapping"
+    shouldPass: false
+    expected:
+      - code: "invalidElement"
+        pointer: "#/components/schemas/EventEnvelope/properties/payload/discriminator"
+        rule: "OpenAPIDiscriminator30_ValidFieldsRule"
+        severity: "error"
+        messageContains: "Discriminators must not have 'defaultMapping' in OpenAPI 3.0/3.1."
+  - fixture: "16-schema-invalid-xmlNodeType"
+    shouldPass: false
+    expected:
+      - code: "invalidElement"
+        pointer: "#/components/schemas/Person/properties/id/xml"
+        rule: "OpenAPIXMLObject_ValidFieldsRule"
+        severity: "error"
+        messageContains: "XML Object must not have 'nodeType' in OpenAPI 3.0/3.1."
+  - fixture: "33-components-unsupportedSecuritySchemes"
+    shouldPass: false
+      expected:
+      - code: "invalidElement"
+        pointer: "#/components/securitySchemes/OAuth2"
+        rule: "OpenAPISecurityScheme_ValidFieldsRule"
+        severity: "error"
+        messageContains: "SecurityScheme must not have 'oauth2MetadataURL','deprecated' in OpenAPI 3.0/3.1."
+      - code: "invalidElement"
+        pointer: "#/components/securitySchemes/OAuth2/flows/deviceAuthorization"
+        rule: "OpenAPIOAuthFlow_ValidFieldsRule"
+        severity: "error"
+        messageContains: "OAuth flows must not have 'deviceAuthorization' in OpenAPI 3.0/3.1."
+      - code: "invalidElement"
+        pointer: "#/components/securitySchemes/OAuth2/flows/deviceAuthorization"
+        rule: "OpenAPIOAuthFlow_ValidFieldsRule"
+        severity: "error"
+        messageContains: "OAuth flows must not have 'deviceAuthorizationUrl' in OpenAPI 3.0/3.1."

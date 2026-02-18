@@ -31,12 +31,12 @@ public struct RuleRunner  : Sendable{
     public let rules: [Rule]
     
     /// Executes all validation rules against an OpenAPI specification.
-    /// 
+    ///
     /// - Parameters:
     ///   - spec: The OpenAPI specification to validate
     ///   - ctx: The validation context
     /// - Returns: An array of diagnostics (validation findings) from all rules
-    /// 
+    ///
     /// This method applies each rule in sequence and collects all findings.
     /// Rules that return empty arrays indicate no issues were found.
     public func run(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
@@ -46,14 +46,14 @@ public struct RuleRunner  : Sendable{
     }
     
     /// Initializes a new RuleRunner with a custom set of rules.
-    /// 
+    ///
     /// - Parameter rules: The validation rules to use
     public init(rules: [Rule]) {
         self.rules = rules
     }
     
     /// The default RuleRunner with the standard set of validation rules.
-    /// 
+    ///
     /// This includes rules for:
     /// - Version validation
     /// - Structural validation
@@ -83,7 +83,7 @@ public struct RuleRunner  : Sendable{
             OpenAPIComponentV30_1FieldsNotAllowed(),
             OpenAPIMediaTypeV30_1ItemFieldsNotAllowed(),
             OpenAPIExample30_ValidFieldsRule(),
-           
+            
             RequiredResponsesComponentNamessRule(),
             OpenAPIResponse30_ValidFieldsRule(),
             RequiredExamplesComponentNamessRule(),
@@ -103,6 +103,7 @@ public struct RuleRunner  : Sendable{
             ResponsesMustHaveDescriptionRule(),
             LinkMustHaveRefOrIdentifier(),
             OpenAPISecurityScheme_ValidFieldsRule(),
+            OpenAPIOAuthFlow_ValidFieldsRule(),
             TagMustHaveName(),
             ReferencesMustHaveRefRule()
         ]
@@ -155,6 +156,7 @@ public struct RuleRunner  : Sendable{
             ResponsesMustHaveDescriptionRule(),
             OpenAPIXMLObject_ValidFieldsRule(),
             OpenAPISecurityScheme_ValidFieldsRule(),
+            OpenAPIOAuthFlow_ValidFieldsRule(),
             LinkMustHaveRefOrIdentifier(),
             TagMustHaveName(),
             ReferencesMustHaveRefRule()
@@ -164,7 +166,7 @@ public struct RuleRunner  : Sendable{
     public init(version: ValidationContext.OASVersion) {
         switch version {
         case .v30:
-           self = Self.oas30RuleRunner
+            self = Self.oas30RuleRunner
         case .v31:
             self = Self.oas31RuleRunner
         case .v32:
@@ -175,15 +177,15 @@ public struct RuleRunner  : Sendable{
         var items =  [(OpenAPIPathItem, String)]()
         for pathItem in spec.paths {
             
-                let pointer = "#/paths/\(JSONPointer.escape(pathItem.key ?? ""))"
+            let pointer = "#/paths/\(JSONPointer.escape(pathItem.key ?? ""))"
             items.append((pathItem,  pointer))
             
         }
         for pathItem in spec.components?.pathItems ?? [] {
             
-                let pointer = "#/components/pathItems/\(JSONPointer.escape(pathItem.key ?? ""))"
-                items.append((pathItem,  pointer))
-                
+            let pointer = "#/components/pathItems/\(JSONPointer.escape(pathItem.key ?? ""))"
+            items.append((pathItem,  pointer))
+            
             
         }
         return items
@@ -209,7 +211,7 @@ public struct RuleRunner  : Sendable{
                 let pointer = "\(operationInfo.pointer)/responses/\(response.key ?? "")"
                 items.append((item: response,  pointer: pointer))
             }
-                
+            
         }
         for response in spec.components?.responses ?? [] {
             let pointer = "#/components/responses/\(response.key ?? "")"
@@ -227,12 +229,12 @@ public struct RuleRunner  : Sendable{
                 }
                 items.append((item: requestBody,  pointer: pointer))
             }
-           
+            
         }
         for requestBody in (spec.components?.requestBodies ?? []) {
             
-                let pointer = "#/components/requestBodies/\(requestBody.key ?? "")"
-                items.append((item: requestBody,  pointer: pointer))
+            let pointer = "#/components/requestBodies/\(requestBody.key ?? "")"
+            items.append((item: requestBody,  pointer: pointer))
         }
         return items
     }
@@ -255,7 +257,7 @@ public struct RuleRunner  : Sendable{
     public static func headerInfo(spec: OpenAPISpecification) -> [(item: OpenAPIHeader, pointer:String)] {
         var items =  [(OpenAPIHeader, String)]()
         if let headers = spec.components?.headers?.map ({ header in
-                (item:header, pointer: "#/components/headers/\(header.key ?? "")")
+            (item:header, pointer: "#/components/headers/\(header.key ?? "")")
         }) {
             items.append(contentsOf: headers)
         }
@@ -288,7 +290,7 @@ public struct RuleRunner  : Sendable{
                     items.append((item: header, pointer: "\(pointer)/prefixEncoding/\(encoding.key ?? "")/headers\(header.key ?? "")"))
                 }
             }
-             
+            
         }
         return items
     }
@@ -299,7 +301,7 @@ public struct RuleRunner  : Sendable{
         }) {
             items.append(contentsOf: examples)
         }
-       
+        
         let mediaTypeInfos = mediaTypes(spec: spec)
         for mediaTypeInfo in mediaTypeInfos {
             let mediaType = mediaTypeInfo.item
@@ -308,8 +310,8 @@ public struct RuleRunner  : Sendable{
             for example in mediaType.examples {
                 items.append((item: example, pointer: "\(pointer)/examples/\(example.key ?? "")"))
             }
-           
-           
+            
+            
         }
         for headerInfo in headerInfo(spec: spec) {
             let header = headerInfo.item
@@ -319,23 +321,94 @@ public struct RuleRunner  : Sendable{
                 items.append((item: example, pointer: "\(pointer)/examples/\(example.key ?? "")"))
             }
         }
-       
+        
         return items
     }
     public static func schemasInfo(spec: OpenAPISpecification) -> [(item: OpenAPISchema, pointer:String)] {
         var items =  [(OpenAPISchema, String)]()
         if let schemas = spec.components?.schemas {
             for namedSchema in schemas {
-                items.append((item: namedSchema,pointer:"#/components/schemas/\(namedSchema.key ?? "")"))
+                let pointer = "#/components/schemas/\(namedSchema.key ?? "")"
+                items.append(contentsOf: schemasInfo(schema: namedSchema, pointer: pointer))
+                
             }
         }
         for info in RuleRunner.mediaTypes(spec: spec)  {
             let pointer = info.pointer
             let content = info.item
             if let schema = content.schema  {
-                items.append((item: schema,pointer: "\(pointer)/schema"))
+                let pointer = "\(pointer)/schema/\(schema.key ?? "")"
+                items.append(contentsOf: schemasInfo(schema: schema, pointer: pointer))
             }
         }
         return items
+    }
+    public static func schemasInfo(schema: OpenAPISchema, pointer: String) -> [(item: OpenAPISchema, pointer:String)] {
+        var schemas: [(item: OpenAPISchema, pointer:String)] = []
+        schemas.append((item: schema, pointer: pointer))
+        if let type =  schema.type {
+            
+            if case let .object(obj) = type {
+                for prop in obj.properties {
+                    if let key = prop.key{
+                        let p = JSONPointer.join(JSONPointer.join(pointer, "properties"), key)
+                        schemas.append(contentsOf: schemasInfo(schema: prop , pointer: p))
+                    }
+                    
+                }
+                for prop in obj.additionalPropertiesObject {
+                    if let key = prop.key{
+                        let p = JSONPointer.join(JSONPointer.join(pointer, "additionalProperties"), key)
+                        schemas.append(contentsOf: schemasInfo(schema: prop , pointer: p))
+                    }
+                    
+                }
+                for prop in obj.patternProperties {
+                    if let key = prop.key{
+                        let p = JSONPointer.join(JSONPointer.join(pointer, "patternProperties"), key)
+                        schemas.append(contentsOf: schemasInfo(schema: prop , pointer: p))
+                    }
+                    
+                }
+            }
+            
+            if case let .array(arr) = type ,
+               let items = arr.items {
+                    schemas.append(contentsOf: schemasInfo(schema: items, pointer: JSONPointer.join(JSONPointer.join(pointer, "items"), "")))
+                
+            }
+            
+            if case let .anyOf(openAPIAnyOfType) = type,
+               let items = openAPIAnyOfType.items {
+                for (idx, item) in items.enumerated() {
+                    schemas.append(contentsOf: schemasInfo(schema: item, pointer: JSONPointer.join(JSONPointer.join(pointer, "anyOf"), "\(idx)")))
+                }
+                
+            }
+            
+            if case let .oneOf(openAPIAnyOfType) = type ,
+               let items = openAPIAnyOfType.items {
+                for (idx, item) in items.enumerated() {
+                    schemas.append(contentsOf: schemasInfo(schema: item, pointer: JSONPointer.join(JSONPointer.join(pointer, "oneOf"), "\(idx)")))
+                }
+                
+            }
+            
+            if case let .allOf(openAPIAnyOfType) = type,
+               let items = openAPIAnyOfType.items {
+                for (idx, item) in items.enumerated() {
+                    schemas.append(contentsOf: schemasInfo(schema: item, pointer: JSONPointer.join(JSONPointer.join(pointer, "allOf"), "\(idx)")))
+                }
+                
+            }
+            
+            
+            
+            if case  .ref = type {
+                return schemas
+            }
+            return schemas
+        }
+        return schemas
     }
 }

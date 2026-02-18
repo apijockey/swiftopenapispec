@@ -655,8 +655,8 @@ struct OpenAPIExample30_ValidFieldsRule: Rule {
             let pointer = exampleInfo.pointer
             if example.dataValue != nil || example.serializedValue != nil {
                 let diagnostics = Diagnostic( severity: .error,
-                                             code: .missingRequired,
-                                             message: "Example does not support 'dataValue', 'serializedValue'in OpenAPI 3.0/3.1",
+                                             code: .invalidElement,
+                                             message: "Example does not support 'dataValue', 'serializedValue'in OpenAPI 3.0/3.1.",
                                              pointer: pointer,
                                              rule: name)
                 diags.append(diagnostics)
@@ -666,7 +666,7 @@ struct OpenAPIExample30_ValidFieldsRule: Rule {
     }
 }
 struct OpenAPITag30_ValidFieldsRule: Rule {
-    let name = " OpenAPITag30_ValidFieldsRule"
+    let name = "OpenAPITag30_ValidFieldsRule"
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         var diags: [Diagnostic] = []
         for tag in spec.tags {
@@ -674,8 +674,8 @@ struct OpenAPITag30_ValidFieldsRule: Rule {
                 tag.parent != nil ||
                 tag.kind != nil {
                 let diagnostics = Diagnostic( severity: .error,
-                                             code: .missingRequired,
-                                             message: "Tags must not specify 'summary','parent' or 'kind' in OpenAPI 3.0/3.1",
+                                             code: .invalidElement,
+                                             message: "Tags must not specify 'summary','parent' or 'kind' in OpenAPI 3.0/3.1.",
                                              pointer: "#/tags/\(tag.key ?? "")",
                                              rule: name)
                 diags.append(diagnostics)
@@ -717,10 +717,13 @@ struct OpenAPIDiscriminator30_ValidFieldsRule: Rule {
         for schemaInfo in RuleRunner.schemasInfo(spec: spec) {
             let pointer = schemaInfo.pointer
             let schema = schemaInfo.item
-            if  schema.defaultValue != nil {
+            
+            if  let discriminator = schema.discriminator,
+                discriminator.defaultMapping != nil{
+                let pointer = "\(pointer)/discriminator"
                         let diagnostics = Diagnostic( severity: .error,
-                                                     code: .missingRequired,
-                                                     message: "Discriminators must not have 'defaultValue' in OpenAPI 3.0/3.1",
+                                                     code: .invalidElement,
+                                                     message: "Discriminators must not have 'defaultMapping' in OpenAPI 3.0/3.1.",
                                                      pointer: pointer,
                                                      rule: name)
                         diags.append(diagnostics)
@@ -739,13 +742,14 @@ struct OpenAPIXMLObject_ValidFieldsRule: Rule {
     func check(spec: OpenAPISpecification, ctx: ValidationContext) -> [Diagnostic] {
         var diags: [Diagnostic] = []
         for schemaInfo in RuleRunner.schemasInfo(spec: spec) {
-            let pointer = schemaInfo.pointer
+            let pointer = schemaInfo.pointer.appending("/xml")
             let schema = schemaInfo.item
             if let xmlObject = schema.xml,
-            xmlObject.nodeType != nil {
+               let nodeType = xmlObject.nodeType,
+               nodeType != .none {
                 let diagnostics = Diagnostic( severity: .error,
-                                             code: .missingRequired,
-                                             message: "XMLObject must not have 'nodeType' in OpenAPI 3.0/3.1",
+                                             code: .invalidElement,
+                                             message: "XML Object must not have 'nodeType' in OpenAPI 3.0/3.1.",
                                              pointer: pointer,
                                              rule: name)
                 diags.append(diagnostics)
@@ -766,12 +770,11 @@ struct OpenAPISecurityScheme_ValidFieldsRule: Rule {
         var diags: [Diagnostic] = []
         for securityScheme in (spec.components?.securitySchemas ?? []) {
            
-            if securityScheme.oauth2MetadataURL != nil,
-               securityScheme.deprecated != nil{
+            if securityScheme.oauth2MetadataURL != nil || securityScheme.deprecated != nil {
                 let diagnostics = Diagnostic( severity: .error,
-                                             code: .missingRequired,
-                                             message: "SecurityScheme must not have 'oauth2MetadataURL','deprecated' in OpenAPI 3.0/3.1",
-                                              pointer: "#/components/securityScheme/\(securityScheme.key ?? "")",
+                                             code: .invalidElement,
+                                             message: "SecurityScheme must not have 'oauth2MetadataURL','deprecated' in OpenAPI 3.0/3.1.",
+                                              pointer: "#/components/securitySchemes/\(securityScheme.key ?? "")",
                                              rule: name)
                 diags.append(diagnostics)
             }
@@ -794,17 +797,17 @@ struct OpenAPIOAuthFlow_ValidFieldsRule: Rule {
             if let flows = securityScheme.flows,
                flows.deviceAuthorization != nil {
                 let diagnostics = Diagnostic( severity: .error,
-                                             code: .missingRequired,
-                                             message: "OAuth flows must not have 'deviceAuthorization' in OpenAPI 3.0/3.1",
-                                              pointer: "#/components/securityScheme/\(securityScheme.key ?? "")/flows",
+                                             code: .invalidElement,
+                                             message: "OAuth flows must not have 'deviceAuthorization' in OpenAPI 3.0/3.1.",
+                                              pointer: "#/components/securitySchemes/\(securityScheme.key ?? "")/flows",
                                              rule: name)
                 diags.append(diagnostics)
                 if let password = flows.password,
                    password.deviceAuthorizationUrl != nil  {
                     let diagnostics = Diagnostic( severity: .error,
-                                                 code: .missingRequired,
-                                                 message: "OAuth flows must not have 'deviceAuthorizationUrl' in OpenAPI 3.0/3.1",
-                                                  pointer: "#/components/securityScheme/\(securityScheme.key ?? "")/flows/password",
+                                                 code: .invalidElement,
+                                                 message: "OAuth flows must not have 'deviceAuthorizationUrl' in OpenAPI 3.0/3.1.",
+                                                  pointer: "#/components/securitySchemes/\(securityScheme.key ?? "")/flows/password",
                                                  rule: name)
                     diags.append(diagnostics)
                     
@@ -812,9 +815,9 @@ struct OpenAPIOAuthFlow_ValidFieldsRule: Rule {
                 if let authorizationCode =  flows.authorizationCode,
                    authorizationCode.deviceAuthorizationUrl != nil {
                     let diagnostics = Diagnostic( severity: .error,
-                                                 code: .missingRequired,
-                                                 message: "OAuth flows must not have 'deviceAuthorizationUrl' in OpenAPI 3.0/3.1",
-                                                  pointer: "#/components/securityScheme/\(securityScheme.key ?? "")/flows/authorizationCode",
+                                                 code: .invalidElement,
+                                                 message: "OAuth flows must not have 'deviceAuthorizationUrl' in OpenAPI 3.0/3.1.",
+                                                  pointer: "#/components/securitySchemes/\(securityScheme.key ?? "")/flows/authorizationCode",
                                                  rule: name)
                     diags.append(diagnostics)
                     
@@ -822,9 +825,9 @@ struct OpenAPIOAuthFlow_ValidFieldsRule: Rule {
                 if let clientCredentials = flows.clienCredentials,
                    clientCredentials.deviceAuthorizationUrl != nil {
                     let diagnostics = Diagnostic( severity: .error,
-                                                 code: .missingRequired,
-                                                 message: "OAuth flows must not have 'deviceAuthorizationUrl' in OpenAPI 3.0/3.1",
-                                                  pointer: "#/components/securityScheme/\(securityScheme.key ?? "")/flows/clientCredentials",
+                                                 code: .invalidElement,
+                                                 message: "OAuth flows must not have 'deviceAuthorizationUrl' in OpenAPI 3.0/3.1.",
+                                                  pointer: "#/components/securitySchemes/\(securityScheme.key ?? "")/flows/clientCredentials",
                                                  rule: name)
                     diags.append(diagnostics)
                     
@@ -834,7 +837,7 @@ struct OpenAPIOAuthFlow_ValidFieldsRule: Rule {
                     let diagnostics = Diagnostic( severity: .error,
                                                  code: .missingRequired,
                                                  message: "OAuth flows must not have 'deviceAuthorizationUrl' in OpenAPI 3.0/3.1",
-                                                  pointer: "#/components/securityScheme/\(securityScheme.key ?? "")/flows/implicit",
+                                                  pointer: "#/components/securitySchemes/\(securityScheme.key ?? "")/flows/implicit",
                                                  rule: name)
                     diags.append(diagnostics)
                     

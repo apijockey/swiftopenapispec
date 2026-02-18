@@ -22,7 +22,7 @@ public struct OpenAPIExample : KeyedElement, RefPointerNavigable {
     public static let SUMMARY_KEY = "summary"
     public static let DESCRIPTION_KEY = "description"
     public static let VALUE_KEY = "value"
- 
+    public static let DATA_VALUE_KEY = "dataValue"
     public static let EXTERNAL_VALUE_KEY = "externalValue"
     public static let SERIALIZED_VALUE_KEY = "serializedValue"
     public init(value : JSONValue) {
@@ -39,7 +39,7 @@ public struct OpenAPIExample : KeyedElement, RefPointerNavigable {
         self.externalValue = map.readIfPresent(Self.EXTERNAL_VALUE_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.EXTERNAL_VALUE_KEY))
 
         self.serializedValue = map.readIfPresent(Self.SERIALIZED_VALUE_KEY,valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.SERIALIZED_VALUE_KEY))
-        
+        self.dataValue = map[Self.DATA_VALUE_KEY]
         // Validate unsupported keys (excluding extensions as they are dynamic)
         let supportingElments = Set(Self.supportedKeys)
         diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
@@ -54,7 +54,8 @@ public struct OpenAPIExample : KeyedElement, RefPointerNavigable {
             Self.VALUE_KEY,
             Self.EXTERNAL_VALUE_KEY,
             OpenAPISchemaReference.REF_KEY,
-            Self.SERIALIZED_VALUE_KEY
+            Self.SERIALIZED_VALUE_KEY,
+            Self.DATA_VALUE_KEY
         ]
     }
    
@@ -73,7 +74,7 @@ public struct OpenAPIExample : KeyedElement, RefPointerNavigable {
     public var summary : String? = nil
     public var description : String? = nil
     public var value : JSONValue? = nil
-    public var dataValue :Data? = nil
+    public var dataValue :JSONValue? = nil
     public var serializedValue : String?
     public var externalValue : String? = nil
     public var ref : OpenAPISchemaReference? = nil

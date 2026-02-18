@@ -12,34 +12,40 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# base
 openapi: 3.0.3
-info: {title: Responses, version: "1.0"}
+info: {title: Minimal 3.0, version: "1.0"}
 paths:
-  /create:
-    post:
-      operationId: create
+  /ping:
+    get:
+      operationId: ping
       responses:
-        "Hi":
-          description: created
+        "200":
+          description: ok
           content:
             application/json:
               schema: {
-                type: integer,
+                type: object,
                 properties: {
-                  id: {
-                    type: integer
+                  ok: {
+                    type: boolean
                   }
                 },
-                required: [id]
+                required: [ok]
               }
-        default:
-          description: error
-          content:
-            application/json:
-              schema: {$ref: "#/components/schemas/Error"}
-components:
-  schemas:
-    Error:
-      type: object
-      properties: {message: {type: string}}
-      required: [message]
+tags:
+  - name: account-updates
+    summary: Account Updates
+    description: Account update operations
+    kind: nav
+
+  - name: partner
+    summary: Partner
+    description: Operations available to the partners network
+    parent: external
+    kind: audience
+
+  - name: external
+    summary: External
+    description: Operations available to external consumers
+    kind: audience

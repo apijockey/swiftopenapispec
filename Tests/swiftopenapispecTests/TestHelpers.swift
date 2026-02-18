@@ -174,7 +174,6 @@ struct TestHelpers {
             let jsonValue = try JSONValue(from: map, diagnostics: &diagnostics)
             return jsonValue
         } catch {
-            print("Diagnostics during YAML load:", diagnostics)
             throw TestError.unreadable(url.absoluteString, error)
         }
     }

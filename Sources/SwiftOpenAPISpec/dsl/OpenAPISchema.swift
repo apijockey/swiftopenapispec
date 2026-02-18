@@ -179,8 +179,6 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
         self.discriminator = try map.readIfPresent(Self.DISCRIMINATOR_KEY,  objectType:  OpenAPIDiscriminator.self, diagnostics: &diagnostics, pointer: pointer)
        
         self.type = try OpenAPIType(load: map,  diagnostics: &diagnostics, pointer: pointer)
-       
-       
         
         if case let .array(allowedElements)  = map[Self.ALLOWED_ELEMENTS_KEY]  {
             if allowedElements.count == 0 {
@@ -264,7 +262,7 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
        
         self.uniqueItems = map.readIfPresent(Self.UNIQUE_ITEMS_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.UNIQUE_ITEMS_KEY))
         self.writeOnly = map.readIfPresent(Self.WRITE_ONLY_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.WRITE_ONLY_KEY))
-        self.xml =  try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIXMLObject.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXAMPLE_KEY))
+        self.xml =  try map.readIfPresent(Self.XML_KEY, objectType: OpenAPIXMLObject.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXAMPLE_KEY))
     }
     public static var supportedKeys: Set<String>      {
         return [
