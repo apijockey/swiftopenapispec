@@ -802,12 +802,23 @@ struct OpenAPIOAuthFlow_ValidFieldsRule: Rule {
                                               pointer: "#/components/securitySchemes/\(securityScheme.key ?? "")/flows",
                                              rule: name)
                 diags.append(diagnostics)
+                
                 if let password = flows.password,
                    password.deviceAuthorizationUrl != nil  {
                     let diagnostics = Diagnostic( severity: .error,
                                                  code: .invalidElement,
                                                  message: "OAuth flows must not have 'deviceAuthorizationUrl' in OpenAPI 3.0/3.1.",
                                                   pointer: "#/components/securitySchemes/\(securityScheme.key ?? "")/flows/password",
+                                                 rule: name)
+                    diags.append(diagnostics)
+                    
+                }
+                if let authorizationCode =  flows.deviceAuthorization,
+                   authorizationCode.deviceAuthorizationUrl != nil {
+                    let diagnostics = Diagnostic( severity: .error,
+                                                 code: .invalidElement,
+                                                 message: "OAuth flows must not have 'deviceAuthorizationUrl' in OpenAPI 3.0/3.1.",
+                                                  pointer: "#/components/securitySchemes/\(securityScheme.key ?? "")/flows/deviceAuthorization",
                                                  rule: name)
                     diags.append(diagnostics)
                     

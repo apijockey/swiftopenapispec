@@ -502,14 +502,14 @@ cases:
         messageContains: "XML Object must not have 'nodeType' in OpenAPI 3.0/3.1."
   - fixture: "33-components-unsupportedSecuritySchemes"
     shouldPass: false
-      expected:
+    expected:
       - code: "invalidElement"
         pointer: "#/components/securitySchemes/OAuth2"
         rule: "OpenAPISecurityScheme_ValidFieldsRule"
         severity: "error"
         messageContains: "SecurityScheme must not have 'oauth2MetadataURL','deprecated' in OpenAPI 3.0/3.1."
       - code: "invalidElement"
-        pointer: "#/components/securitySchemes/OAuth2/flows/deviceAuthorization"
+        pointer: "#/components/securitySchemes/OAuth2/flows"
         rule: "OpenAPIOAuthFlow_ValidFieldsRule"
         severity: "error"
         messageContains: "OAuth flows must not have 'deviceAuthorization' in OpenAPI 3.0/3.1."

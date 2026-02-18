@@ -98,6 +98,8 @@ public struct OpenAPISecurityScheme : KeyedElement , PointerNavigable {
         Self.SCHEME_KEY,
         Self.BEARER_FORMAT_KEY,
         Self.FLOWS_KEY,
+        Self.DEPRECATED_KEY,
+        Self.OAUTH2_METADATA_URL_KEY,
         Self.OPENID_CONNECT_URL_KEY
     ]
     public func element(for segmentName: String) throws -> NavigationResult {

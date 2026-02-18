@@ -66,7 +66,7 @@ struct FixtureTestsOAS30 {
         "01-minimal-30-invalidTags",
         "16-discriminator-invalid-defaultMapping",
         "16-schema-invalid-xmlNodeType",
-        "33-components-unsupportedSecuritySchemes.yaml"
+        "33-components-unsupportedSecuritySchemes"
     ])
     func schemaWarningRulesHit(resource: String) async throws {
         let subDirectory = "Resources/3_0/invalid"

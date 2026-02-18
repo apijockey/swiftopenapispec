@@ -23,6 +23,7 @@ public struct OpenAPIOAuthFlow : ThrowingHashMapInitiable, PointerNavigable {
    
     public init(load map: StringDictionary,  diagnostics: inout [Diagnostic],pointer : String) throws {
         authorizationUrl = map.readIfPresent(Self.AUTHORIZATIONURL_KEY,valueType: String.self, diagnostics : &diagnostics, pointer: pointer)
+        deviceAuthorizationUrl = map.readIfPresent(Self.DEVICE_AUTHORIZATIONURL_KEY, valueType: String.self, diagnostics: &diagnostics, pointer: pointer)
         tokenUrl = map.readIfPresent(Self.TOKENURL_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: pointer)
         refreshUrl = map.readIfPresent(Self.REFRESHURL_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: pointer)
         scopes = map.readIfPresent(Self.SCOPES_KEY,valueType:  [String:String].self, diagnostics : &diagnostics, pointer: pointer)
