@@ -16,6 +16,8 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
     case number
     case object(OpenAPIObjectType)
     case oneOf(OpenAPIOneOfType)
+    case not(OpenAPISchema)
+    case definitions(OpenAPISchema)
     case string
     case ref(OpenAPISchemaReference)
     case null
@@ -159,6 +161,10 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIType", segmentName)
         case .unknown(_):
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIType", segmentName)
+        case .not(let schema):
+            return schema
+        case .definitions(let definitions):
+            return definitions
         }
     }
 }
@@ -189,6 +195,10 @@ extension  OpenAPIType : CustomStringConvertible {
             return "null"
         case .unknown(let string):
             return "unknown(\(string))"
+        case .not(let schema):
+            return "not \(schema.type?.description ?? "")"
+        case .definitions(let definitions):
+            return "definitions \(definitions.type?.description ?? "")"
         }
     }
 }

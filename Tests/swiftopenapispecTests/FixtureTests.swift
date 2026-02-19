@@ -107,8 +107,11 @@ struct FixtureTests {
             return
         }
         
-        
-        #expect(objectType.unevaluatedProperties == false)
+        guard case let .boolean(boolValue) = objectType.unevaluatedProperties else {
+            Issue.record("Bool value expected")
+            return
+        }
+        #expect(boolValue == false)
         #expect(objectType.properties.count == 1)
         #expect(contentType.schema?.required?.count == 1)
         #expect(contentType.schema?.required?.first == "ok")

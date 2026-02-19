@@ -81,7 +81,7 @@ public struct OpenAPIResponse : KeyedElement, PointerNavigable {
         
         var supportingElements = Set(Self.supportedKeys)
         let supportedStatus = map.keys.compactMap { status in
-            if status.matches("^[1-5][0-9]{2}$") {
+            if status.matches(pattern:"^[1-5][0-9]{2}$") {
                 return status
             }
             else {

@@ -90,8 +90,8 @@ struct ArrayComponentsTests {
             Issue.record("Expected .array(let) but got \(comp.type.debugDescription)")
             return
         }
-        #expect(arrayType.minItems == 1)
-        #expect(arrayType.maxItems == 5)
+        #expect(comp.minItems == 1)
+        #expect(comp.maxItems == 5)
         let isString = if case .integer = arrayType.items?.type { true } else { false }
         #expect(isString) // Prüft, ob `items` vom Case `.string` ist
     }
@@ -109,7 +109,7 @@ struct ArrayComponentsTests {
             Issue.record("Expected .array(let) but got \(comp.type.debugDescription)")
             return
         }
-        #expect(arrayType.uniqueItems == true)
+        #expect(comp.uniqueItems == true)
         // boolean wird nicht explizit als eigener Typ modelliert; deine Fabrik kennt boolean? (nicht gelistet).
         // Falls boolean fehlt, wird items evtl. nil. Wir prüfen deshalb nur, dass items nicht String/Int ist.
         // Optional: #expect(arrayType.items is OpenAPIBooleanType)
@@ -229,7 +229,7 @@ struct ArrayComponentsTests {
                 return
 
         }
-        #expect(arrayType.minItems == 0)
+        #expect(comp.minItems == 0)
         #expect(arrayType.items == nil)
     }
 }

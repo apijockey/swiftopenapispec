@@ -60,10 +60,10 @@ public struct OpenAPIObjectType : OpenAPISchemaType, PointerNavigable{
                     self = .boolean(boolValue)
                 }
                 else {
-                    // Present but not an object or boolean -> treat as no value for this failable init
+                    diagnostics.append(.init(severity: .error, code: .invalidType , message: "value must be of type 'boolean' or 'object'", pointer: pointer, rule: "Schema.\(key.uppercased())"))
                     self = .notPresent
                 }
-                self = .notPresent
+                
             }
             
        }
@@ -72,8 +72,7 @@ public struct OpenAPIObjectType : OpenAPISchemaType, PointerNavigable{
     public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
         case OpenAPISchema.DEPENDENT_REQUIRED_KEY : return .value(JSONValue(string: self.dependentRequired))
-        case  OpenAPISchema.MIN_PROPERTIES_KEY : return .value(JSONValue(int: self.minProperties))
-        case  OpenAPISchema.MAX_PROPERTIES_KEY : return .value(JSONValue(int: self.maxProperties))
+       
         
         case  OpenAPISchema.TYPE_KEY:  return .value(JSONValue(string: self.type))
         case  OpenAPISchema.UNEVALUATEDPROPERTIES_KEY :
@@ -130,8 +129,7 @@ public struct OpenAPIObjectType : OpenAPISchemaType, PointerNavigable{
         self.properties = try map.mapListIfPresent(OpenAPISchema.PROPERTIES_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISchema.PROPERTIES_KEY))
         self.patternProperties = map.readIfPresent(OpenAPISchema.PATTERNPROPERTIES_KEY, valueType: String.self, diagnostics: &diagnostics, pointer: "\(pointer)/patternProperties")
         self.required = map.readListIfPresent(OpenAPISchema.REQUIRED_KEY, valueType: String.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISchema.REQUIRED_KEY)) ?? []
-        self.minProperties = map.readIfPresent(OpenAPISchema.MIN_PROPERTIES_KEY, valueType: Int.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISchema.MIN_PROPERTIES_KEY))
-        self.maxProperties = map.readIfPresent(OpenAPISchema.MAX_PROPERTIES_KEY, valueType:Int.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISchema.MAX_PROPERTIES_KEY))
+        
         self.dependentRequired = map.readIfPresent(OpenAPISchema.DEPENDENT_REQUIRED_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISchema.DEPENDENT_REQUIRED_KEY))
         
         diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: OpenAPISchema.supportedKeys , pointer: pointer))
@@ -149,28 +147,22 @@ public struct OpenAPIObjectType : OpenAPISchemaType, PointerNavigable{
                 ))
             }
         }
-        
         self.unevaluatedProperties = try ConditionalProperties(load: map, key: OpenAPISchema.UNEVALUATEDPROPERTIES_KEY, diagnostics: &diagnostics, pointer: pointer)
         self.additionalProperties = try ConditionalProperties(load: map,key: OpenAPISchema.ADDITIONAL_PROPERTIES_KEY, diagnostics: &diagnostics, pointer: pointer)
-        
-        
-    
-        
-      
     }
     
     
     public let type : String?
-    public var dependentRequired : String?
-    public var dependencies : [String: JSONValue]?
-    public var maxProperties : Int?
-    public var minProperties : Int?
+   
     public var properties = [OpenAPISchema]()
     public var patternProperties :String?
+    public var dependentRequired : String?
+    public var dependencies : [String: JSONValue]?
+   
     public var additionalProperties :  ConditionalProperties?
     public var required : [String] = []
     public var unevaluatedProperties: ConditionalProperties?
-
+    
    
   
     

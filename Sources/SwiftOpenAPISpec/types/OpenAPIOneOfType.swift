@@ -71,10 +71,7 @@ public struct OpenAPIOneOfType : OpenAPISchemaType,ThrowingHashMapInitiable, Poi
         }
         else {
             self.type = "unknown"
-            diagnostics.append(Diagnostic(severity: .error,
-                                          code: .schemaViolation,
-                                          message: "oneOf' must contain an array of 'object'.",
-                                          pointer: JSONPointer.join(pointer, "type"), rule: "Schema.OneAnyAllMustHaveObjectArray"))
+            
         }
         self.items = try map.mapListIfPresent("oneOf",objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer : pointer)
     }

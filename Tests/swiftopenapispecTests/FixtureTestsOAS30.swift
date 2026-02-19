@@ -89,7 +89,7 @@ struct FixtureTestsOAS30 {
             resourceName: resource,
             version: ValidationContext.OASVersion.v30,
             dialect: ConverterConfig.Dialect.oas30,
-            assertions: .OAS
+            assertions: [.OAS]
         )
     }
 }

@@ -154,7 +154,6 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
     public static let XML_KEY = "xml"
     public static let MAX_LENGTH_KEY = "maxLength"
     public static let MIN_LENGTH_KEY = "minLength"
-    
     public static let MAX_ITEMS_KEY = "maxItems"
     public static let MIN_ITEMS_KEY = "minItems"
     
@@ -263,12 +262,15 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
         self.uniqueItems = map.readIfPresent(Self.UNIQUE_ITEMS_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.UNIQUE_ITEMS_KEY))
         self.writeOnly = map.readIfPresent(Self.WRITE_ONLY_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.WRITE_ONLY_KEY))
         self.xml =  try map.readIfPresent(Self.XML_KEY, objectType: OpenAPIXMLObject.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXAMPLE_KEY))
+        
+        self.uniqueItems = map.readIfPresent(Self.UNIQUE_ITEMS_KEY, valueType:  Bool.self, diagnostics: &diagnostics, pointer: pointer)
     }
     public static var supportedKeys: Set<String>      {
         return [
             ALLOWED_ELEMENTS_KEY,
             DEFAULT_VALUE_KEY,
             DISCRIMINATOR_KEY,
+           
             DEPRECATED_KEY,
             EXAMPLE_KEY,
             EXTENSIONS_KEY,
@@ -336,7 +338,6 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
     public var pattern: String?
     public var readOnly: Bool?
     public var required: [String]?
-    
     public var title : String?
     public var type : OpenAPIType?
     public var uniqueItems: Bool?

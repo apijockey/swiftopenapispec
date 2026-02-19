@@ -376,13 +376,7 @@ public struct RuleRunner  : Sendable{
                         
                     }
                 }
-                for prop in obj.patternProperties {
-                    if let key = prop.key{
-                        let p = JSONPointer.join(JSONPointer.join(pointer, "patternProperties"), key)
-                        schemas.append(contentsOf: schemasInfo(schema: prop , pointer: p))
-                    }
-                    
-                }
+                
             }
             
             if case let .array(arr) = type ,

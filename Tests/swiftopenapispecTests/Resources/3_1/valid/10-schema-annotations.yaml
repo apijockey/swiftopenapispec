@@ -1,0 +1,145 @@
+# Copyright 2025 CgSe Computergrafik und Softwareentwicklung GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+openapi: 3.1.0
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+info:
+  title: JSON Schema Advanced Validation Example
+  version: "1.0"
+paths:
+  /ping:
+    get:
+      operationId: ping31
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                required: [ok]
+                unevaluatedProperties: false
+
+  /user:
+    post:
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $schema: https://json-schema.org/draft/2020-12/schema
+              type: object
+              properties:
+                username:
+                  type: string
+                  minLength: 3
+                  propertyNames:
+                    pattern: "^[a-zA-Z0-9_]+$"  # Nur alphanumerische Usernamen
+                  description: "Benutzername (mind. 3 Zeichen, nur a-z, A-Z, 0-9, _)"
+                email:
+                  type: string
+                  format: email
+                age:
+                  type: integer
+                  minimum: 0
+                roles:
+                  type: array
+                  items:
+                    type: string
+                  contains:
+                    const: "admin"  # Mindestens ein Element muss "admin" sein
+                  minContains: 1    # Mindestens ein Element muss das 'contains'-Schema erfüllen
+                address:
+                  type: object
+                  properties:
+                    street:
+                      type: string
+                    city:
+                      type: string
+                  dependentSchemas:
+                    city:
+                      required: ["street"]  # Wenn 'city' angegeben ist, ist 'street' Pflicht
+                payment:
+                  type: object
+                  properties:
+                    method:
+                      type: string
+                      enum: ["credit_card", "paypal", "bank_transfer"]
+                    credit_card:
+                      type: object
+                      properties:
+                        number:
+                          type: string
+                        expiry:
+                          type: string
+                      if:
+                        properties:
+                          method:
+                            const: "credit_card"
+                      then:
+                        required: ["number", "expiry"]  # Wenn method=credit_card, sind number/expiry Pflicht
+                      else:
+                        not:
+                          required: ["number", "expiry"]  # Sonst dürfen number/expiry nicht vorhanden sein
+              required: [username, email]
+              unevaluatedProperties: false
+
+  /order:
+    post:
+      operationId: createOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      quantity:
+                        type: integer
+                        minimum: 1
+                    required: [id, quantity]
+                  minItems: 1
+                customer:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    loyalty_points:
+                      type: integer
+                      minimum: 0
+                  if:
+                    properties:
+                      loyalty_points:
+                        minimum: 100
+                  then:
+                    properties:
+                      discount:
+                        type: number
+                        minimum: 0.01
+                        maximum: 0.5
+                  else:
+                    not:
+                      required: ["discount"]  # Kein Rabatt, wenn weniger als 100 Punkte
+              required: [items, customer]
+              unevaluatedProperties: false

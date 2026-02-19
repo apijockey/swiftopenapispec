@@ -54,19 +54,11 @@ public struct OpenAPIAllOfType : OpenAPISchemaType, ThrowingHashMapInitiable, Po
     
         else {
             self.type = "unknown"
-            diagnostics.append(Diagnostic(severity: .error,
-                                          code: .schemaViolation,
-                                          message: "allOf' must contain an array of 'object'.",
-                                          pointer: JSONPointer.join(pointer, "type"), rule: "Schema.OneAnyAllMustHaveObjectArray"))
+            
         }
         self.items = try map.mapListIfPresent("allOf", objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: pointer)
        
     }
     
-    public func validate() throws {
-        
-    }
    
-   
-  
 }

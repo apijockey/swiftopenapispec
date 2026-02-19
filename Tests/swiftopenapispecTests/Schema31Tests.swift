@@ -38,7 +38,7 @@ struct Schema31ValidationTests {
             resourceName: resource,
             version: ValidationContext.OASVersion.v31,
             dialect: ConverterConfig.Dialect.jsonSchema2020_12,
-            assertions: .Schema
+            assertions: [.Schema]
         )
     }
 }
