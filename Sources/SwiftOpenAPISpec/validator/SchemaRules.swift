@@ -109,13 +109,27 @@ public struct SchemaRuleRunner  : Sendable{
                         }
                         
                     }
-                    for prop in obj.additionalPropertiesObject {
-                        if let key = prop.key{
-                            let p = JSONPointer.join(JSONPointer.join(pointer, "additionalProperties"), key)
-                            try await out.append(contentsOf: run(schema: prop , pointer: p,resolver: &resolver))
-                        }
-                        
+                    if let properties = obj.additionalProperties,
+                       case let .schema(array) = properties {
+                        for prop in array {
+                              if let key = prop.key{
+                                  let p = JSONPointer.join(JSONPointer.join(pointer, "additionalProperties"), key)
+                                  try await out.append(contentsOf: run(schema: prop , pointer: p,resolver: &resolver))
+                              }
+  
+                          }
                     }
+                    if let properties = obj.unevaluatedProperties,
+                       case let .schema(array) = properties {
+                        for prop in array {
+                              if let key = prop.key{
+                                  let p = JSONPointer.join(JSONPointer.join(pointer, "additionalProperties"), key)
+                                  try await out.append(contentsOf: run(schema: prop , pointer: p,resolver: &resolver))
+                              }
+  
+                          }
+                    }
+                   
                 }
                 
             if case let .array(arr) = type ,
@@ -324,11 +338,18 @@ public struct UnevaluatedPropertiesRule: SchemaRule {
         
         // unevaluatedProperties must be a boolean
         // This is validated during parsing, but we can add runtime validation
-        if objectType.unevaluatedProperties {
-            // If unevaluatedProperties is true, we should have additional validation
-            // For now, just ensure it's properly set
-            return []
+        if let additionalProperties = objectType.additionalProperties {
+            if case .boolean(let boolValue) = additionalProperties {
+                if boolValue == false {
+                    for property in objectType.properties.indices {
+                        
+                    }
+                }
+                
+            }
+            
         }
+       
         
         return []
     }
@@ -548,7 +569,7 @@ public struct ObjectMaxPropertiesRule: SchemaRule {
     }
 }
 
-/// Rule: for strings, minLength <= maxLength (when both present).
+/// Object properties names must follow patternProperties regex if set
 public struct ObjectPatternPropertiesRule: SchemaRule {
     public let name = "Schema.ObjectPatternProperties"
     public init() {}
@@ -558,18 +579,18 @@ public struct ObjectPatternPropertiesRule: SchemaRule {
         guard case  .object(let objectElement) = schema.type else {
             return []
         }
-        let patternProperties = objectElement.patternProperties
-        for property in patternProperties {
-            if let key = property.key,
-               !key.isValidRegex() {
-                diagnostics.append(.init(severity: .error, code: .schemaViolation, message: "Pattern properties must be named with a regular expression", pointer: JSONPointer.join(JSONPointer.join(pointer,"patternProperties"), key), rule: self.name))
+        if let pattern = objectElement.patternProperties {
+            if !pattern.isValidRegex() {
+                    diagnostics.append(.init(severity: .error, code: .schemaViolation, message: "Pattern properties must be a valid regular expression", pointer: JSONPointer.join(pointer,"patternProperties"), rule: self.name))
             }
+                
+            
         }
+        
             
         return diagnostics
     }
 }
-
 
 /// Rule: for strings, minLength <= maxLength (when both present).
 public struct ObjectDependenciesRule: SchemaRule {

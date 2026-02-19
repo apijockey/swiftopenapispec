@@ -518,3 +518,5 @@ cases:
         rule: "OpenAPIOAuthFlow_ValidFieldsRule"
         severity: "error"
         messageContains: "OAuth flows must not have 'deviceAuthorizationUrl' in OpenAPI 3.0/3.1."
+  - fixture: "10-schema-additionalproperties-false"
+    shouldPass: true

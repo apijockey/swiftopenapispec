@@ -195,7 +195,7 @@ struct TestHelpers {
         version: ValidationContext.OASVersion,
         dialect: ConverterConfig.Dialect,
         bundle: Bundle = .module,
-        assertions: AssertionGroup
+        assertions: [AssertionGroup]
         
     ) async throws {
         let ctx = ValidationContext(version: version, dialect: dialect, baseURI: resourceName, operationIds: [])
@@ -205,10 +205,10 @@ struct TestHelpers {
         }
         
         var errors = [Diagnostic]()
-        if assertions == .OAS {
+        if assertions.contains(.OAS) {
             errors = try await Validator.validate(spec: apiSpec, baseURI: resourceUrl.absoluteString, ctx: ctx, resolver: &resolver)
         }
-        else if assertions == .Schema {
+        else if assertions.contains(.Schema) {
             errors = try await Validator.validateSchema(spec: apiSpec, ctx: ctx, baseURI: resourceUrl.absoluteString, resolver: &resolver)
         }
         

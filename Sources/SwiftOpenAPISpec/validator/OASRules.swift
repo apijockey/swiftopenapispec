@@ -191,7 +191,7 @@ struct  ValidComponentNamesRule: Rule {
         var diagnostics: [Diagnostic] = []
         for schema in (spec.components?.schemas ?? []) {
             if let key = schema.key {
-                if !key.matches("^[a-zA-Z0-9\\.\\-_]+$") {
+                if !key.matches(pattern: "^[a-zA-Z0-9\\.\\-_]+$") {
                     diagnostics.append(.init(severity: .error, code: .invalidValue, message: name, pointer: "#/components/schemas/\(key)", rule: self.name))
                 }
             }
@@ -309,7 +309,7 @@ struct RequiredSchemaComponentNamessRule: Rule {
         for schema in schemas {
             if let key = schema.key {
                 
-                if !key.matches("[a-zA-Z0-9\\-\\._]+") {
+                if !key.matches(pattern: "[a-zA-Z0-9\\-\\._]+") {
                     diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\-\\._]+$'", pointer: "#/components/schema/\(key)", rule: name))
                 }
             }
@@ -329,7 +329,7 @@ struct RequiredResponsesComponentNamessRule: Rule {
         guard let schemas = spec.components?.responses else { return diagnostics }
         for schema in schemas {
             if let key = schema.key {
-                if !key.matches("[a-zA-Z0-9\\.\\-_]+") {
+                if !key.matches(pattern: "[a-zA-Z0-9\\.\\-_]+") {
                     diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "#/components/responses/\(key)", rule: name))
                     
                 }
@@ -351,7 +351,7 @@ struct RequiredParameterComponentsNamessRule: Rule {
         for schema in schemas {
             if let key = schema.key {
                 
-                    if !key.matches("[a-zA-Z0-9\\.\\-_]+") {
+                    if !key.matches(pattern: "[a-zA-Z0-9\\.\\-_]+") {
                         diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "#/components/parameters/\(key)", rule: name))
                     }
                 
@@ -371,7 +371,7 @@ struct RequiredExamplesComponentNamessRule: Rule {
         guard let schemas = spec.components?.examples else { return diagnostics }
         for schema in schemas {
             if let key = schema.key {
-                    if !key.matches("[a-zA-Z0-9\\.\\-_]+") {
+                    if !key.matches(pattern: "[a-zA-Z0-9\\.\\-_]+") {
                         diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "#/components/examples/\(key)", rule: name))
                     }
               
@@ -391,7 +391,7 @@ struct RequiredRequestBodiesComponentsNamessRule: Rule {
         guard let schemas = spec.components?.requestBodies else { return diagnostics }
         for schema in schemas {
             if let key = schema.key {
-                    if !key.matches("[a-zA-Z0-9\\.\\-_]+") {
+                    if !key.matches(pattern: "[a-zA-Z0-9\\.\\-_]+") {
                         diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "#/components/requestBodies/\(key)", rule: name))
                     }
                 
@@ -411,7 +411,7 @@ struct RequiredsHeaderComponentsNamessRule: Rule {
         guard let schemas = spec.components?.headers else { return diagnostics }
         for schema in schemas {
             if let key = schema.key {
-                    if !key.matches( "[a-zA-Z0-9\\.\\-_]+") {
+                if !key.matches( pattern: "[a-zA-Z0-9\\.\\-_]+") {
                         diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "#/components/headers/\(key)", rule: name))
                     }
                
@@ -433,7 +433,7 @@ struct RequiredSecuritySchemeComponentsNamessRule: Rule {
         for schema in schemas {
             if let key = schema.key {
              
-                    if !key.matches("[a-zA-Z0-9\\-\\._]+") {
+                if !key.matches(pattern: "[a-zA-Z0-9\\-\\._]+") {
                         diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\-\\._]+$'", pointer: "#/components/securitySchemes/\(key)", rule: name))
                     }
             }
@@ -453,7 +453,7 @@ struct RequiredLinksComponentsNamessRule: Rule {
         for schema in schemas {
             if let key = schema.key {
                
-                    if !key.matches("[a-zA-Z0-9\\.\\-_]+") {
+                if !key.matches(pattern: "[a-zA-Z0-9\\.\\-_]+") {
                         diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "#/components/links/\(key)", rule: name))
                     }
                
@@ -473,7 +473,7 @@ struct RequiredCallBackomponentsNamessRule: Rule {
         guard let schemas = spec.components?.callbacks else { return diagnostics }
         for schema in schemas {
             if let key = schema.key {
-                if !key.matches("[a-zA-Z0-9\\.\\-_]+") {
+                if !key.matches(pattern: "[a-zA-Z0-9\\.\\-_]+") {
                     diagnostics.append(.init(severity: .error, code: .invalidValue, message: "component name not valid: must match: '^[a-zA-Z0-9\\.\\-_]+$'", pointer: "#/components/callbacks/\(key)", rule: name))
                 }
             }
@@ -879,7 +879,7 @@ struct SupportedHTPStatusRule: Rule {
                     guard let key = response.key else {
                         continue
                     }
-                    if !key.matches("^[1-5](?:\\d{2}|XX)$") && key != "default" {
+            if !key.matches(pattern: "^[1-5](?:\\d{2}|XX)$") && key != "default" {
                         diags.append(Diagnostic(severity: .error,
                                                 code: .invalidValue,
                                                 message: "Response code '\(key)' is not a valid HTTP status code.",
@@ -1042,7 +1042,7 @@ struct RequiredPathsRule: Rule {
 
 extension String {
     // Checks if the whole string is matched by the pattern
-    func matches(_ pattern: String) -> Bool {
+    func matches(pattern: String) -> Bool {
         if #available(macOS 13.0, *) {
             guard let regex = try? Regex(pattern) else { return false }
             return self.wholeMatch(of: regex) != nil

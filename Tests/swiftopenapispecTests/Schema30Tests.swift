@@ -40,7 +40,7 @@ struct Schema30ValidationTests {
             resourceName: fixtureName,
             version: ValidationContext.OASVersion.v30,
             dialect: ConverterConfig.Dialect.oas30,
-            assertions: .Schema
+            assertions: [.Schema]
         )
     }
 
@@ -70,7 +70,7 @@ struct Schema30ValidationTests {
             resourceName: resource,
             version: ValidationContext.OASVersion.v30,
             dialect: ConverterConfig.Dialect.oas30,
-            assertions: .OAS
+            assertions: [.OAS]
         )
     }
 
@@ -104,7 +104,7 @@ struct Schema30ValidationTests {
             resourceName: resource,
             version: ValidationContext.OASVersion.v30,
             dialect: ConverterConfig.Dialect.oas30,
-            assertions: .Schema
+            assertions: [.Schema]
         )
     }
 
@@ -134,7 +134,7 @@ struct Schema30ValidationTests {
             resourceName: resource,
             version: ValidationContext.OASVersion.v30,
             dialect: ConverterConfig.Dialect.oas30,
-            assertions: .Schema
+            assertions: [.Schema]
         )
     }
 
@@ -166,7 +166,7 @@ struct Schema30ValidationTests {
             resourceName: resource,
             version: ValidationContext.OASVersion.v30,
             dialect: ConverterConfig.Dialect.oas30,
-            assertions: .Schema
+            assertions: [.Schema]
         )
     }
 
@@ -197,7 +197,7 @@ struct Schema30ValidationTests {
             resourceName: resource,
             version: ValidationContext.OASVersion.v30,
             dialect: ConverterConfig.Dialect.oas30,
-            assertions: .Schema
+            assertions: [.Schema]
         )
     }
 
@@ -225,7 +225,50 @@ struct Schema30ValidationTests {
             resourceName: resource,
             version: ValidationContext.OASVersion.v30,
             dialect: ConverterConfig.Dialect.oas30,
-            assertions: .OAS
+            assertions: [.OAS]
         )
+    }
+    @Test("Properties with additionalProperties false hit not errors")
+    func testAdditionaPropertiesFalse() async throws {
+        let subDirectory = "Resources/3_0/invalid"
+        let resource = "10-schema-additionalproperties-false"
+        guard let resourceUrl = Bundle.module.url(forResource: resource, withExtension: "yaml", subdirectory: subDirectory) else {
+            throw FixtureErrors.notFound(resource)
+        }
+        guard let fixture = TestHelpers.fixtureManifest(fixtureName: resource, subDirectory: subDirectory) else {
+            throw FixtureErrors.notFound(resource)
+        }
+        let dict = try TestHelpers.loadFixtureDictionary(resource, subDirectory: subDirectory)
+        let apiSpec = try OpenAPISpecification.read(unflattened: dict, url: resource, documentLoader: YamsDocumentLoader())
+        let type = try #require(apiSpec.paths[path: "/test"]?.operations[operationID: "get"]?.responses[key: "200"]?.content[key: "application/json"]?.schema?.type)
+        guard case let .object(object) = type else {
+            #expect(Bool(false), "object expected")
+            return
+        }
+        #expect(object.properties.count == 1)
+        guard case let .boolean(boolValue) = object.additionalProperties else {
+            #expect(Bool(false), "additionalProperties expected to be boolean")
+            return
+        }
+        try await TestHelpers.assertValidations(
+            apiSpec: apiSpec,
+            fixture: fixture,
+            resourceUrl: resourceUrl,
+            resourceName: resource,
+            version: ValidationContext.OASVersion.v30,
+            dialect: ConverterConfig.Dialect.oas30,
+            assertions: [.Schema]
+        )
+        try await TestHelpers.assertValidations(
+            apiSpec: apiSpec,
+            fixture: fixture,
+            resourceUrl: resourceUrl,
+            resourceName: resource,
+            version: ValidationContext.OASVersion.v30,
+            dialect: ConverterConfig.Dialect.oas30,
+            assertions: [.OAS]
+        )
+        
+        
     }
 }

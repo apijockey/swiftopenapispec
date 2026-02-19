@@ -356,12 +356,25 @@ public struct RuleRunner  : Sendable{
                     }
                     
                 }
-                for prop in obj.additionalPropertiesObject {
-                    if let key = prop.key{
-                        let p = JSONPointer.join(JSONPointer.join(pointer, "additionalProperties"), key)
-                        schemas.append(contentsOf: schemasInfo(schema: prop , pointer: p))
+                if let unevaluatedProperties = obj.unevaluatedProperties,
+                   case let .schema(schemaObject) = unevaluatedProperties {
+                    for prop in schemaObject {
+                        if let key = prop.key{
+                            let p = JSONPointer.join(JSONPointer.join(pointer, "unevaluatedProperties"), key)
+                            schemas.append(contentsOf: schemasInfo(schema: prop , pointer: p))
+                        }
+                        
                     }
-                    
+                }
+                if let additionalProperties = obj.additionalProperties,
+                   case let .schema(schemaObject) = additionalProperties  {
+                    for prop in schemaObject {
+                        if let key = prop.key{
+                            let p = JSONPointer.join(JSONPointer.join(pointer, "additionalProperties"), key)
+                            schemas.append(contentsOf: schemasInfo(schema: prop , pointer: p))
+                        }
+                        
+                    }
                 }
                 for prop in obj.patternProperties {
                     if let key = prop.key{

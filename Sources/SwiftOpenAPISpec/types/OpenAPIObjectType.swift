@@ -38,9 +38,35 @@
 //
 
 
-public struct OpenAPIObjectType : OpenAPISchemaType,ThrowingHashMapInitiable, PointerNavigable{
+public struct OpenAPIObjectType : OpenAPISchemaType, PointerNavigable{
     
-    
+    public enum ConditionalProperties : Sendable {
+           case boolean(Bool)
+           case schema([OpenAPISchema])
+            case notPresent
+            public init(load map: StringDictionary, key : String, diagnostics: inout [Diagnostic],pointer : String) throws {
+                // Look up the requested key once
+                guard let rawValue = map[key] else {
+                    // Key not present -> failable init returns nil
+                    self = .notPresent
+                    return 
+                }
+                
+                if case .object = rawValue {
+                    let object = try map.mapListIfPresent(key, objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, key))
+                    self = .schema(object)
+                }
+                else if case let .boolean(boolValue) = rawValue {
+                    self = .boolean(boolValue)
+                }
+                else {
+                    // Present but not an object or boolean -> treat as no value for this failable init
+                    self = .notPresent
+                }
+                self = .notPresent
+            }
+            
+       }
     
     
     public func element(for segmentName: String) throws -> NavigationResult {
@@ -50,11 +76,34 @@ public struct OpenAPIObjectType : OpenAPISchemaType,ThrowingHashMapInitiable, Po
         case  OpenAPISchema.MAX_PROPERTIES_KEY : return .value(JSONValue(int: self.maxProperties))
         
         case  OpenAPISchema.TYPE_KEY:  return .value(JSONValue(string: self.type))
-        case  OpenAPISchema.UNEVALUATEDPROPERTIES_KEY : return .value(JSONValue(bool: self.unevaluatedProperties))
+        case  OpenAPISchema.UNEVALUATEDPROPERTIES_KEY :
+            switch self.unevaluatedProperties {
+            case .boolean(let boolValue):
+                let value = try JSONValue(boolValue)
+                return .value(value)
+            case .schema(let schema):
+                return .navigableCollection(schema)
+            case .none:
+                return .value(.null)
+            case .some(.notPresent):
+                return .value(.null)
+            }
+        case  OpenAPISchema.ADDITIONAL_PROPERTIES_KEY :
+            switch self.additionalProperties {
+            case .boolean(let boolValue):
+                let value = try JSONValue(boolValue)
+                return .value(value)
+            case .schema(let schema):
+                return .navigableCollection(schema)
+            case .none:
+                return .value(.null)
+            case .some(.notPresent):
+                return .value(.null)
+            }
         case  OpenAPISchema.PROPERTIES_KEY:
             return .navigableCollection(properties)
         case  OpenAPISchema.PATTERNPROPERTIES_KEY:
-            return .navigableCollection(patternProperties)
+            return .value(JSONValue(patternProperties))
         case  OpenAPISchema.REQUIRED_KEY:
             let value = try JSONValue(self.required)
             return  .value(value)
@@ -79,7 +128,7 @@ public struct OpenAPIObjectType : OpenAPISchemaType,ThrowingHashMapInitiable, Po
     public init(load map: StringDictionary, diagnostics: inout [Diagnostic],pointer : String) throws {
         self.type = map.readIfPresent(OpenAPISchema.TYPE_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISchema.TYPE_KEY))
         self.properties = try map.mapListIfPresent(OpenAPISchema.PROPERTIES_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISchema.PROPERTIES_KEY))
-        self.patternProperties = try map.mapListIfPresent(OpenAPISchema.PATTERNPROPERTIES_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISchema.PATTERNPROPERTIES_KEY))
+        self.patternProperties = map.readIfPresent(OpenAPISchema.PATTERNPROPERTIES_KEY, valueType: String.self, diagnostics: &diagnostics, pointer: "\(pointer)/patternProperties")
         self.required = map.readListIfPresent(OpenAPISchema.REQUIRED_KEY, valueType: String.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISchema.REQUIRED_KEY)) ?? []
         self.minProperties = map.readIfPresent(OpenAPISchema.MIN_PROPERTIES_KEY, valueType: Int.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISchema.MIN_PROPERTIES_KEY))
         self.maxProperties = map.readIfPresent(OpenAPISchema.MAX_PROPERTIES_KEY, valueType:Int.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISchema.MAX_PROPERTIES_KEY))
@@ -100,12 +149,10 @@ public struct OpenAPIObjectType : OpenAPISchemaType,ThrowingHashMapInitiable, Po
                 ))
             }
         }
-        if case .object = map[OpenAPISchema.ADDITIONAL_PROPERTIES_KEY] {
-            self.additionalPropertiesObject = try map.mapListIfPresent(OpenAPISchema.ADDITIONAL_PROPERTIES_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISchema.ADDITIONAL_PROPERTIES_KEY))
-        }
-        else if case let .boolean(boolValue) = map[OpenAPISchema.ADDITIONAL_PROPERTIES_KEY] {
-            self.additionalPropertiesValid = boolValue
-        }
+        
+        self.unevaluatedProperties = try ConditionalProperties(load: map, key: OpenAPISchema.UNEVALUATEDPROPERTIES_KEY, diagnostics: &diagnostics, pointer: pointer)
+        self.additionalProperties = try ConditionalProperties(load: map,key: OpenAPISchema.ADDITIONAL_PROPERTIES_KEY, diagnostics: &diagnostics, pointer: pointer)
+        
         
     
         
@@ -119,11 +166,11 @@ public struct OpenAPIObjectType : OpenAPISchemaType,ThrowingHashMapInitiable, Po
     public var maxProperties : Int?
     public var minProperties : Int?
     public var properties = [OpenAPISchema]()
-    public var patternProperties = [OpenAPISchema]()
-    public var additionalPropertiesValid : Bool?
-    public var additionalPropertiesObject = [OpenAPISchema]()
+    public var patternProperties :String?
+    public var additionalProperties :  ConditionalProperties?
     public var required : [String] = []
-    public var unevaluatedProperties : Bool = false
+    public var unevaluatedProperties: ConditionalProperties?
+
    
   
     
