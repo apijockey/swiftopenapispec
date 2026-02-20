@@ -29,12 +29,9 @@ webhooks:
       responses:
         "200":
           description: OK
-  
 info:
   title: Servers
   version: "1.0"
-  
-  
 servers:
   - url: /
     description: A default API

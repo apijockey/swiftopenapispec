@@ -54,12 +54,12 @@ components:
           schema:
             type: string
           prefixEncoding:
-          - contentType: text/html
-            headers:
-              Content-ID:
-                $ref: '#/components/headers/RFC2557NoContentId'
-              Content-Location:
-                $ref: '#/components/headers/RFC2557ContentLocation'
+            - contentType: text/html
+              headers:
+                Content-ID:
+                  $ref: '#/components/headers/RFC2557NoContentId'
+                Content-Location:
+                  $ref: '#/components/headers/RFC2557ContentLocation'
           itemEncoding:
             contentType: text/css,text/javascript,image/*
             headers:

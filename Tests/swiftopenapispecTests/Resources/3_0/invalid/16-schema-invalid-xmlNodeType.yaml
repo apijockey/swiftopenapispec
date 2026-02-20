@@ -57,4 +57,3 @@ components:
 #<Person id="123">
 #  <sample:name xmlns:sample="https://example.com/schema/sample">example</sample:name>
 #</Person>
-

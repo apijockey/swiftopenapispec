@@ -38,7 +38,7 @@ components:
     OAuth2:
       type: oauth2
       oauth2MetadataUrl: https://auth.example.com/oauth2Metadata
-      deprecated : true
+      deprecated: true
       flows:
         authorizationCode:
           authorizationUrl: https://auth.example.com/authorize
@@ -56,5 +56,3 @@ components:
       type: apiKey
       in: header
       name: X-API-Key
-      
-
