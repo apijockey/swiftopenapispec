@@ -49,9 +49,21 @@ public struct OpenAPILink : KeyedElement , PointerNavigable {
               
             }
         }
+        var supportingElments = Set(Self.supportedKeys)
+        supportingElments.formUnion((self.extensions ?? []).compactMap({ $0.key }))
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
            
     }
     
+    public static let supportedKeys: Set<String> = [
+        OPERATIION_REF_KEY,
+        OPERATIION_ID_KEY,
+        PARAMETERS_KEY,
+        REQUEST_BODY_KEY,
+        DESCRIPTION_KEY,
+        OpenAPISchemaReference.REF_KEY,
+        SERVER_KEY
+    ]
     public func element(for segmentName: String) throws -> NavigationResult {
        switch segmentName {
        case Self.OPERATIION_REF_KEY : return .value(JSONValue(operationRef))

@@ -53,8 +53,21 @@ public struct OpenAPITag:  KeyedElement, PointerNavigable {
         self.kind = map.readIfPresent(Self.KIND_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.KIND_KEY))
         self.externalDocs = try map.readIfPresent(Self.EXTERNAL_DOCS_KEY, objectType: OpenAPIExternalDocumentation.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXTERNAL_DOCS_KEY))
         self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
+        var supportingElments = Set(Self.supportedKeys)
+        supportingElments.formUnion((self.extensions ?? []).compactMap({ $0.key }))
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
     }
-    
+    public static var supportedKeys: Set<String> {
+        return [
+            Self.NAME_KEY,
+            Self.SUMMARY_KEY,
+            Self.DESCRIPTION_KEY,
+            Self.EXTERNAL_DOCS_KEY,
+            Self.PARENT_KEY,
+            Self.KIND_KEY,
+            
+        ]
+    }
    
     //https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-01  ("null", "boolean", "object", "array", "number", or "string"), or "integer"
     public var key : String?

@@ -38,6 +38,23 @@ public struct OpenAPIXMLObject : PointerNavigable, ThrowingHashMapInitiable {
         self.attribute = map.readIfPresent(Self.ATTRIBUTE_KEY,valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.ATTRIBUTE_KEY))
         self.wrapped = map.readIfPresent(Self.WRAPPED_KEY,valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.WRAPPED_KEY))
         self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
+        
+        var supportingElments = Set(Self.supportedKeys)
+        supportingElments.formUnion((self.extensions ?? []).compactMap({ $0.key }))
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
+        
+    }
+    
+    /// The set of keys supported by OpenAPI XML object (excluding dynamic extensions)
+    private static var supportedKeys: Set<String> {
+        [
+            Self.NODETYPE_KEY,
+            Self.NAME_KEY,
+            Self.NAMESPACE_KEY,
+            Self.PREFIX_KEY,
+            Self.ATTRIBUTE_KEY,
+            Self.WRAPPED_KEY
+        ]
     }
    
     public func element(for segmentName: String) throws -> NavigationResult {

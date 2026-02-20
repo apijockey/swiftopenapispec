@@ -103,7 +103,7 @@ struct ArrayMediaTypesTests {
         }
         
         // Array-Flag
-        #expect(schemaType.uniqueItems == true)
+        #expect(media.schema?.uniqueItems == true)
         guard case let .object(objectItems) = try #require(schemaType.items?.type) else {
             Issue.record("Expected object items")
             return

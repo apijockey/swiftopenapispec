@@ -19,7 +19,6 @@ struct ValidationTests {
         ("02-minimal-30-missingPaths", "OAS.RequiredOpenAPIFixedFields"),
         ("03-minimal-30-unsupportedV3", "OAS.UnsupportedVersion3"),
         ("02-minimal-30-missingInfoVersion", "OAS.RequiredOpenAPIFixedInfoFields"),
-        ("02-minimal-30-missingInfoTitle", "OAS.RequiredOpenAPIFixedInfoFields"),
         ("03-minimal-30-unsupportedPathName", "OAS.PathsMustStartWithSlashRule"),
         ("03-minimal-30-missingResponse", "OAS.OperationMustHaveResponses"),
         ("03-minimal-30-invalidHTTPStatus", "OAS.SupportedHTPStatusRule"),
@@ -155,7 +154,7 @@ struct ValidationTests {
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url:fixtureName , documentLoader: YamsDocumentLoader())
         let resourcesRoot = try #require(bundle.resourceURL)
         let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: fixtureName, operationIds: [])
-        let runner = RuleRunner.defaultRuleRunner
+        let runner = RuleRunner(version: ctx.version)
      
         let unfilteredDiags = runner.run(spec: apiSpec, ctx: ctx)
         let diags = unfilteredDiags.filter { diagnotics in
@@ -226,7 +225,7 @@ struct ValidationTests {
         
         
         let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: resource, operationIds: [])
-        let runner = RuleRunner.defaultRuleRunner
+        let runner = RuleRunner(version: ctx.version)
         let diags = runner.run(spec: apiSpec, ctx: ctx)
         #expect(diags.isEmpty)
         
@@ -248,7 +247,7 @@ struct ValidationTests {
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url:setup.0 , documentLoader: YamsDocumentLoader())
             
             let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: setup.0, operationIds: [])
-            let runner = RuleRunner.defaultRuleRunner
+        let runner = RuleRunner(version: ctx.version)
             
             let unfilteredDiags = runner.run(spec: apiSpec, ctx: ctx)
         let diags = unfilteredDiags.filter { diagnotics in
@@ -262,9 +261,7 @@ struct ValidationTests {
                 #expect(result.pointer.starts(with: expected.pointer), "pointer: \(result) not as \(expected)")
                 #expect(result.rule == expected.rule,  "rule: \(result) != \(expected)")
                 #expect(result.severity.rawValue == expected.severity,  "severity: \(result) != \(expected)")
-                
             }
-            
         }
     
     @Test("03-minimal-30-unsupportedHTTPMethod")
@@ -281,7 +278,7 @@ struct ValidationTests {
         let unsupportedOperations = apiSpec.diagnostics
             
             let ctx = ValidationContext(version: .v30, dialect: .oas30, baseURI: setup, operationIds: [])
-            let runner = RuleRunner.defaultRuleRunner
+        let runner = RuleRunner(version: ctx.version)
             
             let unfilteredDiags = runner.run(spec: apiSpec, ctx: ctx)
             print(unfilteredDiags)
@@ -356,26 +353,26 @@ struct ValidationTests {
        }
        
        #expect(diags.contains { diag in
-           diag.pointer == "/paths/~1pets/patch/requestBody/content/application~1json/schema/oneOf/0/$ref"
+           diag.pointer == "#/paths/~1pets/patch/requestBody/content/application~1json/schema/oneOf/0/$ref"
            && diag.message.contains("#/components/schemas/Cat'")
        })
        #expect(diags.contains { diag in
-           diag.pointer == "/paths/~1pets/patch/requestBody/content/application~1json/schema/oneOf/1/$ref"
+           diag.pointer == "#/paths/~1pets/patch/requestBody/content/application~1json/schema/oneOf/1/$ref"
            && diag.message.contains("#/components/schemas/Dog'")
        })
        
        #expect(diags.contains { diag in
-           diag.pointer == "/paths/~1pets/post/requestBody/content/application~1xml/schema/$ref"
+           diag.pointer == "#/paths/~1pets/post/requestBody/content/application~1xml/schema/$ref"
            && diag.message.contains("'#/components/schemas/Pet'")
        })
        
        #expect(diags.contains { diag in
-           diag.pointer == "/paths/~1pets/post/requestBody/content/application~1x-www-form-urlencoded/schema/$ref"
+           diag.pointer == "#/paths/~1pets/post/requestBody/content/application~1x-www-form-urlencoded/schema/$ref"
            && diag.message.contains("'#/components/schemas/PetForm'")
        })
        
        #expect(diags.contains { diag in
-           diag.pointer == "/paths/~1pets/post/requestBody/content/application~1json/schema/$ref"
+           diag.pointer == "#/paths/~1pets/post/requestBody/content/application~1json/schema/$ref"
            && diag.message.contains("'#/components/schemas/Pet'")
        })
        

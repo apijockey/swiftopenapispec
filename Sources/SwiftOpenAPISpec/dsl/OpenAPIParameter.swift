@@ -73,7 +73,7 @@ public struct OpenAPIParameter :  KeyedElement,  PointerNavigable {
     /// - `label`: Label style (used for path parameters)
     /// - `matrix`: Matrix style (used for path parameters)
     public enum ParameterStyle : String, Codable, CaseIterable, Sendable {
-        case simple,form, label, matrix
+        case simple,form, label, matrix, spaceDelimited,pipeDelimited, deepObject
     }
     public static let FORMAT_KEY = "format"
     public static let NAME_KEY = "name"
@@ -93,7 +93,7 @@ public struct OpenAPIParameter :  KeyedElement,  PointerNavigable {
     public init(load map: StringDictionary,diagnostics: inout [Diagnostic],pointer : String) throws {
         
         if case let .string(refKey) = map[OpenAPISchemaReference.REF_KEY]{
-                    self.ref = OpenAPISchemaReference(ref: refKey)
+            self.ref = OpenAPISchemaReference(ref: refKey)
             return
         }
         guard let location = map.readIfPresent(Self.IN_KEY,valueType:String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.IN_KEY)) else {
@@ -106,26 +106,46 @@ public struct OpenAPIParameter :  KeyedElement,  PointerNavigable {
         self.description =  map.readIfPresent(Self.DESCRIPTION_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.DESCRIPTION_KEY))
         self.deprecated =  map.readIfPresent(Self.DEPRECATED_KEY, valueType: Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.DEPRECATED_KEY))
         self.explode = map.readIfPresent(Self.EXPLODE_KEY, valueType: Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.EXPLODE_KEY))
-       
+        
         self.example = map.readIfPresent(Self.EXAMPLE_KEY, valueType: JSONValue.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.EXAMPLE_KEY))
         self.format = map.readIfPresent(Self.FORMAT_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.FORMAT_KEY))
         
         self.examples  = try map.mapListIfPresent(Self.EXAMPLES_KEY,objectType: OpenAPIExample.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXAMPLES_KEY))
         extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
         self.location = ParameterLocation(rawValue: location)
-      
+        
         self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.NAME_KEY))
         let required = map.readIfPresent(Self.REQUIRED_KEY,valueType: Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.REQUIRED_KEY))
         self.required = required ?? false
         self.schema = try map.readIfPresent(Self.SCHEMA_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.SCHEMA_KEY))
         if let style = map.readIfPresent(Self.STYLE_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.STYLE_KEY)){
-            self.style = ParameterStyle(rawValue: style)
+            self.style = style
         }
+        var supportingElments = Set(Self.supportedKeys)
+        supportingElments.formUnion((self.extensions ?? []).compactMap({ $0.key }))
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
         
-       
-       
-       
+        
+        
     }
+    public static let supportedKeys: Set<String> = [
+        FORMAT_KEY,
+        NAME_KEY,
+        IN_KEY,
+        REQUIRED_KEY,
+        DESCRIPTION_KEY,
+        DEPRECATED_KEY,
+        ALLOW_EMPTYVALUE_KEY,
+        ALLOW_RESERVED_KEY,
+        SCHEMA_KEY,
+        STYLE_KEY,
+        EXPLODE_KEY,
+        EXAMPLE_KEY,
+        EXAMPLES_KEY,
+        CONTENT_KEY,
+        OpenAPISchemaReference.REF_KEY,
+        
+    ]
    
 
     public func element(for segmentName: String) throws -> NavigationResult {
@@ -148,7 +168,7 @@ public struct OpenAPIParameter :  KeyedElement,  PointerNavigable {
            
            return .navigable(schema)
        case Self.STYLE_KEY:
-           let value = try JSONValue(style)
+           let value = JSONValue(string:style)
            return .value(value)
        case Self.EXPLODE_KEY:
            let value = try JSONValue(explode)
@@ -178,7 +198,7 @@ public struct OpenAPIParameter :  KeyedElement,  PointerNavigable {
     public var allowEmptyValue : Bool? = nil
     public var schema :  OpenAPISchema? = nil
     //https://learn.openapis.org/specification/parameters.html
-    public var style : ParameterStyle? = nil
+    public var style : String? = nil
     public var explode : Bool? = nil
     public var allowReserved : Bool? = nil
     public var example : JSONValue? = nil

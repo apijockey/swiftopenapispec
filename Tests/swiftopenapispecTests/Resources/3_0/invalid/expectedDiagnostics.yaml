@@ -17,32 +17,50 @@ cases:
     shouldPass: false
     expected:
       - code: "missingRequired"
-        pointer: "/"
+        pointer: "#/"
         rule: "OAS.RequiredOpenAPIFixedFields"
         severity: "error"
         messageContains: "openapi, info, and paths are required"
     onlyThese: true
-  - fixture: "02-minimal-30-missingInfoTitle"
+  - fixture: "02-minimal-30-InfoValidations"
     shouldPass: false
     expected:
       - code: "missingRequired"
-        pointer: "/info"
+        pointer: "#/info"
         rule: "OAS.RequiredOpenAPIFixedInfoFields"
         severity: "error"
         messageContains: "info element requires 'title' and 'version'."
+      - code: "invalidElement"
+        pointer: "#/info/summary"
+        rule: "OAS.OpenAPISpecificationV30FieldsNotAllowed"
+        severity: "error"
+        messageContains: "'info.summary' is not allowed in OpenAPI 3.0/3.1"
   - fixture: "02-minimal-30-missingInfoVersion"
     shouldPass: false
     expected:
       - code: "missingRequired"
-        pointer: "/info"
+        pointer: "#/info"
         rule: "OAS.RequiredOpenAPIFixedInfoFields"
         severity: "error"
         messageContains: "info element requires 'title' and 'version'."
+  - fixture: "02-minimal-30-LicenseValidations"
+    shouldPass: false
+    expected:
+      - code: "missingRequired"
+        pointer: "#/info/license/name"
+        rule: "OAS.RequiredLicenseName"
+        severity: "error"
+        messageContains: "Missing license 'name'."
+      - code: "invalidElement"
+        pointer: "#/info/license/identifier"
+        rule: "OAS.OpenAPILicenseV30FieldsNotAllowed"
+        severity: "error"
+        messageContains: "'license.identifier' is not allowed in OpenAPI 3.0"
   - fixture: "02-minimal-30-missingPaths"
     shouldPass: false
     expected:
       - code: "missingRequired"
-        pointer: "/"
+        pointer: "#/"
         rule: "OAS.RequiredOpenAPIFixedFields"
         severity: "error"
         messageContains: "openapi, info, and paths are required"
@@ -51,7 +69,7 @@ cases:
     shouldPass: false
     expected:
       - code: "invalidValue"
-        pointer: "/openapi"
+        pointer: "#/openapi"
         rule: "OAS.UnsupportedVersion3"
         severity: "error"
         messageContains: "unsupported Version"
@@ -60,7 +78,7 @@ cases:
     shouldPass: false
     expected:
       - code: "invalidValue"
-        pointer: "/paths"
+        pointer: "#/paths/oops"
         rule: "OAS.PathsMustStartWithSlashRule"
         severity: "error"
         messageContains: "path must start with a '/'"
@@ -68,7 +86,7 @@ cases:
     shouldPass: false
     expected:
       - code: "invalidValue"
-        pointer: "/paths"
+        pointer: "#/paths"
         rule: "OAS.SupportedHTTPMethodRule"
         severity: "error"
         messageContains: "http operation not supported"
@@ -76,7 +94,7 @@ cases:
     shouldPass: false
     expected:
       - code: "missingResponses"
-        pointer: "/"
+        pointer: "#/"
         rule: "OAS.OperationMustHaveResponses"
         severity: "error"
         messageContains: "The Responses Object MUST contain at least one response code, and it SHOULD be the response for a successful operation call"
@@ -84,15 +102,15 @@ cases:
     shouldPass: false
     expected:
       - code: "invalidValue"
-        pointer: "/"
+        pointer: "#/paths/~1ping/get/responses/UNS"
         rule: "OAS.SupportedHTPStatusRule"
         severity: "error"
-        messageContains: "is not a valid HTTP status code."
+        messageContains: "'UNS' is not a valid HTTP status code."
   - fixture: "03-minimal-30-noDescription"
     shouldPass: false
     expected:
       - code: "missingRequired"
-        pointer: "/"
+        pointer: "#/paths/~1ping/get/200"
         rule: "OAS.ReferencesMustHaveRef"
         severity: "error"
         messageContains: "Response needs a ref or a response object with 'description'"
@@ -100,15 +118,23 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/paths/~1create/post/responses/201/content/application~1json/schema/type"
+        pointer: "#/paths/~1create/post/responses/201/content/application~1json/schema/type"
         rule: "OAS30.SupportedTypes"
         severity: "error"
         messageContains: "type 'double' not supported or not recognized in OpenAPI 3.0"
+  - fixture: "05-response-invalidHTTPStatus"
+    shouldPass: false
+    expected:
+      - code: "invalidValue"
+        pointer: "#/paths/~1create/post/responses/Hi"
+        rule: "OAS.SupportedHTPStatusRule"
+        severity: "error"
+        messageContains: "Response code 'Hi' is not a valid HTTP status code."
   - fixture: "05-response-invalidPropertyType"
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/paths/~1create/post/responses/201/content/application~1json/schema/properties/id/type"
+        pointer: "#/paths/~1create/post/responses/201/content/application~1json/schema/properties/id/type"
         rule: "OAS30.SupportedTypes"
         severity: "error"
         messageContains: "type 'double' not supported or not recognized in OpenAPI 3.0"
@@ -116,7 +142,7 @@ cases:
     shouldPass: false
     expected:
       - code: "missingRequired"
-        pointer: "/"
+        pointer: "#/"
         rule: "OAS.ReferencesMustHaveRef"
         severity: "error"
         messageContains: "Response needs a ref or a response object with 'description'"
@@ -124,12 +150,12 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/components/schemas/Product/properties/price/format"
+        pointer: "#/components/schemas/Product/properties/price/format"
         rule: "Schema.SupportedFormat"
         severity: "warning"
         messageContains: "format 'float' not predefined for 'string'"
       - code: "schemaViolation"
-        pointer: "/components/schemas/Product/properties/weight/format"
+        pointer: "#/components/schemas/Product/properties/weight/format"
         rule: "Schema.SupportedFormat"
         severity: "warning"
         messageContains: "format 'binary' not predefined for 'number'"
@@ -137,12 +163,12 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/components/schemas/Pet/allOf"
+        pointer: "#/components/schemas/Pet/allOf"
         rule: "Schema.OneAnyAllMustHaveObjectArray"
         severity: "error"
         messageContains: "'AllOf' elements must be of type 'object'."
       - code: "schemaViolation"
-        pointer: "/components/schemas/Vehicle/anyOf"
+        pointer: "#/components/schemas/Vehicle/anyOf"
         rule: "Schema.OneAnyAllMustHaveObjectArray"
         severity: "error"
         messageContains: "'AnyOf' elements must be of type 'object'."
@@ -150,35 +176,20 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/components/schemas/User/properties/credit/multipleOf"
+        pointer: "#/components/schemas/User/properties/credit/multipleOf"
         rule: "Schema.MultipleOf"
         severity: "error"
         messageContains: "The value of 'multipleOf' MUST be strictly greater than 0"
       - code: "schemaViolation"
-        pointer: "/components/schemas/User/properties/uuid/format"
+        pointer: "#/components/schemas/User/properties/uuid/format"
         rule: "Schema.SupportedFormat"
         severity: "warning"
         messageContains: "format 'uuid' not predefined for 'string'"
-      - code: "schemaViolation"
-        pointer: "/components/schemas/User/properties/email/format"
-        rule: "Schema.SupportedFormat"
-        severity: "warning"
-        messageContains: "format 'email' not predefined for 'string'"
-      - code: "schemaViolation"
-        pointer: "/components/schemas/User/properties/birthday/format"
-        rule: "Schema.SupportedFormat"
-        severity: "warning"
-        messageContains: "format 'date-time' not predefined for 'string'"
   - fixture: "10-schematests-identifiableNullable"
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/components/schemas/User/properties/email/format"
-        rule: "Schema.SupportedFormat"
-        severity: "warning"
-        messageContains: "format 'email' not predefined for 'string'"
-      - code: "schemaViolation"
-        pointer: "/components/schemas/User/properties/name/nullable"
+        pointer: "#/components/schemas/User/properties/name/nullable"
         rule: "Schema.DataType"
         severity: "error"
         messageContains: "expected 'Boolean' instead of 'string(yes)'"
@@ -186,7 +197,7 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/components/schemas/Account/properties/id/readonly"
+        pointer: "#/components/schemas/Account/properties/id/readonly"
         rule: "Schema.ReadOrWriteOnly"
         severity: "error"
         messageContains: "A property MUST NOT be marked as both 'readOnly' and 'writeOnly' being 'true'."
@@ -194,12 +205,12 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/components/schemas/Password/maxLength"
+        pointer: "#/components/schemas/Password/maxLength"
         rule: "Schema.StringMinMaxLength"
         severity: "error"
         messageContains: "minLength '10' must be <= maxLength '5'."
       - code: "schemaViolation"
-        pointer: "/components/schemas/Age/maximum"
+        pointer: "#/components/schemas/Age/maximum"
         rule: "Schema.NumberMinimumMaximum"
         severity: "error"
         messageContains: "minimum '18' must be <= maximum '10'."
@@ -207,7 +218,7 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/components/schemas/InvalidSchema/required"
+        pointer: "#/components/schemas/InvalidSchema/required"
         rule: "Schema.RequiredSubsetOfProperties"
         severity: "error"
         messageContains: "Object marks 'missing_required_field' as required, but no such property exists"
@@ -216,17 +227,17 @@ cases:
     shouldPass: false
     expected:
       - code: "invalidType"
-        pointer: "/components/schemas/Pet/oneOf/1/type"
+        pointer: "#/components/schemas/Pet/oneOf/1/type"
         rule: "OAS30.SupportedTypes"
         severity: "error"
         messageContains: "'null' type not supported in OpenAPI 3.0 (switch to nullable)"
       - code: "schemaViolation"
-        pointer: "/components/schemas/Pet/oneOf"
+        pointer: "#/components/schemas/Pet/oneOf"
         rule: "Schema.OneAnyAllMustHaveObjectArray"
         severity: "error"
         messageContains: "'OneOf' elements must be of type 'object'."
       - code: "schemaViolation"
-        pointer: "/components/schemas/Address/properties/city/nullable"
+        pointer: "#/components/schemas/Address/properties/city/nullable"
         rule: "Schema.DataType"
         severity: "error"
         messageContains: "expected 'Boolean' instead of 'string(yes)'"
@@ -234,7 +245,7 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/paths/~1test/get/responses/200/content/application~1json/schema/minItems"
+        pointer: "#/paths/~1test/get/responses/200/content/application~1json/schema/minItems"
         rule: "Schema.ArrayMinItems"
         severity: "error"
         messageContains: "minItems must be 0 or higher, is -5"
@@ -244,7 +255,7 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/paths/~1test/get/responses/200/content/application~1json/schema/maxItems"
+        pointer: "#/paths/~1test/get/responses/200/content/application~1json/schema/maxItems"
         rule: "Schema.ArrayMaxItems"
         severity: "error"
         messageContains: "maxItems must be 0 or higher, is -10"
@@ -254,7 +265,7 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/paths/~1test/get/responses/200/content/application~1json/schema/maxItems"
+        pointer: "#/paths/~1test/get/responses/200/content/application~1json/schema/maxItems"
         rule: "Schema.ArrayMinMaxItems"
         severity: "error"
         messageContains: "minItems 10 must <= maxItems '5'"
@@ -264,7 +275,7 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/paths/~1test/get/responses/200/content/application~1json/schema/minProperties"
+        pointer: "#/paths/~1test/get/responses/200/content/application~1json/schema/minProperties"
         rule: "Schema.ObjectMinProperties"
         severity: "error"
         messageContains: "minProperties must be 0 or higher, is -3"
@@ -274,7 +285,7 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/paths/~1test/get/responses/200/content/application~1json/schema/maxProperties"
+        pointer: "#/paths/~1test/get/responses/200/content/application~1json/schema/maxProperties"
         rule: "Schema.ObjectMaxProperties"
         severity: "error"
         messageContains: "maxProperties must be 0 or higher, is -10"
@@ -284,7 +295,7 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/paths/~1test/get/responses/200/content/application~1json/schema/maxProperties"
+        pointer: "#/paths/~1test/get/responses/200/content/application~1json/schema/maxProperties"
         rule: "Schema.ObjectMinMaxProperties"
         severity: "error"
         messageContains: "minProperties 10 must <= maxProperties '5'"
@@ -294,27 +305,26 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/paths/~1test/get/responses/200/content/application~1json/schema/patternProperties/[invalid-regex"
+        pointer: "#/paths/~1test/get/responses/200/content/application~1json/schema/patternProperties"
         rule: "Schema.ObjectPatternProperties"
-        severity: "error"
-        messageContains: "Pattern properties must be named with a regular expression"
+        severity: "warning"
+        messageContains: "Pattern properties should be a valid regular expression, is: '[invalid-regex'"
     onlyThese: true
 
   - fixture: "10-schematests-object-additionalproperties-inconsistent"
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/paths/~1test/get/responses/200/content/application~1json/schema/properties/firstname/additionalProperties/age/type"
+        pointer: "#/paths/~1test/get/responses/200/content/application~1json/schema/properties/firstname/additionalProperties/age/type"
         rule: "OAS30.SupportedTypes"
         severity: "error"
         messageContains: "type 'double' not supported or not recognized in OpenAPI 3.0"
     onlyThese: true
-
   - fixture: "10-schematests-enum-invalid"
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/paths/~1test/get/responses/200/content/application~1json/schema/enum/3"
+        pointer: "#/paths/~1test/get/responses/200/content/application~1json/schema/enum/3"
         rule: "OAS30.EnumAllowedValues"
         severity: "warning"
         messageContains: "mixed elements are not suported and must match the schema type 'string', got: 'integer(123)'"
@@ -325,7 +335,7 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/paths/~1invalid-dependencies/post/requestBody/content/application~1json/schema/dependencies/name"
+        pointer: "#/paths/~1invalid-dependencies/post/requestBody/content/application~1json/schema/dependencies/name"
         rule: "Schema.ObjectDependencies"
         severity: "error"
         messageContains: "dependency array must have at least one element"
@@ -335,7 +345,7 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/paths/~1invalid-dependencies/post/requestBody/content/application~1json/schema/dependencies/name/1"
+        pointer: "#/paths/~1invalid-dependencies/post/requestBody/content/application~1json/schema/dependencies/name/1"
         rule: "Schema.ObjectDependencies"
         severity: "error"
         messageContains: "dependency array elements must be unique"
@@ -345,17 +355,17 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/paths/~1invalid-dependencies/post/requestBody/content/application~1json/schema/dependencies/name/0"
+        pointer: "#/paths/~1invalid-dependencies/post/requestBody/content/application~1json/schema/dependencies/name/0"
         rule: "Schema.ObjectDependencies"
         severity: "error"
         messageContains: "dependency array elements must be strings"
       - code: "schemaViolation"
-        pointer: "/paths/~1invalid-dependencies/post/requestBody/content/application~1json/schema/dependencies/name/1"
+        pointer: "#/paths/~1invalid-dependencies/post/requestBody/content/application~1json/schema/dependencies/name/1"
         rule: "Schema.ObjectDependencies"
         severity: "error"
         messageContains: "dependency array elements must be strings"
       - code: "schemaViolation"
-        pointer: "/paths/~1invalid-dependencies/post/requestBody/content/application~1json/schema/dependencies/name/2"
+        pointer: "#/paths/~1invalid-dependencies/post/requestBody/content/application~1json/schema/dependencies/name/2"
         rule: "Schema.ObjectDependencies"
         severity: "error"
         messageContains: "dependency array elements must be strings"
@@ -365,18 +375,132 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "/paths/~1invalid-dependencies/post/requestBody/content/application~1json/schema/dependencies/name"
+        pointer: "#/paths/~1invalid-dependencies/post/requestBody/content/application~1json/schema/dependencies/name"
         rule: "Schema.ObjectDependencies"
         severity: "error"
         messageContains: "dependency value must be an object or array, not string"
       - code: "schemaViolation"
-        pointer: "/paths/~1invalid-dependencies/post/requestBody/content/application~1json/schema/dependencies/credit_card"
+        pointer: "#/paths/~1invalid-dependencies/post/requestBody/content/application~1json/schema/dependencies/credit_card"
         rule: "Schema.ObjectDependencies"
         severity: "error"
         messageContains: "dependency value must be an object or array, not integer"
       - code: "schemaViolation"
-        pointer: "/paths/~1invalid-dependencies/post/requestBody/content/application~1json/schema/dependencies/billing_address"
+        pointer: "#/paths/~1invalid-dependencies/post/requestBody/content/application~1json/schema/dependencies/billing_address"
         rule: "Schema.ObjectDependencies"
         severity: "error"
         messageContains: "dependency value must be an object or array, not boolean"
     onlyThese: true
+  - fixture: "01-minimal-30-unsupportedSpecFields"
+    shouldPass: false
+    expected:
+      - code: "invalidElement"
+        pointer: "#/$self"
+        rule: "OAS.OpenAPISpecificationV30FieldsNotAllowed"
+        severity: "error"
+        messageContains: "openapi.selfURL is not allowed in OpenAPI 3.0/3.1"
+      - code: "invalidElement"
+        pointer: "#/jsonSchemaDialect"
+        rule: "OAS.OpenAPISpecificationV30FieldsNotAllowed"
+        severity: "error"
+        messageContains: "openapi.jsonSchemaDialect is not allowed in OpenAPI 3.0/3.1"
+      - code: "invalidElement"
+        pointer: "#/webhooks"
+        rule: "OAS.OpenAPISpecificationV30FieldsNotAllowed"
+        severity: "error"
+        messageContains: "openapi.webhooks is not allowed in OpenAPI 3.0/3.1"
+  - fixture: "33-components-unsupported"
+    shouldPass: false
+    expected:
+      - code: "invalidElement"
+        pointer: "#/components/mediaTypes"
+        rule: "OAS.OpenAPIComponentV30FieldsNotAllowed"
+        severity: "error"
+        messageContains: "The 'components.mediaTypes' property is not supported in OpenAPI 3.0/3.1"
+      - code: "invalidElement"
+        pointer: "#/components/pathItems"
+        rule: "OAS.OpenAPIComponentV30FieldsNotAllowed"
+        severity: "error"
+        messageContains: "The 'components.pathItems' property is not supported in OpenAPI 3.0"
+  - fixture: "03-pathitems-unsupported"
+    shouldPass: false
+    expected:
+      - code: "invalidElement"
+        pointer: "#/paths/~1pets"
+        rule: "OAS.OpenAPIPathV30_ItemFieldsNotAllowed"
+        severity: "error"
+        messageContains: "Path items do not support 'additionalOperations' in OpenAPI 3.0/3.1."
+  - fixture: "35-ext-components-unsupportedMediaType"
+    shouldPass: false
+    expected:
+      - code: "invalidElement"
+        pointer: "#/components/requestBodies/RFC2557/content/multipart~1related; type=text~1html"
+        rule: "OAS.OpenAPIMediaTypeV30_ItemFieldsNotAllowed"
+        severity: "error"
+        messageContains: "Media types do not support 'itemEncoding' or 'prefixEncoding' in OpenAPI 3.0/3.1."
+  - fixture: "openapi-invalidExamples"
+    shouldPass: false
+    expected:
+      - code: "invalidElement"
+        pointer: "#/paths/~1pets/post/requestBody/content/application~1json/examples/withRating"
+        rule: "OpenAPIExample30_ValidFieldsRule"
+        severity: "error"
+        messageContains: "Example does not support 'dataValue', 'serializedValue'in OpenAPI 3.0/3.1."
+      - code: "invalidElement"
+        pointer: "#/paths/~1pets/post/requestBody/content/application~1json/examples/noRating"
+        rule: "OpenAPIExample30_ValidFieldsRule"
+        severity: "error"
+        messageContains: "Example does not support 'dataValue', 'serializedValue'in OpenAPI 3.0/3.1."
+  - fixture: "01-minimal-30-invalidTags"
+    shouldPass: false
+    expected:
+      - code: "invalidElement"
+        pointer: "#/tags/account-updates"
+        rule: "OpenAPITag30_ValidFieldsRule"
+        severity: "error"
+        messageContains: "Tags must not specify 'summary','parent' or 'kind' in OpenAPI 3.0/3.1."
+      - code: "invalidElement"
+        pointer: "#/tags/partner"
+        rule: "OpenAPITag30_ValidFieldsRule"
+        severity: "error"
+        messageContains: "Tags must not specify 'summary','parent' or 'kind' in OpenAPI 3.0/3.1."
+      - code: "invalidElement"
+        pointer: "#/tags/external"
+        rule: "OpenAPITag30_ValidFieldsRule"
+        severity: "error"
+        messageContains: "Tags must not specify 'summary','parent' or 'kind' in OpenAPI 3.0/3.1."
+  - fixture: "16-discriminator-invalid-defaultMapping"
+    shouldPass: false
+    expected:
+      - code: "invalidElement"
+        pointer: "#/components/schemas/EventEnvelope/properties/payload/discriminator"
+        rule: "OpenAPIDiscriminator30_ValidFieldsRule"
+        severity: "error"
+        messageContains: "Discriminators must not have 'defaultMapping' in OpenAPI 3.0/3.1."
+  - fixture: "16-schema-invalid-xmlNodeType"
+    shouldPass: false
+    expected:
+      - code: "invalidElement"
+        pointer: "#/components/schemas/Person/properties/id/xml"
+        rule: "OpenAPIXMLObject_ValidFieldsRule"
+        severity: "error"
+        messageContains: "XML Object must not have 'nodeType' in OpenAPI 3.0/3.1."
+  - fixture: "33-components-unsupportedSecuritySchemes"
+    shouldPass: false
+    expected:
+      - code: "invalidElement"
+        pointer: "#/components/securitySchemes/OAuth2"
+        rule: "OpenAPISecurityScheme_ValidFieldsRule"
+        severity: "error"
+        messageContains: "SecurityScheme must not have 'oauth2MetadataURL','deprecated' in OpenAPI 3.0/3.1."
+      - code: "invalidElement"
+        pointer: "#/components/securitySchemes/OAuth2/flows"
+        rule: "OpenAPIOAuthFlow_ValidFieldsRule"
+        severity: "error"
+        messageContains: "OAuth flows must not have 'deviceAuthorization' in OpenAPI 3.0/3.1."
+      - code: "invalidElement"
+        pointer: "#/components/securitySchemes/OAuth2/flows/deviceAuthorization"
+        rule: "OpenAPIOAuthFlow_ValidFieldsRule"
+        severity: "error"
+        messageContains: "OAuth flows must not have 'deviceAuthorizationUrl' in OpenAPI 3.0/3.1."
+  - fixture: "10-schema-additionalproperties-false"
+    shouldPass: true

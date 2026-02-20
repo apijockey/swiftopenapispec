@@ -12,13 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-cases:
-  - fixture: "invalid_schema"
-    shouldPass: false
-    expected:
-      - code: "schemaViolation"
-        pointer: "#/components/schemas/InvalidSchema/required"
-        rule: "Schema.RequiredSubsetOfProperties"
-        severity: "error"
-        messageContains: "Object marks 'missing_required_field' as required, but no such property exists"
-    onlyThese: true
+# base
+openapi: 3.0.3
+info:
+  version: "1.0"
+  summary: "Summary not supported in 3.0/3.1"
+paths:
+  /pets/{id}:
+    description: Returns pets information
+    summary: get Pets
+    get:
+      operationId: getPet
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: {type: string}
+      responses:
+        "200": {description: ok}

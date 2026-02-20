@@ -23,6 +23,18 @@ public struct OpenAPILicense : ThrowingHashMapInitiable , PointerNavigable {
         self.identifier = map.readIfPresent(Self.IDENTIFIER_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.IDENTIFIER_KEY))
         self.url = map.readIfPresent(Self.URL_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.URL_KEY))
         
+        let supportingElments = Set(Self.supportedKeys)
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
+        
+    }
+    
+    /// The set of keys supported by OpenAPI License object (excluding dynamic extensions)
+    private static var supportedKeys: Set<String> {
+        [
+            Self.NAME_KEY,
+            Self.IDENTIFIER_KEY,
+            Self.URL_KEY
+        ]
     }
     
     

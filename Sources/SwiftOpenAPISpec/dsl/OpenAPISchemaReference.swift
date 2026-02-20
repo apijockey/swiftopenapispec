@@ -41,6 +41,18 @@ public struct OpenAPISchemaReference  : ThrowingHashMapInitiable, PointerNavigab
         self.summary = map.readIfPresent(Self.SUMMARY_KEY,valueType:  String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.SUMMARY_KEY))
         self.description = map.readIfPresent(Self.DESCRIPTION_KEY,valueType:  String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.DESCRIPTION_KEY))
         
+        let supportingElments = Set(Self.supportedKeys)
+        
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
+    }
+    
+    /// The set of keys supported by OpenAPI Schema Reference object (excluding dynamic extensions)
+    public static var supportedKeys: Set<String> {
+        [
+            Self.REF_KEY,
+            Self.SUMMARY_KEY,
+            Self.DESCRIPTION_KEY
+        ]
     }
     public init(ref: String) {
         self.reference = ref

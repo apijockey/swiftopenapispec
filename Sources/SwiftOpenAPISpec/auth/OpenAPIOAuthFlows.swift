@@ -59,6 +59,23 @@ public struct OpenAPIOAuthFlows : ThrowingHashMapInitiable, PointerNavigable {
         self.password = try map.readIfPresent(Self.PASSWORD_KEY, objectType: OpenAPIOAuthFlow.self, diagnostics: &diagnostics, pointer: pointer)
         self.clienCredentials = try map.readIfPresent(Self.CLIENT_CREDENTIALS_KEY, objectType: OpenAPIOAuthFlow.self, diagnostics: &diagnostics, pointer: pointer)
         self.authorizationCode = try map.readIfPresent(Self.AUTHORIZATION_CODE_KEY, objectType: OpenAPIOAuthFlow.self, diagnostics: &diagnostics, pointer: pointer)
+        self.deviceAuthorization = try map.readIfPresent(Self.DEVICE_AUTHORIZATION_KEY, objectType: OpenAPIOAuthFlow.self, diagnostics: &diagnostics, pointer: pointer)
+        
+        let supportingElments = Set(Self.supportedKeys)
+        
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
+        
+    }
+    
+    /// The set of keys supported by OpenAPI OAuth Flows object (excluding dynamic extensions)
+    private static var supportedKeys: Set<String> {
+        [
+            Self.IMPLICIT_KEY,
+            Self.PASSWORD_KEY,
+            Self.CLIENT_CREDENTIALS_KEY,
+            Self.AUTHORIZATION_CODE_KEY,
+            Self.DEVICE_AUTHORIZATION_KEY
+        ]
     }
    
     public var implicit : OpenAPIOAuthFlow? = nil

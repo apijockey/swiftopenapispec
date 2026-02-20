@@ -14,17 +14,18 @@
 
 # base
 openapi: 3.0.3
-info: {version: "1.0"}
+info: {title: Minimal 3.0, version: "1.0"}
 paths:
-  /pets/{id}:
-    description: Returns pets information
-    summary: get Pets
+  /ping:
     get:
-      operationId: getPet
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: {type: string}
+      operationId: ping
       responses:
-        "200": {description: ok}
+        "200":
+          description: ok
+          content:
+            application/json:
+              type: object
+                properties:
+                  name:
+                    type: string
+                additionalProperties: false

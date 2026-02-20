@@ -1,0 +1,105 @@
+# This file is licensed under the Creative Commons Attribution 4.0 International License.
+#
+# Copyright (c) OpenAPI Initiative
+#
+# You may obtain a copy of the license at:
+# https://creativecommons.org/licenses/by/4.0/
+#
+# Changes:
+# - Adapted for use in this project
+openapi: '3.0.4'
+info:
+  title: GreetingService
+  version: 1.0.0
+  termsOfService: "Displayss the terms of services"
+  contact:
+    name: API Support
+    url: https://www.example.com/support
+    email: support@example.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://example.com/api
+    description: Example service deployment.
+  - url: http://127.0.0.1:8080/api
+    description: Localhost deployment.
+  - url: https://{username}.gigantic-server.com:{port}/{basePath}
+    description: The production API server
+    variables:
+      username:
+        # note! no enum here means it is an open value
+        default: demo
+        description: this value is assigned by the service provider, in this example `gigantic-server.com`
+      port:
+        enum:
+          - '8443'
+          - '443'
+        default: '8443'
+      basePath:
+        # open meaning there is the opportunity to use special base paths as assigned by the provider, default is `v2`
+        default: v2
+paths:
+  /pets:
+    post:
+      summary: Add a new driver
+      requestBody:
+        description: Optional description in *Markdown*
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - author
+                - title
+              properties:
+                author:
+                  type: string
+                title:
+                  type: string
+                rating:
+                  type: number
+                  minimum: 1
+                  maximum: 5
+                  multipleOf: 0.5
+            examples:
+              noRating:
+                summary: A not-yet-rated work
+                dataValue:
+                  author: A. Writer
+                  title: The Newest Book
+              withRating:
+                summary: A work with an average rating of 4.5 stars
+                dataValue:
+                  author: A. Writer
+                  title: An Older Book
+                  rating: 4.5
+                serializedValue: |
+                  {
+                    "author": "A. Writer",
+                    "title": "An Older Book",
+                    "rating": 4.5
+                  }
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Pet'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PetForm'
+          text/plain:
+            schema:
+              type: string
+            examples:
+              user:
+                summary: User example in Plain text
+                externalValue: 'https://foo.bar/examples/user-example.txt'
+              foo:
+                summary: A foo example
+                value: {"foo": "bar"}
+              bar:
+                summary: A bar example
+                value: {"bar": "baz"}
+      responses:
+        '201':
+          description: Created

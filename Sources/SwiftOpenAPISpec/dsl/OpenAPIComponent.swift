@@ -144,6 +144,29 @@ public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
             schemas =   try map.mapListIfPresent(Self.SCHEMAS_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.SCHEMAS_KEY))
             self.securitySchemas =   try map.mapListIfPresent(Self.SECURITY_SCHEMES_KEY, objectType:OpenAPISecurityScheme.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.SECURITY_SCHEMES_KEY))
         
+        var supportingElements = Set(Self.supportedKeys)
+        supportingElements.formUnion((self.extensions ?? []).compactMap({ $0.key }))
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElements , pointer: pointer))
+        
+    }
+    
+    /// The set of keys supported by OpenAPI Component object (excluding dynamic extensions)
+    private static var supportedKeys: Set<String> {
+        [
+            Self.CALLBACKS_KEY,
+            Self.EXAMPLES_KEY,
+            Self.HEADERS_KEY,
+            Self.LINKS_KEY,
+            Self.ENCODINGS_KEY,
+            Self.MEDIATYPES_KEY,
+            Self.PATHSITEMS_KEY,
+            Self.PARAMETERS_KEY,
+            OpenAPISchemaReference.REF_KEY,
+            Self.REQUEST_BODIES_KEY,
+            Self.RESPONSES_KEY,
+            Self.SCHEMAS_KEY,
+            Self.SECURITY_SCHEMES_KEY
+        ]
     }
    
     
@@ -162,7 +185,7 @@ public struct OpenAPIComponent : KeyedElement,PointerNavigable  {
     public var responses : [OpenAPIResponse]?
     public var securitySchemas : [OpenAPISecurityScheme]?
     public var schemas : [OpenAPISchema]?
-   
+    
     public var ref : OpenAPISchemaReference? { nil}
     
     

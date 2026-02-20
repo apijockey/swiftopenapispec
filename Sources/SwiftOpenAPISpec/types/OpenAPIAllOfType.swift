@@ -43,30 +43,22 @@ public struct OpenAPIAllOfType : OpenAPISchemaType, ThrowingHashMapInitiable, Po
     }
     
     public var ref: OpenAPISchemaReference?
-   
     public static let TYPE_KEY = "allOf"
-    public static let DISCRIMINATOR_KEY = "discriminator"
+    
   
 
     public init(load map: StringDictionary,diagnostics: inout [Diagnostic],pointer : String) throws {
         if case .array = map[Self.TYPE_KEY] {
             self.type = "array"
         }
+    
         else {
             self.type = "unknown"
-            diagnostics.append(Diagnostic(severity: .error,
-                                          code: .schemaViolation,
-                                          message: "allOf' must contain an array of 'object'.",
-                                          pointer: JSONPointer.join(pointer, "type"), rule: "Schema.OneAnyAllMustHaveObjectArray"))
+            
         }
         self.items = try map.mapListIfPresent("allOf", objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: pointer)
        
     }
     
-    public func validate() throws {
-        
-    }
    
-   
-  
 }

@@ -21,6 +21,9 @@ public struct OpenAPIEncoding : KeyedElement, PointerNavigable {
    
     
     static let CONTENT_TYPE_KEY = "contentType"
+    static let STYLE_KEY = "style"
+    static let EXPLODE_KEY = "explode"
+    static let ALLOW_RESERVED_KEY = "allowReserved"
     static let HEADERS_KEY = "headers"
     static let ENCODING_KEY = "encoding"
     static let PREFIX_ENCODING_KEY = "prefixEncoding"
@@ -30,19 +33,36 @@ public struct OpenAPIEncoding : KeyedElement, PointerNavigable {
         extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
         self.contentType = map.readIfPresent(Self.CONTENT_TYPE_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.CONTENT_TYPE_KEY))
         self.headers = try map.mapListIfPresent(Self.HEADERS_KEY, objectType: OpenAPIHeader.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.HEADERS_KEY))
-        self.encoding  = try map.mapListIfPresent(Self.ENCODING_KEY, objectType: OpenAPIEncoding.self, diagnostics: &diagnostics, pointer:JSONPointer.join(pointer, Self.ENCODING_KEY))
-        self.prefixEncoding = try map.mapListIfPresent(Self.PREFIX_ENCODING_KEY,objectType: OpenAPIEncoding.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.PREFIX_ENCODING_KEY))
-        self.itemEncoding = try map.mapListIfPresent(Self.PREFIX_ENCODING_KEY,objectType: OpenAPIEncoding.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.PREFIX_ENCODING_KEY))
+        self.style = map.readIfPresent(Self.STYLE_KEY, valueType: String.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.STYLE_KEY))
+        self.explode = map.readIfPresent(Self.EXPLODE_KEY, valueType: Bool.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXPLODE_KEY))
+        self.allowReserved = map.readIfPresent(Self.ALLOW_RESERVED_KEY, valueType: Bool.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXPLODE_KEY))
         
+        // Validate unsupported keys (excluding extensions as they are dynamic)
+        var supportingElments = Set(Self.supportedKeys)
+        supportingElments.formUnion((self.extensions).compactMap({ $0.key }))
+      
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
+        
+    }
+    
+    /// The set of keys supported by OpenAPI Encoding object (excluding dynamic extensions)
+    private static var supportedKeys: Set<String> {
+        [
+            Self.CONTENT_TYPE_KEY,
+            Self.HEADERS_KEY,
+            Self.STYLE_KEY,
+            Self.EXPLODE_KEY,
+            OpenAPISchemaReference.REF_KEY,
+            Self.ALLOW_RESERVED_KEY
+        ]
     }
    
     public func element(for segmentName: String) throws -> NavigationResult {
         switch segmentName {
         case Self.CONTENT_TYPE_KEY: return .value(JSONValue(contentType))
         case Self.HEADERS_KEY: return .navigableCollection(headers)
-        case Self.ENCODING_KEY: return .navigableCollection(encoding)
-        case Self.PREFIX_ENCODING_KEY: return  .navigableCollection(prefixEncoding)
-        case Self.ITEM_ENCODING_KEY: return .navigableCollection(itemEncoding)
+        case Self.STYLE_KEY: return .value(JSONValue(string:self.style))
+        case Self.EXPLODE_KEY : return .value(JSONValue(bool: self.explode))
         case Self.EXTENSIONS_KEY: return  .navigableCollection(extensions)
         default:
             // Für x-* Vendor Extensions einzelne Keys erlauben: "x-..." -> passenden Extension-Wert liefern
@@ -60,7 +80,9 @@ public struct OpenAPIEncoding : KeyedElement, PointerNavigable {
     public var encoding :[OpenAPIEncoding] = []
     public var prefixEncoding :[OpenAPIEncoding] = []
     public var itemEncoding :[OpenAPIEncoding] = []
-   
+    public var style : String? = nil
+    public var explode : Bool? = nil
+    public var allowReserved : Bool? = nil
     public var key: String?
    
     public var ref : OpenAPISchemaReference? { nil}

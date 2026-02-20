@@ -58,17 +58,12 @@ public struct OpenAPIAnyOfType : OpenAPISchemaType, PointerNavigable {
         }
         else {
             self.type = "unknown"
-            diagnostics.append(Diagnostic(severity: .error,
-                                          code: .schemaViolation,
-                                          message: "anyOf' must contain an array of 'object'.",
-                                          pointer: JSONPointer.join(pointer, "type"), rule: "Schema.OneAnyAllMustHaveObjectArray"))
+           
         }
         self.items = try map.mapListIfPresent(objectType: OpenAPISchema.self, pointer: pointer)
     }
     
-    public func validate() throws {
-        
-    }
+   
     public func element(for segmentName: String) throws -> NavigationResult {
         if let index = Int(segmentName) {
             return .navigable(self.items?[index])
@@ -86,6 +81,9 @@ public struct OpenAPIAnyOfType : OpenAPISchemaType, PointerNavigable {
             }
         }
         throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIAnyOfType",segmentName)
+    }
+    public static var supportedKeys: [String] {
+        return [OpenAPISchemaReference.REF_KEY]
     }
     public let type : String?
     public var items: [OpenAPISchema]?

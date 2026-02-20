@@ -59,8 +59,11 @@ public struct OpenAPIOneOfType : OpenAPISchemaType,ThrowingHashMapInitiable, Poi
     
     
     public static let TYPE_KEY = "oneOf"
-    public static let DISCRIMINATOR_KEY = "discriminator"
+   
     
+    public static var supportedKeys: [String] {
+        return [TYPE_KEY,OpenAPISchemaReference.REF_KEY]
+    }
 
     public init(load map: StringDictionary,diagnostics: inout [Diagnostic],pointer : String) throws {
         if case .array = map[Self.TYPE_KEY] {
@@ -68,10 +71,7 @@ public struct OpenAPIOneOfType : OpenAPISchemaType,ThrowingHashMapInitiable, Poi
         }
         else {
             self.type = "unknown"
-            diagnostics.append(Diagnostic(severity: .error,
-                                          code: .schemaViolation,
-                                          message: "oneOf' must contain an array of 'object'.",
-                                          pointer: JSONPointer.join(pointer, "type"), rule: "Schema.OneAnyAllMustHaveObjectArray"))
+            
         }
         self.items = try map.mapListIfPresent("oneOf",objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer : pointer)
     }

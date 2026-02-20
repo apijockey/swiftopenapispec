@@ -18,7 +18,7 @@ struct Schema30ValidationTests {
     func debug_schemarules() async throws {
         let fixtureName = "10-schematests-wrongNullableComposition"
         let subDirectory = "Resources/3_0/invalid"
-        let rule = "OAS.ReferencesMustHaveRef"
+       
         let bundle = Bundle.module
         print("Bundle URL:", bundle.bundleURL.path)
         
@@ -33,20 +33,21 @@ struct Schema30ValidationTests {
             throw FixtureErrors.notFound(fixtureName)
         }
         
-        try await TestHelpers.validateSchemaAndCompare(
+        try await TestHelpers.assertValidations(
             apiSpec: apiSpec,
             fixture: fixture,
             resourceUrl: resourceUrl,
             resourceName: fixtureName,
             version: ValidationContext.OASVersion.v30,
-            dialect: ConverterConfig.Dialect.oas30
+            dialect: ConverterConfig.Dialect.oas30,
+            assertions: [.Schema]
         )
     }
 
     @Test("Schema rules for 3.0 hit", arguments: [
         "05-response-invalidType",
         "05-response-invalidPropertyType",
-        "invalid_schema"
+       
     ])
     func schemaRulesHit(resource: String) async throws {
         let subDirectory = "Resources/3_0/invalid"
@@ -62,13 +63,14 @@ struct Schema30ValidationTests {
             throw FixtureErrors.notFound(resource)
         }
         
-        try await TestHelpers.validateSchemaAndCompare(
+        try await TestHelpers.assertValidations(
             apiSpec: apiSpec,
             fixture: fixture,
             resourceUrl: resourceUrl,
             resourceName: resource,
             version: ValidationContext.OASVersion.v30,
-            dialect: ConverterConfig.Dialect.oas30
+            dialect: ConverterConfig.Dialect.oas30,
+            assertions: [.Schema]
         )
     }
 
@@ -78,7 +80,8 @@ struct Schema30ValidationTests {
         "10-schematests-identifiableNullable",
         "10-schematests-invalidreadwriteonly",
         "10-schematests-wrongconstraints",
-        "10-schematests-wrongformat"
+        "10-schematests-wrongformat",
+        "invalid_schema"
     ])
     func schemaWarningRulesHit(resource: String) async throws {
         let subDirectory = "Resources/3_0/invalid"
@@ -94,13 +97,14 @@ struct Schema30ValidationTests {
             throw FixtureErrors.notFound(resource)
         }
         
-        try await TestHelpers.validateSchemaAndCompare(
+        try await TestHelpers.assertValidations(
             apiSpec: apiSpec,
             fixture: fixture,
             resourceUrl: resourceUrl,
             resourceName: resource,
             version: ValidationContext.OASVersion.v30,
-            dialect: ConverterConfig.Dialect.oas30
+            dialect: ConverterConfig.Dialect.oas30,
+            assertions: [.Schema]
         )
     }
 
@@ -123,13 +127,14 @@ struct Schema30ValidationTests {
             throw FixtureErrors.notFound(resource)
         }
         
-        try await TestHelpers.validateSchemaAndCompare(
+        try await TestHelpers.assertValidations(
             apiSpec: apiSpec,
             fixture: fixture,
             resourceUrl: resourceUrl,
             resourceName: resource,
             version: ValidationContext.OASVersion.v30,
-            dialect: ConverterConfig.Dialect.oas30
+            dialect: ConverterConfig.Dialect.oas30,
+            assertions: [.Schema]
         )
     }
 
@@ -154,13 +159,14 @@ struct Schema30ValidationTests {
             throw FixtureErrors.notFound(resource)
         }
         
-        try await TestHelpers.validateSchemaAndCompare(
+        try await TestHelpers.assertValidations(
             apiSpec: apiSpec,
             fixture: fixture,
             resourceUrl: resourceUrl,
             resourceName: resource,
             version: ValidationContext.OASVersion.v30,
-            dialect: ConverterConfig.Dialect.oas30
+            dialect: ConverterConfig.Dialect.oas30,
+            assertions: [.Schema]
         )
     }
 
@@ -184,13 +190,14 @@ struct Schema30ValidationTests {
             throw FixtureErrors.notFound(resource)
         }
         
-        try await TestHelpers.validateSchemaAndCompare(
+        try await TestHelpers.assertValidations(
             apiSpec: apiSpec,
             fixture: fixture,
             resourceUrl: resourceUrl,
             resourceName: resource,
             version: ValidationContext.OASVersion.v30,
-            dialect: ConverterConfig.Dialect.oas30
+            dialect: ConverterConfig.Dialect.oas30,
+            assertions: [.Schema]
         )
     }
 
@@ -211,13 +218,57 @@ struct Schema30ValidationTests {
             throw FixtureErrors.notFound(resource)
         }
         
-        try await TestHelpers.validateSchemaAndCompare(
+        try await TestHelpers.assertValidations(
             apiSpec: apiSpec,
             fixture: fixture,
             resourceUrl: resourceUrl,
             resourceName: resource,
             version: ValidationContext.OASVersion.v30,
-            dialect: ConverterConfig.Dialect.oas30
+            dialect: ConverterConfig.Dialect.oas30,
+            assertions: [.OAS, .Schema]
         )
+    }
+    @Test("Properties with additionalProperties false hit not errors")
+    func testAdditionaPropertiesFalse() async throws {
+        let subDirectory = "Resources/3_0/invalid"
+        let resource = "10-schematests-object-additionalproperties-inconsistent"
+        guard let resourceUrl = Bundle.module.url(forResource: resource, withExtension: "yaml", subdirectory: subDirectory) else {
+            throw FixtureErrors.notFound(resource)
+        }
+        guard let fixture = TestHelpers.fixtureManifest(fixtureName: resource, subDirectory: subDirectory) else {
+            throw FixtureErrors.notFound(resource)
+        }
+        let dict = try TestHelpers.loadFixtureDictionary(resource, subDirectory: subDirectory)
+        let apiSpec = try OpenAPISpecification.read(unflattened: dict, url: resource, documentLoader: YamsDocumentLoader())
+  
+        let type = try #require(apiSpec.paths[path: "/test"]?.operations[key: "get"]?.responses[key: "200"]?.content[key: "application/json"]?.schema?.type)
+        guard case let .object(object) = type else {
+            #expect(Bool(false), "object expected")
+            return
+        }
+        #expect(object.properties.count == 2)
+        let firstProperty = try #require(object.properties.first)
+         guard case let .object(nestedObject) = firstProperty.type,
+        let conditionalProperties = nestedObject.additionalProperties else {
+            #expect(Bool(false), "nested object expected")
+            return
+        }
+        guard case let .schema(schemas)  = conditionalProperties else {
+            #expect(Bool(false), "schemas expected")
+            return
+        }
+        #expect(schemas.count == 1)
+        try await TestHelpers.assertValidations(
+            apiSpec: apiSpec,
+            fixture: fixture,
+            resourceUrl: resourceUrl,
+            resourceName: resource,
+            version: ValidationContext.OASVersion.v30,
+            dialect: ConverterConfig.Dialect.oas30,
+            assertions: [.OAS, .Schema]
+        )
+       
+        
+        
     }
 }

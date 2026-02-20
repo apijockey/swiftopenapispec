@@ -19,7 +19,8 @@
 import Foundation
 public struct OpenAPICallBack : KeyedElement,PointerNavigable{
     
-    //TODO: Call
+    public static let CALL_BACK_KEY = "callback"
+    
     public func element(for segmentName: String) throws -> NavigationResult {
        switch segmentName {
        case OpenAPISchemaReference.REF_KEY: return  .reference(ref?.reference)
@@ -47,9 +48,21 @@ public struct OpenAPICallBack : KeyedElement,PointerNavigable{
         extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
         if map.count > 0 {
             pathItems = []
-            self.pathItems =  try map.mapListIfPresent(objectType: OpenAPIPathItem.self, pointer: JSONPointer.join(pointer, "callback"))
+            self.pathItems =  try map.mapListIfPresent(objectType: OpenAPIPathItem.self, pointer: JSONPointer.join(pointer, Self.CALL_BACK_KEY))
         }
-     
+        //keys are expressions
+        
+    }
+    
+    /// The set of keys supported by OpenAPI Callback object (excluding dynamic extensions and $ref)
+    /// Callbacks are special as they support any URL as a key for path items
+    private static var supportedKeys: Set<String> {
+        [
+            OpenAPISchemaReference.REF_KEY,
+            CALL_BACK_KEY
+            
+            
+        ] // Callback supports any key as a dynamic callback URL, plus extensions (x-*) and $ref
     }
   
     public var extensions : [OpenAPIExtension]?

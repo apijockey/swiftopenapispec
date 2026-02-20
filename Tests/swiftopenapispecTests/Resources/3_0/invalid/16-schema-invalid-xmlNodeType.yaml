@@ -1,0 +1,60 @@
+# This file is licensed under the Creative Commons Attribution 4.0 International License.
+#
+# Copyright (c) OpenAPI Initiative
+#
+# You may obtain a copy of the license at:
+# https://creativecommons.org/licenses/by/4.0/
+#
+# Changes:
+# - Adapted for use in this project
+
+openapi: "3.1.0"
+info:
+  title: Polymorphic Webhook Events
+  version: "1.0.0"
+paths:
+  /ping:
+    get:
+      operationId: ping
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: {
+                type: object,
+                properties: {
+                  ok: {
+                    type: boolean
+                  }
+                },
+                required: [ok]
+              }
+components:
+  schemas:
+    Person:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          xml:
+            nodeType: attribute
+        name:
+          type: string
+          xml:
+            namespace: https://example.com/schema/sample
+            prefix: sample
+  requestBodies:
+    Person:
+      content:
+        application/xml:
+          schema:
+            $ref: "#/components/schemas/Person"
+          examples:
+            Person:
+              externalValue: ./examples/Person.xml
+#<Person id="123">
+#  <sample:name xmlns:sample="https://example.com/schema/sample">example</sample:name>
+#</Person>
+

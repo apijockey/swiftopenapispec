@@ -46,21 +46,39 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
        
         self.explode = map.readIfPresent(Self.EXPLODE_KEY, valueType: Bool.self, diagnostics : &diagnostics, pointer: pointer)
         self.allowReserved = map.readIfPresent(Self.ALLOW_RESERVED_KEY,valueType:  Bool.self, diagnostics : &diagnostics, pointer: pointer)
-        self.example = map.readIfPresent(Self.EXAMPLE_KEY,valueType:  String.self, diagnostics : &diagnostics, pointer: pointer)
+        self.example = map[Self.EXAMPLE_KEY]
         
         self.examples  = try map.mapListIfPresent(Self.EXAMPLES_KEY, objectType: OpenAPIExample.self, diagnostics: &diagnostics, pointer: pointer)
-        self.content = try map.readIfPresent(Self.CONTENT_KEY,objectType:  OpenAPIMediaType.self, diagnostics: &diagnostics, pointer: pointer)
+        
+        let contents = try map.mapListIfPresent(Self.CONTENT_KEY,objectType:  OpenAPIMediaType.self, diagnostics: &diagnostics, pointer: pointer)
+        if contents.count > 1 {
+            diagnostics.append(.init(severity: .error, code: .invalidValue, message: "The content map for a Header MUST only contain one entry.", pointer: JSONPointer.join(pointer, "content"), rule: "OAS.OpenAPIHeaderContentAllowed"))
+        }
+        self.content = contents.first
         extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
-     
-       
         self.required = map.readIfPresent(Self.REQUIRED_KEY, valueType: Bool.self, diagnostics : &diagnostics, pointer: pointer) ?? false
         self.schema = try map.readIfPresent(Self.SCHEMA_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: pointer)
        
         self.style = map.readIfPresent(Self.STYLE_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: pointer)
-       
+        var supportingElments = Set(Self.supportedKeys)
+        supportingElments.formUnion((self.extensions).compactMap({ $0.key }))
+        supportingElments.formUnion(contents.map({ $0.key ?? "" }))
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
     }
    
-
+    public static let supportedKeys: Set<String> = [
+        ALLOW_EMPTYVALUE_KEY,
+        ALLOW_RESERVED_KEY,
+        CONTENT_KEY,
+        EXAMPLE_KEY,
+        EXAMPLES_KEY,
+        EXPLODE_KEY,
+        DESCRIPTION_KEY,
+        REQUIRED_KEY,
+        OpenAPISchemaReference.REF_KEY,
+        SCHEMA_KEY
+    ]
+    
     public func element(for segmentName: String) throws -> NavigationResult {
        switch segmentName {
        case Self.ALLOW_EMPTYVALUE_KEY:
@@ -71,7 +89,7 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
            return .value(value)
        case Self.CONTENT_KEY: return .navigable(content)
        case Self.EXAMPLE_KEY:
-           let value = try JSONValue(example)
+           let value = example
            return .value(value)
        case Self.EXAMPLES_KEY: return .navigableCollection(examples)
        case Self.EXPLODE_KEY:
@@ -87,13 +105,11 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
        case Self.STYLE_KEY: return .value(JSONValue(style))
        case OpenAPISchemaReference.REF_KEY: return .reference(ref?.reference)
        default:
-           // Für x-* Vendor Extensions einzelne Keys erlauben: "x-..." -> passenden Extension-Wert liefern
-//           if segmentName.hasPrefix("x-"), let exts = extensions {
-//               let ext = exts.first(where: { $0.key == segmentName }) {
-//                   // Gib die strukturierte oder einfache Extension zurück
-//                   //return ext.structuredExtension?.properties ?? ext.simpleExtensionValue
-//               }
-//           }
+           if segmentName.hasPrefix("x-"),
+               let ext = extensions.first(where: { $0.key == segmentName }) {
+                   // Gib die strukturierte oder einfache Extension zurück
+               return .navigable(ext)
+            }
            throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIHeader", segmentName)
     
        
@@ -110,13 +126,10 @@ public struct OpenAPIHeader :  KeyedElement, PointerNavigable {
     public var explode : Bool? = nil
     public var ref : OpenAPISchemaReference? = nil
     public var allowReserved : Bool? = nil
-    public var example :(any Sendable)? = nil
+    public var example :JSONValue? = nil
     public var extensions : [OpenAPIExtension] = []
     public var examples : [OpenAPIExample] = []
     public var content : OpenAPIMediaType? = nil
  
-   
-    //TODO: Examples Object
-   
 }
 

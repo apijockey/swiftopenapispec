@@ -201,10 +201,19 @@ struct OpenAPILegacyPortedTests {
         }
         #expect(errorObject.properties.count == 2)
         let errorMessageCodeProperty = errorObject.properties.first(where: {$0.key == "code"})
-    //#expect(errorMessageCodeProperty?.schema?.type is OpenAPIIntegerType)
+        guard case  .integer = errorMessageCodeProperty?.type else {
+            Issue.record("expected integer schema")
+            return
+        }
+    
         let errorMessageMessageProperty = errorObject.properties.first(where: {$0.key == "message"})
-        //#expect(errorMessageMessageProperty?.schema?.type is OpenAPIStringType)
-        #expect(errorObject.required.count == 0)
+        guard case .string = errorMessageMessageProperty?.type else {
+            Issue.record("expected string schema")
+            return
+        }
+        
+
+        #expect(errorObject.required == nil)
     }
 
     @Test

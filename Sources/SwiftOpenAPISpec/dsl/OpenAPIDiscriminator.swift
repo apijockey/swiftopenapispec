@@ -51,6 +51,20 @@ public struct OpenAPIDiscriminator :  ThrowingHashMapInitiable, PointerNavigable
         }
         self.defaultMapping = map.readIfPresent(Self.DEFAULT_MAPPING_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.DEFAULT_MAPPING_KEY))
         
+        
+        let supportingElments = Set(Self.supportedKeys)
+        
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
+        
+    }
+    
+    /// The set of keys supported by OpenAPI Discriminator object (excluding dynamic extensions)
+    private static var supportedKeys: Set<String> {
+        [
+            Self.PROPERTY_NAME_KEY,
+            Self.MAPPING_KEY,
+            Self.DEFAULT_MAPPING_KEY
+        ]
     }
     
     public var propertyName: String?

@@ -39,7 +39,7 @@
 
 
 public struct OpenAPIArrayType : OpenAPISchemaType, PointerNavigable{
-    public var discriminator: OpenAPIDiscriminator?
+   
     
     
     
@@ -48,11 +48,7 @@ public struct OpenAPIArrayType : OpenAPISchemaType, PointerNavigable{
         switch segmentName {
         case Self.ITEMS_KEY: return .navigable(self.items)
         case Self.ARRAY_TYPE_KEY: return .value(JSONValue(string: self.type))
-        case Self.MAX_ITEMS_KEY : return .value(JSONValue(int: maxItems))
-        case Self.MIN_ITEMS_KEY : return .value(JSONValue(int: minItems))
-        case Self.UNIQE_ITEMS_KEY : return .value(JSONValue(bool: uniqueItems))
-        case Self.MAX_CONTAINS_KEY : return .value(JSONValue(int: maxContains))
-        case Self.MIN_CONTAINS_KEY : return .value(JSONValue(int: minContains))
+        
         default:
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIArrayType", segmentName)
         }
@@ -61,37 +57,34 @@ public struct OpenAPIArrayType : OpenAPISchemaType, PointerNavigable{
     
     public static let ARRAY_TYPE_KEY = "array"
     public static let TYPE_KEY = "type"
-    public static let MAX_ITEMS_KEY = "maxItems"
+    public static let CONTAINS_KEY = "contains"
     public static let ITEMS_KEY = "items"
-    public static let MIN_ITEMS_KEY = "minItems"
-    public static let UNIQE_ITEMS_KEY = "uniqueItems"
-    public static let MAX_CONTAINS_KEY = "maxContains"
-    public static let MIN_CONTAINS_KEY = "minContains"
+    
     
     public init(load map: StringDictionary, diagnostics : inout [Diagnostic], pointer : String) throws {
         self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self, diagnostics: &diagnostics, pointer: pointer)
-        self.minItems = map.readIfPresent(Self.MIN_ITEMS_KEY, valueType: Int.self, diagnostics: &diagnostics, pointer: pointer)
-        self.maxItems = map.readIfPresent(Self.MAX_ITEMS_KEY, valueType:  Int.self, diagnostics: &diagnostics, pointer: pointer)
-        self.maxContains = map.readIfPresent(Self.MAX_CONTAINS_KEY, valueType : Int.self, diagnostics: &diagnostics, pointer: pointer)
-        self.minContains = map.readIfPresent(Self.MIN_CONTAINS_KEY, valueType:  Int.self, diagnostics: &diagnostics, pointer: pointer)
-        self.uniqueItems = map.readIfPresent(Self.UNIQE_ITEMS_KEY, valueType:  Bool.self, diagnostics: &diagnostics, pointer: pointer)
+        self.contains = try map.readIfPresent(Self.TYPE_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: pointer)
+       
          if let list = map[Self.ITEMS_KEY] ,
             case let .object(type) = list {
              self.items = try OpenAPISchema.initialize(load: type, diagnostics : &diagnostics, pointer: pointer).value
              }
     }
-   
+    public static var supportedKeys: [String] {
+        return [
+            ARRAY_TYPE_KEY,
+            TYPE_KEY,
+            CONTAINS_KEY,
+            ITEMS_KEY
+        ]
+    }
 
     public func validate() throws {
         
     }
     public let type : String?
-    public var maxItems : Int?
-    public var minItems : Int?
-    public var uniqueItems : Bool?
-    public var maxContains : Int?
-    public var minContains : Int?
     public var items: OpenAPISchema?
+    public var contains : OpenAPISchema?
     
     
 }

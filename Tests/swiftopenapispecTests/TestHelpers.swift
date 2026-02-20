@@ -13,6 +13,10 @@ import Yams
 /// Common test helper functions and structures for OpenAPI specification testing
 struct TestHelpers {
     
+    enum AssertionGroup : String{
+        case OAS, Schema
+    }
+    
     struct ExpectedDiagnostic: Codable, Equatable {
         let code: String
         let pointer: String
@@ -170,7 +174,6 @@ struct TestHelpers {
             let jsonValue = try JSONValue(from: map, diagnostics: &diagnostics)
             return jsonValue
         } catch {
-            print("Diagnostics during YAML load:", diagnostics)
             throw TestError.unreadable(url.absoluteString, error)
         }
     }
@@ -184,14 +187,16 @@ struct TestHelpers {
     ///   - version: OpenAPI version
     ///   - dialect: OpenAPI dialect
     ///   - bundle: Bundle for loading
-    static func validateSchemaAndCompare(
+    static func assertValidations(
         apiSpec: OpenAPISpecification,
         fixture: ManifestEntry,
         resourceUrl: URL,
         resourceName: String,
         version: ValidationContext.OASVersion,
         dialect: ConverterConfig.Dialect,
-        bundle: Bundle = .module
+        bundle: Bundle = .module,
+        assertions: [AssertionGroup]
+        
     ) async throws {
         let ctx = ValidationContext(version: version, dialect: dialect, baseURI: resourceName, operationIds: [])
         let objectLoader = YamsDocumentLoader()
@@ -199,7 +204,14 @@ struct TestHelpers {
             try await objectLoader.load(from: url)
         }
         
-        let errors = try await Validator.validateSchema(spec: apiSpec, ctx: ctx, baseURI: resourceUrl.absoluteString, resolver: &resolver)
+        var errors = [Diagnostic]()
+        if assertions.contains(.OAS) {
+            errors = try await Validator.validate(spec: apiSpec, baseURI: resourceUrl.absoluteString, ctx: ctx, resolver: &resolver)
+        }
+        if assertions.contains(.Schema) {
+            errors = try await Validator.validateSchema(spec: apiSpec, ctx: ctx, baseURI: resourceUrl.absoluteString, resolver: &resolver)
+        }
+        
         #expect(errors.count == fixture.expected.count, "Expected \(fixture.expected.count) errors, got \(errors.count)")
         let sortedErrors = errors.sorted { lhs, rhs in lhs.pointer < rhs.pointer }
         let sortedExpected = fixture.expected.sorted { lhs, rhs in lhs.pointer < rhs.pointer}

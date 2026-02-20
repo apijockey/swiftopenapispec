@@ -107,11 +107,14 @@ struct FixtureTests {
             return
         }
         
-        
-        #expect(objectType.unevaluatedProperties == false)
+        guard case let .boolean(boolValue) = objectType.unevaluatedProperties else {
+            Issue.record("Bool value expected")
+            return
+        }
+        #expect(boolValue == false)
         #expect(objectType.properties.count == 1)
-        #expect(contentType.schema?.required?.count == 1)
-        #expect(contentType.schema?.required?.first == "ok")
+        #expect(objectType.required?.count == 1)
+        #expect(objectType.required?.first == "ok")
        
         
     }
@@ -189,7 +192,7 @@ struct FixtureTests {
             return
         }
         //#expect(requestbodyContents[0].schema?.allowedValues == ["Alice","Bob","Carl"])
-        #expect(requestbodyContents[0].schema?.allowedValues.compactMap({ value in
+        #expect((requestbodyContents[0].schema?.allowedValues ?? []).compactMap({ value in
             if case .string(let stringValue) = value { return stringValue } else { return nil }
         }) == ["Alice","Bob","Carl"])
         
@@ -234,8 +237,8 @@ struct FixtureTests {
         let response201 = try #require(apiSpec[path: "/create"]?.operations[operationID : "create"]?.response(httpstatus: "201"))
         #expect(response201.description == "created")
         guard case let .object(objectType) = try #require(response201.content.first?.schema?.type ) else { Issue.record(); return }
-        #expect(objectType.required.first  == "id")
-        #expect(objectType.required.count  == 1)
+        #expect(objectType.required?.first  == "id")
+        #expect(objectType.required?.count  == 1)
         let defaultResponse = try #require(apiSpec[path: "/create"]?.operations[operationID : "create"]?.response(httpstatus: "default"))
         #expect(defaultResponse.description == "error")
         guard case let .ref(component) = try #require(defaultResponse.content.first?.schema?.type ) else { Issue.record(); return }
@@ -258,7 +261,7 @@ struct FixtureTests {
         
         //guard case let .string(stringPropertyInfo) = try #require(schema.type) else { Issue.record(); return }
         //#expect(winnerProperty.allowedValues == ["X", "O", "."])
-        #expect(Set(winnerProperty.allowedValues.compactMap({ value in
+        #expect(Set((winnerProperty.allowedValues ?? []).compactMap({ value in
             if case .string(let value) = value { return value } else { return nil }
         })) ==  ["X", "O", "."])
         
@@ -318,8 +321,8 @@ struct FixtureTests {
         }
         let apiSpec = try OpenAPISpecification.read(unflattened: yaml, url:"09-enums-defaults-constraints", documentLoader: YamsDocumentLoader())
         guard case let .object(object) = try #require(apiSpec[path: "/order"]?.operations[operationID : "createOrder"]?.requestBody?.contents[ key: "application/json"]?.schema?.type ) else { Issue.record(); return }
-        #expect(object.required.contains( "status"))
-        #expect(object.required.contains( "count"))
+        #expect((object.required ?? []).contains( "status"))
+        #expect((object.required ?? []).contains( "count"))
         #expect(object.properties.contains(where: {$0.key ==  "count"}) )
         #expect(object.properties.contains(where: {$0.key == "status"}))
         #expect(object.properties.contains(where: {$0.key == "note"}))

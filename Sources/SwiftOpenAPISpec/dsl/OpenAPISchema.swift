@@ -45,7 +45,7 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
             return .value(value)
         case Self.EXCLUSIVE_MINIMUM_KEY : return .value(JSONValue(bool: exclusiveMinimum))
             case OpenAPISpecification.EXTERNAL_DOCS_KEY : return .navigable(externalDocs)
-            case Self.EXAMPLE_KEY : return .navigable(example)
+            case Self.EXAMPLE_KEY : return .value(example)
         case Self.EXCLUSIVE_MAXIMUM_KEY : return .value(JSONValue(bool: exclusiveMaximum))
         case Self.FORMAT_KEY : return .value(JSONValue(string: format))
         case OpenAPISchemaReference.REF_KEY :
@@ -104,10 +104,9 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
         case Self.READ_ONLY_KEY :
             
             return .value(JSONValue(bool: readOnly))
-            case Self.REQUIRED_KEY :
             
-            let value = try JSONValue(required)
-            return .value(value)
+            
+           
         case Self.TITLE_KEY : return .value(JSONValue(string: title))
         case Self.TYPE_KEY :
             let value = try JSONValue(type)
@@ -131,6 +130,8 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
     }
     
     public static let ALLOWED_ELEMENTS_KEY = "enum"
+    public static let REQUIRED_KEY = "required"
+    public static let CONTAINS_KEY = "contains"
     public static let DEFAULT_VALUE_KEY : String = "default"
     public static let DISCRIMINATOR_KEY = "discriminator"
     public static let DEPRECATED_KEY = "deprecated"
@@ -139,7 +140,10 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
     public static let EXCLUSIVE_MAXIMUM_KEY : String = "exclusiveMaximum"
     public static let EXCLUSIVE_MINIMUM_KEY : String = "exclusiveMinimum"
     public static let FORMAT_KEY : String = "format"
-    
+    public static let DEPENDENT_REQUIRED_KEY = "dependentRequired"
+    public static let DEPENDENCIES_KEY = "dependencies"
+    public static let ADDITIONAL_PROPERTIES_KEY = "additionalProperties"
+    public static let UNEVALUATEDPROPERTIES_KEY = "unevaluatedProperties"
     
     public static let MULTIPLEOF_KEY : String = "multipleOf"
     public static let MAXIMUM_KEY : String = "maximum"
@@ -151,37 +155,41 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
     public static let XML_KEY = "xml"
     public static let MAX_LENGTH_KEY = "maxLength"
     public static let MIN_LENGTH_KEY = "minLength"
-    
     public static let MAX_ITEMS_KEY = "maxItems"
     public static let MIN_ITEMS_KEY = "minItems"
     
     public static let READ_ONLY_KEY = "readOnly"
     public static let WRITE_ONLY_KEY = "writeOnly"
-    
+    public static let PATTERNPROPERTIES_KEY = "patternProperties"
     public static let PROPERTIES_KEY = "properties"
     public static let MAX_PROPERTIES_KEY = "maxProperties"
     public static let MIN_PROPERTIES_KEY = "minProperties"
-    
-    
-    
+    public static let PROPERTY_NAMES = "propertyNames"
     public static let PATTERN_KEY = "pattern"
     public static let TYPE_KEY = "type"
     public static let TITLE_KEY = "title"
     
-    public static let REQUIRED_KEY = "required"
+    
+    
+    
     
     public init(load map: StringDictionary,  diagnostics: inout [Diagnostic],pointer : String) throws {
        
         self.defaultValue =  map[Self.DEFAULT_VALUE_KEY]
         self.deprecated = map.readIfPresent(Self.DEPRECATED_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: pointer)
         self.discriminator = try map.readIfPresent(Self.DISCRIMINATOR_KEY,  objectType:  OpenAPIDiscriminator.self, diagnostics: &diagnostics, pointer: pointer)
-        // Value MUST be a string. Multiple types via an array are not supported.
        
         self.type = try OpenAPIType(load: map,  diagnostics: &diagnostics, pointer: pointer)
-       
-       
         
         if case let .array(allowedElements)  = map[Self.ALLOWED_ELEMENTS_KEY]  {
+            if allowedElements.count == 0 {
+                let diagnostic = Diagnostic( severity: .error,
+                                             code: .missingRequired,
+                                             message: "'enums' must not be empty'",
+                                             pointer: pointer,
+                                             rule: "OAS30.EnumAllowedValues")
+                diagnostics.append(diagnostic)
+            }
             var collected: [JSONValue] = []
             for (index,value) in allowedElements.enumerated() {
                 switch value {
@@ -194,14 +202,14 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
                         collected.append(value)
                     }
                     else {
-                        diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "mixed elements are not suported and must match the schema type '\(self.type.debugDescription)', got: '\(value.debugDescription)'", pointer: JSONPointer.join(JSONPointer.join(pointer, "enum"),String(index)),rule: "OAS30.EnumAllowedValues"))
+                        diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "mixed elements are not suported and must match the schema type '\(self.type.description)', got: '\(value.debugDescription)'", pointer: JSONPointer.join(JSONPointer.join(pointer, "enum"),String(index)),rule: "OAS30.EnumAllowedValues"))
                     }
                 case .number:
                     if case .number = type {
                         collected.append(value)
                     }
                     else {
-                        diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "mixed elements are not suported and must match the schema type '\(self.type.debugDescription)', got: '\(value.debugDescription)'", pointer: JSONPointer.join(JSONPointer.join(pointer, "enum"),String(index)),rule: "OAS30.EnumAllowedValues"))
+                        diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "mixed elements are not suported and must match the schema type '\(self.type.description)', got: '\(value.debugDescription)'", pointer: JSONPointer.join(JSONPointer.join(pointer, "enum"),String(index)),rule: "OAS30.EnumAllowedValues"))
                     }
                 case .integer:
                     if case .number = type{
@@ -211,14 +219,14 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
                         collected.append(value)
                     }
                     else {
-                        diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "mixed elements are not suported and must match the schema type '\(self.type.debugDescription)', got: '\(value.debugDescription)'", pointer: JSONPointer.join(JSONPointer.join(pointer, "enum"),String(index)),rule: "OAS30.EnumAllowedValues"))
+                        diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "mixed elements are not suported and must match the schema type '\(self.type.description)', got: '\(value.debugDescription)'", pointer: JSONPointer.join(JSONPointer.join(pointer, "enum"),String(index)),rule: "OAS30.EnumAllowedValues"))
                     }
                 case .boolean:
                     if case .bool = type {
                         collected.append(value)
                     }
                     else {
-                        diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "mixed elements are not suported and must match the schema type '\(self.type.debugDescription)', got: '\(value.debugDescription)'", pointer: JSONPointer.join(JSONPointer.join(pointer, "enum"),String(index)),rule: "OAS30.EnumAllowedValues"))
+                        diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "mixed elements are not suported and must match the schema type '\(self.type.description)', got: '\(value.debugDescription)'", pointer: JSONPointer.join(JSONPointer.join(pointer, "enum"),String(index)),rule: "OAS30.EnumAllowedValues"))
                     }
                 case .null:
                     if self.nullable == false {
@@ -226,15 +234,13 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
                     }
                 }
             }
-            
             self.allowedValues = collected
         } else {
-            self.allowedValues = []
         }
         self.extensions = try OpenAPIExtension.extensionElements(map, &diagnostics,pointer: JSONPointer.join(pointer, "extensions"))
         self.exclusiveMinimum = map.readIfPresent(Self.EXCLUSIVE_MINIMUM_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.EXCLUSIVE_MINIMUM_KEY))
         self.externalDocs = try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIExternalDocumentation.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXAMPLE_KEY))
-        self.example = try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIExample.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXAMPLE_KEY))
+        self.example  = map[Self.EXAMPLE_KEY]
         self.exclusiveMaximum = map.readIfPresent(Self.EXCLUSIVE_MAXIMUM_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.EXCLUSIVE_MAXIMUM_KEY))
         self.format = map.readIfPresent(Self.FORMAT_KEY, valueType:  String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.FORMAT_KEY))
         self.multipleOf = map.readIfPresent(Self.MULTIPLEOF_KEY, valueType:Double.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.MULTIPLEOF_KEY))
@@ -251,33 +257,69 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
         self.nullable = map.readIfPresent(Self.NULLABLE_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.NULLABLE_KEY))
         self.pattern = map.readIfPresent(Self.PATTERN_KEY,valueType:String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.PATTERN_KEY))
         self.readOnly = map.readIfPresent(Self.READ_ONLY_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.READ_ONLY_KEY))
-        self.required = map.readListIfPresent(Self.REQUIRED_KEY, valueType:  String.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.REQUIRED_KEY))
-    
         self.title = map.readIfPresent(OpenAPISchema.TYPE_KEY, valueType:String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISchema.TYPE_KEY))
-       
+        
         self.uniqueItems = map.readIfPresent(Self.UNIQUE_ITEMS_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.UNIQUE_ITEMS_KEY))
         self.writeOnly = map.readIfPresent(Self.WRITE_ONLY_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.WRITE_ONLY_KEY))
-        self.xml =  try map.readIfPresent(Self.EXAMPLE_KEY, objectType: OpenAPIXMLObject.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXAMPLE_KEY))
+        self.xml =  try map.readIfPresent(Self.XML_KEY, objectType: OpenAPIXMLObject.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXAMPLE_KEY))
         
+        self.uniqueItems = map.readIfPresent(Self.UNIQUE_ITEMS_KEY, valueType:  Bool.self, diagnostics: &diagnostics, pointer: pointer)
     }
+    public static var supportedKeys: Set<String>      {
+        return [
+            ALLOWED_ELEMENTS_KEY,
+            DEFAULT_VALUE_KEY,
+            DISCRIMINATOR_KEY,
+            
+            DEPRECATED_KEY,
+            EXAMPLE_KEY,
+            EXTENSIONS_KEY,
+            OpenAPISchemaReference.REF_KEY,
+            EXCLUSIVE_MAXIMUM_KEY,
+            ADDITIONAL_PROPERTIES_KEY,
+            EXCLUSIVE_MINIMUM_KEY,
+            FORMAT_KEY,
+            MULTIPLEOF_KEY,
+            MAXIMUM_KEY,
+            MINIMUM_KEY,
+            MAX_CONTAINS_KEY,
+            MIN_CONTAINS_KEY,
+            NULLABLE_KEY,
+            UNIQUE_ITEMS_KEY,
+            XML_KEY,
+            MAX_LENGTH_KEY,
+            MIN_LENGTH_KEY,
+            MAX_ITEMS_KEY,
+            MIN_ITEMS_KEY,
+            READ_ONLY_KEY,
+            WRITE_ONLY_KEY,
+            PROPERTIES_KEY,
+            MAX_PROPERTIES_KEY,
+            MIN_PROPERTIES_KEY,
+            PATTERN_KEY,
+            TYPE_KEY,
+            TITLE_KEY,
+            REQUIRED_KEY
+        ]
+    }
+    
+    
+   
    
          //self.format30 = map.readIfPresent(Self.FORMAT_KEY, String.self)
          //extensions = try OpenAPIExtension.extensionElements(map)
     
-    public var allowedValues: [JSONValue]
+    public var allowedValues: [JSONValue]?
     public var defaultValue : JSONValue?
+   
     public var deprecated: Bool?
     public var discriminator: OpenAPIDiscriminator?
-  
-    
     public var extensions: [OpenAPIExtension]?
     public var exclusiveMinimum: Bool?
     public var externalDocs: OpenAPIExternalDocumentation?
-    public var example: OpenAPIExample?
+    public var example: JSONValue?
     public var exclusiveMaximum: Bool?
-    
     public var format: String?
-    
     public var multipleOf: Double?
     public var maximum: Double?
     public var minimum: Double?
@@ -292,8 +334,7 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
     public var nullable: Bool?
     public var pattern: String?
     public var readOnly: Bool?
-    public var required: [String]?
-    
+   
     public var title : String?
     public var type : OpenAPIType?
     public var uniqueItems: Bool?

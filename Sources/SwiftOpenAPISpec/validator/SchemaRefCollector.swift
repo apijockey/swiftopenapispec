@@ -355,23 +355,45 @@ public struct SchemaRefCollector {
                 out.append(contentsOf: collect(from:  prop  , pointer: JSONPointer.join(propPtr, "\(key)/")))
             }
         }
-        
-        for prop in obj.additionalPropertiesObject {
-            if let key = prop.key,
-               case let .ref(ref) = prop.type {
-                let propPtr = JSONPointer.join(JSONPointer.join(pointer, "additionalProperties"), key)
-                out.append(.init(
-                    refString: ref.reference ?? "",
-                    pointerToDollarRef: JSONPointer.join(propPtr, "\(key)/$ref"),
-                    expected: .schemaObject
-                ))
-            }
-            
-            else if let key = prop.key{
-                let propPtr = JSONPointer.join(JSONPointer.join(pointer, "properties"), key)
-                out.append(contentsOf: collect(from:  prop  , pointer: JSONPointer.join(propPtr, "\(key)/")))
+        if let additionalProperties = obj.additionalProperties,
+            case let .schema(schemaObject) = additionalProperties  {
+            for prop in schemaObject {
+                if let key = prop.key,
+                   case let .ref(ref) = prop.type {
+                    let propPtr = JSONPointer.join(JSONPointer.join(pointer, "additionalProperties"), key)
+                    out.append(.init(
+                        refString: ref.reference ?? "",
+                        pointerToDollarRef: JSONPointer.join(propPtr, "\(key)/$ref"),
+                        expected: .schemaObject
+                    ))
+                }
+                
+                else if let key = prop.key{
+                    let propPtr = JSONPointer.join(JSONPointer.join(pointer, "properties"), key)
+                    out.append(contentsOf: collect(from:  prop  , pointer: JSONPointer.join(propPtr, "\(key)/")))
+                }
             }
         }
+        if let unevaluatedProperties = obj.unevaluatedProperties,
+            case let .schema(schemaObject) = unevaluatedProperties  {
+            for prop in schemaObject {
+                if let key = prop.key,
+                   case let .ref(ref) = prop.type {
+                    let propPtr = JSONPointer.join(JSONPointer.join(pointer, "additionalProperties"), key)
+                    out.append(.init(
+                        refString: ref.reference ?? "",
+                        pointerToDollarRef: JSONPointer.join(propPtr, "\(key)/$ref"),
+                        expected: .schemaObject
+                    ))
+                }
+                
+                else if let key = prop.key{
+                    let propPtr = JSONPointer.join(JSONPointer.join(pointer, "properties"), key)
+                    out.append(contentsOf: collect(from:  prop  , pointer: JSONPointer.join(propPtr, "\(key)/")))
+                }
+            }
+        }
+       
         return out
     }
     /// Collects references from an OpenAPI schema.
@@ -427,6 +449,16 @@ public struct SchemaRefCollector {
             return []
         case .some(.unknown(_)):
             return []
+        case .some(.not(let schema)):
+            out.append(contentsOf: collect(from: schema, pointer: JSONPointer.join(pointer, "not")))
+        case .some(.definitions(let definitions)):
+            out.append(contentsOf: collect(from: definitions, pointer: JSONPointer.join(pointer, "definitions")))
+        case .some(.ifType(_)):
+            out.append(contentsOf: collect(from: schema, pointer: JSONPointer.join(pointer, "if")))
+        case .some(.thenType(_)):
+            out.append(contentsOf: collect(from: schema, pointer: JSONPointer.join(pointer, "then")))
+        case .some(.elseType(_)):
+            out.append(contentsOf: collect(from: schema, pointer: JSONPointer.join(pointer, "else")))
         }
         return out
     }

@@ -12,13 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-cases:
-  - fixture: "invalid_schema"
-    shouldPass: false
-    expected:
-      - code: "schemaViolation"
-        pointer: "#/components/schemas/InvalidSchema/required"
-        rule: "Schema.RequiredSubsetOfProperties"
-        severity: "error"
-        messageContains: "Object marks 'missing_required_field' as required, but no such property exists"
-    onlyThese: true
+openapi: 3.0.0
+info:
+  title: Object PatternProperties Test
+  version: 1.0.0
+paths:
+  /test:
+    get:
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                patternProperties:
+                  "[invalid-regex":
+                    type: string

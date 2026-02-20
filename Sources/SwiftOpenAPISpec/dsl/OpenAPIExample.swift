@@ -22,9 +22,12 @@ public struct OpenAPIExample : KeyedElement, RefPointerNavigable {
     public static let SUMMARY_KEY = "summary"
     public static let DESCRIPTION_KEY = "description"
     public static let VALUE_KEY = "value"
- 
+    public static let DATA_VALUE_KEY = "dataValue"
     public static let EXTERNAL_VALUE_KEY = "externalValue"
     public static let SERIALIZED_VALUE_KEY = "serializedValue"
+    public init(value : JSONValue) {
+        self.value = value
+    }
     public init(load map: StringDictionary, diagnostics: inout [Diagnostic],pointer : String) throws {
         if case let .string(refKey) = map[OpenAPISchemaReference.REF_KEY]{
             self.ref = OpenAPISchemaReference(ref: refKey)
@@ -36,6 +39,24 @@ public struct OpenAPIExample : KeyedElement, RefPointerNavigable {
         self.externalValue = map.readIfPresent(Self.EXTERNAL_VALUE_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.EXTERNAL_VALUE_KEY))
 
         self.serializedValue = map.readIfPresent(Self.SERIALIZED_VALUE_KEY,valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.SERIALIZED_VALUE_KEY))
+        self.dataValue = map[Self.DATA_VALUE_KEY]
+        // Validate unsupported keys (excluding extensions as they are dynamic)
+        let supportingElments = Set(Self.supportedKeys)
+        diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
+        
+    }
+    
+    /// The set of keys supported by OpenAPI Example object (excluding dynamic extensions and $ref)
+    private static var supportedKeys: Set<String> {
+        [
+            Self.SUMMARY_KEY,
+            Self.DESCRIPTION_KEY,
+            Self.VALUE_KEY,
+            Self.EXTERNAL_VALUE_KEY,
+            OpenAPISchemaReference.REF_KEY,
+            Self.SERIALIZED_VALUE_KEY,
+            Self.DATA_VALUE_KEY
+        ]
     }
    
     public func element(for segmentName: String) throws -> NavigationResult {
@@ -53,7 +74,7 @@ public struct OpenAPIExample : KeyedElement, RefPointerNavigable {
     public var summary : String? = nil
     public var description : String? = nil
     public var value : JSONValue? = nil
-    public var dataValue :Data? = nil
+    public var dataValue :JSONValue? = nil
     public var serializedValue : String?
     public var externalValue : String? = nil
     public var ref : OpenAPISchemaReference? = nil

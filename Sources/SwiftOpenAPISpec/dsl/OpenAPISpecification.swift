@@ -84,7 +84,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
             case Self.OPENAPI_KEY : return .value(JSONValue(string:self.version))
             case Self.PATHS_KEY : return .navigableCollection(self.paths)
             case Self.SECURITY_KEY :  return  .searchableCollection(self.securityObjects) // searchable
-            case Self.SERVERS_KEY : return  .navigableCollection(self.servers)
+           
             case Self.TAGS_KEY : return .navigableCollection(self.tags)
             case Self.SELF_URL_KEY : return .value(JSONValue(string:self.selfUrl))
         case Self.WEBHOOKS_KEY :return .navigableCollection(self.webhooks)
@@ -106,7 +106,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
             throw OpenAPISpecification.Errors.invalidYaml("mergeKeys failed")
         
         }
-       
+       let pointer = "#"
         
         self.version = dictionary.readIfPresent(OpenAPISpecification.OPENAPI_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISpecification.OPENAPI_KEY) )
         self.info = try dictionary.readIfPresent(OpenAPISpecification.INFO_KEY, objectType: OpenAPIInfo.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISpecification.INFO_KEY))
@@ -127,11 +127,29 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
         
         
         self.extensions = try OpenAPIExtension.extensionElements(dictionary, &diagnostics, pointer: JSONPointer.join(pointer, "extensions"))
+        var supportingElments = Set(Self.supportedKeys)
+        supportingElments.formUnion((self.extensions ?? []).compactMap({ $0.key }))
+        diagnostics.append(contentsOf: dictionary.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
 
        
         
        
     }
+    private static let supportedKeys : Set<String> = [
+        Self.COMPONENTS_KEY,
+        Self.EXTERNAL_DOCS_KEY,
+        Self.INFO_KEY,
+        Self.JSON_SCHEMA_DIALECT_KEY,
+        Self.OPENAPI_KEY,
+        Self.PATHS_KEY,
+        Self.SECURITY_KEY,
+        Self.TAGS_KEY,
+        Self.SELF_URL_KEY,
+        Self.WEBHOOKS_KEY,
+        Self.SERVERS_KEY,
+        Self.SCHEMA_DATA_TYPE
+        
+    ]
    
     /// Userinfo  holds information about validation or generation errors on each struct to simplify and streamline error handling and navigation
     
@@ -577,7 +595,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     public static let COMPONENTS_KEY = "components"
     public static let EXTERNAL_DOCS_KEY = "externalDocs"
     public static let INFO_KEY = "info"
-    public static let JSON_SCHEMA_DIALECT_KEY = "$schema"
+    public static let JSON_SCHEMA_DIALECT_KEY = "jsonSchemaDialect"
     public static let OPENAPI_KEY = "openapi"
     public static let PATHS_KEY = "paths"
     public static let SECURITY_KEY = "security"
@@ -585,10 +603,10 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     public static let TAGS_KEY = "tags"
     public static let SELF_URL_KEY = "$self"
     public static let WEBHOOKS_KEY = "webhooks"
+   
     public var version : String? = "3.2.0"
     public var diagnostics: [Diagnostic] = []
     public var selfUrl : String?
-  
     public var jsonSchemaDialect : String?
     public var info : OpenAPIInfo?
     public var servers : [OpenAPIServer] = []
@@ -599,6 +617,8 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     public var externalDocumentation : OpenAPIExternalDocumentation?
     public var tags : [OpenAPITag] = []
     public var extensions : [OpenAPIExtension]?
+    
+    
    
     
     

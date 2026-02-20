@@ -78,10 +78,44 @@ public struct OpenAPIResponse : KeyedElement, PointerNavigable {
         self.content = try map.mapListIfPresent(Self.CONTENT_KEY, objectType: OpenAPIMediaType.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.CONTENT_KEY))
         self.headers = try map.mapListIfPresent(Self.HEADERS_KEY, objectType: OpenAPIHeader.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.HEADERS_KEY))
         self.links =   try map.mapListIfPresent(Self.LINKS_KEY, objectType: OpenAPILink .self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.LINKS_KEY))
-      
+        
+        var supportingElements = Set(Self.supportedKeys)
+        let supportedStatus = map.keys.compactMap { status in
+            if status.matches(pattern:"^[1-5][0-9]{2}$") {
+                return status
+            }
+            else {
+                return nil
+            }
+        }
+        supportingElements = supportingElements.union(supportedStatus)
+        supportingElements.formUnion(["default"])
+        var diagnostics =  map.diagnoseUnsupportedElements(supportedKeys: supportingElements , pointer: pointer)
+        
+        diagnostics.append(contentsOf:diagnostics)
     }
-   
-
+    public static func defaultResponse(value : JSONValue?, diagnostics: inout [Diagnostic],pointer : String) throws  -> OpenAPIResponse?{
+        if case let .object(responses) = value {
+            for response in responses {
+                if response.key == "default",
+                   case let .object(responseObject) = response.value
+                {
+                    return try OpenAPIResponse(load: responseObject, diagnostics: &diagnostics, pointer: pointer)
+                }
+            }
+        }
+        return nil
+       
+    }
+    public static var supportedKeys: [String] { [
+        Self.CONTENT_KEY,
+        Self.DESCRIPTION_KEY,
+        Self.HEADERS_KEY,
+        Self.LINKS_KEY,
+        OpenAPISchemaReference.REF_KEY,
+        Self.SUMMARY_KEY
+    ] }
+    
     public var summary : String?
     public var description : String?
     public var content: [OpenAPIMediaType] = []

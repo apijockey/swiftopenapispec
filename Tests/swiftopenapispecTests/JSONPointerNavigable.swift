@@ -208,7 +208,7 @@ struct OpenAPIJSONPointerTests {
         let ex = try await resolver.resolve(
            ref: "#/components/requestBodies/CreateEvent/content/application~1json/encoding/event~1payload/headers/X-Encoded/example"
         )
-        
+       
         #expect(ex  == .value(.string("1")))
     }
 

@@ -16,6 +16,11 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
     case number
     case object(OpenAPIObjectType)
     case oneOf(OpenAPIOneOfType)
+    case not(OpenAPISchema)
+    case ifType(OpenAPISchema)
+    case thenType(OpenAPISchema)
+    case elseType(OpenAPISchema)
+    case definitions(OpenAPISchema)
     case string
     case ref(OpenAPISchemaReference)
     case null
@@ -27,6 +32,10 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
     public static let ANYOF_KEY = "anyOf"
     public static let XML_KEY = "xml"
     public static let ALLOF_KEY = "allOf"
+    public static let NOT_KEY = "not"
+    public static let IF_KEY = "if"
+    public static let THEN_KEY = "then"
+    public static let ELSE_KEY = "else"
     
     public init() {
         self = .null
@@ -53,11 +62,11 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
         case .some("array"):
             let arrayType = try OpenAPIArrayType(load: map, diagnostics : &diagnostics, pointer: pointer)
             self = .array(arrayType)
-
+        
         case .some("object"):
             let objectType = try OpenAPIObjectType(load: map, diagnostics: &diagnostics, pointer : pointer)
             self = .object(objectType)
-
+        
         case .some("boolean"):
             self = .bool
                    
@@ -67,6 +76,7 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
             if map.readIfPresent(OpenAPISchemaReference.REF_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: pointer) != nil{
                 let ref = try OpenAPISchemaReference(load: map, diagnostics: &diagnostics,pointer :pointer)
                    self = .ref(ref)
+                  
                    return
             }
             // Try composite constructs if type is missing
@@ -74,39 +84,53 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
                 case .array  = oneOfValue  {
                 let pointer = JSONPointer.join(pointer, "oneOf")
                 var localDiagnostics: [Diagnostic] = []
+               
                 let oneOf = try OpenAPIOneOfType(load: map, diagnostics: &localDiagnostics,pointer : pointer)
-                diagnostics.append(contentsOf: localDiagnostics)
+               
                 self = .oneOf(oneOf)
+                
                 return
             }
            
             if let oneOfValue = map[OpenAPIAnyOfType.TYPE_KEY],
                 case .array  = oneOfValue  {
-                let pointer = JSONPointer.join(pointer, "oneOf")
+                let pointer = JSONPointer.join(pointer, "anyOf")
                 // OpenAPIAnyOfType has a different initializer style
                 let anyOf = try OpenAPIAnyOfType(load: map,  &diagnostics, pointer: pointer)
                 self = .anyOf(anyOf)
+                
                 return
             }
             if let oneOfValue = map[OpenAPIAllOfType.TYPE_KEY],
                 case .array  = oneOfValue  {
                 let pointer = JSONPointer.join(pointer, "allOf")
+                
                 let allOf = try OpenAPIAllOfType(load: map, diagnostics: &diagnostics,pointer : pointer)
+                
                 self = .allOf(allOf)
                 return
             }
             
-            // Unsupported or missing type info
-            let diagnostic = Diagnostic(
-                severity: .error,
-                code: .missingRequired,
-                message: "unsupported or missing type info",
-                pointer: pointer,
-                rule: "Initialization.OpenAPIType"
-            )
-            diagnostics.append(diagnostic)
             self = .unknown(type ?? "")
         }
+        
+       
+        
+                    
+        
+    }
+    
+    /// The set of keys supported by OpenAPI Type object (excluding dynamic extensions)
+    private static var supportedKeys: Set<String> {
+        [
+            Self.TYPE_KEY,
+            Self.ONEOF_KEY,
+            Self.ANYOF_KEY,
+            Self.ALLOF_KEY,
+            Self.XML_KEY,
+            Self.NULLABLE_KEY,
+            OpenAPISchemaReference.REF_KEY
+        ]
     }
     
     public func element(for segmentName : String) throws -> Any? {
@@ -135,11 +159,21 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIType", segmentName)
         case .unknown(_):
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIType", segmentName)
+        case .not(let schema):
+            return schema
+        case .definitions(let definitions):
+            return definitions
+        case .ifType(let schema):
+            return schema
+        case .thenType(let schema):
+            return schema
+        case .elseType(let schema):
+            return schema
         }
     }
 }
-extension  OpenAPIType : CustomDebugStringConvertible {
-    public var debugDescription: String {
+extension  OpenAPIType : CustomStringConvertible {
+    public var description: String {
         switch self {
         case .allOf:
             return "allOf"
@@ -165,13 +199,23 @@ extension  OpenAPIType : CustomDebugStringConvertible {
             return "null"
         case .unknown(let string):
             return "unknown(\(string))"
+        case .not(let schema):
+            return "not \(schema.type?.description ?? "")"
+        case .definitions(let definitions):
+            return "definitions \(definitions.type?.description ?? "")"
+        case .ifType(let schema):
+            return "if \(schema.type?.description ?? "")"
+        case .thenType(let schema):
+            return "then \(schema.type?.description ?? "")"
+        case .elseType(let schema):
+            return "else \(schema.type?.description ?? "")"
         }
     }
 }
 extension Optional where Wrapped == OpenAPIType {
-    public var debugDescription: String {
+    public var description: String {
         if let wrapped = self {
-            return wrapped.debugDescription
+            return wrapped.description
         } else {
                 return "nil"
         }

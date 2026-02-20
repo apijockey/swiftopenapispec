@@ -31,7 +31,71 @@ public struct SchemaRuleRunner  : Sendable{
         self.rules = rules
         self.ctx = ctx
     }
+    /// JSON Schema Draft 06 (Wright) runner - compatible with OpenAPI 3.0
+    public static func wrightJSONSchemaRunner(ctx: ValidationContext) -> SchemaRuleRunner  {
+        var rules = [SchemaRule]()
+        
+        // Common rules for all dialects
+        rules.append(StringMinMaxLengthRule())
+        rules.append(StringNumberMinimumMaximumhRule())
+        rules.append(MultipleOfRule())
+        rules.append(SchemaObjectReadOrWriteOnlyRule())
+       
+        rules.append(OneAnyAllMustHaveObjectArrayCompositionRule())
+        rules.append(ArrayMinItemsRule())
+        rules.append(ArrayMaxItemsRule())
+        rules.append(ArrayMinMaxItemsRule())
+        rules.append(ObjectMinPropertiesRule())
+        rules.append(ObjectMaxPropertiesRule())
+        rules.append(ObjectMinMaxPropertiesRule())
+        
+        rules.append(ObjectDependenciesRule())
+        
+        
+        if ctx.dialect == .oas30 {
+            rules.append(SupportedOAS30FormatsRule())
+            rules.append(OAS30SupportedTypeRule())
+            rules.append(OAS30SupportedRegexRule())
+            rules.append(RequiredSubsetOfPropertiesV30Rule())
+            rules.append(ObjectPatternPropertiesV30Rule())
+        }
+        // OAS 3.1+ specific rules
+        else {
+            rules.append(OAS31SupportedTypeRule())
+            rules.append(OAS30SupportedRegexRule())
+            rules.append(RequiredSubsetOfPropertiesV31Rule())
+        }
+        
+        return SchemaRuleRunner(rules: rules, ctx: ctx)
+    }
     
+    /// JSON Schema Draft 2020-12 (Bhutton) runner - includes modern JSON Schema features
+    public static func bhuttonJSONSchemaRunner(ctx: ValidationContext) -> SchemaRuleRunner  {
+        var rules = [SchemaRule]()
+        
+        // Start with Wright rules as base
+        rules.append(contentsOf: wrightJSONSchemaRunner(ctx: ctx).rules)
+        
+        // Add JSON Schema 2020-12 specific rules
+        rules.append(ArrayContainsRule())
+       
+        rules.append(DependentRequiredRule())
+        rules.append(ContentEncodingRule())
+        rules.append(ContentMediaTypeRule())
+        rules.append(PrefixItemsRule())
+      
+        rules.append(ObjectPatternPropertiesV31Rule())
+        return SchemaRuleRunner(rules: rules, ctx: ctx)
+    }
+    
+    /// Default runner - uses Wright for OAS 3.0, Bhutton for OAS 3.1+
+    public static func defaultRunner(ctx: ValidationContext) -> SchemaRuleRunner  {
+        if ctx.dialect == .oas30 {
+            return wrightJSONSchemaRunner(ctx: ctx)
+        } else {
+            return bhuttonJSONSchemaRunner(ctx: ctx)
+        }
+    }
     
     public func run(schema: OpenAPISchema, pointer: String,resolver: inout JSONPointerResolver) async throws -> [Diagnostic] {
         if let type =  schema.type {
@@ -48,13 +112,27 @@ public struct SchemaRuleRunner  : Sendable{
                         }
                         
                     }
-                    for prop in obj.additionalPropertiesObject {
-                        if let key = prop.key{
-                            let p = JSONPointer.join(JSONPointer.join(pointer, "additionalProperties"), key)
-                            try await out.append(contentsOf: run(schema: prop , pointer: p,resolver: &resolver))
-                        }
-                        
+                    if let properties = obj.additionalProperties,
+                       case let .schema(array) = properties {
+                        for prop in array {
+                              if let key = prop.key{
+                                  let p = JSONPointer.join(JSONPointer.join(pointer, "additionalProperties"), key)
+                                  try await out.append(contentsOf: run(schema: prop , pointer: p,resolver: &resolver))
+                              }
+  
+                          }
                     }
+                    if let properties = obj.unevaluatedProperties,
+                       case let .schema(array) = properties {
+                        for prop in array {
+                              if let key = prop.key{
+                                  let p = JSONPointer.join(JSONPointer.join(pointer, "additionalProperties"), key)
+                                  try await out.append(contentsOf: run(schema: prop , pointer: p,resolver: &resolver))
+                              }
+  
+                          }
+                    }
+                   
                 }
                 
             if case let .array(arr) = type ,
@@ -97,51 +175,8 @@ public struct SchemaRuleRunner  : Sendable{
        return []
     }
    
-    public static func defaultRunner(ctx: ValidationContext) -> SchemaRuleRunner  {
-        var rules = [SchemaRule]()
-        if ctx.dialect == .oas30  {
-            rules.append(StringMinMaxLengthRule())
-            rules.append(StringNumberMinimumMaximumhRule())
-            rules.append(SupportedFormatsRule())
-            rules.append(MultipleOfRule())
-            rules.append(SchemaObjectReadOrWriteOnlyRule())
-            rules.append(OAS30SupportedTypeRule())
-            rules.append(OAS30SupportedRegexRule())
-            rules.append(RequiredSubsetOfPropertiesRule())
-            rules.append(OneAnyAllMustHaveObjectArrayCompositionRule())
-            rules.append(ArrayMinItemsRule())
-            rules.append(ArrayMaxItemsRule())
-            rules.append(ArrayMinMaxItemsRule())
-            rules.append(ObjectMinPropertiesRule())
-            rules.append(ObjectMaxPropertiesRule())
-            rules.append(ObjectMinMaxPropertiesRule())
-            rules.append(ObjectPatternPropertiesRule())
-           
-            rules.append(ObjectDependenciesRule())
-          
-            
-        }
-        else {
-            rules.append(StringMinMaxLengthRule())
-            rules.append(StringNumberMinimumMaximumhRule())
-            rules.append(RequiredSubsetOfPropertiesRule())
-            rules.append(SchemaObjectReadOrWriteOnlyRule())
-            rules.append(OAS31SupportedTypeRule())
-            rules.append(OAS30SupportedRegexRule())
-            rules.append(OneAnyAllMustHaveObjectArrayCompositionRule())
-            rules.append(ArrayMinItemsRule())
-            rules.append(ArrayMaxItemsRule())
-            rules.append(ArrayMinMaxItemsRule())
-            rules.append(ObjectMinPropertiesRule())
-            rules.append(ObjectMaxPropertiesRule())
-            rules.append(ObjectMinMaxPropertiesRule())
-            rules.append(ObjectPatternPropertiesRule())
-            
-            rules.append(ObjectDependenciesRule())
-           
-        }
-        return SchemaRuleRunner(rules: rules, ctx: ctx)
-    }
+// OLD DEFAULT RUNNER - REPLACED
+// See new wrightJSONSchemaRunner and bhuttonJSONSchemaRunner below
 }
 
 
@@ -237,6 +272,151 @@ public struct OneAnyAllMustHaveObjectArrayCompositionRule: SchemaRule {
         return diags
     }
 }
+
+/// Rule: Validate minContains and maxContains constraints for arrays
+public struct ArrayContainsRule: SchemaRule {
+    public let name = "Schema.ArrayContains"
+    public init() {}
+
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        var diagnostics = [Diagnostic]()
+        
+        guard case .array = schema.type else {
+            return []
+        }
+        
+        // Validate minContains
+        if let minContains = schema.minContains {
+            if minContains < 0 {
+                diagnostics.append(.init(
+                    severity: .error,
+                    code: .schemaViolation,
+                    message: "minContains must be 0 or higher, is \(minContains)",
+                    pointer: JSONPointer.join(pointer, "minContains"),
+                    rule: name
+                ))
+            }
+        }
+        
+        // Validate maxContains
+        if let maxContains = schema.maxContains {
+            if maxContains < 0 {
+                diagnostics.append(.init(
+                    severity: .error,
+                    code: .schemaViolation,
+                    message: "maxContains must be 0 or higher, is \(maxContains)",
+                    pointer: JSONPointer.join(pointer, "maxContains"),
+                    rule: name
+                ))
+            }
+        }
+        
+        // Validate minContains <= maxContains when both are present
+        if let minContains = schema.minContains,
+           let maxContains = schema.maxContains {
+            if minContains > maxContains {
+                diagnostics.append(.init(
+                    severity: .error,
+                    code: .schemaViolation,
+                    message: "minContains \(minContains) must be <= maxContains \(maxContains)",
+                    pointer: JSONPointer.join(pointer, "maxContains"),
+                    rule: name
+                ))
+            }
+        }
+        
+        return diagnostics
+    }
+}
+
+
+
+/// Rule: Validate dependentRequired constraint
+public struct DependentRequiredRule: SchemaRule {
+    public let name = "Schema.DependentRequired"
+    public init() {}
+
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        var diagnostics = [Diagnostic]()
+        
+        guard case .object(let objectType) = schema.type else {
+            return []
+        }
+        
+        if let dependentRequired = objectType.dependentRequired {
+            // dependentRequired should be a property name
+            if dependentRequired.isEmpty {
+                diagnostics.append(.init(
+                    severity: .error,
+                    code: .schemaViolation,
+                    message: "dependentRequired must not be empty",
+                    pointer: JSONPointer.join(pointer, "dependentRequired"),
+                    rule: name
+                ))
+            }
+            
+            // Check if the dependent property exists in the schema
+            let propertyKeys = Set(objectType.properties.map { $0.key })
+            if !propertyKeys.contains(dependentRequired) {
+                diagnostics.append(.init(
+                    severity: .error,
+                    code: .schemaViolation,
+                    message: "dependentRequired property '\(dependentRequired)' does not exist in schema",
+                    pointer: JSONPointer.join(pointer, "dependentRequired"),
+                    rule: name
+                ))
+            }
+        }
+        
+        return diagnostics
+    }
+}
+
+/// Rule: Validate contentEncoding constraint
+public struct ContentEncodingRule: SchemaRule {
+    public let name = "Schema.ContentEncoding"
+    public init() {}
+
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        // contentEncoding is typically validated at the schema level
+        // For now, we'll implement basic validation
+        
+        // Check if contentEncoding is a valid encoding (base64, etc.)
+        // This would need to be extended with actual encoding validation
+        return []
+    }
+}
+
+/// Rule: Validate contentMediaType constraint
+public struct ContentMediaTypeRule: SchemaRule {
+    public let name = "Schema.ContentMediaType"
+    public init() {}
+
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        // contentMediaType validation would check for valid media types
+        // This is a placeholder for future implementation
+        return []
+    }
+}
+
+/// Rule: Validate prefixItems constraint for arrays
+public struct PrefixItemsRule: SchemaRule {
+    public let name = "Schema.PrefixItems"
+    public init() {}
+
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        guard case .array = schema.type else {
+            return []
+        }
+        
+        // prefixItems would be validated here
+        // This is a placeholder for the actual implementation
+        // In JSON Schema 2020-12, prefixItems replaces the items array behavior
+        
+        return []
+    }
+}
+
 
 /// Rule: for strings, minLength <= maxLength (when both present).
 public struct StringMinMaxLengthRule: SchemaRule {
@@ -349,8 +529,8 @@ public struct ObjectMaxPropertiesRule: SchemaRule {
     }
 }
 
-/// Rule: for strings, minLength <= maxLength (when both present).
-public struct ObjectPatternPropertiesRule: SchemaRule {
+/// Object properties names must follow patternProperties regex if set
+public struct ObjectPatternPropertiesV30Rule: SchemaRule {
     public let name = "Schema.ObjectPatternProperties"
     public init() {}
     
@@ -359,17 +539,84 @@ public struct ObjectPatternPropertiesRule: SchemaRule {
         guard case  .object(let objectElement) = schema.type else {
             return []
         }
-        let patternProperties = objectElement.patternProperties
-        for property in patternProperties {
-            if let key = property.key,
+        for patternProperty in (objectElement.patternProperties ?? []){
+            if let key = patternProperty.key,
                !key.isValidRegex() {
-                diagnostics.append(.init(severity: .error, code: .schemaViolation, message: "Pattern properties must be named with a regular expression", pointer: JSONPointer.join(JSONPointer.join(pointer,"patternProperties"), key), rule: self.name))
+                    diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "Pattern properties should be a valid regular expression, is: '\(key)'", pointer: JSONPointer.join(pointer,"patternProperties"), rule: self.name))
             }
+            if patternProperty.key == nil {
+                diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "Pattern properties should be a valid regular expression, is: missing", pointer: JSONPointer.join(pointer,"patternProperties"), rule: self.name))
+            }
+                
+            
         }
+        
             
         return diagnostics
     }
 }
+
+
+/// Object properties names must follow patternProperties regex if set
+public struct ObjectPatternPropertiesV31Rule: SchemaRule {
+    public let name = "Schema.ObjectPatternProperties"
+    public init() {}
+    
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        var diagnostics = [Diagnostic]()
+        guard case  .object(let objectElement) = schema.type else {
+            return []
+        }
+        for patternProperty in (objectElement.patternProperties ?? []){
+            if let key = patternProperty.key,
+               !key.isValidRegex() {
+                    diagnostics.append(.init(severity: .error, code: .schemaViolation, message: "Pattern properties must be a valid regular expression, is: '\(key)'", pointer: JSONPointer.join(pointer,"patternProperties"), rule: self.name))
+            }
+            if patternProperty.key == nil {
+                diagnostics.append(.init(severity: .error, code: .schemaViolation, message: "Pattern properties must be a valid regular expression, is: missing", pointer: JSONPointer.join(pointer,"patternProperties"), rule: self.name))
+            }
+                
+            
+        }
+        
+            
+        return diagnostics
+    }
+}
+
+
+/// Object properties names must follow patternProperties regex if set
+public struct OneAnyAllofItemsRule: SchemaRule {
+    public let name = "Schema.OneAnyAllofItems"
+    public init() {}
+    
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        var diagnostics = [Diagnostic]()
+        if case  .anyOf(let objectElement) = schema.type,
+           objectElement.items?.count == 0 {
+            diagnostics.append(Diagnostic(severity: .error,
+                                           code: .schemaViolation,
+                                           message: "anyOf' must contain an array of 'object'.",
+                                           pointer: JSONPointer.join(pointer, "type"), rule: "Schema.OneAnyAllofItems"))
+        }
+        if case  .allOf(let objectElement) = schema.type,
+           objectElement.items?.count == 0 {
+            diagnostics.append(Diagnostic(severity: .error,
+                                           code: .schemaViolation,
+                                           message: "allOf' must contain an array of 'object'.",
+                                           pointer: JSONPointer.join(pointer, "type"), rule: "Schema.OneAnyAllofItems"))
+        }
+        if case  .oneOf(let objectElement) = schema.type,
+           objectElement.items?.count == 0 {
+            diagnostics.append(Diagnostic(severity: .error,
+                                           code: .schemaViolation,
+                                           message: "oneOf' must contain an array of 'object'.",
+                                           pointer: JSONPointer.join(pointer, "type"), rule: "Schema.OneAnyAllofItems"))
+        }
+            return diagnostics
+    }
+}
+
 
 
 /// Rule: for strings, minLength <= maxLength (when both present).
@@ -601,10 +848,8 @@ public struct OAS31SupportedTypeRule: SchemaRule {
 }
 
 
-
-
 /// Rule: for objects, every entry in required must exist as a property key.
-public struct RequiredSubsetOfPropertiesRule: SchemaRule {
+public struct RequiredSubsetOfPropertiesV31Rule: SchemaRule {
     public let name = "Schema.RequiredSubsetOfProperties"
     public init() {}
     
@@ -613,8 +858,54 @@ public struct RequiredSubsetOfPropertiesRule: SchemaRule {
         guard case let .object(openAPIObjectType) = schema.type else {
             return []
         }
-        let required = openAPIObjectType.required
+
+        guard let required = openAPIObjectType.required else {
+            return []
+        }
         if required.isEmpty { return [] }
+        
+        let propKeys = Set(openAPIObjectType.properties.map { $0.key })
+        
+        for r in (required) where !propKeys.contains(r) {
+            diags.append(.init(
+                severity: .error,
+                code: .schemaViolation,
+                message: "Object marks '\(r)' as required, but no such property exists.",
+                pointer: JSONPointer.join(pointer, "required"),
+                rule: name
+            ))
+        }
+        return diags
+    }
+
+}
+
+
+
+/// Rule: for objects, every entry in required must exist as a property key.
+public struct RequiredSubsetOfPropertiesV30Rule: SchemaRule {
+    public let name = "Schema.RequiredSubsetOfProperties"
+    public init() {}
+    
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        var diags: [Diagnostic] = []
+        guard case let .object(openAPIObjectType) = schema.type else {
+            return []
+        }
+        guard let required = openAPIObjectType.required else {
+            return []
+        }
+        if required.isEmpty {
+            
+            diags.append(.init(
+                severity: .error,
+                code: .schemaViolation,
+                message: "required elements must not be empty",
+                pointer: JSONPointer.join(pointer, "required"),
+                rule: name
+            ))
+            
+        }
         
         let propKeys = Set(openAPIObjectType.properties.map { $0.key })
         
@@ -635,7 +926,7 @@ public struct RequiredSubsetOfPropertiesRule: SchemaRule {
 
 
 /// Rule: for objects, every entry in required must exist as a property key.
-public struct SupportedFormatsRule: SchemaRule {
+public struct SupportedOAS30FormatsRule: SchemaRule {
     public let name = "Schema.SupportedFormat"
     public init() {}
     
@@ -643,7 +934,7 @@ public struct SupportedFormatsRule: SchemaRule {
         var diags: [Diagnostic] = []
         
         if case .string = schema.type {
-            if ["byte","binary","", "date","date-time ","password"].contains(schema.format)  || schema.format == nil { return [] }
+            if ["byte","binary", "date","date-time", "email","hostname", "password", "ipv4", "ipv6", "uri", "uriref"].contains(schema.format)  || schema.format == nil { return [] }
             else {
                 diags.append(Diagnostic(severity: .warning, code: .schemaViolation, message: "format '\(schema.format ?? "")' not predefined for 'string'", pointer: JSONPointer.join(pointer, "format"), rule: name))
             }
@@ -674,4 +965,45 @@ public struct SupportedFormatsRule: SchemaRule {
         return diags
     }
 }
-
+//TODO: JSONSchema
+/// Rule: for objects, every entry in required must exist as a property key.
+public struct SupportedOAS31FormatsRule: SchemaRule {
+    public let name = "Schema.SupportedFormat"
+    public init() {}
+    
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        var diags: [Diagnostic] = []
+        
+        if case .string = schema.type {
+            if ["byte","binary","", "date","date-time ","password"].contains(schema.format)  || schema.format == nil { return [] }
+            else {
+                diags.append(Diagnostic(severity: .warning, code: .schemaViolation, message: "format '\(schema.format ?? "")' not predefined for 'string'", pointer: JSONPointer.join(pointer, "format"), rule: name))
+            }
+        }
+        else if case .integer = schema.type {
+            if  ["int32","int64"].contains(schema.format) || (schema.format ?? "").isEmpty {
+                return []
+            }
+            else {
+                diags.append(Diagnostic(severity: .warning, code: .schemaViolation, message: "format '\(schema.format ?? "")' not predefined for 'integer'", pointer:  JSONPointer.join(pointer, "format"), rule: name))
+            }
+        }
+        
+        else if case  .number = schema.type {
+            if  ["float","double"].contains(schema.format) || (schema.format ?? "").isEmpty {
+                return []
+            }
+            else {
+                diags.append(Diagnostic(severity: .warning, code: .schemaViolation, message: "format '\(schema.format ?? "")' not predefined for 'number'", pointer:  JSONPointer.join(pointer, "format"), rule: name))
+            }
+        }
+        else {
+            if !(schema.format ?? "").isEmpty {
+                diags.append(Diagnostic(severity: .warning, code: .schemaViolation, message: "format '\(schema.format ?? "")' not expected", pointer:  JSONPointer.join(pointer, "format"), rule: name))
+            }
+        }
+        
+        return diags
+    }
+   
+}
