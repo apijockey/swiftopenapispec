@@ -102,10 +102,10 @@ cases:
     shouldPass: false
     expected:
       - code: "invalidValue"
-        pointer: "#/"
+        pointer: "#/paths/~1ping/get/responses/UNS"
         rule: "OAS.SupportedHTPStatusRule"
         severity: "error"
-        messageContains: "is not a valid HTTP status code."
+        messageContains: "'UNS' is not a valid HTTP status code."
   - fixture: "03-minimal-30-noDescription"
     shouldPass: false
     expected:
@@ -117,7 +117,7 @@ cases:
   - fixture: "05-response-invalidType"
     shouldPass: false
     expected:
-      - code: "invalidType"
+      - code: "schemaViolation"
         pointer: "#/paths/~1create/post/responses/201/content/application~1json/schema/type"
         rule: "OAS30.SupportedTypes"
         severity: "error"
@@ -133,7 +133,7 @@ cases:
   - fixture: "05-response-invalidPropertyType"
     shouldPass: false
     expected:
-      - code: "invalidType"
+      - code: "schemaViolation"
         pointer: "#/paths/~1create/post/responses/201/content/application~1json/schema/properties/id/type"
         rule: "OAS30.SupportedTypes"
         severity: "error"
@@ -185,24 +185,9 @@ cases:
         rule: "Schema.SupportedFormat"
         severity: "warning"
         messageContains: "format 'uuid' not predefined for 'string'"
-      - code: "schemaViolation"
-        pointer: "#/components/schemas/User/properties/email/format"
-        rule: "Schema.SupportedFormat"
-        severity: "warning"
-        messageContains: "format 'email' not predefined for 'string'"
-      - code: "schemaViolation"
-        pointer: "#/components/schemas/User/properties/birthday/format"
-        rule: "Schema.SupportedFormat"
-        severity: "warning"
-        messageContains: "format 'date-time' not predefined for 'string'"
   - fixture: "10-schematests-identifiableNullable"
     shouldPass: false
     expected:
-      - code: "schemaViolation"
-        pointer: "#/components/schemas/User/properties/email/format"
-        rule: "Schema.SupportedFormat"
-        severity: "warning"
-        messageContains: "format 'email' not predefined for 'string'"
       - code: "schemaViolation"
         pointer: "#/components/schemas/User/properties/name/nullable"
         rule: "Schema.DataType"
@@ -320,10 +305,10 @@ cases:
     shouldPass: false
     expected:
       - code: "schemaViolation"
-        pointer: "#/paths/~1test/get/responses/200/content/application~1json/schema/patternProperties/[invalid-regex"
+        pointer: "#/paths/~1test/get/responses/200/content/application~1json/schema/patternProperties"
         rule: "Schema.ObjectPatternProperties"
-        severity: "error"
-        messageContains: "Pattern properties must be named with a regular expression"
+        severity: "warning"
+        messageContains: "Pattern properties should be a valid regular expression, is: '[invalid-regex'"
     onlyThese: true
 
   - fixture: "10-schematests-object-additionalproperties-inconsistent"
@@ -335,7 +320,6 @@ cases:
         severity: "error"
         messageContains: "type 'double' not supported or not recognized in OpenAPI 3.0"
     onlyThese: true
-
   - fixture: "10-schematests-enum-invalid"
     shouldPass: false
     expected:

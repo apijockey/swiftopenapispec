@@ -208,7 +208,7 @@ struct TestHelpers {
         if assertions.contains(.OAS) {
             errors = try await Validator.validate(spec: apiSpec, baseURI: resourceUrl.absoluteString, ctx: ctx, resolver: &resolver)
         }
-        else if assertions.contains(.Schema) {
+        if assertions.contains(.Schema) {
             errors = try await Validator.validateSchema(spec: apiSpec, ctx: ctx, baseURI: resourceUrl.absoluteString, resolver: &resolver)
         }
         

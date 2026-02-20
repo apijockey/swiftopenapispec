@@ -204,7 +204,7 @@ struct OpenAPILegacyPortedTests {
     //#expect(errorMessageCodeProperty?.schema?.type is OpenAPIIntegerType)
         let errorMessageMessageProperty = errorObject.properties.first(where: {$0.key == "message"})
         //#expect(errorMessageMessageProperty?.schema?.type is OpenAPIStringType)
-        #expect(errorObject.required.count == 0)
+        #expect(errorObject.required == nil)
     }
 
     @Test

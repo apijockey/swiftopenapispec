@@ -57,6 +57,7 @@ public struct SchemaRuleRunner  : Sendable{
             rules.append(OAS30SupportedTypeRule())
             rules.append(OAS30SupportedRegexRule())
             rules.append(RequiredSubsetOfPropertiesV30Rule())
+            rules.append(ObjectPatternPropertiesV30Rule())
         }
         // OAS 3.1+ specific rules
         else {
@@ -82,7 +83,7 @@ public struct SchemaRuleRunner  : Sendable{
         rules.append(ContentEncodingRule())
         rules.append(ContentMediaTypeRule())
         rules.append(PrefixItemsRule())
-        rules.append(PropertyNamesRule())
+      
         rules.append(ObjectPatternPropertiesV31Rule())
         return SchemaRuleRunner(rules: rules, ctx: ctx)
     }
@@ -416,22 +417,6 @@ public struct PrefixItemsRule: SchemaRule {
     }
 }
 
-/// Rule: Validate propertyNames constraint for objects
-public struct PropertyNamesRule: SchemaRule {
-    public let name = "Schema.PropertyNames"
-    public init() {}
-
-    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
-        guard case .object = schema.type else {
-            return []
-        }
-        
-        // propertyNames would be validated here
-        // This constraint allows validation of property names against a schema
-        
-        return []
-    }
-}
 
 /// Rule: for strings, minLength <= maxLength (when both present).
 public struct StringMinMaxLengthRule: SchemaRule {
@@ -545,7 +530,7 @@ public struct ObjectMaxPropertiesRule: SchemaRule {
 }
 
 /// Object properties names must follow patternProperties regex if set
-public struct ObjectPatternPropertiesV31Rule: SchemaRule {
+public struct ObjectPatternPropertiesV30Rule: SchemaRule {
     public let name = "Schema.ObjectPatternProperties"
     public init() {}
     
@@ -554,9 +539,13 @@ public struct ObjectPatternPropertiesV31Rule: SchemaRule {
         guard case  .object(let objectElement) = schema.type else {
             return []
         }
-        if let pattern = objectElement.patternProperties {
-            if !pattern.isValidRegex() {
-                    diagnostics.append(.init(severity: .error, code: .schemaViolation, message: "Pattern properties must be a valid regular expression", pointer: JSONPointer.join(pointer,"patternProperties"), rule: self.name))
+        for patternProperty in (objectElement.patternProperties ?? []){
+            if let key = patternProperty.key,
+               !key.isValidRegex() {
+                    diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "Pattern properties should be a valid regular expression, is: '\(key)'", pointer: JSONPointer.join(pointer,"patternProperties"), rule: self.name))
+            }
+            if patternProperty.key == nil {
+                diagnostics.append(.init(severity: .warning, code: .schemaViolation, message: "Pattern properties should be a valid regular expression, is: missing", pointer: JSONPointer.join(pointer,"patternProperties"), rule: self.name))
             }
                 
             
@@ -566,6 +555,35 @@ public struct ObjectPatternPropertiesV31Rule: SchemaRule {
         return diagnostics
     }
 }
+
+
+/// Object properties names must follow patternProperties regex if set
+public struct ObjectPatternPropertiesV31Rule: SchemaRule {
+    public let name = "Schema.ObjectPatternProperties"
+    public init() {}
+    
+    public func check(schema: OpenAPISchema, ctx: ValidationContext, pointer: String) -> [Diagnostic] {
+        var diagnostics = [Diagnostic]()
+        guard case  .object(let objectElement) = schema.type else {
+            return []
+        }
+        for patternProperty in (objectElement.patternProperties ?? []){
+            if let key = patternProperty.key,
+               !key.isValidRegex() {
+                    diagnostics.append(.init(severity: .error, code: .schemaViolation, message: "Pattern properties must be a valid regular expression, is: '\(key)'", pointer: JSONPointer.join(pointer,"patternProperties"), rule: self.name))
+            }
+            if patternProperty.key == nil {
+                diagnostics.append(.init(severity: .error, code: .schemaViolation, message: "Pattern properties must be a valid regular expression, is: missing", pointer: JSONPointer.join(pointer,"patternProperties"), rule: self.name))
+            }
+                
+            
+        }
+        
+            
+        return diagnostics
+    }
+}
+
 
 /// Object properties names must follow patternProperties regex if set
 public struct OneAnyAllofItemsRule: SchemaRule {
@@ -840,7 +858,9 @@ public struct RequiredSubsetOfPropertiesV31Rule: SchemaRule {
         guard case let .object(openAPIObjectType) = schema.type else {
             return []
         }
-        let required = openAPIObjectType.required
+        guard let required = openAPIObjectType.required else {
+            return []
+        }
         if required.isEmpty { return [] }
         
         let propKeys = Set(openAPIObjectType.properties.map { $0.key })
@@ -871,7 +891,9 @@ public struct RequiredSubsetOfPropertiesV30Rule: SchemaRule {
         guard case let .object(openAPIObjectType) = schema.type else {
             return []
         }
-        let required = openAPIObjectType.required
+        guard let required = openAPIObjectType.required else {
+            return []
+        }
         if required.isEmpty {
             
             diags.append(.init(

@@ -104,10 +104,9 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
         case Self.READ_ONLY_KEY :
             
             return .value(JSONValue(bool: readOnly))
-            case Self.REQUIRED_KEY :
             
-            let value = try JSONValue(required)
-            return .value(value)
+            
+           
         case Self.TITLE_KEY : return .value(JSONValue(string: title))
         case Self.TYPE_KEY :
             let value = try JSONValue(type)
@@ -131,6 +130,7 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
     }
     
     public static let ALLOWED_ELEMENTS_KEY = "enum"
+    public static let REQUIRED_KEY = "required"
     public static let DEFAULT_VALUE_KEY : String = "default"
     public static let DISCRIMINATOR_KEY = "discriminator"
     public static let DEPRECATED_KEY = "deprecated"
@@ -166,7 +166,7 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
     public static let PATTERN_KEY = "pattern"
     public static let TYPE_KEY = "type"
     public static let TITLE_KEY = "title"
-    public static let REQUIRED_KEY = "required"
+    
     
     
     
@@ -255,8 +255,6 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
         self.nullable = map.readIfPresent(Self.NULLABLE_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.NULLABLE_KEY))
         self.pattern = map.readIfPresent(Self.PATTERN_KEY,valueType:String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.PATTERN_KEY))
         self.readOnly = map.readIfPresent(Self.READ_ONLY_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.READ_ONLY_KEY))
-        self.required = map.readListIfPresent(Self.REQUIRED_KEY, valueType:  String.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.REQUIRED_KEY))
-    
         self.title = map.readIfPresent(OpenAPISchema.TYPE_KEY, valueType:String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISchema.TYPE_KEY))
        
         self.uniqueItems = map.readIfPresent(Self.UNIQUE_ITEMS_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.UNIQUE_ITEMS_KEY))
@@ -313,16 +311,12 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
     public var defaultValue : JSONValue?
     public var deprecated: Bool?
     public var discriminator: OpenAPIDiscriminator?
-  
-    
     public var extensions: [OpenAPIExtension]?
     public var exclusiveMinimum: Bool?
     public var externalDocs: OpenAPIExternalDocumentation?
     public var example: JSONValue?
     public var exclusiveMaximum: Bool?
-    
     public var format: String?
-    
     public var multipleOf: Double?
     public var maximum: Double?
     public var minimum: Double?
@@ -337,7 +331,7 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
     public var nullable: Bool?
     public var pattern: String?
     public var readOnly: Bool?
-    public var required: [String]?
+   
     public var title : String?
     public var type : OpenAPIType?
     public var uniqueItems: Bool?

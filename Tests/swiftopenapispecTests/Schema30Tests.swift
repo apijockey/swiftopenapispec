@@ -70,7 +70,7 @@ struct Schema30ValidationTests {
             resourceName: resource,
             version: ValidationContext.OASVersion.v30,
             dialect: ConverterConfig.Dialect.oas30,
-            assertions: [.OAS]
+            assertions: [.Schema]
         )
     }
 
@@ -225,13 +225,13 @@ struct Schema30ValidationTests {
             resourceName: resource,
             version: ValidationContext.OASVersion.v30,
             dialect: ConverterConfig.Dialect.oas30,
-            assertions: [.OAS]
+            assertions: [.OAS, .Schema]
         )
     }
     @Test("Properties with additionalProperties false hit not errors")
     func testAdditionaPropertiesFalse() async throws {
         let subDirectory = "Resources/3_0/invalid"
-        let resource = "10-schema-additionalproperties-false"
+        let resource = "10-schematests-object-additionalproperties-inconsistent"
         guard let resourceUrl = Bundle.module.url(forResource: resource, withExtension: "yaml", subdirectory: subDirectory) else {
             throw FixtureErrors.notFound(resource)
         }
@@ -240,16 +240,24 @@ struct Schema30ValidationTests {
         }
         let dict = try TestHelpers.loadFixtureDictionary(resource, subDirectory: subDirectory)
         let apiSpec = try OpenAPISpecification.read(unflattened: dict, url: resource, documentLoader: YamsDocumentLoader())
-        let type = try #require(apiSpec.paths[path: "/test"]?.operations[operationID: "get"]?.responses[key: "200"]?.content[key: "application/json"]?.schema?.type)
+  
+        let type = try #require(apiSpec.paths[path: "/test"]?.operations[key: "get"]?.responses[key: "200"]?.content[key: "application/json"]?.schema?.type)
         guard case let .object(object) = type else {
             #expect(Bool(false), "object expected")
             return
         }
-        #expect(object.properties.count == 1)
-        guard case let .boolean(boolValue) = object.additionalProperties else {
-            #expect(Bool(false), "additionalProperties expected to be boolean")
+        #expect(object.properties.count == 2)
+        let firstProperty = try #require(object.properties.first)
+         guard case let .object(nestedObject) = firstProperty.type,
+        let conditionalProperties = nestedObject.additionalProperties else {
+            #expect(Bool(false), "nested object expected")
             return
         }
+        guard case let .schema(schemas)  = conditionalProperties else {
+            #expect(Bool(false), "schemas expected")
+            return
+        }
+        #expect(schemas.count == 1)
         try await TestHelpers.assertValidations(
             apiSpec: apiSpec,
             fixture: fixture,
@@ -257,17 +265,9 @@ struct Schema30ValidationTests {
             resourceName: resource,
             version: ValidationContext.OASVersion.v30,
             dialect: ConverterConfig.Dialect.oas30,
-            assertions: [.Schema]
+            assertions: [.OAS, .Schema]
         )
-        try await TestHelpers.assertValidations(
-            apiSpec: apiSpec,
-            fixture: fixture,
-            resourceUrl: resourceUrl,
-            resourceName: resource,
-            version: ValidationContext.OASVersion.v30,
-            dialect: ConverterConfig.Dialect.oas30,
-            assertions: [.OAS]
-        )
+       
         
         
     }

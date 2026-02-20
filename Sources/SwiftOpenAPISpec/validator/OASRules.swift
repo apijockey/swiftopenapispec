@@ -920,6 +920,7 @@ struct LinkMustHaveRefOrIdentifier: Rule {
 }
 
 
+
 struct TagMustHaveName: Rule {
     let name = "OAS.TagMustHaveName"
 

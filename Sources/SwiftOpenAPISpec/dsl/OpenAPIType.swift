@@ -104,15 +104,6 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
                 return
             }
             
-            // Unsupported or missing type info
-            let diagnostic = Diagnostic(
-                severity: .error,
-                code: .invalidType,
-                message: "type '\(type?.description ?? "")' not supported or not recognized in OpenAPI 3.0",
-                pointer: "\(pointer)/type",
-                rule: "OAS30.SupportedTypes"
-            )
-            diagnostics.append(diagnostic)
             self = .unknown(type ?? "")
         }
         
