@@ -131,6 +131,7 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
     
     public static let ALLOWED_ELEMENTS_KEY = "enum"
     public static let REQUIRED_KEY = "required"
+    public static let CONTAINS_KEY = "contains"
     public static let DEFAULT_VALUE_KEY : String = "default"
     public static let DISCRIMINATOR_KEY = "discriminator"
     public static let DEPRECATED_KEY = "deprecated"
@@ -163,6 +164,7 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
     public static let PROPERTIES_KEY = "properties"
     public static let MAX_PROPERTIES_KEY = "maxProperties"
     public static let MIN_PROPERTIES_KEY = "minProperties"
+    public static let PROPERTY_NAMES = "propertyNames"
     public static let PATTERN_KEY = "pattern"
     public static let TYPE_KEY = "type"
     public static let TITLE_KEY = "title"
@@ -256,7 +258,7 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
         self.pattern = map.readIfPresent(Self.PATTERN_KEY,valueType:String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.PATTERN_KEY))
         self.readOnly = map.readIfPresent(Self.READ_ONLY_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.READ_ONLY_KEY))
         self.title = map.readIfPresent(OpenAPISchema.TYPE_KEY, valueType:String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISchema.TYPE_KEY))
-       
+        
         self.uniqueItems = map.readIfPresent(Self.UNIQUE_ITEMS_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.UNIQUE_ITEMS_KEY))
         self.writeOnly = map.readIfPresent(Self.WRITE_ONLY_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.WRITE_ONLY_KEY))
         self.xml =  try map.readIfPresent(Self.XML_KEY, objectType: OpenAPIXMLObject.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXAMPLE_KEY))
@@ -268,7 +270,7 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
             ALLOWED_ELEMENTS_KEY,
             DEFAULT_VALUE_KEY,
             DISCRIMINATOR_KEY,
-           
+            
             DEPRECATED_KEY,
             EXAMPLE_KEY,
             EXTENSIONS_KEY,
@@ -309,6 +311,7 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable {
     
     public var allowedValues: [JSONValue]?
     public var defaultValue : JSONValue?
+   
     public var deprecated: Bool?
     public var discriminator: OpenAPIDiscriminator?
     public var extensions: [OpenAPIExtension]?

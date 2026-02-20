@@ -858,6 +858,7 @@ public struct RequiredSubsetOfPropertiesV31Rule: SchemaRule {
         guard case let .object(openAPIObjectType) = schema.type else {
             return []
         }
+
         guard let required = openAPIObjectType.required else {
             return []
         }
@@ -865,7 +866,7 @@ public struct RequiredSubsetOfPropertiesV31Rule: SchemaRule {
         
         let propKeys = Set(openAPIObjectType.properties.map { $0.key })
         
-        for r in required where !propKeys.contains(r) {
+        for r in (required) where !propKeys.contains(r) {
             diags.append(.init(
                 severity: .error,
                 code: .schemaViolation,

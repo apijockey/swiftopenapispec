@@ -17,6 +17,9 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
     case object(OpenAPIObjectType)
     case oneOf(OpenAPIOneOfType)
     case not(OpenAPISchema)
+    case ifType(OpenAPISchema)
+    case thenType(OpenAPISchema)
+    case elseType(OpenAPISchema)
     case definitions(OpenAPISchema)
     case string
     case ref(OpenAPISchemaReference)
@@ -29,6 +32,10 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
     public static let ANYOF_KEY = "anyOf"
     public static let XML_KEY = "xml"
     public static let ALLOF_KEY = "allOf"
+    public static let NOT_KEY = "not"
+    public static let IF_KEY = "if"
+    public static let THEN_KEY = "then"
+    public static let ELSE_KEY = "else"
     
     public init() {
         self = .null
@@ -156,6 +163,12 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable {
             return schema
         case .definitions(let definitions):
             return definitions
+        case .ifType(let schema):
+            return schema
+        case .thenType(let schema):
+            return schema
+        case .elseType(let schema):
+            return schema
         }
     }
 }
@@ -190,6 +203,12 @@ extension  OpenAPIType : CustomStringConvertible {
             return "not \(schema.type?.description ?? "")"
         case .definitions(let definitions):
             return "definitions \(definitions.type?.description ?? "")"
+        case .ifType(let schema):
+            return "if \(schema.type?.description ?? "")"
+        case .thenType(let schema):
+            return "then \(schema.type?.description ?? "")"
+        case .elseType(let schema):
+            return "else \(schema.type?.description ?? "")"
         }
     }
 }

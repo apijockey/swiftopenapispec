@@ -453,6 +453,12 @@ public struct SchemaRefCollector {
             out.append(contentsOf: collect(from: schema, pointer: JSONPointer.join(pointer, "not")))
         case .some(.definitions(let definitions)):
             out.append(contentsOf: collect(from: definitions, pointer: JSONPointer.join(pointer, "definitions")))
+        case .some(.ifType(_)):
+            out.append(contentsOf: collect(from: schema, pointer: JSONPointer.join(pointer, "if")))
+        case .some(.thenType(_)):
+            out.append(contentsOf: collect(from: schema, pointer: JSONPointer.join(pointer, "then")))
+        case .some(.elseType(_)):
+            out.append(contentsOf: collect(from: schema, pointer: JSONPointer.join(pointer, "else")))
         }
         return out
     }

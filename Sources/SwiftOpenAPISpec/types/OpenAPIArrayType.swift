@@ -57,12 +57,13 @@ public struct OpenAPIArrayType : OpenAPISchemaType, PointerNavigable{
     
     public static let ARRAY_TYPE_KEY = "array"
     public static let TYPE_KEY = "type"
-    
+    public static let CONTAINS_KEY = "contains"
     public static let ITEMS_KEY = "items"
     
     
     public init(load map: StringDictionary, diagnostics : inout [Diagnostic], pointer : String) throws {
         self.type = map.readIfPresent(Self.TYPE_KEY, valueType: String.self, diagnostics: &diagnostics, pointer: pointer)
+        self.contains = try map.readIfPresent(Self.TYPE_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: pointer)
        
          if let list = map[Self.ITEMS_KEY] ,
             case let .object(type) = list {
@@ -73,6 +74,7 @@ public struct OpenAPIArrayType : OpenAPISchemaType, PointerNavigable{
         return [
             ARRAY_TYPE_KEY,
             TYPE_KEY,
+            CONTAINS_KEY,
             ITEMS_KEY
         ]
     }
@@ -82,6 +84,7 @@ public struct OpenAPIArrayType : OpenAPISchemaType, PointerNavigable{
     }
     public let type : String?
     public var items: OpenAPISchema?
+    public var contains : OpenAPISchema?
     
     
 }

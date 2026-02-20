@@ -133,9 +133,12 @@ public struct OpenAPIObjectType : OpenAPISchemaType, PointerNavigable{
     public init(load map: StringDictionary, diagnostics: inout [Diagnostic],pointer : String) throws {
         self.type = map.readIfPresent(OpenAPISchema.TYPE_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISchema.TYPE_KEY))
         self.properties = try map.mapListIfPresent(OpenAPISchema.PROPERTIES_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISchema.PROPERTIES_KEY))
+
         self.patternProperties = try map.mapListIfPresent(OpenAPISchema.PATTERNPROPERTIES_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISchema.PATTERNPROPERTIES_KEY))
         self.required = map.readListIfPresent(OpenAPISchema.REQUIRED_KEY, valueType: String.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISchema.REQUIRED_KEY))
         
+
+
         self.dependentRequired = map.readIfPresent(OpenAPISchema.DEPENDENT_REQUIRED_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISchema.DEPENDENT_REQUIRED_KEY))
         
         diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: OpenAPISchema.supportedKeys , pointer: pointer))
@@ -153,6 +156,7 @@ public struct OpenAPIObjectType : OpenAPISchemaType, PointerNavigable{
                 ))
             }
         }
+        self.propertyNames = try map.readIfPresent(OpenAPISchema.DEPENDENT_REQUIRED_KEY, objectType: OpenAPISchema.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISchema.DEPENDENT_REQUIRED_KEY))
         self.unevaluatedProperties = try ConditionalProperties(load: map, key: OpenAPISchema.UNEVALUATEDPROPERTIES_KEY, diagnostics: &diagnostics, pointer: pointer)
         self.additionalProperties = try ConditionalProperties(load: map,key: OpenAPISchema.ADDITIONAL_PROPERTIES_KEY, diagnostics: &diagnostics, pointer: pointer)
     }
@@ -161,12 +165,18 @@ public struct OpenAPIObjectType : OpenAPISchemaType, PointerNavigable{
     public let type : String?
    
     public var properties = [OpenAPISchema]()
+
     public var patternProperties : [OpenAPISchema]?
     public var dependentRequired : String?
     public var dependencies : [String: JSONValue]?
+    public var propertyNames : OpenAPISchema?
+    
+    
+
+    
     public var additionalProperties :  ConditionalProperties?
+    public var required : [String]?
     public var unevaluatedProperties: ConditionalProperties?
-    public var required: [String]?
    
   
     
