@@ -15,6 +15,7 @@
  */
 
 import Foundation
+import Yams
 
 /// The root structure representing an OpenAPI specification document.
 ///
@@ -97,6 +98,8 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     public var documentLoader : DocumentLoadable?
     public static let SCHEMA_DATA_TYPE = "Schema.DataType"
     
+    /// initalizes an empty OpenAPISpecification
+    public init() {}
     /// initializes an OpenAPISpecification
     /// - Parameter unmerged: ``StringDictionary``
     /// public init(load map: StringDictionary throws {
@@ -199,6 +202,52 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     }
     
     
+    /// Writes an OpenAPI specification to YAML format.
+    /// - Parameters:
+    ///   - stringDictionary: A ``StringDictionary`` containing the specification data
+    /// - Returns: A YAML string representation of the specification
+    /// - Throws: Errors if the conversion to YAML fails
+    ///
+    /// This function converts a StringDictionary to a JSONValue and then uses Yams to generate YAML output.
+    /// Currently supports basic values like version, selfUrl, and jsonSchemaDialect.
+    public static func write(from stringDictionary: StringDictionary) throws -> String {
+        // Convert StringDictionary to a format that Yams can process
+        let jsonValue = JSONValue.object(stringDictionary)
+        
+        // Convert JSONValue to a native Swift dictionary for Yams
+        let nativeDict = try convertJSONValueToNative(jsonValue)
+        
+        // Use Yams to dump the dictionary as YAML
+        let yamlString = try Yams.dump(object: nativeDict)
+        return yamlString
+    }
+    
+    /// Helper function to convert JSONValue to native Swift types for Yams compatibility
+    /// - Parameter jsonValue: The JSONValue to convert
+    /// - Returns: A native Swift object (Dictionary, Array, or primitive type)
+    private static func convertJSONValueToNative(_ jsonValue: JSONValue) throws -> Any {
+        switch jsonValue {
+        case .object(let dict):
+            var nativeDict: [String: Any] = [:]
+            for (key, value) in dict {
+                nativeDict[key] = try convertJSONValueToNative(value)
+            }
+            return nativeDict
+        case .array(let array):
+            return try array.map { try convertJSONValueToNative($0) }
+        case .string(let string):
+            return string
+        case .integer(let int):
+            return int
+        case .number(let double):
+            return double
+        case .boolean(let bool):
+            return bool
+        case .null:
+            return NSNull()
+        }
+    }
+
     /// reads a textual representantation of an OpenAPI specification starting with version
     /// - Parameters:
     ///   - unflattened: A ``StringDictionary`` representing the speicification in Yaml/JSON
@@ -505,6 +554,45 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     }
     
     
+
+    /// Converts the OpenAPISpecification to a StringDictionary representation.
+    /// This function creates a dictionary with the basic values that can be written to YAML/JSON.
+    /// Currently supports: version, selfUrl, and jsonSchemaDialect.
+    /// - Returns: A StringDictionary containing the basic specification values
+    public func toStringDictionary() -> StringDictionary {
+        var dictionary: StringDictionary = [:]
+        
+        // Add version if present
+        if let version = self.version {
+            dictionary[Self.OPENAPI_KEY] = JSONValue(string: version)
+        }
+        
+        // Add selfUrl if present
+        if let selfUrl = self.selfUrl {
+            dictionary[Self.SELF_URL_KEY] = JSONValue(string: selfUrl)
+        }
+        
+        // Add jsonSchemaDialect if present
+        if let jsonSchemaDialect = self.jsonSchemaDialect {
+            dictionary[Self.JSON_SCHEMA_DIALECT_KEY] = JSONValue(string: jsonSchemaDialect)
+        }
+        
+        return dictionary
+    }
+
+    /// Writes the OpenAPISpecification directly to YAML format.
+    /// This convenience function combines toStringDictionary() and write(from:) in one step.
+    /// - Returns: A YAML string representation of the specification's basic values
+    /// - Throws: Errors if the conversion to YAML fails
+    ///
+    /// Currently writes: version, selfUrl, and jsonSchemaDialect
+    public func writeToYAML() throws -> String {
+        // Convert this specification to StringDictionary
+        let stringDictionary = self.toStringDictionary()
+        
+        // Use the static write function to generate YAML
+        return try Self.write(from: stringDictionary)
+    }
 
     /// Resolves YAML merge keys ("<<") in a structure produced by Yams.load.
     /// - Parameter any: The parsed YAML object (Dictionary/Array/Scalar).
