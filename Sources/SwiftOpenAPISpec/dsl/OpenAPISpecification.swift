@@ -225,7 +225,7 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     /// Helper function to convert JSONValue to native Swift types for Yams compatibility
     /// - Parameter jsonValue: The JSONValue to convert
     /// - Returns: A native Swift object (Dictionary, Array, or primitive type)
-    private static func convertJSONValueToNative(_ jsonValue: JSONValue) throws -> Any {
+    static func convertJSONValueToNative(_ jsonValue: JSONValue) throws -> Any {
         switch jsonValue {
         case .object(let dict):
             var nativeDict: [String: Any] = [:]
