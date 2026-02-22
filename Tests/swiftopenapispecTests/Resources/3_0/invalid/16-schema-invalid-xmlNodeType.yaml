@@ -54,6 +54,6 @@ components:
           examples:
             Person:
               externalValue: ./examples/Person.xml
-#<Person id="123">
+# <Person id="123">
 #  <sample:name xmlns:sample="https://example.com/schema/sample">example</sample:name>
-#</Person>
+# </Person>
