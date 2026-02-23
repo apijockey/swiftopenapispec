@@ -98,6 +98,32 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     public var documentLoader : DocumentLoadable?
     public static let SCHEMA_DATA_TYPE = "Schema.DataType"
     
+    
+    /// Iniitalizes an OpenAPI specification object with required fields
+    /// - Parameters:
+    ///   - version: the OpernAPI specification which is used for validations
+    ///   - info: the info element in the OpenAPI specification
+    public init(version: String, info: OpenAPIInfo) {
+        self.version = version
+        self.info = info
+    }
+    
+    public init(yamlString : String) throws {
+        do {
+            guard let map = try Yams.load(yaml: yamlString)  as? [String:Any] else  {
+                throw  Self.Errors.invalidYaml("not a Dictionary")
+            }
+            let jsonValue = try JSONValue(from: map)
+            guard case let .object(specObject) = jsonValue else {
+                throw  Self.Errors.invalidType("root of generated YAML is not an object")
+            }
+            self = try  OpenAPISpecification.read(unflattened: specObject)
+            
+        }
+        catch {
+            throw  Self.Errors.invalidYaml(error.localizedDescription)
+        }
+    }
     /// initalizes an empty OpenAPISpecification
     public init() {}
     /// initializes an OpenAPISpecification
@@ -561,21 +587,10 @@ public struct OpenAPISpecification : KeyedElement , PointerNavigable, Sendable {
     /// - Returns: A StringDictionary containing the basic specification values
     public func toStringDictionary() -> StringDictionary {
         var dictionary: StringDictionary = [:]
-        
-        // Add version if present
-        if let version = self.version {
-            dictionary[Self.OPENAPI_KEY] = JSONValue(string: version)
-        }
-        
-        // Add selfUrl if present
-        if let selfUrl = self.selfUrl {
-            dictionary[Self.SELF_URL_KEY] = JSONValue(string: selfUrl)
-        }
-        
-        // Add jsonSchemaDialect if present
-        if let jsonSchemaDialect = self.jsonSchemaDialect {
-            dictionary[Self.JSON_SCHEMA_DIALECT_KEY] = JSONValue(string: jsonSchemaDialect)
-        }
+        dictionary.addOptionalString(string: self.version, forKey: Self.OPENAPI_KEY)
+        dictionary.addOptionalString(string: self.selfUrl, forKey: Self.SELF_URL_KEY)
+        dictionary.addOptionalString(string: self.jsonSchemaDialect, forKey: Self.JSON_SCHEMA_DIALECT_KEY)
+        dictionary.addOptionalStringDictionary(stringDictionary: self.info?.toStringDictionary(), forKey: Self.INFO_KEY)
         
         return dictionary
     }

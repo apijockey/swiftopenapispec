@@ -28,30 +28,4 @@ public struct KeyedElementList<T> where T :  KeyedElement {
         }
         return InitializationResult(value: types, diagnostics: diagnostics)
     }
-//    static func map(list : [StringDictionary], yamlKeyName : String, mayHaveRef : Bool) throws -> InitializationResult<[T]> {
-//        var types = [T]()
-//        var diagnostics: [Diagnostic] = []
-//        for listElement in list {
-//            var element = try T.initialize(listElement)
-//            diagnostics.append(contentsOf:element.diagnostics)
-//                if case let .string(key) = listElement[yamlKeyName] {
-//                    element.value.key = key
-//                    types.append(element.value)
-//                }
-//                else if mayHaveRef == true {
-//                    if case let .object(reference) = listElement["$ref"]  {
-//                        var schemaReferenceable = reference as? OpenAPISchemaReferenceable
-//                        if schemaReferenceable != nil {
-//                            schemaReferenceable?.ref = try OpenAPISchemaReference(load: reference)
-//                        }
-//                    }
-//                }
-//                else {
-//                    throw OpenAPISpecification.Errors.invalidYaml("Could not find a entry in \(list.debugDescription) for \(yamlKeyName)")
-//                }
-//        }
-//        return  InitializationResult(value: types, diagnostics: diagnostics)
-//        
-//    }
-    
 }

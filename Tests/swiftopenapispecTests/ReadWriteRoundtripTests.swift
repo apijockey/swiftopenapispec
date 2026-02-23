@@ -126,9 +126,10 @@ struct SwiftTestingOpenAPIWriteTests {
             originalSpec.jsonSchemaDialect = "https://spec.openapis.org/oas/3.1/dialect/base"
             
             let yamlString = try originalSpec.writeToYAML()
+            
             guard let map = try Yams.load(yaml: yamlString)  as? [String:Any] else  {
                 Issue.record("cannot read yaml-file")
-                return 
+                return
             }
             let jsonValue = try JSONValue(from: map)
             guard case let .object(specObject) = jsonValue else {
@@ -155,7 +156,77 @@ struct SwiftTestingOpenAPIWriteTests {
             #expect(!yamlString.contains("$self:"))
             #expect(!yamlString.contains("jsonSchemaDialect:"))
         }
+        @Test("write info element")
+        func infoElement() throws {
+            var spec = OpenAPISpecification()
+            spec.version = "3.0.0"
+            var info = OpenAPIInfo()
+            info.summary = "Summary Test API"
+            info.version = "1.0.0"
+            info.title = "Title Example API"
+            info.description = "Description A very simple API"
+            info.termsOfService = "TermsOfService http://example.com/terms"
+            spec.info = info
+            let title = try #require(info.title)
+            let version = try #require(info.version)
+            let summary = try #require(info.summary)
+            let description = try #require(info.description)
+            let termsOfService = try #require(info.termsOfService)
+            let yamlString = try spec.writeToYAML()
+            #expect(yamlString.contains(title))
+            #expect(yamlString.contains(version))
+            #expect(yamlString.contains(summary))
+            #expect(yamlString.contains(description))
+            #expect(yamlString.contains(termsOfService))
+            let readSpec = try TestHelpers.loadSpec(yamlString: yamlString)
+            #expect(readSpec.info?.title == title)
+            #expect(readSpec.info?.version == version)
+            #expect(readSpec.info?.summary == summary)
+            #expect(readSpec.info?.description == description)
+            #expect(readSpec.info?.termsOfService == termsOfService)
+            #expect(readSpec.info == spec.info)
+            
+        }
+    @Test("write license element")
+    func licenseElement() throws {
+        let version = "3.0.0"
+        let info = OpenAPIInfo(version: "1.0.0", title: "test license element")
+        var spec = OpenAPISpecification(version: version, info: info)
+        var license =    OpenAPILicense(name: "Apache 2")
+        license.url = "http://example.com/license"
+        spec.info = OpenAPIInfo()
+        spec.info?.license = license
+        let yamlString = try spec.writeToYAML()
+        #expect(yamlString.contains("Apache 2"))
+        #expect(yamlString.contains("http://example.com/license"))
+        let readSpec = try OpenAPISpecification(yamlString: yamlString)
+        let readLicense = readSpec.info?.license
+        #expect(readLicense == license)
     }
+    
+    @Test("write contact element")
+    func contactElement() throws {
+        let version = "3.0.0"
+        let info = OpenAPIInfo(version: "1.0.0", title: "test license element")
+        var spec = OpenAPISpecification(version: version, info: info)
+        var license =    OpenAPILicense(name: "Apache 2")
+        license.url = "http://example.com/license"
+        spec.info = OpenAPIInfo()
+        spec.info?.license = license
+        var contact = OpenAPIContact()
+        contact.email = "test@example.com"
+        contact.name = "Test User"
+        contact.url = "http://example.com/contact"
+        spec.info?.contact = contact
+        let yamlString = try spec.writeToYAML()
+        #expect(yamlString.contains("test@example.com"))
+        #expect(yamlString.contains("Test User"))
+        #expect(yamlString.contains("http://example.com/contact"))
+        let readSpec = try OpenAPISpecification(yamlString: yamlString)
+        let readLicense = readSpec.info?.license
+        #expect(readLicense == license)
+    }
+}
     
     
     

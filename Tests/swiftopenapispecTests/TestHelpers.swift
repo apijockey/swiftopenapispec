@@ -37,6 +37,8 @@ struct TestHelpers {
         case unreadable(String, Error)
         case notUTF8(String)
         case invalidFixtureFormat(String)
+        case yamsError(String)
+        case notAJsonObject(String)
         
         var description: String {
             switch self {
@@ -44,6 +46,8 @@ struct TestHelpers {
             case .unreadable(let name, let err): return "Fixture unreadable: \(name) (\(err))"
             case .notUTF8(let name): return "Fixture not UTF-8 encoded: \(name)"
             case .invalidFixtureFormat(let name): return "Invalid fixture format: \(name)"
+            case .notAJsonObject(let string) : return "not a valid JSON object: \(string)"
+            case .yamsError(let string): return "YAML parsing error: \(string)"
             }
         }
     }
@@ -222,5 +226,24 @@ struct TestHelpers {
             #expect(error.code.rawValue == expected.code, "Error code should be '\(expected.code)', got: '\(error.code.rawValue)'")
             #expect(error.severity.rawValue == expected.severity, "Error severity should be '\(expected.severity)', got: '\(error.severity.rawValue)'")
         }
+    }
+    static func loadSpec(yamlString : String) throws -> OpenAPISpecification{
+        do {
+            guard let map = try Yams.load(yaml: yamlString)  as? [String:Any] else  {
+                throw  Self.TestError.yamsError("not a Dictionary")
+            }
+            let jsonValue = try JSONValue(from: map)
+            guard case let .object(specObject) = jsonValue else {
+                throw  Self.TestError.notAJsonObject("root of generated YAML is not an object")
+            }
+            return try OpenAPISpecification.read(unflattened: specObject)
+            
+        }
+        catch {
+            throw  Self.TestError.yamsError(error.localizedDescription)
+        }
+        
+        
+        
     }
 }

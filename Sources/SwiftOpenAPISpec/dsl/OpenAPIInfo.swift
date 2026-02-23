@@ -35,6 +35,23 @@ public struct OpenAPIInfo : ThrowingHashMapInitiable, PointerNavigable {
     static let TERMS_KEY = "termsOfService"
     static let TITLE_KEY = "title"
     static let VERSION_KEY = "version"
+    
+    
+    
+    /// initalizes an OpenAPI info element with required fields
+    /// - Parameters:
+    ///   - version: The version of the OpenAPI document (which is distinct from the OpenAPI Specification version or the version of the API being described or the version of the OpenAPI Description).
+    ///   - title: The title of the API.
+    public init(version: String, title: String) {
+        self.version = version
+        self.title = title
+    }
+    
+    /// initializes an empty info element
+    public init() {
+        
+    }
+    
     /// Creates an `OpenAPIInfo` instance from a dictionary representation.
     ///
     /// - Parameters:
@@ -97,12 +114,43 @@ public struct OpenAPIInfo : ThrowingHashMapInitiable, PointerNavigable {
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIInfo", segmentName)
         }
     }
+    
+    // Converts the OpenAPIINfo to a StringDictionary representation.
+    /// This function creates a dictionary with the basic values that can be written to YAML/JSON.
+    /// Currently supports: version, selfUrl, and jsonSchemaDialect.
+    /// - Returns: A StringDictionary containing the basic specification values
+    public func toStringDictionary() -> StringDictionary {
+        var dictionary: StringDictionary  = StringDictionary()
+      
+        dictionary.addOptionalString(string: title, forKey: Self.TITLE_KEY)
+        dictionary.addOptionalString(string: summary, forKey: Self.SUMMARY_KEY)
+        dictionary.addOptionalString(string: version, forKey: Self.VERSION_KEY)
+        dictionary.addOptionalString(string: termsOfService, forKey: Self.TERMS_KEY)
+        dictionary.addOptionalString(string: description, forKey: Self.DESCRIPTION_KEY)
+        dictionary.addOptionalStringDictionary(stringDictionary: license?.toStringDictionary(), forKey: Self.LICENSE_KEY)
+        dictionary.addOptionalStringDictionary(stringDictionary: contact?.toStringDictionary(), forKey: Self.CONTACT_KEY)
+        return dictionary
+    }
+    
     public var contact : OpenAPIContact? = nil
-    public var description : String? = nil
     public var extensions : [OpenAPIExtension]?
     public var license : OpenAPILicense? = nil
-    public var termsOfService : String? = nil
-    public var title : String?
+    public var description : String? = nil
     public var summary : String?
+    public var title : String?
+    public var termsOfService : String? = nil
     public var version : String?
+}
+
+extension OpenAPIInfo : Equatable {
+    public static func == (lhs: OpenAPIInfo, rhs: OpenAPIInfo) -> Bool {
+        lhs.license == rhs.license
+        && lhs.title == rhs.title
+        && lhs.version == rhs.version
+        && lhs.description == rhs.description
+        && lhs.termsOfService == rhs.termsOfService
+        && lhs.summary == rhs.summary
+    }
+    
+    
 }

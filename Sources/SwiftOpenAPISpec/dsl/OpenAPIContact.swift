@@ -32,6 +32,9 @@ public struct OpenAPIContact : ThrowingHashMapInitiable , PointerNavigable {
     public  static let NAME_KEY = "name"
     public static let URL_KEY = "url"
    
+    public init() {
+        
+    }
     public init(load map: StringDictionary,diagnostics: inout [Diagnostic],pointer : String) throws {
         self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.NAME_KEY))
         self.url =  map.readIfPresent(Self.URL_KEY, valueType:  String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.URL_KEY))
@@ -43,7 +46,13 @@ public struct OpenAPIContact : ThrowingHashMapInitiable , PointerNavigable {
         diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
         
     }
-    
+    public func toStringDictionary() -> StringDictionary {
+        var dictionary: StringDictionary  = StringDictionary()
+        dictionary.addOptionalString(string: email, forKey: Self.EMAIL_KEY)
+        dictionary.addOptionalString(string: name, forKey: Self.NAME_KEY)
+        dictionary.addOptionalString(string: url, forKey: Self.URL_KEY)
+        return dictionary
+    }
     /// The set of keys supported by OpenAPI Contact object (excluding dynamic extensions)
     private static var supportedKeys: Set<String> {
         [
@@ -58,6 +67,17 @@ public struct OpenAPIContact : ThrowingHashMapInitiable , PointerNavigable {
     public var extensions : [OpenAPIExtension]?
     public  var name : String? = nil
     public var url : String? = nil
+    
+    
+}
+
+extension OpenAPIContact : Equatable {
+    public static func == (lhs: OpenAPIContact, rhs: OpenAPIContact) -> Bool {
+        lhs.email == rhs.email
+        && lhs.name == rhs.name
+        && lhs.url == rhs.url
+        
+    }
     
     
 }

@@ -17,7 +17,23 @@
 //
 
 import Foundation
+
+
+/// License information for the exposed API.
 public struct OpenAPILicense : ThrowingHashMapInitiable , PointerNavigable {
+    
+    
+    /// initializes an OpenAPI License Object with required fields
+    /// - Parameter name: The license name used for the API.
+    public init(name: String) {
+        self.name = name
+    }
+    
+    
+    /// initilaizes an empty OpenAPI License element
+    public init() {
+        
+    }
     public init(load map: StringDictionary, diagnostics: inout [Diagnostic],pointer : String) throws {
         self.name = map.readIfPresent(Self.NAME_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.NAME_KEY))
         self.identifier = map.readIfPresent(Self.IDENTIFIER_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.IDENTIFIER_KEY))
@@ -27,7 +43,14 @@ public struct OpenAPILicense : ThrowingHashMapInitiable , PointerNavigable {
         diagnostics.append(contentsOf: map.diagnoseUnsupportedElements(supportedKeys: supportingElments , pointer: pointer))
         
     }
+    public func toStringDictionary() -> StringDictionary {
+        var dictionary: StringDictionary = StringDictionary()
+        dictionary.addOptionalString(string: name, forKey: Self.NAME_KEY)
+        dictionary.addOptionalString(string:identifier, forKey: Self.IDENTIFIER_KEY)
+        dictionary.addOptionalString(string:url, forKey: Self.URL_KEY)
     
+        return dictionary
+    }
     /// The set of keys supported by OpenAPI License object (excluding dynamic extensions)
     private static var supportedKeys: Set<String> {
         [
@@ -59,3 +82,5 @@ public struct OpenAPILicense : ThrowingHashMapInitiable , PointerNavigable {
     public var identifier : String? = nil
     public var url : String? = nil
 }
+
+extension OpenAPILicense : Equatable {}
