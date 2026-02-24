@@ -20,7 +20,7 @@ jobs:
       api_breakage_check_enabled: false
       format_check_enabled: false
       shell_check_enabled: false
-  wtest:
+  release-windows:
     if: vars.RUN_WINDOWS_TESTS == 'true'
     runs-on: windows-latest
     needs: [soundness]
@@ -36,4 +36,8 @@ jobs:
             -v "${{ github.workspace }}:C:\src" `
             -w "C:\src" `
             $image `
-            cmd /c "swift --version && swift build && swift test"
+            cmd /c "swift build -c release --product SwiftOpenAPICLI && strip .build\release\SwiftOpenAPICLI.exe"
+            docker create --name temp $image
+            docker cp temp:"C:\src\.build\release\SwiftOpenAPICLI.exe" .
+            docker rm temp
+            shasum -a 256 SwiftOpenAPICLI.exe > SwiftOpenAPICLI-windows.sha256

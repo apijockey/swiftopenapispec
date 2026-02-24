@@ -54,3 +54,58 @@ jobs:
       api_breakage_check_enabled: false
       format_check_enabled: false
       shell_check_enabled: false
+  release-linux:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [soundness, linux]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Release
+        run: |
+          swift build -c release --product SwiftOpenApiCLI
+          strip .build/release/SwiftOpenApiCLI
+          cp .build/release/SwiftOpenApiCLI SwiftOpenApiCLI-linux
+	  shasum -a 256 SwiftOpenAPICLI-linux > SwiftOpenAPICLI-linux.sha256
+  release-macos:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [soundness, macos]
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Release
+        run: |
+          swift build -c release --product SwiftOpenApiCLI
+          strip .build/release/SwiftOpenApiCLI
+          cp .build/release/SwiftOpenApiCLI SwiftOpenApiCLI-macos
+          shasum -a 256 SwiftOpenAPICLI-macos > SwiftOpenAPICLI-macos.sha256
+  create-release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [release-linux, release-macos, wtest]  # wtest = dein Windows-Job
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Linux Binary
+        uses: actions/download-artifact@v3
+        with:
+          name: linux-binary
+          path: .
+      - name: Download macOS Binary
+        uses: actions/download-artifact@v3
+        with:
+          name: macos-binary
+          path: .
+      - name: Download Windows Binary
+        uses: actions/download-artifact@v3
+        with:
+          name: windows-binary
+          path: .
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            SwiftOpenAPICLI-linux
+            SwiftOpenAPICLI-linux.sha256
+            SwiftOpenAPICLI-macos
+            SwiftOpenAPICLI-macos.sha256
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
