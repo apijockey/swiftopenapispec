@@ -57,10 +57,9 @@ jobs:
           cp .build/release/SwiftOpenApiCLI SwiftOpenApiCLI
           shasum -a 256 SwiftOpenApiCLI > SwiftOpenAPICLI.sha256
       - name: upload artifact
-        uses: actions/upload-artifact@v4 
+        uses: actions/upload-artifact@v4
         with:
           name: macos-cli
           path: |
             SwiftOpenAPICLI
             SwiftOpenAPICLI.sha256
-
