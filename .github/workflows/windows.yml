@@ -36,9 +36,9 @@ jobs:
             -v "${{ github.workspace }}:C:\src" `
             -w "C:\src" `
             $image `
-            cmd /c "swift build -c release --product SwiftOpenAPICLI && strip .build\release\SwiftOpenAPICLI.exe"
+            cmd /c "swift build -c release --product SwiftOpenAPICLI
             docker create --name temp $image
-            docker cp temp:"C:\src\.build\release\SwiftOpenAPICLI.exe" .
+            docker cp temp:"C:\src\.build\release\SwiftOpenAPICLI.exe"
             docker rm temp
             shasum -a 256 SwiftOpenAPICLI.exe > SwiftOpenAPICLI.sha256
       - name: upload artifact
@@ -46,5 +46,5 @@ jobs:
         with:
           name: windows-cli
           path: |
-            SwiftOpenAPICLI
+            SwiftOpenAPICLI.exe
             SwiftOpenAPICLI.sha256

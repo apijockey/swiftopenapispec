@@ -15,7 +15,7 @@
 # Copyright 2025
 #
 
-name: Swift Linux and MacOS Test
+name: Swift MacOS X86/64 architecture build and Test
 
 permissions:
   contents: read
