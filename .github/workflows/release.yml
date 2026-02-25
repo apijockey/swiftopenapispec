@@ -107,10 +107,10 @@ jobs:
     needs: [soundness]
     steps:
       - uses: actions/checkout@v4
-      - name: Install Swift on Windows
-        uses: compnerd/swift-build@v0.1
+      - name: Setup swift
+        uses: swift-actions/setup-swift@v1
         with:
-          platform: windows
+          swift-version: "6.0.3"
       - name: Build .exe
         run: |
           swift build -c release --product SwiftOpenAPICLI
