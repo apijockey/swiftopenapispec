@@ -1,17 +1,8 @@
 # swiftopenapispec
-A cross platform swift library that provides a domain specific language for OpenAPI-specifications 
+A cross platform swift library that provides full-featured validation for OAS 3.0 - OAS 3.2 with JSON-Schema validation using a domain specific language for reading OpenAPI-specifications .
+
 
 ## Overview
-
-Use SwiftOpenAPISpec, if you want to read and write OpenAPI specifications written in Yaml and JSON using a Domain Specific Language with the Swift programming language.
-Basis of the implementation is the specification on [OpenAPI Specification v3.2.0](https://spec.openapis.org/oas/v3.2.0.html)
-
-This Swift library reads OpenAPI specifications (OAS) written in Yaml and JSON when they conform to OAS version 3.0.0 or higher, otherwise eventually fail.
-The library makes no other assumptions on spec versions.
-
-Run your validation with a simple command line tool.
-
-## Command Line Interface
 
 As part of SwiftOpenAPISpec, SwiftOpenAPICLI is a command line tool available for macOS, Linux and Windows systems. 
 It is a simple executable that runs in a shell, terminal or PowerShell environment. 
@@ -22,26 +13,8 @@ The tool provides basic functionality for:
 - Validating OpenAPI documents against the specification rules
 - Displaying basic information about OpenAPI files
 
-## Usage Examples
 
-### Basic Usage
-
-Display basic information about an OpenAPI specification:
-
-```bash
-$ ./SwiftOpenAPICLI path/to/your/openapi.yaml
-OpenAPI: 3.1.0
-Title: My API
-```
-
-### Version Information
-
-Check the installed version of the CLI:
-
-```bash
-$ ./SwiftOpenAPICLI path/to/openapi.yaml --version
-0.1.0
-```
+## Validation with a simple Command line program
 
 ### Validation
 
@@ -86,9 +59,28 @@ $ ./SwiftOpenAPICLI nonexistent.yaml
 Error: File not found: nonexistent.yaml
 ```
 
- 
+### Other Uses
 
-## Getting Started
+
+Display basic information about an OpenAPI specification:
+
+```bash
+$ ./SwiftOpenAPICLI path/to/your/openapi.yaml
+OpenAPI: 3.1.0
+Title: My API
+```
+
+### Version Information
+
+Check the installed version of the CLI:
+
+```bash
+$ ./SwiftOpenAPICLI path/to/openapi.yaml --version
+0.1.0
+```
+
+
+## API Getting Started
 
 OpenAPI specifications are created to document an API with all of its subelements.
 These specifications are written in Yaml or JSON and can be loaded using Packages like YAMS or JSONSerialization.
