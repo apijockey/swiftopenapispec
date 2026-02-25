@@ -111,6 +111,12 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
+           # Docker-Dienst starten und warten
+          Start-Service docker
+          while ((Test-NetConnection -ComputerName localhost -Port 2375 -InformationLevel Quiet) -eq $false) {
+            Start-Sleep -Seconds 1
+          }
+          docker version
           $image = "swift:windowsservercore-ltsc2022"
           docker pull $image
           docker run --rm `
