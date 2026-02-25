@@ -40,4 +40,11 @@ jobs:
             docker create --name temp $image
             docker cp temp:"C:\src\.build\release\SwiftOpenAPICLI.exe" .
             docker rm temp
-            shasum -a 256 SwiftOpenAPICLI.exe > SwiftOpenAPICLI-windows.sha256
+            shasum -a 256 SwiftOpenAPICLI.exe > SwiftOpenAPICLI.sha256
+      - name: upload artifact
+        uses: actions/upload-artifact@v4 
+        with:
+          name: windows-cli
+          path: |
+            SwiftOpenAPICLI
+            SwiftOpenAPICLI.sha256

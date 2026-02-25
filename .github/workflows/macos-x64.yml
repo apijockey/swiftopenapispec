@@ -26,11 +26,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  linux:
-    if: vars.RUN_LINUX_TESTS == 'true'
-    runs-on: ubuntu-latest
-    container:
-      image: swift:6.0.3-jammy
+  macos:
+    if: vars.RUN_MACOS_TESTS == 'true'
+    runs-on: macos-13
     needs: [soundness]
     steps:
       - uses: actions/checkout@v4
@@ -48,7 +46,7 @@ jobs:
       shell_check_enabled: false
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [soundness, linux]
+    needs: [soundness, macos]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -61,7 +59,7 @@ jobs:
       - name: upload artifact
         uses: actions/upload-artifact@v4 
         with:
-          name: linux-cli
+          name: macos-cli
           path: |
             SwiftOpenAPICLI
             SwiftOpenAPICLI.sha256
