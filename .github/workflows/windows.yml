@@ -36,7 +36,7 @@ jobs:
             -v "${{ github.workspace }}:C:\src" `
             -w "C:\src" `
             $image `
-            cmd /c "swift build -c release --product SwiftOpenAPICLI
+            cmd /c "swift build -c release --product SwiftOpenAPICLI"
             docker create --name temp $image
             docker cp temp:C:/src/.build/release/SwiftOpenAPICLI.exe .
             docker rm temp
