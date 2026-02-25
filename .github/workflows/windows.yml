@@ -39,8 +39,8 @@ jobs:
             cmd /c "swift build -c release --product SwiftOpenAPICLI"
             docker create --name temp $image
             docker cp temp:C:/src/.build/release/SwiftOpenAPICLI.exe .
-            docker rm temp
             shasum -a 256 SwiftOpenAPICLI.exe > SwiftOpenAPICLI.sha256
+            docker rm temp
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
