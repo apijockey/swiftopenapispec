@@ -107,33 +107,21 @@ jobs:
     needs: [soundness]
     steps:
       - uses: actions/checkout@v4
-      - name: Run Swift build & tests in Windows container
-        shell: pwsh
+      - name: Install Swift on Windows
+        uses: compnerd/swift-build@v0.1
+        with:
+          platform: windows
+      - name: Build .exe
         run: |
-          $ErrorActionPreference = 'Stop'
-           # Docker-Dienst starten und warten
-          Start-Service docker
-          while ((Test-NetConnection -ComputerName localhost -Port 2375 -InformationLevel Quiet) -eq $false) {
-            Start-Sleep -Seconds 1
-          }
-          docker version
-          $image = "swift:windowsservercore-ltsc2022"
-          docker pull $image
-          docker run --rm `
-            -v "${{ github.workspace }}:C:\src" `
-            -w "C:\src" `
-            $image `
-            cmd /c "swift build -c release --product SwiftOpenAPICLI"
-            docker create --name temp $image
-            docker cp temp:C:/src/.build/release/SwiftOpenAPICLI.exe .
-            shasum -a 256 SwiftOpenAPICLI.exe > SwiftOpenAPICLI.sha256
-            docker rm temp
-      - name: upload artifact
+          swift build -c release --product SwiftOpenAPICLI
+          shasum -a 256 .build\release\SwiftOpenAPICLI.exe > SwiftOpenAPICLI.sha256
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-cli
           path: |
-            SwiftOpenAPICLI.exe
+            .build\release\SwiftOpenAPICLI.exe
             SwiftOpenAPICLI.sha256
   release:
     needs: [upload-macos-x86, upload-macos-arm, windows, upload-linux]
