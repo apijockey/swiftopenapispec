@@ -124,7 +124,7 @@ jobs:
             .build\release\SwiftOpenAPICLI.exe
             SwiftOpenAPICLI.sha256
   release:
-    needs: [upload-macos-x86, upload-macos-arm, windows, upload-linux]
+    needs: [upload-macos-x86, upload-macos-arm, upload-linux]
     runs-on: ubuntu-latest
     steps:
       - name: Download all artifacts
@@ -135,11 +135,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            artifacts/macos-x86_64-cli/SwiftOpenAPICLI.exe
+            artifacts/macos-x86_64-cli/SwiftOpenAPICLI
             artifacts/macos-x86_64-cli/SwiftOpenAPICLI.sha256
             artifacts/linux-cli/SwiftOpenAPICLI
             artifacts/linux-cli/SwiftOpenAPICLI.sha256
-            artifacts/windows-cli/SwiftOpenAPICLI
-            artifacts/windows-cli/SwiftOpenAPICLI.sha256
             artifacts/macos-arm-cli/SwiftOpenAPICLI
             artifacts/macos-arm-cli/SwiftOpenAPICLI.sha256
