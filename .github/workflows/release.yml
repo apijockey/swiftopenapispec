@@ -59,7 +59,7 @@ jobs:
         run: swift build && swift test
   upload-macos-arm:
     needs: [macos-arm]
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
       - name: Build Release
@@ -85,7 +85,7 @@ jobs:
         run: swift build && swift test
   upload-macos-x86:
     needs: [soundness, macos-x86]
-    runs-on: ubuntu-latest
+    runs-on: macos-15-intel
     steps:
       - uses: actions/checkout@v4
       - name: Build Release
