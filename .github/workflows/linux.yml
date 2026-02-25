@@ -55,8 +55,8 @@ jobs:
         run: |
           swift build -c release --product SwiftOpenApiCLI
           strip .build/release/SwiftOpenApiCLI
-          cp .build/release/SwiftOpenApiCLI SwiftOpenApiCLI
-          shasum -a 256 SwiftOpenApiCLI > SwiftOpenAPICLI.sha256
+          cp .build/release/SwiftOpenAPICLI SwiftOpenAPICLI
+          shasum -a 256 SwiftOpenAPICLI > SwiftOpenAPICLI.sha256
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
