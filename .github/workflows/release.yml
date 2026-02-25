@@ -1,0 +1,30 @@
+name: Create Release
+on:
+  push:
+    branches:
+      main
+jobs:
+  dummy:  # Job ohne Abhängigkeiten (nur für VSCode)
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "avoid message in VSCode"
+  release:
+    needs: [upload-macos-x86, upload-macos-arm,upload-windows, upload-linux]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            artifacts/macos-x86_64-cli/SwiftOpenAPICLI.exe
+            artifacts/macos-x86_64-cli/SwiftOpenAPICLI.sha256
+            artifacts/linux-cli/SwiftOpenAPICLI
+            artifacts/linux-cli/SwiftOpenAPICLI.sha256
+            artifacts/windows-cli/SwiftOpenAPICLI
+            artifacts/windows-cli/SwiftOpenAPICLI.sha256
+            artifacts/macos-arm-cli/SwiftOpenAPICLI
+            artifacts/macos-arm-cli/SwiftOpenAPICLI.sha256

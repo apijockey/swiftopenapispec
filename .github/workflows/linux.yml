@@ -46,7 +46,7 @@ jobs:
       api_breakage_check_enabled: false
       format_check_enabled: false
       shell_check_enabled: false
-  release:
+  upload-linux:
     needs: [soundness, linux]
     runs-on: ubuntu-latest
     steps:

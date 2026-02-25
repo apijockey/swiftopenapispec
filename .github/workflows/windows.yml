@@ -20,7 +20,7 @@ jobs:
       api_breakage_check_enabled: false
       format_check_enabled: false
       shell_check_enabled: false
-  release-windows:
+  upload:
     if: vars.RUN_WINDOWS_TESTS == 'true'
     runs-on: windows-latest
     needs: [soundness]

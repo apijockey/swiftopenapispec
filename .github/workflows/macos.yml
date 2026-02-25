@@ -44,7 +44,7 @@ jobs:
       api_breakage_check_enabled: false
       format_check_enabled: false
       shell_check_enabled: false
-  release:
+  upload-macos-arm:
     needs: [soundness, macos]
     runs-on: ubuntu-latest
     steps:
@@ -58,7 +58,7 @@ jobs:
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: macos-cli
+          name: macos-arm-cli
           path: |
             SwiftOpenAPICLI
             SwiftOpenAPICLI.sha256
