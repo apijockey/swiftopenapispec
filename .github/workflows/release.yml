@@ -130,7 +130,7 @@ jobs:
             SwiftOpenAPICLI.exe
             SwiftOpenAPICLI.sha256
   release:
-    needs: [upload-macos-x86, upload-macos-arm,windows, upload-linux]
+    needs: [upload-macos-x86, upload-macos-arm, windows, upload-linux]
     runs-on: ubuntu-latest
     steps:
       - name: Download all artifacts
