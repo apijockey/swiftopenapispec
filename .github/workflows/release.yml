@@ -87,12 +87,11 @@ jobs:
           codesign --force --verify --verbose --sign "GPW8X6U5Q8".build/release/SwiftOpenAPICLI
       - name: Notarize binary
         run: |
-          xcrun altool --notarize-app \
-            --primary-bundle-id "com.apijockey.swiftopenapispec" \
-            --username "${{ secrets.APPLE_ID }}" \
+          xcrun notarytool submit .build/release/SwiftOpenAPICLI \
+            --apple-id "${{ secrets.APPLE_ID }}" \
             --password "${{ secrets.APPLE_ID_PASSWORD }}" \
-            --file .build/release/SwiftOpenAPICLI \
-            --asc-provider "CgSe Computergrafik und Softwareentwicklung GmbH"
+            --team-id "com.apijockey.swiftopenapispec" \
+            --wait
       - name: Staple notarization
         run: |
           xcrun stapler staple .build/release/SwiftOpenAPICLI
@@ -134,12 +133,11 @@ jobs:
           codesign --force --verify --verbose --sign "GPW8X6U5Q8".build/release/SwiftOpenAPICLI
       - name: Notarize binary
         run: |
-          xcrun altool --notarize-app \
-            --primary-bundle-id "com.apijockey.swiftopenapispec" \
-            --username "${{ secrets.APPLE_ID }}" \
+         xcrun notarytool submit .build/release/SwiftOpenAPICLI \
+            --apple-id "${{ secrets.APPLE_ID }}" \
             --password "${{ secrets.APPLE_ID_PASSWORD }}" \
-            --file .build/release/SwiftOpenAPICLI \
-            --asc-provider "CgSe Computergrafik und Softwareentwicklung GmbH"
+            --team-id "com.apijockey.swiftopenapispec" \
+            --wait
       - name: Staple notarization
         run: |
           xcrun stapler staple .build/release/SwiftOpenAPICLI
