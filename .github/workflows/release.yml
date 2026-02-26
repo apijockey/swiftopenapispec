@@ -84,7 +84,7 @@ jobs:
           security default-keychain -s build.keychain
       - name: Sign binary
         run: |
-          codesign --force --verify --verbose --sign "GPW8X6U5Q8".build/release/SwiftOpenAPICLI
+          codesign --force --verify --verbose --sign "CgSe Computergrafik und Softwareentwicklung GmbH (GPW8X6U5Q8)".build/release/SwiftOpenAPICLI
       - name: Notarize binary
         run: |
           xcrun notarytool submit .build/release/SwiftOpenAPICLI \
@@ -128,9 +128,11 @@ jobs:
           security import cert.p12 -P "${{ secrets.MACOS_CERT_PASSWORD }}" -k build.keychain -T /usr/bin/codesign
           security set-keychain-settings -t 3600 build.keychain
           security default-keychain -s build.keychain
+      - name: List available signing identities
+        run: security find-identity -v -p codesigning build.keychain
       - name: Sign binary
         run: |
-          codesign --force --verify --verbose --sign "GPW8X6U5Q8".build/release/SwiftOpenAPICLI
+          codesign --force --verify --verbose --sign "CgSe Computergrafik und Softwareentwicklung GmbH (GPW8X6U5Q8)".build/release/SwiftOpenAPICLI
       - name: Notarize binary
         run: |
          xcrun notarytool submit .build/release/SwiftOpenAPICLI \
