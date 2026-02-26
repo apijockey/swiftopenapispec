@@ -40,7 +40,7 @@ jobs:
         run: |
           swift build -c release --product SwiftOpenAPICLI
           strip .build/release/SwiftOpenAPICLI
-          cp .build/release/SwiftOpenAPICLI SwiftOpenAPICLI
+          cp .build/release/SwiftOpenAPICLI de
           shasum -a 256 SwiftOpenAPICLI > SwiftOpenAPICLI.sha256
       - name: upload artifact
         uses: actions/upload-artifact@v4
@@ -91,7 +91,7 @@ jobs:
         run: |
           codesign --force --deep --options runtime --timestamp --sign "Developer ID Application: CgSe Computergrafik und Softwareentwicklung GmbH (GPW8X6U5Q8)" .build/release/SwiftOpenAPICLI
       - name: Create zip for notarization
-        run: ditto -c -k --sequesterRsrc --keepParent .build/release/SwiftOpenAPICLI SwiftOpenAPICLI.zip
+        run: ditto -c -k --sequesterRsrc --keepParent .build/release/SwiftOpenAPICLI .build/release/SwiftOpenAPICLI.zip
       - name: Notarize binary
         run: |
          xcrun notarytool submit .build/release/SwiftOpenAPICLI.zip \
@@ -149,7 +149,7 @@ jobs:
         run: |
           codesign --force --deep --options runtime --timestamp --sign "Developer ID Application: CgSe Computergrafik und Softwareentwicklung GmbH (GPW8X6U5Q8)" .build/release/SwiftOpenAPICLI
       - name: Create zip for notarization
-        run: ditto -c -k --sequesterRsrc --keepParent .build/release/SwiftOpenAPICLI SwiftOpenAPICLI.zip
+        run: ditto -c -k --sequesterRsrc --keepParent .build/release/SwiftOpenAPICLI .build/release/SwiftOpenAPICLI.zip
       - name: Notarize binary
         run: |
          xcrun notarytool submit .build/release/SwiftOpenAPICLI.zip \
