@@ -84,7 +84,7 @@ jobs:
           security default-keychain -s build.keychain
       - name: Sign binary
         run: |
-          codesign --force --verify --verbose --sign "Developer ID Application: CgSe Computergrafik und Softwareentwicklung GmbH (GPW8X6U5Q8)".build/release/SwiftOpenAPICLI
+          codesign --force --verify --verbose --sign "Developer ID Application: CgSe Computergrafik und Softwareentwicklung GmbH (GPW8X6U5Q8)" .build/release/SwiftOpenAPICLI
       - name: Notarize binary
         run: |
           xcrun notarytool submit .build/release/SwiftOpenAPICLI \
@@ -132,7 +132,7 @@ jobs:
         run: security find-identity -v -p codesigning build.keychain
       - name: Sign binary
         run: |
-          codesign --force --verify --verbose --sign "Developer ID Application: CgSe Computergrafik und Softwareentwicklung GmbH (GPW8X6U5Q8)".build/release/SwiftOpenAPICLI
+          codesign --force --verify --verbose --sign "Developer ID Application: CgSe Computergrafik und Softwareentwicklung GmbH (GPW8X6U5Q8)" .build/release/SwiftOpenAPICLI
       - name: Notarize binary
         run: |
          xcrun notarytool submit .build/release/SwiftOpenAPICLI \
