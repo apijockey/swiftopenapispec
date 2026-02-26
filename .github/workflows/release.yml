@@ -75,6 +75,27 @@ jobs:
           path: |
             SwiftOpenAPICLI
             SwiftOpenAPICLI.sha256
+      - name: Import signing certificate
+        run: |
+          echo "${{ secrets.MACOS_CERT_P12 }}" | base64 --decode > cert.p12
+          security create-keychain -p "" build.keychain
+          security import cert.p12 -P "${{ secrets.MACOS_CERT_PASSWORD }}" -k build.keychain -T /usr/bin/codesign
+          security set-keychain-settings -t 3600 build.keychain
+          security default-keychain -s build.keychain
+      - name: Sign binary
+        run: |
+          codesign --force --verify --verbose --sign "GPW8X6U5Q8".build/release/SwiftOpenAPICLI
+      - name: Notarize binary
+        run: |
+          xcrun altool --notarize-app \
+            --primary-bundle-id "com.apijockey.swiftopenapispec" \
+            --username "${{ secrets.APPLE_ID }}" \
+            --password "${{ secrets.APPLE_ID_PASSWORD }}" \
+            --file .build/release/SwiftOpenAPICLI \
+            --asc-provider "CgSe Computergrafik und Softwareentwicklung GmbH" 
+      - name: Staple notarization
+        run: |
+          xcrun stapler staple .build/release/SwiftOpenAPICLI
   macos-x86:
     if: vars.RUN_MACOS_TESTS == 'true'
     runs-on: macos-15-intel
@@ -101,6 +122,27 @@ jobs:
           path: |
             SwiftOpenAPICLI
             SwiftOpenAPICLI.sha256
+       - name: Import signing certificate
+        run: |
+          echo "${{ secrets.MACOS_CERT_P12 }}" | base64 --decode > cert.p12
+          security create-keychain -p "" build.keychain
+          security import cert.p12 -P "${{ secrets.MACOS_CERT_PASSWORD }}" -k build.keychain -T /usr/bin/codesign
+          security set-keychain-settings -t 3600 build.keychain
+          security default-keychain -s build.keychain
+      - name: Sign binary
+        run: |
+          codesign --force --verify --verbose --sign "GPW8X6U5Q8".build/release/SwiftOpenAPICLI
+      - name: Notarize binary
+        run: |
+          xcrun altool --notarize-app \
+            --primary-bundle-id "com.apijockey.swiftopenapispec" \
+            --username "${{ secrets.APPLE_ID }}" \
+            --password "${{ secrets.APPLE_ID_PASSWORD }}" \
+            --file .build/release/SwiftOpenAPICLI \
+            --asc-provider "CgSe Computergrafik und Softwareentwicklung GmbH" 
+      - name: Staple notarization
+        run: |
+          xcrun stapler staple .build/release/SwiftOpenAPICLI
   windows:
     if: vars.RUN_WINDOWS_TESTS == 'true'
     runs-on: windows-latest
