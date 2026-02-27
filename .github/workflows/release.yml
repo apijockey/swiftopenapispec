@@ -99,11 +99,18 @@ jobs:
             --password "${{ secrets.APPLE_ID_PASSWORD }}" \
             --team-id "${{secrets.APPLE_TEAM_ID}}" \
             --wait
+      - name: Verify notarization
+        run: |
+          echo "--- Codesign Verify ---"
           codesign --verify --verbose=4 .build/release/SwiftOpenAPICLI
+          echo "--- Gatekeeper Check (CLI tools may fail this) ---"
           if ! spctl -a -t exec -v .build/release/SwiftOpenAPICLI; then
-            echo "Gatekeeper check failed (but this is expected for CLI tools)"
-            codesign -dvvv .build/release/SwiftOpenAPICLI | grep -A1 "Authority"
+            echo "⚠️ Gatekeeper rejection is normal for CLI tools (not an error)"
           fi
+          echo "--- Stapler Validate ---"
+          xcrun stapler validate .build/release/SwiftOpenAPICLI
+          echo "--- Authority Check ---"
+          codesign -dvvv .build/release/SwiftOpenAPICLI | grep -A1 "Authority"
       - name: Staple notarization
         run: |
           xcrun stapler staple .build/release/SwiftOpenAPICLI
@@ -160,11 +167,24 @@ jobs:
             --password "${{ secrets.APPLE_ID_PASSWORD }}" \
             --team-id "${{ secrets.APPLE_TEAM_ID }}" \
             --wait
+      - name: Verify notarization
+        run: |
+          echo "--- Codesign Verify ---"
           codesign --verify --verbose=4 .build/release/SwiftOpenAPICLI
-           if ! spctl -a -t exec -v .build/release/SwiftOpenAPICLI; then
-            echo "Gatekeeper check failed (but this is expected for CLI tools)"
-            codesign -dvvv .build/release/SwiftOpenAPICLI | grep -A1 "Authority"
+          echo "--- Gatekeeper Check (CLI tools may fail this) ---"
+          if ! spctl -a -t exec -v .build/release/SwiftOpenAPICLI; then
+            echo "⚠️ Gatekeeper rejection is normal for CLI tools (not an error)"
           fi
+          echo "--- Stapler Validate ---"
+          xcrun stapler validate .build/release/SwiftOpenAPICLI
+          echo "--- Authority Check ---"
+          codesign -dvvv .build/release/SwiftOpenAPICLI | grep -A1 "Authority"
+      - name: Staple notarization
+        run: |
+          xcrun stapler staple .build/release/SwiftOpenAPICLI
+      - name: Staple notarization
+        run: |
+          xcrun stapler staple .build/release/SwiftOpenAPICLI
       - name: Staple notarization
         run: |
           xcrun stapler staple .build/release/SwiftOpenAPICLI
