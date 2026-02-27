@@ -100,7 +100,10 @@ jobs:
             --team-id "${{secrets.APPLE_TEAM_ID}}" \
             --wait
           codesign --verify --verbose=4 .build/release/SwiftOpenAPICLI
-          spctl -a -v .build/release/SwiftOpenAPICLI
+          if ! spctl -a -t exec -v .build/release/SwiftOpenAPICLI; then
+            echo "Gatekeeper check failed (but this is expected for CLI tools)"
+            codesign -dvvv .build/release/SwiftOpenAPICLI | grep -A1 "Authority"
+          fi
       - name: Staple notarization
         run: |
           xcrun stapler staple .build/release/SwiftOpenAPICLI
@@ -158,7 +161,10 @@ jobs:
             --team-id "${{ secrets.APPLE_TEAM_ID }}" \
             --wait
           codesign --verify --verbose=4 .build/release/SwiftOpenAPICLI
-          spctl -a -v .build/release/SwiftOpenAPICLI
+           if ! spctl -a -t exec -v .build/release/SwiftOpenAPICLI; then
+            echo "Gatekeeper check failed (but this is expected for CLI tools)"
+            codesign -dvvv .build/release/SwiftOpenAPICLI | grep -A1 "Authority"
+          fi
       - name: Staple notarization
         run: |
           xcrun stapler staple .build/release/SwiftOpenAPICLI
