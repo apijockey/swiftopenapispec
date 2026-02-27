@@ -42,7 +42,7 @@ jobs:
           strip .build/release/SwiftOpenAPICLI
           mkdir -p linux
           cp .build/release/SwiftOpenAPICLI linux
-          shasum -a 256 swiftopenapicli > swiftopenapicli.sha256
+          shasum -a 256 linux/swiftopenapicli > linux/swiftopenapicli.sha256
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -69,7 +69,7 @@ jobs:
           strip .build/release/SwiftOpenAPICLI
           mkdir -p macos-arm
           cp .build/release/SwiftOpenAPICLI macos-arm
-          shasum -a 256 swiftopenapicli > swiftopenapicli.sha256
+          shasum -a 256 macos-arm/swiftopenapicli > macos-arm/swiftopenapicli.sha256
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -128,7 +128,7 @@ jobs:
           strip .build/release/SwiftOpenAPICLI
           mkdir -p macos-x86
           cp .build/release/SwiftOpenAPICLI macos-x86
-          shasum -a 256 swiftopenapicli > swiftopenapicli.sha256
+          shasum -a 256 macos-x86/swiftopenapicli > macos-x86/swiftopenapicli.sha256
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -183,7 +183,7 @@ jobs:
           swift build -c release --product SwiftOpenAPICLI
            mkdir -p windows
           copy .build/release/SwiftOpenAPICLI.exe  windows
-          shasum -a 256 swiftopenapicli.exe > swiftopenapicli.sha256
+          shasum -a 256 windows/swiftopenapicli.exe > windows/swiftopenapicli.sha256
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
