@@ -107,8 +107,8 @@ jobs:
           codesign -dvvv .build/release/SwiftOpenAPICLI | grep -A1 "Authority"
       - name: Debug notarization
         if: failure()  # Nur bei Fehlern
-          run: |
-            xcrun notarytool log $(xcrun notarytool history | grep "SwiftOpenAPICLI" | head -1 | awk '{print $1}')
+        run: |
+          xcrun notarytool log $(xcrun notarytool history | grep "SwiftOpenAPICLI" | head -1 | awk '{print $1}')
       - name: Verify notarization
         run: |
           echo "--- Codesign Verify ---"
@@ -175,8 +175,8 @@ jobs:
           codesign -dvvv .build/release/SwiftOpenAPICLI | grep -A1 "Authority"
       - name: Debug notarization
         if: failure()  # Nur bei Fehlern
-          run: |
-            xcrun notarytool log $(xcrun notarytool history | grep "SwiftOpenAPICLI" | head -1 | awk '{print $1}')
+        run: |
+          xcrun notarytool log $(xcrun notarytool history | grep "SwiftOpenAPICLI" | head -1 | awk '{print $1}')
       - name: Verify notarization
         run: |
           echo "--- Codesign Verify ---"
