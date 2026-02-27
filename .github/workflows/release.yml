@@ -66,15 +66,15 @@ jobs:
         run: |
           swift build -c release --product SwiftOpenAPICLI
           strip .build/release/SwiftOpenAPICLI
-          cp .build/release/SwiftOpenAPICLI SwiftOpenAPICLI
-          shasum -a 256 SwiftOpenAPICLI > SwiftOpenAPICLI.sha256
+          cp .build/release/SwiftOpenAPICLI swiftopenapicli
+          shasum -a 256 swiftopenapicli > swiftopenapicli.sha256
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: macos-arm-cli
           path: |
-            SwiftOpenAPICLI
-            SwiftOpenAPICLI.sha256
+            swiftopenapicli
+            swiftopenapicli.sha256
       - name: Import signing certificate
         run: |
           echo "${{ secrets.MACOS_CERT_P12 }}" | base64 --decode > cert.p12
@@ -124,15 +124,15 @@ jobs:
         run: |
           swift build -c release --product SwiftOpenAPICLI
           strip .build/release/SwiftOpenAPICLI
-          cp .build/release/SwiftOpenAPICLI SwiftOpenAPICLI
-          shasum -a 256 SwiftOpenAPICLI > SwiftOpenAPICLI.sha256
+          cp .build/release/SwiftOpenAPICLI swiftopenapicli
+          shasum -a 256 swiftopenapicli > swiftopenapicli.sha256
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: macos-x86_64-cli
           path: |
-            SwiftOpenAPICLI
-            SwiftOpenAPICLI.sha256
+            swiftopenapicli
+            swiftopenapicli.sha256
       - name: Import signing certificate
         run: |
           echo "${{ secrets.MACOS_CERT_P12 }}" | base64 --decode > cert.p12
@@ -172,21 +172,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup swift
-        uses: swift-actions/setup-swift@v1
+        uses: swift-actions/setup-swift@v2
         with:
-          swift-version: "5.9.2"
+          swift-version: "6.0.3"
       - name: Build .exe
         run: |
           swift build -c release --product SwiftOpenAPICLI
-          shasum -a 256 .build\release\SwiftOpenAPICLI.exe > SwiftOpenAPICLI.sha256
-
+          copy .build/release/SwiftOpenAPICLI.exe swiftopenapicli.exe
+          shasum -a 256 swiftopenapicli.exe > swiftopenapicli.sha256
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-cli
           path: |
-            .build\release\SwiftOpenAPICLI.exe
-            SwiftOpenAPICLI.sha256
+            swiftopenapicli.exe
+            swiftopenapicli.sha256
   release:
     needs: [upload-macos-x86, upload-macos-arm, upload-linux]
     runs-on: ubuntu-latest
@@ -199,9 +199,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            artifacts/macos-x86_64-cli/SwiftOpenAPICLI
-            artifacts/macos-x86_64-cli/SwiftOpenAPICLI.sha256
-            artifacts/linux-cli/SwiftOpenAPICLI
-            artifacts/linux-cli/SwiftOpenAPICLI.sha256
-            artifacts/macos-arm-cli/SwiftOpenAPICLI
-            artifacts/macos-arm-cli/SwiftOpenAPICLI.sha256
+            macos-x86_64-cli/swiftopenapicli
+            macos-x86_64-cli/swiftopenapicli.sha256
+            linux-cli/swiftopenapicli
+            linux-cli/swiftopenapicli.sha256
+            macos-arm-cli/swiftopenapicli
+            macos-arm-cli/swiftopenapicli.sha256
