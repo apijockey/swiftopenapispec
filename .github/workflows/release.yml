@@ -97,7 +97,7 @@ jobs:
          xcrun notarytool submit .build/release/SwiftOpenAPICLI.zip \
             --apple-id "${{ secrets.APPLE_ID }}" \
             --password "${{ secrets.APPLE_ID_PASSWORD }}" \
-            --team-id "com.apijockey.swiftopenapispec" \
+            --team-id "${{secrets.APPLE_TEAM_ID}}" \
             --wait
           codesign --verify --verbose=4 .build/release/SwiftOpenAPICLI
           sptl -a -v .build/release/SwiftOpenAPICLI
@@ -155,7 +155,7 @@ jobs:
          xcrun notarytool submit .build/release/SwiftOpenAPICLI.zip \
             --apple-id "${{ secrets.APPLE_ID }}" \
             --password "${{ secrets.APPLE_ID_PASSWORD }}" \
-            --team-id "com.apijockey.swiftopenapispec" \
+            --team-id "${{ secrets.APPLE_TEAM_ID }}" \
             --wait
           codesign --verify --verbose=4 .build/release/SwiftOpenAPICLI
           sptl -a -v .build/release/SwiftOpenAPICLI
