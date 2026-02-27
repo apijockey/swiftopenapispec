@@ -119,14 +119,12 @@ jobs:
             --apple-id "${{ secrets.APPLE_ID }}" \
             --password "${{ secrets.APPLE_ID_PASSWORD }}" \
             --team-id "${{ secrets.APPLE_TEAM_ID }}"
-      
           echo "--- Extracting Submission ID ---"
           SUBMISSION_ID=$(xcrun notarytool history \
             --apple-id "${{ secrets.APPLE_ID }}" \
             --password "${{ secrets.APPLE_ID_PASSWORD }}" \
             --team-id "${{ secrets.APPLE_TEAM_ID }}" \
             | grep "SwiftOpenAPICLI" | head -1 | awk '{print $1}')
-      
           if [ -n "$SUBMISSION_ID" ]; then
             echo "Found Submission ID: $SUBMISSION_ID"
             xcrun notarytool log "$SUBMISSION_ID" \
@@ -214,14 +212,12 @@ jobs:
             --apple-id "${{ secrets.APPLE_ID }}" \
             --password "${{ secrets.APPLE_ID_PASSWORD }}" \
             --team-id "${{ secrets.APPLE_TEAM_ID }}"
-      
           echo "--- Extracting Submission ID ---"
           SUBMISSION_ID=$(xcrun notarytool history \
             --apple-id "${{ secrets.APPLE_ID }}" \
             --password "${{ secrets.APPLE_ID_PASSWORD }}" \
             --team-id "${{ secrets.APPLE_TEAM_ID }}" \
             | grep "SwiftOpenAPICLI" | head -1 | awk '{print $1}')
-      
           if [ -n "$SUBMISSION_ID" ]; then
             echo "Found Submission ID: $SUBMISSION_ID"
             xcrun notarytool log "$SUBMISSION_ID" \
