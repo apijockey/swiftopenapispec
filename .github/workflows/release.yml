@@ -40,15 +40,15 @@ jobs:
         run: |
           swift build -c release --product SwiftOpenAPICLI
           strip .build/release/SwiftOpenAPICLI
-          cp .build/release/SwiftOpenAPICLI de
-          shasum -a 256 SwiftOpenAPICLI > SwiftOpenAPICLI.sha256
+          cp .build/release/SwiftOpenAPICLI swiftopenapicli 
+          shasum -a 256 swiftopenapicli > swiftopenapicli.sha256
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: linux-cli
           path: |
-            SwiftOpenAPICLI
-            SwiftOpenAPICLI.sha256
+            swiftopenapicli
+            swiftopenapicli.sha256
   macos-arm:
     if: vars.RUN_MACOS_TESTS == 'true'
     runs-on: macos-latest
