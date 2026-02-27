@@ -40,7 +40,7 @@ jobs:
         run: |
           swift build -c release --product SwiftOpenAPICLI
           strip .build/release/SwiftOpenAPICLI
-          cp .build/release/SwiftOpenAPICLI swiftopenapicli 
+          cp .build/release/SwiftOpenAPICLI swiftopenapicli
           shasum -a 256 swiftopenapicli > swiftopenapicli.sha256
       - name: upload artifact
         uses: actions/upload-artifact@v4
