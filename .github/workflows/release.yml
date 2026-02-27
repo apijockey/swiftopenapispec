@@ -100,7 +100,7 @@ jobs:
             --team-id "${{secrets.APPLE_TEAM_ID}}" \
             --wait
           codesign --verify --verbose=4 .build/release/SwiftOpenAPICLI
-          sptl -a -v .build/release/SwiftOpenAPICLI
+          spctl -a -v .build/release/SwiftOpenAPICLI
       - name: Staple notarization
         run: |
           xcrun stapler staple .build/release/SwiftOpenAPICLI
@@ -158,7 +158,7 @@ jobs:
             --team-id "${{ secrets.APPLE_TEAM_ID }}" \
             --wait
           codesign --verify --verbose=4 .build/release/SwiftOpenAPICLI
-          sptl -a -v .build/release/SwiftOpenAPICLI
+          spctl -a -v .build/release/SwiftOpenAPICLI
       - name: Staple notarization
         run: |
           xcrun stapler staple .build/release/SwiftOpenAPICLI
