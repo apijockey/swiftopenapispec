@@ -200,25 +200,25 @@ jobs:
       - name: Download macOS ARM
         uses: actions/download-artifact@v4
         with:
-          name: macos-arm-binaries
+          name: macos-arm-cli
           path: macos-arm  # Entpackt nach ./macos-arm/
 
       - name: Download macOS x86_64
         uses: actions/download-artifact@v4
         with:
-          name: macos-x86_64-binaries
+          name: macos-x86_64-cli
           path: macos-x86_64
 
       - name: Download Linux
         uses: actions/download-artifact@v4
         with:
-          name: linux-binaries
+          name: linux-cli
           path: linux
 
       - name: Download Windows
         uses: actions/download-artifact@v4
         with:
-          name: windows-binaries
+          name: windows-cli
           path: windows
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
