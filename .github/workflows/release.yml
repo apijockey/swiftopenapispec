@@ -224,6 +224,22 @@ jobs:
           ls -la macos-x86_64/
           echo "--- Linux ---"
           ls -la linux/
+      - name: Check macOS ARM SHA256 content
+        run: |
+          echo "--- macOS ARM SHA256 ---"
+          cat macos-arm/swiftopenapicli.sha256.txt
+          echo "--- Length ---"
+          wc -c macos-arm/swiftopenapicli.sha256.txt
+          echo "--- Hexdump ---"
+          hexdump -C macos-arm/swiftopenapicli.sha256.txt
+      - name: Check macOS ARM SHA256 content
+        run: |
+          echo "--- macOS x86-64 SHA256 ---"
+          cat macos-x86_64/swiftopenapicli.sha256.txt
+          echo "--- Length ---"
+          wc -c macos-x86_64/swiftopenapicli.sha256.txt
+          echo "--- Hexdump ---"
+          hexdump -C macos-x86_64/swiftopenapicli.sha256.txt
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
