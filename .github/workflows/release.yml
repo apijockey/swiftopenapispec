@@ -215,11 +215,6 @@ jobs:
           name: macos-x86_64-cli
           path: macos-x86_64
 
-      - name: Download Windows
-        uses: actions/download-artifact@v4
-        with:
-          name: windows-cli
-          path: windows
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
