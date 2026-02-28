@@ -134,7 +134,7 @@ jobs:
         with:
           name: macos-x86_64-cli
           path: |
-            macos-x86_64/swiftopenapicli.txt
+            macos-x86_64/swiftopenapicli
             macos-x86_64/swiftopenapicli.sha256.txt
       - name: Import signing certificate
         run: |
