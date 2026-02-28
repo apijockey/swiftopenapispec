@@ -127,8 +127,8 @@ jobs:
           swift build -c release --product SwiftOpenAPICLI
           strip .build/release/SwiftOpenAPICLI
           mkdir -p macos-x86_64
-          cp .build/release/SwiftOpenAPICLI macos-x86/swiftopenapicli
-          shasum -a 256 macos-x86/swiftopenapicli > macos-x86/swiftopenapicli.sha256.txt
+          cp .build/release/SwiftOpenAPICLI macos-x86_64/swiftopenapicli
+          shasum -a 256 macos-x86_64/swiftopenapicli > macos-x86_64/swiftopenapicli.sha256.txt
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
