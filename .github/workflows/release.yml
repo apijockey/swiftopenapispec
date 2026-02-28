@@ -197,6 +197,12 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Download Linux
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-cli
+          path: linux
+
       - name: Download macOS ARM
         uses: actions/download-artifact@v4
         with:
@@ -208,12 +214,6 @@ jobs:
         with:
           name: macos-x86_64-cli
           path: macos-x86_64
-
-      - name: Download Linux
-        uses: actions/download-artifact@v4
-        with:
-          name: linux-cli
-          path: linux
 
       - name: Download Windows
         uses: actions/download-artifact@v4
