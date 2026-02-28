@@ -194,11 +194,32 @@ jobs:
   release:
     needs: [upload-macos-x86, upload-macos-arm, upload-linux]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: Download all artifacts
+      - name: Download macOS ARM
         uses: actions/download-artifact@v4
         with:
-          path: artifacts
+          name: macos-arm-binaries
+          path: macos-arm  # Entpackt nach ./macos-arm/
+
+      - name: Download macOS x86_64
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-x86_64-binaries
+          path: macos-x86_64
+
+      - name: Download Linux
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-binaries
+          path: linux
+
+      - name: Download Windows
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-binaries
+          path: windows
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
@@ -209,3 +230,4 @@ jobs:
             linux/swiftopenapicli.sha256
             macos-arm/swiftopenapicli
             macos-arm/swiftopenapicli.sha256
+          token: ${{ secrets.GITHUB_TOKEN }}
