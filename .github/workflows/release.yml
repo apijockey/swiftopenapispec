@@ -214,6 +214,16 @@ jobs:
         with:
           name: macos-x86_64-cli
           path: macos-x86_64
+      - name: Verify downloaded files
+        run: |
+          echo "--- Arbeitsverzeichnis ---"
+          ls -la
+          echo "--- macOS ARM ---"
+          ls -la macos-arm/
+          echo "--- macOS x86_64 ---"
+          ls -la macos-x86_64/
+          echo "--- Linux ---"
+          ls -la linux/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
