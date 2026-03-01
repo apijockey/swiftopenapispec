@@ -273,7 +273,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: macos-arm/swiftopenapicli
-          asset_name: swiftopenapi-macos-arm
+          asset_name: swiftopenapicli-macos-arm
           asset_content_type: application/octet-stream
 
       - name: Upload macOS ARM SHA 256
