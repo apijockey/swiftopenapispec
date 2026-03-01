@@ -251,6 +251,11 @@ jobs:
           test -f macos-x86_64/swiftopenapicli
           test -f linux/swiftopenapicli
           test -f macos-arm/swiftopenapicli
+      - name: List release assets
+        run: |
+          ls -al macos-x86_64/
+          ls -al linux/
+          ls -al macos-arm/
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
