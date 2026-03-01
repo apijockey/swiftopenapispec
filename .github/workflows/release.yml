@@ -129,7 +129,7 @@ jobs:
           cp .build/release/SwiftOpenAPICLI macos-x86_64/swiftopenapicli
           shasum -a 256 macos-x86_64/swiftopenapicli > macos-x86_64/swiftopenapicli.sha256
       - name: zip macos X86 64 bit
-        run: ditto -c -k --sequesterRsrc --keepParent macos-x86_64 swiftopenapicli-macos-x86_64.zip¶
+        run: ditto -c -k --sequesterRsrc --keepParent macos-x86_64 swiftopenapicli-macos-x86_64.zip
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -202,33 +202,10 @@ jobs:
           body: See commit history
           draft: false
           prerelease: false
-
-      - name: Upload macOS x86_64
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Release
+        uses: softprops/action-gh-release@v2
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: swiftopenapicli-macos-x86_64.zip
-          asset_name: swiftopenapicli-macos-x86_64
-          asset_content_type: application/octet-stream
-
-      - name: Upload Linux
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: swiftopenapicli-linux.zip
-          asset_name: swiftopenapicli-linux
-          asset_content_type: application/octet-stream
-
-      - name: Upload macOS ARM
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: swiftopenapicli-macos-arm.zip
-          asset_name: swiftopenapicli-macos-arm
-          asset_content_type: application/octet-stream
+          files: |
+            swiftopenapicli-linux.zip
+            swiftopenapicli-macos-arm.zip
+            swiftopenapicli-macos-x86_64.zip
