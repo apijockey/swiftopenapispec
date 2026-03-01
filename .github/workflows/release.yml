@@ -177,21 +177,19 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: linux-cli
-          path: swiftopenapicli-linux.zip
+          path: .
 
       - name: Download macOS ARM
         uses: actions/download-artifact@v4
         with:
           name: macos-arm-cli
-          path: swiftopenapicli-macos-arm.zip
+          path: .
 
       - name: Download macOS x86_64
         uses: actions/download-artifact@v4
         with:
           name: macos-x86_64-cli
-          path: swiftopenapicli-macos-x86_64.zip
-      - name: List working directory
-        run: ls -l
+          path: .
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
