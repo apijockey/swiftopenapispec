@@ -142,12 +142,12 @@ jobs:
         run: security find-identity -v -p codesigning build.keychain
       - name: Sign binary
         run: |
-          codesign --force --deep --options runtime --timestamp --sign "Developer ID Application: CgSe Computergrafik und Softwareentwicklung GmbH (GPW8X6U5Q8)" .build/release/SwiftOpenAPICLI
+          codesign --force --deep --options runtime --timestamp --sign "Developer ID Application: CgSe Computergrafik und Softwareentwicklung GmbH (GPW8X6U5Q8)" macos-x86_64/swiftopenapicli
       - name: zip macos X86 64 bit for upload and notarization
         run: ditto -c -k --sequesterRsrc --keepParent macos-x86_64 swiftopenapicli-macos-x86_64.zip
       - name: Notarize binary
         run: |
-         xcrun notarytool submit .build/release/SwiftOpenAPICLI.zip \
+         xcrun notarytool submit swiftopenapicli-macos-x86_64.zip \
             --apple-id "${{ secrets.APPLE_ID }}" \
             --password "${{ secrets.APPLE_ID_PASSWORD }}" \
             --team-id "${{secrets.APPLE_TEAM_ID}}" \
@@ -155,9 +155,9 @@ jobs:
       - name: Verify notarization
         run: |
           echo "--- Codesign Verify ---"
-          codesign --verify --verbose=4 .build/release/SwiftOpenAPICLI
+          codesign --verify --verbose=4 macos-x86_64/swiftopenapicli
           echo "--- Gatekeeper Check (CLI tools may fail this) ---"
-          if ! spctl -a -t exec -v .build/release/SwiftOpenAPICLI; then
+          if ! spctl -a -t exec -v macos-x86_64/swiftopenapicli; then
             echo "⚠️ Gatekeeper rejection is normal for CLI tools (not an error)"
           fi
       - name: upload artifact
