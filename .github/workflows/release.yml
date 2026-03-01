@@ -43,13 +43,12 @@ jobs:
           mkdir -p linux
           cp .build/release/SwiftOpenAPICLI linux/swiftopenapicli
           shasum -a 256 linux/swiftopenapicli > linux/swiftopenapicli.sha256
+      - run ditto -c -k --sequesterRsrc --keepParent linux swiftopenapicli-linux.zip
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: linux-cli
-          path: |
-            linux/swiftopenapicli
-            linux/swiftopenapicli.sha256.txt
+          path: swiftopenapicli-linux.zip
   macos-arm:
     if: vars.RUN_MACOS_TESTS == 'true'
     runs-on: macos-latest
@@ -70,12 +69,11 @@ jobs:
           mkdir -p macos-arm
           cp .build/release/SwiftOpenAPICLI macos-arm/swiftopenapicli
           shasum -a 256 macos-arm/swiftopenapicli > macos-arm/swiftopenapicli.sha256
+      - run ditto -c -k --sequesterRsrc --keepParent macos-arm swiftopenapicli-macos-arm.zip
       - uses: actions/upload-artifact@v4
         with:
           name: macos-arm-cli
-          path: |
-            macos-arm/swiftopenapicli
-            macos-arm/swiftopenapicli.sha256
+          path: swiftopenapicli-macos-arm.zip
       - name: Import signing certificate
         run: |
           echo "${{ secrets.MACOS_CERT_P12 }}" | base64 --decode > cert.p12
@@ -128,13 +126,12 @@ jobs:
           mkdir -p macos-x86_64
           cp .build/release/SwiftOpenAPICLI macos-x86_64/swiftopenapicli
           shasum -a 256 macos-x86_64/swiftopenapicli > macos-x86_64/swiftopenapicli.sha256
+      - run ditto -c -k --sequesterRsrc --keepParent macos-x86_64 swiftopenapicli-macos-x86_64.zip¶
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: macos-x86_64-cli
-          path: |
-            macos-x86_64/swiftopenapicli
-            macos-x86_64/swiftopenapicli.sha256
+          path: swiftopenapicli-macos-x86_64.zip
       - name: Import signing certificate
         run: |
           echo "${{ secrets.MACOS_CERT_P12 }}" | base64 --decode > cert.p12
@@ -167,29 +164,6 @@ jobs:
           if ! spctl -a -t exec -v .build/release/SwiftOpenAPICLI; then
             echo "⚠️ Gatekeeper rejection is normal for CLI tools (not an error)"
           fi
-  windows:
-    if: vars.RUN_WINDOWS_TESTS == 'true'
-    runs-on: windows-latest
-    needs: [soundness]
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup swift
-        uses: swift-actions/setup-swift@v2
-        with:
-          swift-version: "6.0.3"
-      - name: Build .exe
-        run: |
-          swift build -c release --product SwiftOpenAPICLI
-           mkdir -p windows
-          copy .build/release/SwiftOpenAPICLI.exe windows/swiftopenapicli.exe
-          shasum -a 256 windows/swiftopenapicli.exe > windows/swiftopenapicli.sha256
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-cli
-          path: |
-            windows/swiftopenapicli.exe
-            windows/swiftopenapicli.sha256
   release:
     needs: [upload-macos-x86, upload-macos-arm, upload-linux]
     runs-on: ubuntu-latest
@@ -232,18 +206,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: macos-x86_64/swiftopenapicli
+          asset_path: swiftopenapicli-macos-x86_64.zip
           asset_name: swiftopenapicli-macos-x86_64
-          asset_content_type: application/octet-stream
-
-      - name: Upload macOS x86_64 SHA 256
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: macos-x86_64/swiftopenapicli.sha256
-          asset_name: swiftopenapicli-macos-x86_64.sha256
           asset_content_type: application/octet-stream
 
       - name: Upload Linux
@@ -252,18 +216,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: linux/swiftopenapicli
+          asset_path: swiftopenapicli-linux.zip
           asset_name: swiftopenapicli-linux
-          asset_content_type: application/octet-stream
-
-      - name: Upload Linux SHA256
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: linux/swiftopenapicli.sha256
-          asset_name: swiftopenapicli-linux.sha256
           asset_content_type: application/octet-stream
 
       - name: Upload macOS ARM
@@ -272,16 +226,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: macos-arm/swiftopenapicli
+          asset_path: swiftopenapicli-macos-arm.zip
           asset_name: swiftopenapicli-macos-arm
-          asset_content_type: application/octet-stream
-
-      - name: Upload macOS ARM SHA 256
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: macos-arm/swiftopenapicli.sha256
-          asset_name: swiftopenapicli-macos-arm.sha256
           asset_content_type: application/octet-stream
