@@ -42,7 +42,7 @@ jobs:
           strip .build/release/SwiftOpenAPICLI
           mkdir -p linux
           cp .build/release/SwiftOpenAPICLI linux/swiftopenapicli
-          shasum -a 256 linux/swiftopenapicli > linux/swiftopenapicli.sha256.txt
+          shasum -a 256 linux/swiftopenapicli > linux/swiftopenapicli.sha256
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
