@@ -108,7 +108,7 @@ jobs:
           if ! spctl -a -t exec -v .build/release/SwiftOpenAPICLI; then
             echo "⚠️ Gatekeeper rejection is normal for CLI tools (not an error)"
           fi
-  macos-x86:
+  macos-x86_64:
     if: vars.RUN_MACOS_TESTS == 'true'
     runs-on: macos-15-intel
     needs: [soundness]
@@ -117,7 +117,7 @@ jobs:
       - name: Test
         run: swift build && swift test
   upload-macos-x86-64:
-    needs: [soundness, macos-x86]
+    needs: [soundness, macos-x86_64]
     runs-on: macos-15-intel
     steps:
       - uses: actions/checkout@v4
@@ -177,19 +177,19 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: linux-cli
-          path: linux
+          path: swiftopenapicli-linux.zip
 
       - name: Download macOS ARM
         uses: actions/download-artifact@v4
         with:
           name: macos-arm-cli
-          path: macos-arm
+          path: swiftopenapicli-macos-arm.zip
 
       - name: Download macOS x86_64
         uses: actions/download-artifact@v4
         with:
           name: macos-x86_64-cli
-          path: macos-x86_64
+          path: swiftopenapicli-macos-x86_64.zip
 
       - name: Create Release
         id: create_release
