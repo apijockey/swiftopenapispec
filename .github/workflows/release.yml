@@ -246,7 +246,11 @@ jobs:
           wc -c macos-x86_64/swiftopenapicli.sha256.txt
           echo "--- Hexdump ---"
           hexdump -C macos-x86_64/swiftopenapicli.sha256.txt
-
+      - name: Confirm Assets Exist
+        run: |
+          test -f macos-x86_64/swiftopenapicli
+          test -f linux/swiftopenapicli
+          test -f macos-arm/swiftopenapicli
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
