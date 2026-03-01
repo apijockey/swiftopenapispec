@@ -213,54 +213,52 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: macos-arm-cli
-          path: macos-arm  # Entpackt nach ./macos-arm/
+          path: macos-arm
 
       - name: Download macOS x86_64
         uses: actions/download-artifact@v4
         with:
           name: macos-x86_64-cli
           path: macos-x86_64
-      - name: Verify downloaded files
-        run: |
-          echo "--- Arbeitsverzeichnis ---"
-          ls -la
-          echo "--- macOS ARM ---"
-          ls -la macos-arm/
-          echo "--- macOS x86_64 ---"
-          ls -la macos-x86_64/
-          echo "--- Linux ---"
-          ls -la linux/
-      - name: Check macOS ARM SHA256 content
-        run: |
-          echo "--- macOS ARM SHA256 ---"
-          cat macos-arm/swiftopenapicli.sha256.txt
-          echo "--- Length ---"
-          wc -c macos-arm/swiftopenapicli.sha256.txt
-          echo "--- Hexdump ---"
-          hexdump -C macos-arm/swiftopenapicli.sha256.txt
-      - name: Check macOS x86_64 SHA256 content
-        run: |
-          echo "--- macOS x86-64 SHA256 ---"
-          cat macos-x86_64/swiftopenapicli.sha256.txt
-          echo "--- Length ---"
-          wc -c macos-x86_64/swiftopenapicli.sha256.txt
-          echo "--- Hexdump ---"
-          hexdump -C macos-x86_64/swiftopenapicli.sha256.txt
-      - name: Confirm Assets Exist
-        run: |
-          test -f macos-x86_64/swiftopenapicli
-          test -f linux/swiftopenapicli
-          test -f macos-arm/swiftopenapicli
-      - name: List release assets
-        run: |
-          ls -al macos-x86_64/
-          ls -al linux/
-          ls -al macos-arm/
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          files: |
-            macos-x86_64/swiftopenapicli
-            linux/swiftopenapicli
-            macos-arm/swiftopenapicli
-          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: See commit history
+          draft: false
+          prerelease: false
+
+      - name: Upload macOS x86_64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: macos-x86_64/swiftopenapicli
+          asset_name: swiftopenapicli
+          asset_content_type: application/octet-stream
+
+      - name: Upload Linux
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: linux/swiftopenapicli
+          asset_name: swiftopenapicli
+          asset_content_type: application/octet-stream
+
+      - name: Upload macOS ARM
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: macos-arm/swiftopenapicli
+          asset_name: swiftopenapicli
+          asset_content_type: application/octet-stream
