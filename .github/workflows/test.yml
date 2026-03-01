@@ -1,0 +1,49 @@
+name:test commit
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      main
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  linux:
+    if: vars.RUN_LINUX_TESTS == 'true'
+    runs-on: ubuntu-latest
+    container:
+      image: swift:6.0.3-jammy
+    needs: [soundness]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test
+        run: swift build && swift test
+  soundness:
+    name: Soundness
+    uses: swiftlang/github-workflows/.github/workflows/soundness.yml@0.0.2
+    with:
+      license_header_check_project_name: "Swift"
+      license_header_check_enabled: false
+      unacceptable_language_check_enabled: true
+      api_breakage_check_enabled: false
+      format_check_enabled: false
+      shell_check_enabled: false
+  macos-arm:
+    if: vars.RUN_MACOS_TESTS == 'true'
+    runs-on: macos-latest
+    needs: [soundness]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test
+        run: swift build && swift test
+  macos-x86:
+    if: vars.RUN_MACOS_TESTS == 'true'
+    runs-on: macos-15-intel
+    needs: [soundness]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test
+        run: swift build && swift test
