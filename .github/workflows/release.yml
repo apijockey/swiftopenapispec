@@ -43,7 +43,8 @@ jobs:
           mkdir -p linux
           cp .build/release/SwiftOpenAPICLI linux/swiftopenapicli
           shasum -a 256 linux/swiftopenapicli > linux/swiftopenapicli.sha256
-      - run ditto -c -k --sequesterRsrc --keepParent linux swiftopenapicli-linux.zip
+      - name: zip linux
+        run: ditto -c -k --sequesterRsrc --keepParent linux swiftopenapicli-linux.zip
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -69,7 +70,8 @@ jobs:
           mkdir -p macos-arm
           cp .build/release/SwiftOpenAPICLI macos-arm/swiftopenapicli
           shasum -a 256 macos-arm/swiftopenapicli > macos-arm/swiftopenapicli.sha256
-      - run ditto -c -k --sequesterRsrc --keepParent macos-arm swiftopenapicli-macos-arm.zip
+      - name: zip macos ARM
+        run: ditto -c -k --sequesterRsrc --keepParent macos-arm swiftopenapicli-macos-arm.zip
       - uses: actions/upload-artifact@v4
         with:
           name: macos-arm-cli
@@ -126,7 +128,8 @@ jobs:
           mkdir -p macos-x86_64
           cp .build/release/SwiftOpenAPICLI macos-x86_64/swiftopenapicli
           shasum -a 256 macos-x86_64/swiftopenapicli > macos-x86_64/swiftopenapicli.sha256
-      - run ditto -c -k --sequesterRsrc --keepParent macos-x86_64 swiftopenapicli-macos-x86_64.zip¶
+      - name: zip macos X86 64 bit
+        run: ditto -c -k --sequesterRsrc --keepParent macos-x86_64 swiftopenapicli-macos-x86_64.zip¶
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
