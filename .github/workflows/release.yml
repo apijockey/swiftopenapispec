@@ -252,9 +252,6 @@ jobs:
         with:
           files: |
             macos-x86_64/swiftopenapicli
-            macos-x86_64/swiftopenapicli.sha256.txt
             linux/swiftopenapicli
-            linux/swiftopenapicli.sha256.txt
             macos-arm/swiftopenapicli
-            macos-arm/swiftopenapicli.sha256.txt
           token: ${{ secrets.GITHUB_TOKEN }}
