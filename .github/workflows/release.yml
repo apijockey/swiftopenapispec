@@ -70,7 +70,7 @@ jobs:
           mkdir -p macos-arm
           cp .build/release/SwiftOpenAPICLI macos-arm/swiftopenapicli
           shasum -a 256 macos-arm/swiftopenapicli > macos-arm/swiftopenapicli.sha256
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: macos-arm-cli
           path: |
