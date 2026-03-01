@@ -44,7 +44,7 @@ jobs:
           cp .build/release/SwiftOpenAPICLI linux/swiftopenapicli
           shasum -a 256 linux/swiftopenapicli > linux/swiftopenapicli.sha256
       - name: zip linux
-        run: ditto -c -k --sequesterRsrc --keepParent linux swiftopenapicli-linux.zip
+        run: zip -r swiftopenapicli-linux.zip linux
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
