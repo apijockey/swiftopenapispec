@@ -1,23 +1,13 @@
-name:test commit
+name: test-commit
 
 on:
   push:
     branches:
-      main
+      [main]
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  linux:
-    if: vars.RUN_LINUX_TESTS == 'true'
-    runs-on: ubuntu-latest
-    container:
-      image: swift:6.0.3-jammy
-    needs: [soundness]
-    steps:
-      - uses: actions/checkout@v4
-      - name: Test
-        run: swift build && swift test
   soundness:
     name: Soundness
     uses: swiftlang/github-workflows/.github/workflows/soundness.yml@0.0.2
@@ -28,6 +18,16 @@ jobs:
       api_breakage_check_enabled: false
       format_check_enabled: false
       shell_check_enabled: false
+  linux:
+    if: vars.RUN_LINUX_TESTS == 'true'
+    runs-on: ubuntu-latest
+    container:
+      image: swift:6.0.3-jammy
+    needs: [soundness]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test
+        run: swift build && swift test
   macos-arm:
     if: vars.RUN_MACOS_TESTS == 'true'
     runs-on: macos-latest
