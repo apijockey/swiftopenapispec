@@ -55,13 +55,13 @@ jobs:
           if (Test-Path $swiftPath) {
             echo "$swiftPath" >> $env:GITHUB_PATH
           } else {
-            # Falls der Pfad anders ist, hier anpassen oder dynamisch suchen
             Get-ChildItem -Path "C:\Library\Developer\Toolchains\" -Filter "*RELEASE.xctoolchain" -Recurse -Directory | ForEach-Object {
               $binPath = Join-Path $_.FullName "usr\bin"
               if (Test-Path $binPath) {
                   echo "$binPath" >> $env:GITHUB_PATH
               }
           }
+	}
         shell: pwsh
       - uses: actions/checkout@v4
       - name: Test windows x64
@@ -176,7 +176,20 @@ jobs:
         run: security find-identity -v -p codesigning build.keychain
       - name: Sign binary
         run: |
-          codesign --force --deep --options runtime --timestamp --sign "Developer ID Application: CgSe Computergrafik und Softwareentwicklung GmbH (GPW8X6U5Q8)" macos-x86_64/swiftopenapicli
+          BINARY_PATH="macos-x86_64/swiftopenapicli"
+          SIGNING_IDENTITY="Developer ID Application: CgSe Computergrafik und Softwareentwicklung GmbH (GPW8X6U5Q8)"
+          TIMESTAMP_SERVERS=(
+           "http://timestamp.apple.com/ts01"
+           "http://timestamp.apple.com/ts02"
+           "http://timestamp.apple.com/ts03"
+          )
+          for server in "${TIMESTAMP_SERVERS[@]}"; do
+            if codesign --force --deep --options runtime --timestamp="$server" --sign "$SIGNING_IDENTITY" macos-x86_64/swiftopenapicli; then
+               exit 0
+            fi
+          done
+          echo "::error::no timestamp server available, giving up"
+          exit 1
       - name: zip macos X86 64 bit for upload and notarization
         run: ditto -c -k --sequesterRsrc --keepParent macos-x86_64 swiftopenapicli-macos-x86_64.zip
       - name: Notarize binary
