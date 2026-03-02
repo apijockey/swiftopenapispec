@@ -61,6 +61,7 @@ jobs:
         run: |
           swift build -c release --product --static-swift-stdlib SwiftOpenAPICLI
           strip .build/release/SwiftOpenAPICLI
+          swift test
           mkdir -p linux
           cp .build/release/SwiftOpenAPICLI linux/swiftopenapicli
           shasum -a 256 linux/swiftopenapicli > linux/swiftopenapicli.sha256
@@ -88,6 +89,7 @@ jobs:
         run: |
           swift build -c release --product SwiftOpenAPICLI
           strip .build/release/SwiftOpenAPICLI
+          swift test
           mkdir -p macos-arm
           cp .build/release/SwiftOpenAPICLI macos-arm/swiftopenapicli
           shasum -a 256 macos-arm/swiftopenapicli > macos-arm/swiftopenapicli.sha256
@@ -142,6 +144,7 @@ jobs:
         run: |
           swift build -c release --product SwiftOpenAPICLI
           strip .build/release/SwiftOpenAPICLI
+          swift test
           mkdir -p macos-x86_64
           cp .build/release/SwiftOpenAPICLI macos-x86_64/swiftopenapicli
           shasum -a 256 macos-x86_64/swiftopenapicli > macos-x86_64/swiftopenapicli.sha256
