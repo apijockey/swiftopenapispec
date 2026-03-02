@@ -50,18 +50,18 @@ jobs:
       - name: install swift
         run: winget install --id Swift.Toolchain -e
         shell: pwsh
-     - name: Search for Swift
-       run: |
-         $swiftPath = "$env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr\bin\swift.exe"
-         if (Test-Path $swiftPath) {
-           Write-Output "Swift gefunden unter: $swiftPath"
-           echo "$($swiftPath.Substring(0, $swiftPath.LastIndexOf('\')))" >> $env:GITHUB_PATH
-           swift --version
-           swift.exe --version
-         } else {
-           Write-Output "Swift nicht gefunden unter: $swiftPath"
-           exit 1
-         }
+      - name: Search for Swift
+        run: |
+          $swiftPath = "$env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr\bin\swift.exe"
+          if (Test-Path $swiftPath) {
+            Write-Output "Swift gefunden unter: $swiftPath"
+            echo "$($swiftPath.Substring(0, $swiftPath.LastIndexOf('\')))" >> $env:GITHUB_PATH
+            swift --version
+            swift.exe --version
+          } else {
+            Write-Output "Swift nicht gefunden unter: $swiftPath"
+            exit 1
+          }
   shell: pwsh
 
         shell: pwsh
