@@ -20,7 +20,7 @@ jobs:
       unacceptable_language_check_enabled: true
       api_breakage_check_enabled: false
       format_check_enabled: false
-      shell_check_enabled: false 
+      shell_check_enabled: false
   linux:
     if: vars.RUN_LINUX_TESTS == 'true'
     runs-on: ubuntu-latest
@@ -40,7 +40,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Test linux x64
-        run: swift build && swift test:
+        run: swift build && swift test
   windows:
     runs-on: windows-latest
     needs: [soundness]
