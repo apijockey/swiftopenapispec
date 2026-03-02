@@ -56,7 +56,6 @@ jobs:
           if (Test-Path $swiftPath) {
             Write-Output "Swift gefunden unter: $swiftPath"
             echo "$($swiftPath.Substring(0, $swiftPath.LastIndexOf('\')))" >> $env:GITHUB_PATH
-            swift --version
             swift.exe --version
           } else {
             Write-Output "Swift nicht gefunden unter: $swiftPath"
