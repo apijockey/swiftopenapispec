@@ -62,8 +62,8 @@ jobs:
           } else {
             Write-Output "Swift nicht gefunden unter: $swiftPath"
             exit 1
-         }
-        shell: pwsh
+          }
+         shell: pwsh
       -  name: Add Swift to PATH
         run: |
           $env:Path += ";$env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr\bin"
