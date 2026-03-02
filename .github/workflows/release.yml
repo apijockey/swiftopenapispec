@@ -53,10 +53,10 @@ jobs:
       - name: Search for Swift
         run: |
           Test-Path "$env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr\bin\swift.exe"
-          Test-Path "$env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr\bin\
-          Test-Path "$env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr\
-          Test-Path "$env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts
-          ls -al Test-Path "$env:LOCALAPPDATA\Programs\Swift\Toolchains\"
+          Test-Path "$env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr\bin"
+          Test-Path "$env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr"
+          Test-Path "$env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts"
+          ls -al Test-Path "$env:LOCALAPPDATA\Programs\Swift\Toolchains"
           echo $env:LOCALAPPDATA
         shell: pwsh
       - uses: actions/checkout@v4
