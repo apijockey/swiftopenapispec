@@ -53,6 +53,12 @@ jobs:
       - name: Search for Swift
         run: |
           Test-Path "$env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr\bin\swift.exe"
+          echo "test swift --version
+          swift --version
+          echo "test swift.exe --version
+          swift.exe --version
+          echo "test the long way down"
+          $env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr\bin\swift.exe --version
         shell: pwsh
       - name: Add Swift to PATH
         run: |
