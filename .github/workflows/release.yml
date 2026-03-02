@@ -58,7 +58,14 @@ jobs:
             $swiftDir = $swiftPath.Substring(0, $swiftPath.LastIndexOf('\'))
             $env:Path = "$swiftDir;$env:Path"
             Write-Output "Aktualisierte PATH: $env:Path"
-            swift.exe --version
+            Get-ChildItem -Path $swiftDir -Filter "*.dll" | Select-Object Name
+            try {
+              swift.exe --version
+            }
+            catch {
+              Write-Error "Swift failed with error: $_"
+              Write-Output "Exception type: $($_.Exception.GetType().FullName)"
+              Write-Output "Exception message: $($_.Exception.Message)"
           } else {
             Write-Output "Swift nicht gefunden unter: $swiftPath"
             exit 1
