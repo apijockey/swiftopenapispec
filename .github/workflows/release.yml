@@ -55,7 +55,10 @@ jobs:
           $swiftPath = "$env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr\bin\swift.exe"
           if (Test-Path $swiftPath) {
             Write-Output "Swift gefunden unter: $swiftPath"
-            echo "$($swiftPath.Substring(0, $swiftPath.LastIndexOf('\')))" >> $env:GITHUB_PATH
+            $swiftDir = $swiftPath.Substring(0, $swiftPath.LastIndexOf('\'))
+            echo "$swiftDir" >> $env:GITHUB_PATH
+            # Temporär zur aktuellen PATH-Variable hinzufügen
+            $env:Path += ";$swiftDir"
             swift.exe --version
           } else {
             Write-Output "Swift nicht gefunden unter: $swiftPath"
