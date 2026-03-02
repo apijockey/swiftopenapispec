@@ -49,6 +49,20 @@ jobs:
         run: winget install --id Microsoft.VisualStudio.2022.Community --exact --force --accept-package-agreements --accept-source-agreements --custom "--add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
       - name: install swift
         run: winget install --id Swift.Toolchain -e
+      - name: add swift to path
+        run: |
+          $swiftPath = "C:\Library\Developer\Toolchains\unknown-Asserts-development.xctoolchain\usr\bin"
+          if (Test-Path $swiftPath) {
+            echo "$swiftPath" >> $env:GITHUB_PATH
+          } else {
+            # Falls der Pfad anders ist, hier anpassen oder dynamisch suchen
+            Get-ChildItem -Path "C:\Library\Developer\Toolchains\" -Filter "*RELEASE.xctoolchain" -Recurse -Directory | ForEach-Object {
+              $binPath = Join-Path $_.FullName "usr\bin"
+              if (Test-Path $binPath) {
+                  echo "$binPath" >> $env:GITHUB_PATH
+              }
+          }
+        shell: pwsh
       - uses: actions/checkout@v4
       - name: Test windows x64
         run: swift build && swift test
