@@ -70,7 +70,7 @@ jobs:
             Write-Output "Swift nicht gefunden unter: $swiftPath"
             exit 1
           }
-        }
+          }
         shell: pwsh
       - name: Add Swift to PATH
         run: |
