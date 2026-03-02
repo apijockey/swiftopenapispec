@@ -46,7 +46,7 @@ jobs:
     needs: [soundness]
     steps:
       - name: setup visual studio components
-        run: winget install --id Microsoft.VisualStudio.2022.Community --exact --force --accept-user-agreement --custom "--add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
+        run: winget install --id Microsoft.VisualStudio.2022.Community --exact --force --accept-package-agreements --accept-source-agreements --custom "--add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
       - name: install swift
         run: winget install --id Swift.Toolchain -e
       - uses: actions/checkout@v4
@@ -59,7 +59,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build Release
         run: |
-          swift build -c release --product SwiftOpenAPICL --static-swift-stdlib
+          swift build -c release --product SwiftOpenAPICLI --static-swift-stdlib
           strip .build/release/SwiftOpenAPICLI
           swift test
           mkdir -p linux
