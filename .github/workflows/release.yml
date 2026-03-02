@@ -5,8 +5,8 @@ permissions:
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -56,7 +56,6 @@ jobs:
         shell: pwsh
       - name: Add Swift to PATH
         run: |
-          echo "$env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr\bin" >> $env:GITHUB_PATH
           $env:Path += ";$env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr\bin"
         shell: pwsh
       - uses: actions/checkout@v4
