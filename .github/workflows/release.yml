@@ -52,6 +52,16 @@ jobs:
         shell: pwsh
       - name: Search for Swift and test
         run: |
+          try {
+            $env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr\bin\swift.exe --version
+            $env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr\bin\swift.exe build
+            $env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr\bin\swift.exe test
+          }
+          catch {¶
+            Write-Error "Swift failed with error: $_"¶
+            Write-Output "Exception type: $($_.Exception.GetType().FullName)"¶
+            Write-Output "Exception message: $($_.Exception.Message)"¶
+           }
           $swiftExe = "$env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr\bin\swift.exe"
           if (Test-Path $swiftExe) {
             Write-Output "Swift gefunden unter: $swiftExe"
