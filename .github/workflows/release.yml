@@ -78,7 +78,7 @@ jobs:
             Write-Error "Keine Swift-Toolchain-Verzeichnisse gefunden in: $toolchainsDir"
             exit 1
           }
-  shell: pwsh
+        shell: pwsh
   upload-linux:
     needs: [soundness, linux]
     runs-on: ubuntu-latest
