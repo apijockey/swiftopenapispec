@@ -66,11 +66,11 @@ jobs:
               $swiftDir = [System.IO.Path]::GetDirectoryName($swiftExe)
               $env:Path = "$swiftDir;$env:Path"
               Write-Output "Aktualisierte PATH: $env:Path"
-              # Liste der DLLs im Swift-Verzeichnis
-              Get-ChildItem -Path $swiftDir -Filter "*.dll" | Select-Object Name
               # Teste Swift
               try {
-                & $swiftExe --version
+                Write-Output "before swiftExe"
+                &$swiftExe --version
+                Write-Output "after swiftExe
               }
               catch {
                 Write-Error "Swift failed with error: $_"
