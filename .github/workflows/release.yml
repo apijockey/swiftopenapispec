@@ -50,49 +50,35 @@ jobs:
       - name: install swift
         run: winget install --id Swift.Toolchain -e
         shell: pwsh
-      - name: Search for Swift and test
+      - name: search swift
         run: |
-          try {
-            $env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr\bin\swift.exe --version
-            $env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr\bin\swift.exe build
-            $env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr\bin\swift.exe test
-          }
-          catch {¶
-            Write-Error "Swift failed with error: $_"¶
-            Write-Output "Exception type: $($_.Exception.GetType().FullName)"¶
-            Write-Output "Exception message: $($_.Exception.Message)"¶
-           }
-          $swiftExe = "$env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr\bin\swift.exe"
-          if (Test-Path $swiftExe) {
-            Write-Output "Swift gefunden unter: $swiftExe"
-            $swiftDir = $swiftExe.Substring(0, $swiftExe.LastIndexOf('\'))
-            $env:Path = "$swiftDir;$env:Path"
-            Write-Output "Aktualisierte PATH: $env:Path"
-            Get-ChildItem -Path $swiftDir -Filter "*.dll" | Select-Object Name
-            try {
+          $toolchainsDir = "$env:LOCALAPPDATA\Programs\Swift\Toolchains"
+          Write-Output "Suche nach Swift-Toolchains in: $toolchainsDir"
+          # Liste alle Unterverzeichnisse auf und wähle das erste aus
+          $swiftToolchain = Get-ChildItem -Path $toolchainsDir -Directory | Select-Object -First 1
+          if ($swiftToolchain) {
+            $swiftToolchainPath = $swiftToolchain.FullName
+            Write-Output "Verwende Swift-Toolchain: $swiftToolchainPath"
+            # Pfad zur swift.exe
+            $swiftExe = Join-Path -Path $swiftToolchainPath -ChildPath "usr\bin\swift.exe"
+            if (Test-Path $swiftExe) {
+              Write-Output "Swift gefunden unter: $swiftExe"
+              $swiftDir = [System.IO.Path]::GetDirectoryName($swiftExe)
+              $env:Path = "$swiftDir;$env:Path"
+              Write-Output "Aktualisierte PATH: $env:Path"
+              # Liste der DLLs im Swift-Verzeichnis
+              Get-ChildItem -Path $swiftDir -Filter "*.dll" | Select-Object Name
+              # Teste Swift
               & $swiftExe --version
+            } else {
+              Write-Error "swift.exe nicht gefunden in: $swiftToolchainPath"
+              exit 1
             }
-            catch {
-              Write-Error "Swift failed with error: $_"
-              Write-Output "Exception type: $($_.Exception.GetType().FullName)"
-              Write-Output "Exception message: $($_.Exception.Message)"
-          }
           } else {
-            Write-Output "Swift nicht gefunden unter: $swiftPath"
+            Write-Error "Keine Swift-Toolchain-Verzeichnisse gefunden in: $toolchainsDir"
             exit 1
           }
-        shell: pwsh
-      - name: Add Swift to PATH
-        run: |
-          $env:Path += ";$env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr\bin"
-        shell: pwsh
-      - uses: actions/checkout@v4
-      - name: Test windows x64 with $swiftPath
-        run: |
-          & $swiftPath build && & $swiftPath test
-      - name: Test windows x64 with swift.exe
-        run: |
-          & swift.exe build && & swift.exe test
+  shell: pwsh
   upload-linux:
     needs: [soundness, linux]
     runs-on: ubuntu-latest
