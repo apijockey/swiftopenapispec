@@ -47,9 +47,6 @@ jobs:
     steps:
       - name: setup visual studio components
         run: winget install --id Microsoft.VisualStudio.2022.Community --exact --force --accept-package-agreements --accept-source-agreements --custom "--add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
-      - name: Install ICU
-        run: choco install icu -y
-        shell: pwsh
       - name: install swift
         run: winget install --id Swift.Toolchain -e
         shell: pwsh
@@ -68,7 +65,19 @@ jobs:
               Write-Output "Swift gefunden unter: $swiftExe"
               $swiftDir = [System.IO.Path]::GetDirectoryName($swiftExe)
               $env:Path = "$swiftDir;$env:Path"
-              Write-Output "Aktualisierte PATH: $env:Path"
+              $icuUrl = "https://github.com/unicode-org/icu/releases/download/release-72-1/icu4c-72_1-Win64-MSVC2019.zip"
+              $icuZip = "$env:TEMP\icu.zip"
+              $icuDir = "$env:TEMP\icu"
+              # Lade ICU herunter
+              Invoke-WebRequest -Uri $icuUrl -OutFile $icuZip
+              # Entpacke die ZIP-Datei
+              Expand-Archive -Path $icuZip -DestinationPath $icuDir -Force
+              # Kopiere die benötigten DLLs in das Swift-Verzeichnis
+              Copy-Item -Path "$icuDir\bin64\icuuc72.dll" -Destination $swiftDir -Force
+              Copy-Item -Path "$icuDir\bin64\icuin72.dll" -Destination $swiftDir -Force
+              # Überprüfe, ob die DLLs kopiert wurden
+              Write-Output "Kopierte ICU-DLLs:"
+              Get-ChildItem -Path $swiftDir -Filter "icu*.dll" | Select-Object Name, FullName
               # Teste Swift
               try {
                 Write-Output "before swiftExe"
