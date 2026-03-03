@@ -60,7 +60,7 @@ jobs:
             Write-Output "Aktualisierte PATH: $env:Path"
             Get-ChildItem -Path $swiftDir -Filter "*.dll" | Select-Object Name
             try {
-              $swiftExe --version
+              & $swiftExe --version
             }
             catch {
               Write-Error "Swift failed with error: $_"
@@ -78,9 +78,11 @@ jobs:
         shell: pwsh
       - uses: actions/checkout@v4
       - name: Test windows x64 with $swiftPath
-        run: $swiftPath build && $swiftPath test
+        run: |
+          & $swiftPath build && & $swiftPath test
       - name: Test windows x64 with swift.exe
-        run: swift.exe build && swift.exe test
+        run: |
+          & swift.exe build && & swift.exe test
   upload-linux:
     needs: [soundness, linux]
     runs-on: ubuntu-latest
