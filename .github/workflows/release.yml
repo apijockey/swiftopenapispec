@@ -53,7 +53,7 @@ jobs:
       - name: Search for Swift and test
         run: |
           $swiftExe = "$env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr\bin\swift.exe"
-          if (Test-Path $swiftPath) {
+          if (Test-Path $swiftExe) {
             Write-Output "Swift gefunden unter: $swiftExe"
             $swiftDir = $swiftExe.Substring(0, $swiftExe.LastIndexOf('\'))
             $env:Path = "$swiftDir;$env:Path"
