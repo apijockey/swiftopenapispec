@@ -70,7 +70,7 @@ jobs:
               try {
                 Write-Output "before swiftExe"
                 &$swiftExe --version
-                Write-Output "after swiftExe
+                Write-Output "after swiftExe"
               }
               catch {
                 Write-Error "Swift failed with error: $_"
