@@ -52,24 +52,24 @@ jobs:
         shell: pwsh
       - name: Search for Swift and test
         run: |
-          $swiftPath = "$env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr\bin\swift.exe"
+          $swiftExe = "$env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr\bin\swift.exe"
           if (Test-Path $swiftPath) {
-            Write-Output "Swift gefunden unter: $swiftPath"
-            $swiftDir = $swiftPath.Substring(0, $swiftPath.LastIndexOf('\'))
+            Write-Output "Swift gefunden unter: $swiftExe"
+            $swiftDir = $swiftExe.Substring(0, $swiftExe.LastIndexOf('\'))
             $env:Path = "$swiftDir;$env:Path"
             Write-Output "Aktualisierte PATH: $env:Path"
             Get-ChildItem -Path $swiftDir -Filter "*.dll" | Select-Object Name
             try {
-              swift.exe --version
+              $swiftExe --version
             }
             catch {
               Write-Error "Swift failed with error: $_"
               Write-Output "Exception type: $($_.Exception.GetType().FullName)"
               Write-Output "Exception message: $($_.Exception.Message)"
+          }
           } else {
             Write-Output "Swift nicht gefunden unter: $swiftPath"
             exit 1
-          }
           }
         shell: pwsh
       - name: Add Swift to PATH
@@ -77,8 +77,10 @@ jobs:
           $env:Path += ";$env:LOCALAPPDATA\Programs\Swift\Toolchains\6.2.3+Asserts\usr\bin"
         shell: pwsh
       - uses: actions/checkout@v4
-      - name: Test windows x64
-        run: swift build && swift test
+      - name: Test windows x64 with $swiftPath
+        run: $swiftPath build && $swiftPath test
+      - name: Test windows x64 with swift.exe
+        run: swift.exe build && swift.exe test
   upload-linux:
     needs: [soundness, linux]
     runs-on: ubuntu-latest
