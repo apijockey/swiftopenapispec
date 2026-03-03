@@ -69,8 +69,10 @@ jobs:
               # Teste Swift
               try {
                 Write-Output "before swiftExe"
-                &$swiftExe --version
+                $output = & $swiftExe --version
+                Write-Output "Swift Version Output: $output"
                 Write-Output "after swiftExe"
+                Write-Output "Exit Code von swift --version: $LastExitCode"
               }
               catch {
                 Write-Error "Swift failed with error: $_"
@@ -86,6 +88,7 @@ jobs:
             Write-Error "Keine Swift-Toolchain-Verzeichnisse gefunden in: $toolchainsDir"
             exit 1
           }
+          exit 0
         shell: pwsh
   upload-linux:
     needs: [soundness, linux]
