@@ -69,7 +69,15 @@ jobs:
               # Liste der DLLs im Swift-Verzeichnis
               Get-ChildItem -Path $swiftDir -Filter "*.dll" | Select-Object Name
               # Teste Swift
-              & $swiftExe --version
+              try {
+                & $swiftExe --version
+              }
+              catch {
+                Write-Error "Swift failed with error: $_"
+                Write-Output "Exception type: $($_.Exception.GetType().FullName)"
+                Write-Output "Exception message: $($_.Exception.Message)"
+                exit 1
+              }
             } else {
               Write-Error "swift.exe nicht gefunden in: $swiftToolchainPath"
               exit 1
