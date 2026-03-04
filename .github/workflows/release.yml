@@ -70,21 +70,44 @@ jobs:
               $icuDir = "$env:TEMP\icu"
               # Lade ICU herunter
               Invoke-WebRequest -Uri $icuUrl -OutFile $icuZip
-              # Entpacke die ZIP-Datei
-              Expand-Archive -Path $icuZip -DestinationPath $icuDir -Force
-              # Suche rekursiv nach den ICU-DLLs
-              $icuucDLL = Get-ChildItem -Path $icuDir -Filter "icuuc72.dll" -Recurse -File | Select-Object -First 1
-              $icuinDLL = Get-ChildItem -Path $icuDir -Filter "icuin72.dll" -Recurse -File | Select-Object -First 1
+              # Entpacke die erste ZIP-Datei
+              # Prüfe den Inhalt des entpackten Verzeichnisses
+              Write-Output "Inhalt von $icuDir nach dem ersten Entpacken:"
+              Get-ChildItem -Path $icuDir -Recurse | Select-Object FullName
 
-              if ($icuucDLL -and $icuinDLL) {
-                Write-Output "ICU-DLLs gefunden:"
-                Write-Output "icuuc72.dll: $($icuucDLL.FullName)"
-                Write-Output "icuin72.dll: $($icuinDLL.FullName)"
-                # Kopiere die DLLs in das Swift-Verzeichnis
-                Copy-Item -Path $icuucDLL.FullName -Destination $swiftDir -Force
-                Copy-Item -Path $icuinDLL.FullName -Destination $swiftDir -Force
+              # Suche die innere ZIP-Datei (z. B. icu-windows-zip.zip)
+              $innerZip = Get-ChildItem -Path $icuDir -Filter "*.zip" | Select-Object -First 1
+
+              if ($innerZip) {
+                Write-Output "Innere ZIP-Datei gefunden: $($innerZip.FullName)"
+
+                # Entpacke die innere ZIP-Datei
+                $innerZipDir = "$icuDir\inner"
+                New-Item -ItemType Directory -Path $innerZipDir -Force
+                Expand-Archive -Path $innerZip.FullName -DestinationPath $innerZipDir -Force
+
+                # Prüfe den Inhalt des inneren Verzeichnisses
+                Write-Output "Inhalt von $innerZipDir nach dem zweiten Entpacken:"
+                Get-ChildItem -Path $innerZipDir -Recurse | Select-Object FullName
+
+                # Suche die ICU-DLLs im inneren Verzeichnis
+                $icuucDLL = Get-ChildItem -Path $innerZipDir -Filter "icuuc72.dll" -Recurse -File | Select-Object -First 1
+                $icuinDLL = Get-ChildItem -Path $innerZipDir -Filter "icuin72.dll" -Recurse -File | Select-Object -First 1
+
+                if ($icuucDLL -and $icuinDLL) {
+                  Write-Output "ICU-DLLs gefunden:"
+                  Write-Output "icuuc72.dll: $($icuucDLL.FullName)"
+                  Write-Output "icuin72.dll: $($icuinDLL.FullName)"
+
+                  # Kopiere die DLLs in das Swift-Verzeichnis
+                  Copy-Item -Path $icuucDLL.FullName -Destination $swiftDir -Force
+                  Copy-Item -Path $icuinDLL.FullName -Destination $swiftDir -Force
+                } else {
+                  Write-Error "ICU-DLLs nicht gefunden in: $innerZipDir"
+                  exit 1
+                }
               } else {
-                Write-Error "ICU-DLLs nicht gefunden in: $icuDir"
+                Write-Error "Innere ZIP-Datei nicht gefunden in: $icuDir"
                 exit 1
               }
               # Überprüfe, ob die DLLs kopiert wurden
