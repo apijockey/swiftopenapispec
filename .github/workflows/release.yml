@@ -71,6 +71,7 @@ jobs:
               # Lade ICU herunter
               Invoke-WebRequest -Uri $icuUrl -OutFile $icuZip
               # Entpacke die erste ZIP-Datei
+              Expand-Archive -Path $icuZip -DestinationPath $icuDir -Force
               # Prüfe den Inhalt des entpackten Verzeichnisses
               Write-Output "Inhalt von $icuDir nach dem ersten Entpacken:"
               Get-ChildItem -Path $icuDir -Recurse | Select-Object FullName
