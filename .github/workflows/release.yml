@@ -72,9 +72,21 @@ jobs:
               Invoke-WebRequest -Uri $icuUrl -OutFile $icuZip
               # Entpacke die ZIP-Datei
               Expand-Archive -Path $icuZip -DestinationPath $icuDir -Force
-              # Kopiere die benötigten DLLs in das Swift-Verzeichnis
-              Copy-Item -Path "$icuDir\bin64\icuuc72.dll" -Destination $swiftDir -Force
-              Copy-Item -Path "$icuDir\bin64\icuin72.dll" -Destination $swiftDir -Force
+              # Suche rekursiv nach den ICU-DLLs
+              $icuucDLL = Get-ChildItem -Path $icuDir -Filter "icuuc72.dll" -Recurse -File | Select-Object -First 1
+              $icuinDLL = Get-ChildItem -Path $icuDir -Filter "icuin72.dll" -Recurse -File | Select-Object -First 1
+
+              if ($icuucDLL -and $icuinDLL) {
+                Write-Output "ICU-DLLs gefunden:"
+                Write-Output "icuuc72.dll: $($icuucDLL.FullName)"
+                Write-Output "icuin72.dll: $($icuinDLL.FullName)"
+                # Kopiere die DLLs in das Swift-Verzeichnis
+                Copy-Item -Path $icuucDLL.FullName -Destination $swiftDir -Force
+                Copy-Item -Path $icuinDLL.FullName -Destination $swiftDir -Force
+              } else {
+                Write-Error "ICU-DLLs nicht gefunden in: $icuDir"
+                exit 1
+              }
               # Überprüfe, ob die DLLs kopiert wurden
               Write-Output "Kopierte ICU-DLLs:"
               Get-ChildItem -Path $swiftDir -Filter "icu*.dll" | Select-Object Name, FullName
