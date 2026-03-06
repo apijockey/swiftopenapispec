@@ -74,7 +74,7 @@ jobs:
               Write-Output "Prüfe, ob die ZIP-Datei existiert: $(Test-Path $icuZip)"
               Write-Output "Größe der heruntergeladenen ZIP-Datei"
               $fileInfo = Get-Item $icuZip
-              Write-Output "Größe: $(fileInfo.Length) Bytes"
+              Write-Output "Größe: $($fileInfo.Length) Bytes"
               Expand-Archive -Path $icuZip -DestinationPath $icuDir -Force
               # Prüfe den Inhalt des entpackten Verzeichnisses
               Write-Output "Inhalt von $icuDir nach dem ersten Entpacken:"
