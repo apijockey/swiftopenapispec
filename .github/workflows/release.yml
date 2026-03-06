@@ -71,11 +71,15 @@ jobs:
               # Lade ICU herunter
               Invoke-WebRequest -Uri $icuUrl -OutFile $icuZip
               # Entpacke die erste ZIP-Datei
+              Write-Output "Prüfe, ob die ZIP-Datei existiert: $(Test-Path $icuZip)"
+              Write-Output "Größe der heruntergeladenen ZIP-Datei: $(Get-Item $icuZip).Length Bytes"
               Expand-Archive -Path $icuZip -DestinationPath $icuDir -Force
               # Prüfe den Inhalt des entpackten Verzeichnisses
               Write-Output "Inhalt von $icuDir nach dem ersten Entpacken:"
               Get-ChildItem -Path $icuDir -Recurse | Select-Object FullName
-
+              if (-not (Test-Path $icuDir)) {
+                New-Item -ItemType Directory -Path $icuDir -Force
+              }
               # Suche die innere ZIP-Datei (z. B. icu-windows-zip.zip)
               $innerZip = Get-ChildItem -Path $icuDir -Filter "*.zip" | Select-Object -First 1
 
