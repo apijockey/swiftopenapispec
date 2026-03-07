@@ -41,103 +41,28 @@ jobs:
       - uses: actions/checkout@v4
       - name: Test linux x64
         run: swift build && swift test
-  windows:
+  windows-upload:
     runs-on: windows-latest
     needs: [soundness]
+    container:
+      image: winamd64/swift:latest
     steps:
-      - name: setup visual studio components
-        run: winget install --id Microsoft.VisualStudio.2022.Community --exact --force --accept-package-agreements --accept-source-agreements --custom "--add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
-      - name: install swift
-        run: winget install --id Swift.Toolchain -e
-        shell: pwsh
-      - name: search swift
+      - uses: actions/checkout@v4
+      - name: Build Release
         run: |
-          $toolchainsDir = "$env:LOCALAPPDATA\Programs\Swift\Toolchains"
-          Write-Output "Suche nach Swift-Toolchains in: $toolchainsDir"
-          # Liste alle Unterverzeichnisse auf und wähle das erste aus
-          $swiftToolchain = Get-ChildItem -Path $toolchainsDir -Directory | Select-Object -First 1
-          if ($swiftToolchain) {
-            $swiftToolchainPath = $swiftToolchain.FullName
-            Write-Output "Verwende Swift-Toolchain: $swiftToolchainPath"
-            # Pfad zur swift.exe
-            $swiftExe = Join-Path -Path $swiftToolchainPath -ChildPath "usr\bin\swift.exe"
-            if (Test-Path $swiftExe) {
-              Write-Output "Swift gefunden unter: $swiftExe"
-              $swiftDir = [System.IO.Path]::GetDirectoryName($swiftExe)
-              $env:Path = "$swiftDir;$env:Path"
-              $icuUrl = "https://github.com/unicode-org/icu/releases/download/release-72-1/icu4c-72_1-Win64-MSVC2019.zip"
-              $icuZip = "$env:TEMP\icu.zip"
-              $icuDir = "$env:TEMP\icu"
-              # Lade ICU herunter
-              Invoke-WebRequest -Uri $icuUrl -OutFile $icuZip
-              # Entpacke die erste ZIP-Datei
-              Expand-Archive -Path $icuZip -DestinationPath $icuDir -Force
-              # Prüfe den Inhalt des entpackten Verzeichnisses
-              Write-Output "Inhalt von $icuDir nach dem ersten Entpacken:"
-              Get-ChildItem -Path $icuDir -Recurse | Select-Object FullName
-
-              # Suche die innere ZIP-Datei (z. B. icu-windows-zip.zip)
-              $innerZip = Get-ChildItem -Path $icuDir -Filter "*.zip" | Select-Object -First 1
-
-              if ($innerZip) {
-                Write-Output "Innere ZIP-Datei gefunden: $($innerZip.FullName)"
-
-                # Entpacke die innere ZIP-Datei
-                $innerZipDir = "$icuDir\inner"
-                New-Item -ItemType Directory -Path $innerZipDir -Force
-                Expand-Archive -Path $innerZip.FullName -DestinationPath $innerZipDir -Force
-
-                # Prüfe den Inhalt des inneren Verzeichnisses
-                Write-Output "Inhalt von $innerZipDir nach dem zweiten Entpacken:"
-                Get-ChildItem -Path $innerZipDir -Recurse | Select-Object FullName
-
-                # Suche die ICU-DLLs im inneren Verzeichnis
-                $icuucDLL = Get-ChildItem -Path $innerZipDir -Filter "icuuc72.dll" -Recurse -File | Select-Object -First 1
-                $icuinDLL = Get-ChildItem -Path $innerZipDir -Filter "icuin72.dll" -Recurse -File | Select-Object -First 1
-
-                if ($icuucDLL -and $icuinDLL) {
-                  Write-Output "ICU-DLLs gefunden:"
-                  Write-Output "icuuc72.dll: $($icuucDLL.FullName)"
-                  Write-Output "icuin72.dll: $($icuinDLL.FullName)"
-
-                  # Kopiere die DLLs in das Swift-Verzeichnis
-                  Copy-Item -Path $icuucDLL.FullName -Destination $swiftDir -Force
-                  Copy-Item -Path $icuinDLL.FullName -Destination $swiftDir -Force
-                } else {
-                  Write-Error "ICU-DLLs nicht gefunden in: $innerZipDir"
-                  exit 1
-                }
-              } else {
-                Write-Error "Innere ZIP-Datei nicht gefunden in: $icuDir"
-                exit 1
-              }
-              # Überprüfe, ob die DLLs kopiert wurden
-              Write-Output "Kopierte ICU-DLLs:"
-              Get-ChildItem -Path $swiftDir -Filter "icu*.dll" | Select-Object Name, FullName
-              # Teste Swift
-              try {
-                Write-Output "before swiftExe"
-                $output = & $swiftExe --version
-                Write-Output "Swift Version Output: $output"
-                Write-Output "after swiftExe"
-                Write-Output "Exit Code von swift --version: $LastExitCode"
-              }
-              catch {
-                Write-Error "Swift failed with error: $_"
-                Write-Output "Exception type: $($_.Exception.GetType().FullName)"
-                Write-Output "Exception message: $($_.Exception.Message)"
-                exit 1
-              }
-            } else {
-              Write-Error "swift.exe nicht gefunden in: $swiftToolchainPath"
-              exit 1
-            }
-          } else {
-            Write-Error "Keine Swift-Toolchain-Verzeichnisse gefunden in: $toolchainsDir"
-            exit 1
-          }
-          exit 0
-        shell: pwsh
+          swift build -c release --product SwiftOpenAPICLI
+          strip .build/release/SwiftOpenAPICLI
+          swift test
+          mkdir -p windows
+          cp .build/release/SwiftOpenAPICLI windows/swiftopenapicli¶
+          shasum -a 256 windows/swiftopenapicli > windows/swiftopenapicli.sha256
+      - name: zip windows
+        run: zip -r swiftopenapicli-windows.zip windows
+      - name: upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-cli
+          path: swiftopenapicli-windows.zip
   upload-linux:
     needs: [soundness, linux]
     runs-on: ubuntu-latest
@@ -145,7 +70,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build Release
         run: |
-          swift build -c release --product SwiftOpenAPICLI --static-swift-stdlib
+          swift build -c release --product SwiftOpenAPICLI
           strip .build/release/SwiftOpenAPICLI
           swift test
           mkdir -p linux
