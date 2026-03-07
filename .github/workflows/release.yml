@@ -48,6 +48,12 @@ jobs:
       image: winamd64/swift:6.2-windowsservercore-ltsc2022
     steps:
       - uses: actions/checkout@v4
+      - name: Pull docker image and run test
+        run: |
+          - name: Pull and run Windows container
+        run: |
+          docker pull --platform windows winamd64/swift:6.2-windowsservercore-ltsc2022
+          docker run --platform windows -v ${PWD}:/src -w /src winamd64/swift:6.2-windowsservercore-ltsc2022 swift build
       - name: Build Release
         run: |
           swift build -c release --product SwiftOpenAPICLI
