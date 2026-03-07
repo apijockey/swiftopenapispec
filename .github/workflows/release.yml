@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [soundness]
     container:
-      image: winamd64/swift:latest
+      image: winamd64/swift:6.2-windowsservercore-ltsc2022
     steps:
       - uses: actions/checkout@v4
       - name: Build Release
