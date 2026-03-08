@@ -18,9 +18,19 @@ jobs:
       api_breakage_check_enabled: false
       format_check_enabled: false
       shell_check_enabled: false
-  linux:
+  linux-x64:
     if: vars.RUN_LINUX_TESTS == 'true'
     runs-on: ubuntu-latest
+    container:
+      image: swift:6.0.3-jammy
+    needs: [soundness]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test
+        run: swift build && swift test
+  linux-arm:
+    if: vars.RUN_LINUX_TESTS == 'true'
+    runs-on: ubuntu-24.04-arm
     container:
       image: swift:6.0.3-jammy
     needs: [soundness]
