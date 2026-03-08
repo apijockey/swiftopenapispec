@@ -171,7 +171,7 @@ jobs:
           name: macos-x86_64-cli
           path: swiftopenapicli-macos-x86_64.zip
   release:
-    needs: [upload-macos-x86-64, upload-macos-arm, upload-linux-arm,upload-linux-x64]
+    needs: [upload-macos-x86-64, upload-macos-arm, upload-linux-arm, upload-linux-x64]
     runs-on: ubuntu-latest
     permissions:
       contents: write
