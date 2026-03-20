@@ -32,7 +32,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/jpsim/Yams", from: "5.1.0"),
+        .package(url: "https://github.com/jpsim/Yams", from: "6.0.0"),
         .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0")
         // Keine externe swift-testing Dependency mehr – Toolchain liefert 'Testing'
     ],
