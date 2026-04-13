@@ -60,7 +60,7 @@ public struct OpenAPIAnyOfType : OpenAPISchemaType, PointerNavigable, Equatable,
             self.type = "unknown"
            
         }
-        self.items = try map.mapListIfPresent(objectType: OpenAPISchema.self, pointer: pointer)
+        self.items = try map.mapListIfPresent("anyOf", objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: pointer)
     }
     
    

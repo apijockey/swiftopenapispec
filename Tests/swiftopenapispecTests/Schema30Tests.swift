@@ -273,3 +273,25 @@ struct Schema30ValidationTests {
     }
    
 }
+@Test("Schema with allOf and inline schema in property")
+func testAllOfinlineSchema() async throws {
+    let subDirectory = "Resources/3_0/valid"
+    let resource = "30-allOf"
+    
+    let dict = try TestHelpers.loadFixtureDictionary(resource, subDirectory: subDirectory)
+    do {
+        let apiSpec = try OpenAPISpecification.read(unflattened: dict, url: resource, documentLoader: YamsDocumentLoader())
+        print(apiSpec.paths.first)
+        print(apiSpec.paths.first?.operations.first)
+        print(apiSpec.paths.first?.operations.first?.responses[key: "200"])
+        print(apiSpec.paths.first?.operations.first?.responses[key: "200"]?.content.first?.schema)
+         
+    }
+    catch {
+        Issue.record("Validation of \(resource) failed: \(error)")
+    }
+    
+    
+    
+    
+}
