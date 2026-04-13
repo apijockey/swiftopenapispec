@@ -20,7 +20,7 @@
 public enum ExtensionType : Sendable {
    
 }
-public struct OpenAPIExtension : KeyedElement, PointerNavigable  {
+public struct OpenAPIExtension : KeyedElement, PointerNavigable, Equatable, Hashable  {
   
    
     

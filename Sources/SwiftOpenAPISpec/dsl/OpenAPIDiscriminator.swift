@@ -17,7 +17,7 @@
 //  Created by Patric Dubois on 10.12.25.
 //
 
-public struct OpenAPIDiscriminator :  ThrowingHashMapInitiable, PointerNavigable {
+public struct OpenAPIDiscriminator :  ThrowingHashMapInitiable, PointerNavigable, Equatable, Hashable {
    
     
     public func element(for segmentName: String) throws -> NavigationResult {

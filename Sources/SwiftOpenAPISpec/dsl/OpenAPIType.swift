@@ -6,7 +6,63 @@
 //
 
 
-public indirect enum OpenAPIType: ThrowingHashMapInitiable {
+public indirect enum OpenAPIType: ThrowingHashMapInitiable, Equatable, Hashable {
+    public static func == (lhs: OpenAPIType, rhs: OpenAPIType) -> Bool {
+        if case .string = lhs, case  .string = rhs {
+            return true
+        }
+        if case .number = lhs, case  .number = rhs {
+            return true
+        }
+        if case .integer = lhs, case  .integer = rhs {
+            return true
+        }
+        if case .bool = lhs, case  .bool = rhs {
+            return true
+        }
+        if case .null = lhs, case  .null = rhs {
+                return true
+        }
+        if case .unknown(let l) = lhs, case  .unknown(let r) = rhs {
+            return l == r
+        }
+        if case .object(let l) = lhs, case  .object(let r) = rhs {
+            return l == r
+        }
+        if case allOf(let l) = lhs, case  allOf(let r) = rhs {
+            return l == r
+        }
+        if case anyOf(let l) = lhs, case  anyOf(let r) = rhs {
+            return l == r
+        }
+        if case array(let l) = lhs, case  array(let r) = rhs {
+            return l == r
+        }
+        if case oneOf(let l) = lhs, case  oneOf(let r) = rhs {
+            return l == r
+        }
+        if case .not(let l) = lhs, case  .not(let r) = rhs {
+            return l == r
+        }
+        if case .ifType(let l) = lhs, case  .ifType(let r) = rhs {
+            return l == r
+        }
+        if case .thenType(let l) = lhs, case  .thenType(let r) = rhs {
+            return l == r
+        }
+        if case elseType(let l) = lhs, case  elseType(let r) = rhs {
+            return l == r
+        }
+        if case ref(let l) = lhs, case  ref(let r) = rhs {
+            return l == r
+        }
+        if case definitions(let l) = lhs, case  definitions(let r) = rhs {
+            return l == r
+        }
+       return false
+        
+    }
+    
    
     case allOf(OpenAPIAllOfType)
     case anyOf(OpenAPIAnyOfType)

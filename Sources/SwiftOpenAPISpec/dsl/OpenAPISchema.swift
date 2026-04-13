@@ -23,7 +23,43 @@ import Foundation
 
 
 
-public struct OpenAPISchema : KeyedElement, PointerNavigable {
+public struct OpenAPISchema : KeyedElement, PointerNavigable, Equatable, Hashable {
+    public static func == (lhs: OpenAPISchema, rhs: OpenAPISchema) -> Bool {
+        if lhs.key != rhs.key { return false }
+        if lhs.allowedValues != rhs.allowedValues { return false }
+        if lhs.defaultValue != rhs.defaultValue { return false }
+        if lhs.discriminator != rhs.discriminator { return false }
+        if lhs.exclusiveMinimum != rhs.exclusiveMinimum { return false }
+        if lhs.exclusiveMaximum != rhs.exclusiveMaximum { return false }
+        if lhs.extensions != rhs.extensions { return false }
+        if lhs.format != rhs.format { return false }
+        if lhs.maximum != rhs.maximum { return false }
+        if let lhsMaximum = lhs.maximum,
+           let rhsMaximum = rhs.maximum,
+           lhsMaximum != rhsMaximum {
+            return false
+        }
+        else if lhs.maximum == nil, rhs.maximum != nil ||
+                    lhs.maximum != nil, rhs.maximum == nil{
+            return false
+        }
+        
+        if let lhsMinimum = lhs.minimum,
+           let rhsMinimum = rhs.minimum,
+           lhsMinimum != rhsMinimum{
+            return false
+        }
+        else if lhs.minimum == nil, rhs.minimum != nil ||
+                    lhs.minimum != nil, rhs.minimum == nil{
+            return false
+        }
+        if lhs.multipleOf != rhs.multipleOf { return false }
+        if lhs.nullable != rhs.nullable { return false }
+        if lhs.pattern != rhs.pattern { return false }
+        if lhs.type != rhs.type { return false }
+        return true
+    }
+    
     public var key: String?
     
     public func element(for segmentName: String) throws -> NavigationResult {

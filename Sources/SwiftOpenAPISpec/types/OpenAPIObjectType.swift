@@ -38,9 +38,30 @@
 //
 
 
-public struct OpenAPIObjectType : OpenAPISchemaType, PointerNavigable{
+public struct OpenAPIObjectType : OpenAPISchemaType, PointerNavigable, Equatable, Hashable{
+    public static func == (lhs: OpenAPIObjectType, rhs: OpenAPIObjectType) -> Bool {
+        if let lhsRequired = lhs.required, let rhsRequired = rhs.required,
+           lhsRequired.count != rhsRequired.count {
+            return false
+        }
+        else if let lhsRequired = lhs.required, let rhsRequired = rhs.required {
+            let zipped = zip(lhsRequired.sorted(), rhsRequired.sorted())
+            for (lhsKey, rhsKey) in  zipped{
+                if lhsKey != rhsKey {
+                    return false
+                }
+            }
+            return true
+        }
+        if lhs.additionalProperties != rhs.additionalProperties {
+            return false
+        }
+        return true
+       
+    }
     
-    public enum ConditionalProperties : Sendable {
+    
+    public enum ConditionalProperties : Sendable, Equatable, Hashable {
            case boolean(Bool)
            case schema([OpenAPISchema])
             case notPresent

@@ -38,7 +38,7 @@
 //
 
 
-public struct OpenAPIOneOfType : OpenAPISchemaType,ThrowingHashMapInitiable, PointerNavigable {
+public struct OpenAPIOneOfType : OpenAPISchemaType,ThrowingHashMapInitiable, PointerNavigable, Equatable, Hashable {
     
     
    

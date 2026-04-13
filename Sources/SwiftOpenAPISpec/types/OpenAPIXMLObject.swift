@@ -16,7 +16,7 @@
 //  Created by Patric Dubois on 16.12.25.
 //
 
-public struct OpenAPIXMLObject : PointerNavigable, ThrowingHashMapInitiable {
+public struct OpenAPIXMLObject : PointerNavigable, ThrowingHashMapInitiable, Hashable {
    
     
     public enum NodeKind: String, Codable, Sendable {

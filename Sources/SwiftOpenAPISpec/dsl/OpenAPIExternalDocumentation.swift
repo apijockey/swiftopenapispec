@@ -19,7 +19,7 @@
 
 import Foundation
 
-public struct OpenAPIExternalDocumentation : ThrowingHashMapInitiable, PointerNavigable {
+public struct OpenAPIExternalDocumentation : ThrowingHashMapInitiable, PointerNavigable, Hashable {
     
     public static let URL_KEY = "url"
     public static let DESCRIPTION_KEY = "description"

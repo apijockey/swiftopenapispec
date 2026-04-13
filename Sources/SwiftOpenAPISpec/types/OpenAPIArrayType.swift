@@ -38,7 +38,7 @@
 //
 
 
-public struct OpenAPIArrayType : OpenAPISchemaType, PointerNavigable{
+public struct OpenAPIArrayType : OpenAPISchemaType, PointerNavigable, Equatable, Hashable{
    
     
     

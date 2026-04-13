@@ -16,7 +16,21 @@
 
 
 
-public struct OpenAPIAllOfType : OpenAPISchemaType, ThrowingHashMapInitiable, PointerNavigable {
+public struct OpenAPIAllOfType : OpenAPISchemaType, ThrowingHashMapInitiable, PointerNavigable, Equatable, Hashable {
+    public static func == (l: OpenAPIAllOfType, r: OpenAPIAllOfType) -> Bool {
+        
+            if l.items?.count != r.items?.count {
+                return false
+            }
+            for (i,lItem) in l.items!.enumerated() {
+                if lItem != r.items![i] {
+                    return false
+                }
+            }
+            return true
+        
+    }
+    
   
     public let type : String?
     public var items: [OpenAPISchema]?

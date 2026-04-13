@@ -41,4 +41,24 @@ struct Schema31ValidationTests {
             assertions: [.Schema]
         )
     }
+    @Test("Object with valid PatternProperties")
+    func testObjectWithValidPatternProperties() async throws {
+        let subDirectory = "Resources/3_1/valid"
+        let resource = "10-schematests-object-validPatternProperties"
+        
+        let dict = try TestHelpers.loadFixtureDictionary(resource, subDirectory: subDirectory)
+        let apiSpec = try OpenAPISpecification.read(unflattened: dict, url: resource, documentLoader: YamsDocumentLoader())
+        let configSchema = try #require(apiSpec.components?.schemas?[key:"Config"])
+        guard case let .object(patternProperty) = configSchema.type else {
+            Issue.record("The schema does not have an object type")
+            return
+        }
+        #expect(patternProperty.patternProperties?.count == 2)
+        let stringPatternProperty = try #require(patternProperty.patternProperties[keyPath: \.?[key: "^[a-z]+$"]])
+        let integerPatternProperty = try #require(patternProperty.patternProperties[keyPath: \.?[key: "^[0-9]+$"]])
+       
+        #expect(integerPatternProperty.type ==  .integer)
+        #expect(stringPatternProperty.type == .string)
+        
+    }
 }
