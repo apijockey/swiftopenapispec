@@ -52,8 +52,6 @@ public extension JSONValue {
     init(from any: Any, diagnostics : inout [Diagnostic]) throws  {
         diagnostics.append(Diagnostic(severity: .info, code: .debugTrace, message: "_ any: Any \(String(describing: any))", pointer: "(diagnostics.count)", rule: "JSONValueConvertible"))
         switch any {
-        case let v as String:
-            self = .string(v)
         case let v as Int:
             self = .integer(v)
         case let v as Double:
@@ -62,6 +60,8 @@ public extension JSONValue {
             self = .number(Double(v))
         case let v as Bool:
             self = .boolean(v)
+        case let v as String:
+            self = .string(v)
         case let v as [Any]:
             let arr = try v.compactMap { try JSONValue(from: $0,diagnostics : &diagnostics) }
             guard arr.count == v.count else  {
