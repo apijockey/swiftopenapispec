@@ -70,7 +70,7 @@ public struct OpenAPIAllOfType : OpenAPISchemaType, ThrowingHashMapInitiable, Po
             self.type = "unknown"
             
         }
-        self.items = try map.mapListIfPresent("allOf", objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: pointer)
+        self.items = try map.mapListIfPresent(Self.TYPE_KEY, objectType: OpenAPISchema.self, diagnostics: &diagnostics, pointer: pointer)
        
     }
     

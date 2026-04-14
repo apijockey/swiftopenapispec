@@ -281,10 +281,7 @@ func testAllOfinlineSchema() async throws {
     let dict = try TestHelpers.loadFixtureDictionary(resource, subDirectory: subDirectory)
     do {
         let apiSpec = try OpenAPISpecification.read(unflattened: dict, url: resource, documentLoader: YamsDocumentLoader())
-        print(apiSpec.paths.first)
-        print(apiSpec.paths.first?.operations.first)
-        print(apiSpec.paths.first?.operations.first?.responses[key: "200"])
-        print(apiSpec.paths.first?.operations.first?.responses[key: "200"]?.content.first?.schema)
+       
          
     }
     catch {
@@ -294,4 +291,27 @@ func testAllOfinlineSchema() async throws {
     
     
     
+}
+@Test("Schmit with NOT keyword")
+func testNotKeyword() throws {
+    let subDirectory = "Resources/3_0/valid"
+    let resource = "30-not"
+    
+    let dict = try TestHelpers.loadFixtureDictionary(resource, subDirectory: subDirectory)
+    do {
+        let apiSpec = try OpenAPISpecification.read(unflattened: dict, url: resource, documentLoader: YamsDocumentLoader())
+       
+        guard case let .object(objectElement) = apiSpec.paths.first?.operations.first?.requestBody?.contents.first?.schema?.type,
+                let ageProperty = objectElement.properties.first (where:{ $0.key == "age" }),
+                let usernameProperty = objectElement.properties.first (where:{ $0.key == "username" }),
+                case  let .object(ageNotValidates) = ageProperty.notValidates,
+                case  let .object(usernameNotValidates) = usernameProperty.notValidates else  {
+            Issue.record("Schema does not contain 'NOT")
+            return
+        }
+        
+        #expect(usernameNotValidates["pattern"] == .string("^admin$"))
+        #expect(ageNotValidates["maximum"] == .integer(18))
+        
+    }
 }

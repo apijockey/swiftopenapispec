@@ -41,9 +41,7 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable, Equatable, Hashable 
         if case oneOf(let l) = lhs, case  oneOf(let r) = rhs {
             return l == r
         }
-        if case .not(let l) = lhs, case  .not(let r) = rhs {
-            return l == r
-        }
+       
         if case .ifType(let l) = lhs, case  .ifType(let r) = rhs {
             return l == r
         }
@@ -72,7 +70,6 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable, Equatable, Hashable 
     case number
     case object(OpenAPIObjectType)
     case oneOf(OpenAPIOneOfType)
-    case not(OpenAPISchema)
     case ifType(OpenAPISchema)
     case thenType(OpenAPISchema)
     case elseType(OpenAPISchema)
@@ -95,6 +92,18 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable, Equatable, Hashable 
     
     public init() {
         self = .null
+    }
+    
+    public static func loadNotType(load map: StringDictionary?,  diagnostics: inout [Diagnostic],pointer : String) throws -> OpenAPIType? {
+        if let map = map
+        {
+            return try OpenAPIType(load: map, diagnostics: &diagnostics, pointer: pointer)
+        }
+        else {
+           
+            return nil
+        }
+        
     }
     
     public init(load map: StringDictionary,  diagnostics: inout [Diagnostic],pointer : String) throws {
@@ -215,8 +224,7 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable, Equatable, Hashable 
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIType", segmentName)
         case .unknown(_):
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIType", segmentName)
-        case .not(let schema):
-            return schema
+       
         case .definitions(let definitions):
             return definitions
         case .ifType(let schema):
@@ -255,8 +263,7 @@ extension  OpenAPIType : CustomStringConvertible {
             return "null"
         case .unknown(let string):
             return "unknown(\(string))"
-        case .not(let schema):
-            return "not \(schema.type?.description ?? "")"
+      
         case .definitions(let definitions):
             return "definitions \(definitions.type?.description ?? "")"
         case .ifType(let schema):

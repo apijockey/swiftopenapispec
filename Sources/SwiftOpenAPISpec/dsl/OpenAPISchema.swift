@@ -186,6 +186,7 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable, Equatable, Hashabl
     public static let MINIMUM_KEY : String = "minimum"
     public static let MAX_CONTAINS_KEY : String = "maxContains"
     public static let MIN_CONTAINS_KEY : String = "minContains"
+    public static let NOT_KEY : String = "not"
     public static let NULLABLE_KEY : String = "nullable"
     public static let UNIQUE_ITEMS_KEY = "uniqueItems"
     public static let XML_KEY = "xml"
@@ -295,6 +296,7 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable, Equatable, Hashabl
         self.readOnly = map.readIfPresent(Self.READ_ONLY_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.READ_ONLY_KEY))
         self.title = map.readIfPresent(OpenAPISchema.TYPE_KEY, valueType:String.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, OpenAPISchema.TYPE_KEY))
         
+        self.notValidates = map.readIfPresent(Self.NOT_KEY, valueType: JSONValue.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.NOT_KEY))
         self.uniqueItems = map.readIfPresent(Self.UNIQUE_ITEMS_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.UNIQUE_ITEMS_KEY))
         self.writeOnly = map.readIfPresent(Self.WRITE_ONLY_KEY, valueType:  Bool.self, diagnostics : &diagnostics, pointer: JSONPointer.join(pointer, Self.WRITE_ONLY_KEY))
         self.xml =  try map.readIfPresent(Self.XML_KEY, objectType: OpenAPIXMLObject.self, diagnostics: &diagnostics, pointer: JSONPointer.join(pointer, Self.EXAMPLE_KEY))
@@ -333,6 +335,7 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable, Equatable, Hashabl
             MAX_PROPERTIES_KEY,
             MIN_PROPERTIES_KEY,
             PATTERN_KEY,
+            NOT_KEY,
             TYPE_KEY,
             TITLE_KEY,
             REQUIRED_KEY
@@ -373,6 +376,7 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable, Equatable, Hashabl
    
     public var title : String?
     public var type : OpenAPIType?
+    public var notValidates: JSONValue?
     public var uniqueItems: Bool?
     public var writeOnly: Bool?
     public var xml : OpenAPIXMLObject?
