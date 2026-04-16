@@ -137,6 +137,8 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable, Equatable, Hashable 
                    
         case .some("null"):
             self = .null
+        // "NOT validates creates a schema from an object representation (StringDictionary that may include arbitrary elements as JSONValues
+    
         default:
             if map.readIfPresent(OpenAPISchemaReference.REF_KEY, valueType: String.self, diagnostics : &diagnostics, pointer: pointer) != nil{
                 let ref = try OpenAPISchemaReference(load: map, diagnostics: &diagnostics,pointer :pointer)

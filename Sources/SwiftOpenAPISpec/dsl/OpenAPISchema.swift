@@ -208,8 +208,19 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable, Equatable, Hashabl
     
     
     
-    
-    
+    // in case of NOT validations, the type is given by the parent element and is not included in the schema itself
+    /*
+     type: array
+     not:
+       items:
+         type :
+           # usernames darf kein bool sein
+           bool
+     */
+    public init(load map: StringDictionary,  diagnostics: inout [Diagnostic],pointer : String, notType :OpenAPIType?) throws {
+        try self.init(load: map, diagnostics: &diagnostics, pointer: pointer)
+        self.type = notType
+    }
     public init(load map: StringDictionary,  diagnostics: inout [Diagnostic],pointer : String) throws {
        
         self.defaultValue =  map[Self.DEFAULT_VALUE_KEY]

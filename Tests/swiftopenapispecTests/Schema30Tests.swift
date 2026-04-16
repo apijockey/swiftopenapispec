@@ -315,3 +315,30 @@ func testNotKeyword() throws {
         
     }
 }
+
+
+@Test("Schmit with NOT items keyword")
+func testNotArrayKeyword() throws {
+    let subDirectory = "Resources/3_0/valid"
+    let resource = "30-notArray"
+    
+    let dict = try TestHelpers.loadFixtureDictionary(resource, subDirectory: subDirectory)
+    do {
+        let apiSpec = try OpenAPISpecification.read(unflattened: dict, url: resource, documentLoader: YamsDocumentLoader())
+       
+        guard case let .object(objectElement) = apiSpec.paths.first?.operations.first?.requestBody?.contents.first?.schema?.type,
+                let usernames = objectElement.properties.first (where:{ $0.key == "usernames" }),
+              case  let .object(usernamesNotValidates) = usernames.notValidates  else {
+            Issue.record("Schema does not contain 'NOT' bools")
+            return
+        }
+         var diagnostics = [Diagnostic]()
+        let pointer = "/"
+        let notSchema = try OpenAPISchema(load: usernamesNotValidates, diagnostics: &diagnostics, pointer: pointer, notType: usernames.type)
+        guard case let .array(itemsElement) = notSchema.type else {
+            Issue.record("Schema does not contain array items")
+            return
+        }
+        #expect(itemsElement.type == "array")
+    }
+}
