@@ -335,7 +335,7 @@ func testNotArrayKeyword() throws {
          var diagnostics = [Diagnostic]()
         let pointer = "/"
         let notSchema = try OpenAPISchema(load: usernamesNotValidates, diagnostics: &diagnostics, pointer: pointer, notType: usernames.type)
-        guard case let .array(itemsElement) = notSchema.type else {
+        guard case let .array(itemsElement) = notSchema.negatingType else {
             Issue.record("Schema does not contain array items")
             return
         }

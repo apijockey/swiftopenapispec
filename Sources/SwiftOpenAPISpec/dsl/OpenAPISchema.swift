@@ -217,9 +217,11 @@ public struct OpenAPISchema : KeyedElement, PointerNavigable, Equatable, Hashabl
            # usernames darf kein bool sein
            bool
      */
-    public init(load map: StringDictionary,  diagnostics: inout [Diagnostic],pointer : String, notType :OpenAPIType?) throws {
-        try self.init(load: map, diagnostics: &diagnostics, pointer: pointer)
-        self.type = notType
+    public init(load map: StringDictionary,  diagnostics: inout [Diagnostic],pointer : String, negatingType : OpenAPIType?) throws {
+        var newMap = map
+        newMap["type"] = negatingType?.stringValue ?? JSONValue(string:"null")
+        try self.init(load: newMap, diagnostics: &diagnostics, pointer: pointer)
+        
     }
     public init(load map: StringDictionary,  diagnostics: inout [Diagnostic],pointer : String) throws {
        

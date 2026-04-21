@@ -54,9 +54,7 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable, Equatable, Hashable 
         if case ref(let l) = lhs, case  ref(let r) = rhs {
             return l == r
         }
-        if case definitions(let l) = lhs, case  definitions(let r) = rhs {
-            return l == r
-        }
+       
        return false
         
     }
@@ -73,7 +71,7 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable, Equatable, Hashable 
     case ifType(OpenAPISchema)
     case thenType(OpenAPISchema)
     case elseType(OpenAPISchema)
-    case definitions(OpenAPISchema)
+
     case string
     case ref(OpenAPISchemaReference)
     case null
@@ -227,14 +225,49 @@ public indirect enum OpenAPIType: ThrowingHashMapInitiable, Equatable, Hashable 
         case .unknown(_):
             throw OpenAPISpecification.Errors.unsupportedSegment("OpenAPIType", segmentName)
        
-        case .definitions(let definitions):
-            return definitions
+        
         case .ifType(let schema):
             return schema
         case .thenType(let schema):
             return schema
         case .elseType(let schema):
             return schema
+        }
+    }
+    public var stringValue :  JSONValue {
+        switch self {
+        case .allOf:
+            return JSONValue(string: "allOf")
+        case .anyOf:
+            return JSONValue(string: "anyOf")
+        case .array:
+            return JSONValue(string: "array")
+        case .bool:
+            return JSONValue(string: "bool")
+        case .integer:
+            return JSONValue(string: "integer")
+        case .number:
+            return JSONValue(string: "number")
+        case .object:
+            return JSONValue(string: "object")
+        case .oneOf:
+            return JSONValue(string: "oneOf")
+        case .string:
+            return JSONValue(string: "string")
+        case .ref:
+            return JSONValue(string: "§ref")
+        case .null:
+            return JSONValue(string:  "null")
+        case .unknown:
+            return JSONValue(string: "null")
+      
+        
+        case .ifType:
+            return  JSONValue(string: "if")
+        case .thenType:
+            return  JSONValue(string: "then")
+        case .elseType:
+            return  JSONValue(string: "else")
         }
     }
 }
@@ -265,9 +298,6 @@ extension  OpenAPIType : CustomStringConvertible {
             return "null"
         case .unknown(let string):
             return "unknown(\(string))"
-      
-        case .definitions(let definitions):
-            return "definitions \(definitions.type?.description ?? "")"
         case .ifType(let schema):
             return "if \(schema.type?.description ?? "")"
         case .thenType(let schema):
