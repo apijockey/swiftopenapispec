@@ -292,7 +292,7 @@ func testAllOfinlineSchema() async throws {
     
     
 }
-@Test("Schmit with NOT keyword")
+@Test("Schema with NOT keyword")
 func testNotKeyword() throws {
     let subDirectory = "Resources/3_0/valid"
     let resource = "30-not"
@@ -317,7 +317,7 @@ func testNotKeyword() throws {
 }
 
 
-@Test("Schmit with NOT items keyword")
+@Test("Schema with NOT items keyword")
 func testNotArrayKeyword() throws {
     let subDirectory = "Resources/3_0/valid"
     let resource = "30-notArray"
@@ -334,8 +334,8 @@ func testNotArrayKeyword() throws {
         }
          var diagnostics = [Diagnostic]()
         let pointer = "/"
-        let notSchema = try OpenAPISchema(load: usernamesNotValidates, diagnostics: &diagnostics, pointer: pointer, notType: usernames.type)
-        guard case let .array(itemsElement) = notSchema.negatingType else {
+        let notSchema = try OpenAPISchema(load: usernamesNotValidates, diagnostics: &diagnostics, pointer: pointer, negatingType: usernames.type)
+        guard case let .array(itemsElement) = notSchema.type else {
             Issue.record("Schema does not contain array items")
             return
         }

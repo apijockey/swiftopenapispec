@@ -290,7 +290,7 @@ struct FixtureTests {
     
     @Test("08-oneof")
     func oneofanyof() async throws {
-        guard case let .object(yaml) = try fixtureMap("08-oneof", subDirectory: "Resources/3_0/valid") else {
+        guard case let .object(yaml) = try fixtureMap("08-oneOf", subDirectory: "Resources/3_0/valid") else {
             Issue.record("Expected .object(let)")
             return
         }
